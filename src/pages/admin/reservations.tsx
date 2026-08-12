@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
+import { Button } from '@/components/common/button'
+import { Input } from '@/components/common/input'
 import { Spinner } from '@/components/common/spinner'
 import { StatusBadge } from '@/components/common/badge'
 import type { Reservation, ReservationStatus } from '@/types'
-import { format, parseISO } from 'date-fns'
+import { format } from 'date-fns'
+import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
+import { toZonedTime } from 'date-fns-tz'
 
 const statusFilters: { key: ReservationStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'Todas' },
@@ -18,18 +22,24 @@ const statusFilters: { key: ReservationStatus | 'all'; label: string }[] = [
 export function AdminReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
+  const [actingId, setActingId] = useState<string | null>(null)
+  const [rejectingId, setRejectingId] = useState<string | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
   const [filter, setFilter] = useState<ReservationStatus | 'all'>('all')
   const [selectedDate, setSelectedDate] = useState(
-    format(new Date(), 'yyyy-MM-dd')
+    format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
   )
 
   const load = useCallback(async () => {
     setLoading(true)
+    const { start, end } = dayRangeUtc(selectedDate)
     let query = supabase
       .from('reservations')
-      .select('*, court:courts(*), profile:profiles(*)')
-      .gte('starts_at', `${selectedDate}T00:00:00`)
-      .lte('starts_at', `${selectedDate}T23:59:59`)
+      .select(
+        '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*)'
+      )
+      .gte('starts_at', start)
+      .lte('starts_at', end)
       .order('starts_at', { ascending: true })
 
     if (filter !== 'all') {
@@ -46,6 +56,39 @@ export function AdminReservationsPage() {
 
     setReservations((data as Reservation[]) ?? [])
   }, [filter, selectedDate])
+
+  async function handleConfirm(id: string) {
+    setActingId(id)
+    const { error } = await supabase.rpc('confirm_reservation', {
+      p_reservation_id: id
+    })
+    setActingId(null)
+    if (error) {
+      alert('Error al confirmar: ' + error.message)
+      return
+    }
+    await load()
+  }
+
+  async function handleReject(id: string) {
+    if (!rejectReason.trim()) {
+      alert('Por favor escribe un motivo para el rechazo.')
+      return
+    }
+    setActingId(id)
+    const { error } = await supabase.rpc('reject_reservation', {
+      p_reservation_id: id,
+      p_reason: rejectReason.trim()
+    })
+    setActingId(null)
+    setRejectingId(null)
+    setRejectReason('')
+    if (error) {
+      alert('Error al rechazar: ' + error.message)
+      return
+    }
+    await load()
+  }
 
   useEffect(() => {
     load()
@@ -89,11 +132,14 @@ export function AdminReservationsPage() {
       ) : (
         <div className='flex flex-col gap-2'>
           {reservations.map((r) => (
-            <Card key={r.id} className='p-3'>
+            <Card
+              key={r.id}
+              className={`p-3 ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
+            >
               <div className='flex items-start justify-between gap-2'>
-                <div className='min-w-0'>
+                <div className='min-w-0 flex-1'>
                   <p className='font-medium text-sm'>
-                    {format(parseISO(r.starts_at), 'HH:mm')} — {r.court?.name}
+                    {formatLocal(r.starts_at, 'HH:mm')} — {r.court?.name}
                   </p>
                   <p className='text-xs text-[var(--color-text-muted)] mt-0.5'>
                     {r.profile?.full_name} · {r.profile?.phone}
@@ -111,6 +157,60 @@ export function AdminReservationsPage() {
                 </div>
                 <StatusBadge status={r.status} />
               </div>
+
+              {r.status === 'pending' && (
+                <div className='mt-3'>
+                  {rejectingId === r.id ? (
+                    <div className='flex flex-col gap-2'>
+                      <Input
+                        label='Motivo del rechazo'
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder='Ej: cancha en mantenimiento'
+                        autoFocus
+                      />
+                      <div className='flex gap-2'>
+                        <Button
+                          variant='danger'
+                          size='sm'
+                          loading={actingId === r.id}
+                          onClick={() => handleReject(r.id)}
+                        >
+                          Confirmar rechazo
+                        </Button>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => {
+                            setRejectingId(null)
+                            setRejectReason('')
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className='flex gap-2'>
+                      <Button
+                        variant='success'
+                        size='sm'
+                        loading={actingId === r.id}
+                        onClick={() => handleConfirm(r.id)}
+                      >
+                        Confirmar
+                      </Button>
+                      <Button
+                        variant='danger'
+                        size='sm'
+                        onClick={() => setRejectingId(r.id)}
+                      >
+                        Rechazar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </Card>
           ))}
         </div>
