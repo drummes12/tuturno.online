@@ -3,8 +3,16 @@ import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
-import { Spinner } from '@/components/common/spinner'
 import { StatusBadge } from '@/components/common/badge'
+import { Alert } from '@/components/common/alert'
+import { ReservationSkeleton } from '@/components/common/skeleton'
+import {
+  CheckIcon,
+  XIcon,
+  UserIcon,
+  CalendarIcon,
+  InboxIcon
+} from '@/components/common/icon'
 import type { Reservation, ReservationStatus } from '@/types'
 import { format } from 'date-fns'
 import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
@@ -25,6 +33,7 @@ export function AdminReservationsPage() {
   const [actingId, setActingId] = useState<string | null>(null)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<ReservationStatus | 'all'>('all')
   const [selectedDate, setSelectedDate] = useState(
     format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
@@ -32,6 +41,7 @@ export function AdminReservationsPage() {
 
   const load = useCallback(async () => {
     setLoading(true)
+    setError(null)
     const { start, end } = dayRangeUtc(selectedDate)
     let query = supabase
       .from('reservations')
@@ -46,11 +56,11 @@ export function AdminReservationsPage() {
       query = query.eq('status', filter)
     }
 
-    const { data, error } = await query
+    const { data, error: err } = await query
     setLoading(false)
 
-    if (error) {
-      console.error(error)
+    if (err) {
+      setError('No pudimos cargar las reservas.')
       return
     }
 
@@ -59,12 +69,13 @@ export function AdminReservationsPage() {
 
   async function handleConfirm(id: string) {
     setActingId(id)
-    const { error } = await supabase.rpc('confirm_reservation', {
+    setError(null)
+    const { error: rpcError } = await supabase.rpc('confirm_reservation', {
       p_reservation_id: id
     })
     setActingId(null)
-    if (error) {
-      alert('Error al confirmar: ' + error.message)
+    if (rpcError) {
+      setError('Error al confirmar: ' + rpcError.message)
       return
     }
     await load()
@@ -72,19 +83,20 @@ export function AdminReservationsPage() {
 
   async function handleReject(id: string) {
     if (!rejectReason.trim()) {
-      alert('Por favor escribe un motivo para el rechazo.')
+      setError('Escribe un motivo para el rechazo.')
       return
     }
     setActingId(id)
-    const { error } = await supabase.rpc('reject_reservation', {
+    setError(null)
+    const { error: rpcError } = await supabase.rpc('reject_reservation', {
       p_reservation_id: id,
       p_reason: rejectReason.trim()
     })
     setActingId(null)
     setRejectingId(null)
     setRejectReason('')
-    if (error) {
-      alert('Error al rechazar: ' + error.message)
+    if (rpcError) {
+      setError('Error al rechazar: ' + rpcError.message)
       return
     }
     await load()
@@ -95,27 +107,47 @@ export function AdminReservationsPage() {
   }, [load])
 
   return (
-    <div className='flex flex-col gap-4'>
-      <h1 className='text-2xl font-bold'>Reservas</h1>
+    <div className='flex flex-col gap-5'>
+      {/* Header */}
+      <div className='animate-fade-up'>
+        <h1 className='text-2xl font-bold tracking-tight'>Reservas</h1>
+        <p className='text-sm text-(--color-text-muted) mt-0.5'>
+          Filtra por fecha y estado para gestionar.
+        </p>
+      </div>
 
-      {/* Date picker */}
-      <input
-        type='date'
-        value={selectedDate}
-        onChange={(e) => setSelectedDate(e.target.value)}
-        className='rounded-lg border border-border bg-surface-inset px-4 py-2.5 text-base touch-target'
-      />
+      {/* Date picker — styled */}
+      <div
+        className='flex items-center gap-2 animate-fade-up'
+        style={{ animationDelay: '60ms' }}
+      >
+        <div className='relative flex-1'>
+          <CalendarIcon
+            size={18}
+            className='absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none'
+          />
+          <input
+            type='date'
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className='w-full rounded-xl border border-border bg-surface-inset pl-11 pr-4 py-3 text-base text-(--color-text) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring touch-target'
+          />
+        </div>
+      </div>
 
       {/* Filter chips */}
-      <div className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4'>
+      <div
+        className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        style={{ animationDelay: '120ms' }}
+      >
         {statusFilters.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium border whitespace-nowrap transition-colors touch-target ${
+            className={`px-3.5 py-1.5 rounded-full text-sm font-medium border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
               filter === f.key
-                ? 'bg-(--color-primary) text-white border-(--color-primary)'
-                : 'bg-surface-elevated text-(--color-text-muted) border-border'
+                ? 'bg-(--color-primary) text-white border-(--color-primary) shadow-(--shadow-pitch)'
+                : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
             }`}
           >
             {f.label}
@@ -123,34 +155,59 @@ export function AdminReservationsPage() {
         ))}
       </div>
 
+      {error && (
+        <Alert variant='error' onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
       {loading ? (
-        <Spinner size='lg' />
+        <div className='flex flex-col gap-3'>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <ReservationSkeleton key={i} />
+          ))}
+        </div>
       ) : reservations.length === 0 ? (
-        <Card className='p-6 text-center text-(--color-text-muted)'>
-          No hay reservas para este filtro.
+        <Card className='p-8 text-center animate-fade-up'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-12 h-12 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
+              <InboxIcon size={24} />
+            </div>
+            <p className='text-text-muted text-sm'>
+              No hay reservas para este filtro.
+            </p>
+          </div>
         </Card>
       ) : (
-        <div className='flex flex-col gap-2'>
-          {reservations.map((r) => (
+        <div className='flex flex-col gap-2.5'>
+          {reservations.map((r, index) => (
             <Card
               key={r.id}
-              className={`p-3 ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
+              className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
+              style={{ '--index': index } as React.CSSProperties}
             >
               <div className='flex items-start justify-between gap-2'>
                 <div className='min-w-0 flex-1'>
-                  <p className='font-medium text-sm'>
-                    {formatLocal(r.starts_at, 'HH:mm')} — {r.court?.name}
+                  <p className='font-medium text-sm flex items-center gap-1.5'>
+                    <span className='nums font-bold text-primary'>
+                      {formatLocal(r.starts_at, 'HH:mm')}
+                    </span>
+                    <span className='text-text-muted'>·</span>
+                    <span className='truncate'>{r.court?.name}</span>
                   </p>
-                  <p className='text-xs text-(--color-text-muted) mt-0.5'>
-                    {r.profile?.full_name} · {r.profile?.phone}
+                  <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
+                    <UserIcon size={12} className='shrink-0' />
+                    <span className='truncate'>{r.profile?.full_name}</span>
+                    <span>·</span>
+                    <span className='nums'>{r.profile?.phone}</span>
                   </p>
                   {r.notes && (
-                    <p className='text-xs italic text-(--color-text-muted) mt-1'>
-                      "{r.notes}"
+                    <p className='text-xs italic text-(--color-text-muted) mt-1.5 border-l-2 border-border pl-2'>
+                      {r.notes}
                     </p>
                   )}
                   {r.decision_reason && (
-                    <p className='text-xs text-(--color-text-muted) mt-1'>
+                    <p className='text-xs text-(--color-text-muted) mt-1.5'>
                       Motivo: {r.decision_reason}
                     </p>
                   )}
@@ -159,9 +216,9 @@ export function AdminReservationsPage() {
               </div>
 
               {r.status === 'pending' && (
-                <div className='mt-3'>
+                <div className='mt-3 pt-3 border-t border-border'>
                   {rejectingId === r.id ? (
-                    <div className='flex flex-col gap-2'>
+                    <div className='flex flex-col gap-2.5 animate-fade-up'>
                       <Input
                         label='Motivo del rechazo'
                         value={rejectReason}
@@ -198,6 +255,7 @@ export function AdminReservationsPage() {
                         loading={actingId === r.id}
                         onClick={() => handleConfirm(r.id)}
                       >
+                        <CheckIcon size={16} />
                         Confirmar
                       </Button>
                       <Button
@@ -205,6 +263,7 @@ export function AdminReservationsPage() {
                         size='sm'
                         onClick={() => setRejectingId(r.id)}
                       >
+                        <XIcon size={16} />
                         Rechazar
                       </Button>
                     </div>

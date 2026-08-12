@@ -5,10 +5,12 @@ import { useAuthStore } from '@/stores/auth'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { StatusBadge } from '@/components/common/badge'
-import { Spinner } from '@/components/common/spinner'
+import { Alert } from '@/components/common/alert'
+import { ReservationSkeleton } from '@/components/common/skeleton'
+import { CalendarPlusIcon, InboxIcon } from '@/components/common/icon'
 import type { Reservation } from '@/types'
-import { format, parseISO, isAfter, subHours } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { parseISO, isAfter, subHours } from 'date-fns'
+import { formatLocal } from '@/lib/time'
 
 type Filter = 'upcoming' | 'pending' | 'confirmed' | 'past'
 
@@ -18,12 +20,13 @@ export function MyReservationsPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('upcoming')
   const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const loadReservations = useCallback(async () => {
     if (!user) return
     setLoading(true)
 
-    const { data, error } = await supabase
+    const { data, error: err } = await supabase
       .from('reservations')
       .select('*, court:courts(*)')
       .eq('user_id', user.id)
@@ -31,8 +34,8 @@ export function MyReservationsPage() {
 
     setLoading(false)
 
-    if (error) {
-      console.error('Error loading reservations:', error)
+    if (err) {
+      setError('No pudimos cargar tus reservas.')
       return
     }
 
@@ -62,9 +65,7 @@ export function MyReservationsPage() {
 
   function canCancel(r: Reservation): boolean {
     if (!['pending', 'confirmed'].includes(r.status)) return false
-    // Las pendientes se pueden cancelar siempre (sin límite de tiempo)
     if (r.status === 'pending') return true
-    // Las confirmadas solo hasta N horas antes (el RPC valida con cancellation_limit_hours del negocio)
     const start = parseISO(r.starts_at)
     const limit = subHours(start, 2)
     return isAfter(limit, new Date())
@@ -73,23 +74,23 @@ export function MyReservationsPage() {
   async function handleCancel(id: string) {
     if (!confirm('¿Seguro que quieres cancelar esta reserva?')) return
     setCancellingId(id)
+    setError(null)
 
-    const { error } = await supabase.rpc('cancel_reservation_by_client', {
-      p_reservation_id: id,
-    })
+    const { error: rpcError } = await supabase.rpc(
+      'cancel_reservation_by_client',
+      {
+        p_reservation_id: id
+      }
+    )
 
     setCancellingId(null)
 
-    if (error) {
-      alert('No pudimos cancelar la reserva: ' + error.message)
+    if (rpcError) {
+      setError(rpcError.message)
       return
     }
 
     await loadReservations()
-  }
-
-  if (loading) {
-    return <div className="py-12"><Spinner size="lg" /></div>
   }
 
   const filters: { key: Filter; label: string }[] = [
@@ -100,19 +101,27 @@ export function MyReservationsPage() {
   ]
 
   return (
-    <div className='flex flex-col gap-4'>
-      <h1 className='text-2xl font-bold'>Mis reservas</h1>
+    <div className='flex flex-col gap-5'>
+      <div className='animate-fade-up'>
+        <h1 className='text-2xl font-bold tracking-tight'>Mis reservas</h1>
+        <p className='text-sm text-(--color-text-muted) mt-0.5'>
+          Gestiona tus solicitudes de turnos.
+        </p>
+      </div>
 
       {/* Filter chips */}
-      <div className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4'>
+      <div
+        className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        style={{ animationDelay: '60ms' }}
+      >
         {filters.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-colors touch-target ${
+            className={`px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
               filter === f.key
-                ? 'bg-(--color-primary) text-white border-(--color-primary)'
-                : 'bg-surface-elevated text-(--color-text-muted) border-border'
+                ? 'bg-(--color-primary) text-white border-(--color-primary) shadow-(--shadow-pitch)'
+                : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
             }`}
           >
             {f.label}
@@ -120,36 +129,68 @@ export function MyReservationsPage() {
         ))}
       </div>
 
-      {filtered.length === 0 ? (
-        <Card className='p-6 text-center'>
-          <p className='text-(--color-text-muted) mb-4'>
-            No tienes reservas aquí.
-          </p>
-          <Link href='/'>
-            <Button variant='secondary'>Ver disponibilidad</Button>
-          </Link>
+      {error && (
+        <Alert variant='error' className='animate-fade-up'>
+          {error}
+        </Alert>
+      )}
+
+      {loading ? (
+        <div className='flex flex-col gap-3'>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <ReservationSkeleton key={i} />
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <Card className='p-8 text-center animate-fade-up'>
+          <div className='flex flex-col items-center gap-4'>
+            <div className='w-14 h-14 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
+              <InboxIcon size={28} />
+            </div>
+            <div>
+              <p className='font-medium text-(--color-text) mb-1'>
+                No tienes reservas aquí
+              </p>
+              <p className='text-sm text-text-muted'>
+                {filter === 'upcoming' &&
+                  'Busca un turno disponible y solicita tu reserva.'}
+                {filter === 'pending' &&
+                  'No tienes reservas esperando confirmación.'}
+                {filter === 'confirmed' && 'No tienes reservas confirmadas.'}
+                {filter === 'past' && 'No hay historial de reservas pasadas.'}
+              </p>
+            </div>
+            <Link href='/'>
+              <Button variant='secondary'>
+                <CalendarPlusIcon size={18} />
+                Ver disponibilidad
+              </Button>
+            </Link>
+          </div>
         </Card>
       ) : (
         <div className='flex flex-col gap-3'>
-          {filtered.map((r) => (
-            <Card key={r.id} className='p-4'>
+          {filtered.map((r, index) => (
+            <Card
+              key={r.id}
+              className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
+              style={{ '--index': index } as React.CSSProperties}
+            >
               <div className='flex items-start justify-between gap-3 mb-2'>
-                <div>
-                  <p className='font-semibold text-(--color-text)'>
+                <div className='min-w-0 flex-1'>
+                  <p className='font-semibold text-(--color-text) tracking-tight'>
                     {r.court?.name ?? 'Cancha'}
                   </p>
-                  <p className='text-sm text-(--color-text-muted) capitalize'>
-                    {format(parseISO(r.starts_at), "EEE d 'de' MMMM, HH:mm", {
-                      locale: es
-                    })}
+                  <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
+                    {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
                   </p>
                 </div>
                 <StatusBadge status={r.status} />
               </div>
 
               {r.notes && (
-                <p className='text-sm text-(--color-text-muted) mt-2 italic'>
-                  "{r.notes}"
+                <p className='text-sm text-(--color-text-muted) mt-2 italic border-l-2 border-border pl-3'>
+                  {r.notes}
                 </p>
               )}
 
@@ -160,7 +201,7 @@ export function MyReservationsPage() {
               )}
 
               {canCancel(r) && (
-                <div className='mt-3'>
+                <div className='mt-3 pt-3 border-t border-border'>
                   <Button
                     variant='danger'
                     size='sm'
@@ -173,7 +214,7 @@ export function MyReservationsPage() {
               )}
 
               {r.status === 'confirmed' && !canCancel(r) && (
-                <p className='text-xs text-(--color-text-muted) mt-2'>
+                <p className='text-xs text-text-muted mt-2 pt-2 border-t border-border'>
                   La cancelación directa está disponible hasta 2 horas antes del
                   turno.
                 </p>

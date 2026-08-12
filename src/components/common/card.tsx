@@ -1,17 +1,28 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 interface CardProps {
   children: ReactNode
   className?: string
   elevated?: boolean
+  bordered?: boolean
+  style?: CSSProperties
 }
 
-export function Card({ children, className = '', elevated = false }: CardProps) {
+export function Card({
+  children,
+  className = '',
+  elevated = false,
+  bordered = true,
+  style
+}: CardProps) {
   return (
     <div
-      className={`rounded-lg bg-surface-elevated border border-border ${
+      style={style}
+      className={`rounded-xl bg-surface-elevated ${
+        bordered ? 'border border-border' : ''
+      } ${
         elevated ? 'shadow-(--shadow-md)' : 'shadow-(--shadow-xs)'
-      } ${className}`}
+      } transition-shadow duration-300 ease-spring ${className}`}
     >
       {children}
     </div>

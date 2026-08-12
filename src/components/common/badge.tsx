@@ -7,8 +7,8 @@ interface BadgeProps {
 }
 
 const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
-  neutral: 'bg-[var(--color-surface-inset)] text-[var(--color-text-muted)] border-[var(--color-border)]',
-  success: 'bg-[var(--color-pitch-100)] text-[var(--color-pitch-800)] border-[var(--color-pitch-300)]',
+  neutral: 'bg-surface-inset text-text-muted border-border',
+  success: 'bg-pitch-100 text-pitch-800 border-pitch-300',
   warning: 'bg-orange-50 text-orange-800 border-orange-200',
   danger: 'bg-red-50 text-red-800 border-red-200',
   info: 'bg-blue-50 text-blue-800 border-blue-200',
@@ -18,24 +18,34 @@ const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
 export function Badge({ children, variant = 'neutral' }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full border ${variantClasses[variant]}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border ${variantClasses[variant]}`}
     >
       {children}
     </span>
   )
 }
 
-const statusConfig: Record<ReservationStatus, { label: string; variant: BadgeProps['variant'] }> = {
-  pending: { label: 'Pendiente', variant: 'warning' },
-  confirmed: { label: 'Confirmada', variant: 'success' },
-  rejected: { label: 'Rechazada', variant: 'danger' },
-  cancelled_by_client: { label: 'Cancelada por cliente', variant: 'neutral' },
-  cancelled_by_business: { label: 'Cancelada por negocio', variant: 'neutral' },
-  expired: { label: 'Expirada', variant: 'neutral' },
-  completed: { label: 'Completada', variant: 'info' },
+/* Status dot — small semantic indicator */
+function StatusDot({ className }: { className: string }) {
+  return <span className={`w-1.5 h-1.5 rounded-full ${className}`} aria-hidden="true" />
+}
+
+const statusConfig: Record<ReservationStatus, { label: string; variant: BadgeProps['variant']; dot: string }> = {
+  pending: { label: 'Pendiente', variant: 'warning', dot: 'bg-orange-500' },
+  confirmed: { label: 'Confirmada', variant: 'success', dot: 'bg-pitch-600' },
+  rejected: { label: 'Rechazada', variant: 'danger', dot: 'bg-red-500' },
+  cancelled_by_client: { label: 'Cancelada por cliente', variant: 'neutral', dot: 'bg-graphite-400' },
+  cancelled_by_business: { label: 'Cancelada por negocio', variant: 'neutral', dot: 'bg-graphite-400' },
+  expired: { label: 'Expirada', variant: 'neutral', dot: 'bg-graphite-400' },
+  completed: { label: 'Completada', variant: 'info', dot: 'bg-blue-500' },
 }
 
 export function StatusBadge({ status }: { status: ReservationStatus }) {
   const config = statusConfig[status]
-  return <Badge variant={config.variant}>{config.label}</Badge>
+  return (
+    <Badge variant={config.variant}>
+      <StatusDot className={config.dot} />
+      {config.label}
+    </Badge>
+  )
 }

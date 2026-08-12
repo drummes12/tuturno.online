@@ -110,7 +110,7 @@ export default function App() {
         {/* 404 */}
         <Route>
           <div className='text-center py-12'>
-            <p className='text-[var(--color-text-muted)]'>
+            <p className='text-text-muted'>
               Página no encontrada.
             </p>
           </div>

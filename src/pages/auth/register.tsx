@@ -4,6 +4,14 @@ import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Card } from '@/components/common/card'
+import { Alert } from '@/components/common/alert'
+import {
+  CourtIcon,
+  MailIcon,
+  UserIcon,
+  PhoneIcon,
+  ArrowLeftIcon
+} from '@/components/common/icon'
 
 export function RegisterPage() {
   const [, navigate] = useLocation()
@@ -54,96 +62,130 @@ export function RegisterPage() {
   if (success) {
     return (
       <div className='flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8'>
-        <Card elevated className='w-full max-w-md p-6 md:p-8 text-center'>
-          <div className='text-4xl mb-4'>📧</div>
-          <h1 className='text-xl font-bold mb-2'>Revisa tu correo</h1>
-          <p className='text-sm text-(--color-text-muted) mb-6'>
-            Te enviamos un enlace de confirmación a <strong>{email}</strong>.
-            Haz clic en el enlace para activar tu cuenta.
-          </p>
-          <Link href='/login'>
-            <Button variant='secondary' className='w-full'>
-              Volver a iniciar sesión
-            </Button>
-          </Link>
-        </Card>
+        <div className='w-full max-w-md animate-fade-up'>
+          <Card elevated className='p-8 text-center'>
+            <div className='flex flex-col items-center gap-4'>
+              <div className='w-16 h-16 rounded-2xl bg-pitch-100 flex items-center justify-center text-pitch-700'>
+                <MailIcon size={32} />
+              </div>
+              <div>
+                <h1 className='text-xl font-bold mb-2 tracking-tight'>
+                  Revisa tu correo
+                </h1>
+                <p className='text-sm text-(--color-text-muted) max-w-xs'>
+                  Te enviamos un enlace de confirmación a{' '}
+                  <strong>{email}</strong>. Haz clic en el enlace para activar
+                  tu cuenta.
+                </p>
+              </div>
+            </div>
+            <Link href='/login' className='block mt-6'>
+              <Button variant='secondary' className='w-full'>
+                Volver a iniciar sesión
+              </Button>
+            </Link>
+          </Card>
+        </div>
       </div>
     )
   }
 
   return (
     <div className='flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8'>
-      <Card elevated className='w-full max-w-md p-6 md:p-8'>
-        <h1 className='text-2xl font-bold mb-1'>Crear cuenta</h1>
-        <p className='text-sm text-(--color-text-muted) mb-6'>
-          Regístrate para solicitar reservas.
-        </p>
+      <div className='w-full max-w-md animate-fade-up'>
+        {/* Brand mark */}
+        <div className='flex flex-col items-center gap-3 mb-8'>
+          <div className='flex items-center justify-center w-14 h-14 rounded-2xl bg-pitch-800 text-flood-400 shadow-(--shadow-pitch)'>
+            <CourtIcon size={28} strokeWidth={2.5} />
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-          <Input
-            label='Nombre completo'
-            type='text'
-            name='full_name'
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder='Juan Pérez'
-            required
-            autoComplete='name'
-            autoFocus
-          />
-          <Input
-            label='Teléfono'
-            type='tel'
-            name='phone'
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder='+57 300 123 4567'
-            required
-            autoComplete='tel'
-            hint='Lo usará el negocio para contactarte. No se verifica automáticamente.'
-          />
-          <Input
-            label='Email'
-            type='email'
-            name='email'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder='tu@email.com'
-            required
-            autoComplete='email'
-          />
-          <Input
-            label='Contraseña'
-            type='password'
-            name='password'
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder='Mínimo 6 caracteres'
-            required
-            autoComplete='new-password'
-          />
-
-          {error && (
-            <p className='text-sm text-(--color-danger) bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
-              {error}
-            </p>
-          )}
-
-          <Button type='submit' loading={loading} size='lg' className='w-full'>
+        <Card elevated className='p-6 md:p-8'>
+          <h1 className='text-2xl font-bold mb-1 tracking-tight'>
             Crear cuenta
-          </Button>
-        </form>
+          </h1>
+          <p className='text-sm text-(--color-text-muted) mb-6'>
+            Regístrate para solicitar reservas.
+          </p>
 
-        <p className='mt-6 text-sm text-center text-(--color-text-muted)'>
-          ¿Ya tienes cuenta?{' '}
-          <Link
-            href='/login'
-            className='text-(--color-primary) font-medium hover:underline'
-          >
-            Inicia sesión
-          </Link>
-        </p>
-      </Card>
+          <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+            <Input
+              label='Nombre completo'
+              type='text'
+              name='full_name'
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder='Juan Pérez'
+              required
+              autoComplete='name'
+              autoFocus
+              icon={<UserIcon size={18} />}
+            />
+            <Input
+              label='Teléfono'
+              type='tel'
+              name='phone'
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder='+57 300 123 4567'
+              required
+              autoComplete='tel'
+              hint='Lo usará el negocio para contactarte. No se verifica automáticamente.'
+              icon={<PhoneIcon size={18} />}
+            />
+            <Input
+              label='Email'
+              type='email'
+              name='email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder='tu@email.com'
+              required
+              autoComplete='email'
+              icon={<MailIcon size={18} />}
+            />
+            <Input
+              label='Contraseña'
+              type='password'
+              name='password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder='Mínimo 6 caracteres'
+              required
+              autoComplete='new-password'
+            />
+
+            {error && <Alert variant='error'>{error}</Alert>}
+
+            <Button
+              type='submit'
+              loading={loading}
+              size='lg'
+              className='w-full'
+            >
+              Crear cuenta
+            </Button>
+          </form>
+
+          <p className='mt-6 text-sm text-center text-(--color-text-muted)'>
+            ¿Ya tienes cuenta?{' '}
+            <Link
+              href='/login'
+              className='text-(--color-primary) font-medium hover:underline'
+            >
+              Inicia sesión
+            </Link>
+          </p>
+        </Card>
+
+        <Link
+          href='/'
+          className='flex items-center justify-center gap-1.5 mt-6 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors'
+        >
+          <ArrowLeftIcon size={16} />
+          Volver al inicio
+        </Link>
+      </div>
     </div>
   )
 }

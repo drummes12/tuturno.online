@@ -5,7 +5,15 @@ import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Card } from '@/components/common/card'
-import { Spinner } from '@/components/common/spinner'
+import { Alert } from '@/components/common/alert'
+import { Skeleton } from '@/components/common/skeleton'
+import {
+  ArrowLeftIcon,
+  CourtIcon,
+  ClockIcon,
+  CalendarIcon,
+  HourglassIcon
+} from '@/components/common/icon'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 
@@ -49,34 +57,50 @@ export function ReservePage() {
 
   if (!user) {
     return (
-      <Card className='p-6 text-center'>
-        <p className='text-(--color-text) mb-4'>
-          Necesitas iniciar sesión para reservar.
-        </p>
-        <Link
-          href={`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`}
-        >
-          <Button>Iniciar sesión</Button>
-        </Link>
+      <Card className='p-8 text-center max-w-md mx-auto mt-8 animate-fade-up'>
+        <div className='flex flex-col items-center gap-4'>
+          <div className='w-14 h-14 rounded-full bg-surface-inset flex items-center justify-center text-text-muted'>
+            <CourtIcon size={28} />
+          </div>
+          <div>
+            <p className='font-semibold text-(--color-text) mb-1'>
+              Inicia sesión para reservar
+            </p>
+            <p className='text-sm text-(--color-text-muted)'>
+              Necesitas una cuenta para solicitar turnos.
+            </p>
+          </div>
+          <Link
+            href={`/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`}
+          >
+            <Button>Iniciar sesión</Button>
+          </Link>
+        </div>
       </Card>
     )
   }
 
   if (!courtId || !startStr) {
     return (
-      <Card className='p-6 text-center'>
-        <p className='text-(--color-text-muted)'>Faltan datos de la reserva.</p>
+      <Card className='p-8 text-center max-w-md mx-auto mt-8 animate-fade-up'>
+        <p className='text-(--color-text-muted) mb-4'>
+          Faltan datos de la reserva.
+        </p>
         <Link href='/'>
-          <Button variant='secondary' className='mt-4'>
-            Ver disponibilidad
-          </Button>
+          <Button variant='secondary'>Ver disponibilidad</Button>
         </Link>
       </Card>
     )
   }
 
   if (loadingCourt) {
-    return <Spinner size='lg' />
+    return (
+      <div className='max-w-md mx-auto mt-8 flex flex-col gap-4'>
+        <Skeleton className='h-8 w-48' />
+        <Skeleton className='h-32 rounded-xl' />
+        <Skeleton className='h-64 rounded-xl' />
+      </div>
+    )
   }
 
   const timeLabel = (() => {
@@ -133,15 +157,24 @@ export function ReservePage() {
 
   if (success) {
     return (
-      <div className='flex flex-col items-center gap-4 py-8'>
-        <Card elevated className='w-full max-w-md p-6 text-center'>
-          <div className='text-4xl mb-3'>⏳</div>
-          <h1 className='text-xl font-bold mb-2'>Solicitud recibida</h1>
-          <p className='text-sm text-(--color-text-muted) mb-6'>
-            Tu reserva está <strong>pendiente de confirmación</strong> por el
-            negocio. Te avisaremos por correo cuando la confirmen o rechacen.
-          </p>
-          <div className='flex flex-col gap-2'>
+      <div className='flex flex-col items-center gap-4 py-12 max-w-md mx-auto animate-fade-up'>
+        <Card elevated className='w-full p-8 text-center'>
+          <div className='flex flex-col items-center gap-4'>
+            <div className='w-16 h-16 rounded-2xl bg-pitch-100 flex items-center justify-center text-pitch-700'>
+              <HourglassIcon size={32} />
+            </div>
+            <div>
+              <h1 className='text-xl font-bold mb-1.5 tracking-tight'>
+                Solicitud recibida
+              </h1>
+              <p className='text-sm text-(--color-text-muted) max-w-xs'>
+                Tu reserva está <strong>pendiente de confirmación</strong> por
+                el negocio. Te avisaremos por correo cuando la confirmen o
+                rechacen.
+              </p>
+            </div>
+          </div>
+          <div className='flex flex-col gap-2 mt-6'>
             <Link href='/mis-reservas'>
               <Button className='w-full'>Ver mis reservas</Button>
             </Link>
@@ -156,37 +189,56 @@ export function ReservePage() {
     )
   }
 
+  const details = [
+    { icon: <CourtIcon size={16} />, label: 'Cancha', value: courtName },
+    {
+      icon: <CalendarIcon size={16} />,
+      label: 'Fecha',
+      value: dateLabel,
+      capitalize: true
+    },
+    { icon: <ClockIcon size={16} />, label: 'Hora', value: timeLabel },
+    { icon: <ClockIcon size={16} />, label: 'Duración', value: '60 minutos' }
+  ]
+
   return (
     <div className='flex flex-col gap-4 max-w-md mx-auto'>
-      <div>
-        <h1 className='text-2xl font-bold'>Confirmar reserva</h1>
-        <p className='text-sm text-(--color-text-muted)'>
+      <Link
+        href='/'
+        className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
+      >
+        <ArrowLeftIcon size={16} />
+        Disponibilidad
+      </Link>
+
+      <div className='animate-fade-up'>
+        <h1 className='text-2xl font-bold tracking-tight'>Confirmar reserva</h1>
+        <p className='text-sm text-(--color-text-muted) mt-0.5'>
           Revisa los datos antes de enviar.
         </p>
       </div>
 
-      <Card className='p-4'>
-        <dl className='flex flex-col gap-2 text-sm'>
-          <div className='flex justify-between'>
-            <dt className='text-(--color-text-muted)'>Cancha</dt>
-            <dd className='font-medium'>{courtName}</dd>
-          </div>
-          <div className='flex justify-between'>
-            <dt className='text-(--color-text-muted)'>Fecha</dt>
-            <dd className='font-medium capitalize'>{dateLabel}</dd>
-          </div>
-          <div className='flex justify-between'>
-            <dt className='text-(--color-text-muted)'>Hora</dt>
-            <dd className='font-medium'>{timeLabel}</dd>
-          </div>
-          <div className='flex justify-between'>
-            <dt className='text-(--color-text-muted)'>Duración</dt>
-            <dd className='font-medium'>60 minutos</dd>
-          </div>
+      <Card className='p-5 animate-fade-up' elevated>
+        <dl className='flex flex-col gap-3 text-sm'>
+          {details.map((d) => (
+            <div key={d.label} className='flex justify-between items-center'>
+              <dt className='flex items-center gap-2 text-(--color-text-muted)'>
+                <span className='text-graphite-400'>
+                  {d.icon}
+                </span>
+                {d.label}
+              </dt>
+              <dd
+                className={`font-medium nums ${d.capitalize ? 'capitalize' : ''}`}
+              >
+                {d.value}
+              </dd>
+            </div>
+          ))}
         </dl>
       </Card>
 
-      <Card className='p-4'>
+      <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
           <Input
             label='Nombre completo'
@@ -212,16 +264,12 @@ export function ReservePage() {
             hint='Información adicional para el negocio.'
           />
 
-          {error && (
-            <p className='text-sm text-(--color-danger) bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
-              {error}
-            </p>
-          )}
+          {error && <Alert variant='error'>{error}</Alert>}
 
-          <div className='bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2.5 text-sm text-yellow-800'>
+          <Alert variant='warning'>
             <strong>Importante:</strong> Esta es una solicitud. El negocio debe
             confirmarla. El turno queda reservado temporalmente por 30 minutos.
-          </div>
+          </Alert>
 
           <Button
             type='submit'
@@ -233,13 +281,6 @@ export function ReservePage() {
           </Button>
         </form>
       </Card>
-
-      <Link
-        href='/'
-        className='text-center text-sm text-(--color-text-muted) hover:text-(--color-text)'
-      >
-        ← Volver a disponibilidad
-      </Link>
     </div>
   )
 }
