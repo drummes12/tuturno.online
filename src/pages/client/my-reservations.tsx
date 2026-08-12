@@ -62,6 +62,9 @@ export function MyReservationsPage() {
 
   function canCancel(r: Reservation): boolean {
     if (!['pending', 'confirmed'].includes(r.status)) return false
+    // Las pendientes se pueden cancelar siempre (sin límite de tiempo)
+    if (r.status === 'pending') return true
+    // Las confirmadas solo hasta N horas antes (el RPC valida con cancellation_limit_hours del negocio)
     const start = parseISO(r.starts_at)
     const limit = subHours(start, 2)
     return isAfter(limit, new Date())
@@ -97,19 +100,19 @@ export function MyReservationsPage() {
   ]
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Mis reservas</h1>
+    <div className='flex flex-col gap-4'>
+      <h1 className='text-2xl font-bold'>Mis reservas</h1>
 
       {/* Filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+      <div className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4'>
         {filters.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-colors touch-target ${
               filter === f.key
-                ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                : 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] border-[var(--color-border)]'
+                ? 'bg-(--color-primary) text-white border-(--color-primary)'
+                : 'bg-surface-elevated text-(--color-text-muted) border-border'
             }`}
           >
             {f.label}
@@ -118,41 +121,49 @@ export function MyReservationsPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <Card className="p-6 text-center">
-          <p className="text-[var(--color-text-muted)] mb-4">No tienes reservas aquí.</p>
-          <Link href="/">
-            <Button variant="secondary">Ver disponibilidad</Button>
+        <Card className='p-6 text-center'>
+          <p className='text-(--color-text-muted) mb-4'>
+            No tienes reservas aquí.
+          </p>
+          <Link href='/'>
+            <Button variant='secondary'>Ver disponibilidad</Button>
           </Link>
         </Card>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className='flex flex-col gap-3'>
           {filtered.map((r) => (
-            <Card key={r.id} className="p-4">
-              <div className="flex items-start justify-between gap-3 mb-2">
+            <Card key={r.id} className='p-4'>
+              <div className='flex items-start justify-between gap-3 mb-2'>
                 <div>
-                  <p className="font-semibold text-[var(--color-text)]">{r.court?.name ?? 'Cancha'}</p>
-                  <p className="text-sm text-[var(--color-text-muted)] capitalize">
-                    {format(parseISO(r.starts_at), "EEE d 'de' MMMM, HH:mm", { locale: es })}
+                  <p className='font-semibold text-(--color-text)'>
+                    {r.court?.name ?? 'Cancha'}
+                  </p>
+                  <p className='text-sm text-(--color-text-muted) capitalize'>
+                    {format(parseISO(r.starts_at), "EEE d 'de' MMMM, HH:mm", {
+                      locale: es
+                    })}
                   </p>
                 </div>
                 <StatusBadge status={r.status} />
               </div>
 
               {r.notes && (
-                <p className="text-sm text-[var(--color-text-muted)] mt-2 italic">"{r.notes}"</p>
+                <p className='text-sm text-(--color-text-muted) mt-2 italic'>
+                  "{r.notes}"
+                </p>
               )}
 
               {r.decision_reason && (
-                <p className="text-sm text-[var(--color-text-muted)] mt-2">
+                <p className='text-sm text-(--color-text-muted) mt-2'>
                   Motivo: {r.decision_reason}
                 </p>
               )}
 
               {canCancel(r) && (
-                <div className="mt-3">
+                <div className='mt-3'>
                   <Button
-                    variant="danger"
-                    size="sm"
+                    variant='danger'
+                    size='sm'
                     loading={cancellingId === r.id}
                     onClick={() => handleCancel(r.id)}
                   >
@@ -161,9 +172,10 @@ export function MyReservationsPage() {
                 </div>
               )}
 
-              {r.status === 'pending' && !canCancel(r) && (
-                <p className="text-xs text-[var(--color-text-muted)] mt-2">
-                  La cancelación directa está disponible hasta 2 horas antes del turno.
+              {r.status === 'confirmed' && !canCancel(r) && (
+                <p className='text-xs text-(--color-text-muted) mt-2'>
+                  La cancelación directa está disponible hasta 2 horas antes del
+                  turno.
                 </p>
               )}
             </Card>

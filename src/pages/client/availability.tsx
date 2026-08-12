@@ -77,10 +77,10 @@ export function AvailabilityPage() {
     <div className='flex flex-col gap-4'>
       {/* Header */}
       <div>
-        <h1 className='text-2xl font-bold text-[var(--color-text)]'>
+        <h1 className='text-2xl font-bold text-(--color-text)'>
           Disponibilidad
         </h1>
-        <p className='text-sm text-[var(--color-text-muted)] capitalize'>
+        <p className='text-sm text-(--color-text-muted) capitalize'>
           {dateLabel}
         </p>
       </div>
@@ -96,10 +96,10 @@ export function AvailabilityPage() {
             <button
               key={dateStr}
               onClick={() => setSelectedDate(dateStr)}
-              className={`flex flex-col items-center justify-center min-w-[64px] py-2 px-3 rounded-lg border transition-colors touch-target ${
+              className={`flex flex-col items-center justify-center min-w-16 py-2 px-3 rounded-lg border transition-colors touch-target ${
                 isSelected
-                  ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                  : 'bg-[var(--color-surface-elevated)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-border-strong)]'
+                  ? 'bg-(--color-primary) text-white border-(--color-primary)'
+                  : 'bg-surface-elevated text-(--color-text) border-border hover:border-border-strong'
               }`}
             >
               <span className='text-xs font-medium capitalize'>
@@ -125,8 +125,8 @@ export function AvailabilityPage() {
                 onClick={() => setSelectedCourt(court.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-colors touch-target ${
                   isSelected
-                    ? 'bg-[var(--color-pitch-100)] text-[var(--color-pitch-800)] border-[var(--color-pitch-400)]'
-                    : 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] border-[var(--color-border)]'
+                    ? 'bg-pitch-100 text-(--color-pitch-800) border-pitch-400'
+                    : 'bg-surface-elevated text-(--color-text-muted) border-border'
                 }`}
               >
                 {court.name}
@@ -138,9 +138,7 @@ export function AvailabilityPage() {
 
       {/* Slots grid */}
       {error && (
-        <Card className='p-4 text-center text-sm text-[var(--color-danger)]'>
-          {error}
-        </Card>
+        <Card className='p-4 text-center text-sm text-danger'>{error}</Card>
       )}
 
       {loading ? (
@@ -149,7 +147,7 @@ export function AvailabilityPage() {
         </div>
       ) : slots.length === 0 ? (
         <Card className='p-6 text-center'>
-          <p className='text-[var(--color-text-muted)]'>
+          <p className='text-(--color-text-muted)'>
             No hay turnos disponibles para esta fecha.
           </p>
         </Card>
@@ -162,7 +160,7 @@ export function AvailabilityPage() {
             const statusConfig = {
               available: {
                 className:
-                  'bg-[var(--color-pitch-100)] text-[var(--color-pitch-800)] border-[var(--color-pitch-400)] hover:bg-[var(--color-pitch-200)]',
+                  'bg-pitch-100 text-(--color-pitch-800) border-pitch-400 hover:bg-pitch-200',
                 label: 'Disponible'
               },
               held: {
@@ -171,7 +169,7 @@ export function AvailabilityPage() {
               },
               reserved: {
                 className:
-                  'bg-[var(--color-surface-inset)] text-[var(--color-text-muted)] border-[var(--color-border)]',
+                  'bg-surface-inset text-(--color-text-muted) border-border',
                 label: 'Reservado'
               },
               blocked: {
@@ -208,9 +206,9 @@ export function AvailabilityPage() {
       )}
 
       {/* Legend */}
-      <div className='flex flex-wrap gap-3 mt-2 text-xs text-[var(--color-text-muted)]'>
+      <div className='flex flex-wrap gap-3 mt-2 text-xs text-(--color-text-muted)'>
         <span className='flex items-center gap-1.5'>
-          <span className='w-3 h-3 rounded bg-[var(--color-pitch-100)] border border-[var(--color-pitch-400)]' />
+          <span className='w-3 h-3 rounded bg-pitch-100 border border-pitch-400' />
           Disponible
         </span>
         <span className='flex items-center gap-1.5'>
@@ -218,7 +216,7 @@ export function AvailabilityPage() {
           En espera
         </span>
         <span className='flex items-center gap-1.5'>
-          <span className='w-3 h-3 rounded bg-[var(--color-surface-inset)] border border-[var(--color-border)]' />
+          <span className='w-3 h-3 rounded bg-surface-inset border border-border' />
           Reservado
         </span>
         <span className='flex items-center gap-1.5'>

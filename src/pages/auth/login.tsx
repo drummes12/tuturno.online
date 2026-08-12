@@ -38,10 +38,10 @@ export function LoginPage() {
   return (
     <div className='flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8'>
       <Card elevated className='w-full max-w-md p-6 md:p-8'>
-        <h1 className='text-2xl font-bold text-[var(--color-text)] mb-1'>
+        <h1 className='text-2xl font-bold text-(--color-text) mb-1'>
           Iniciar sesión
         </h1>
-        <p className='text-sm text-[var(--color-text-muted)] mb-6'>
+        <p className='text-sm text-(--color-text-muted) mb-6'>
           Ingresa para gestionar tus reservas.
         </p>
 
@@ -69,7 +69,7 @@ export function LoginPage() {
           />
 
           {error && (
-            <p className='text-sm text-[var(--color-danger)] bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
+            <p className='text-sm text-(--color-danger) bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
               {error}
             </p>
           )}
@@ -82,15 +82,15 @@ export function LoginPage() {
         <div className='mt-6 flex flex-col gap-2 text-sm text-center'>
           <Link
             href='/recuperar-password'
-            className='text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+            className='text-(--color-text-muted) hover:text-(--color-text)'
           >
             ¿Olvidaste tu contraseña?
           </Link>
-          <p className='text-[var(--color-text-muted)]'>
+          <p className='text-(--color-text-muted)'>
             ¿No tienes cuenta?{' '}
             <Link
               href='/registro'
-              className='text-[var(--color-primary)] font-medium hover:underline'
+              className='text-(--color-primary) font-medium hover:underline'
             >
               Regístrate
             </Link>

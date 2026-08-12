@@ -50,7 +50,7 @@ export function ReservePage() {
   if (!user) {
     return (
       <Card className='p-6 text-center'>
-        <p className='text-[var(--color-text)] mb-4'>
+        <p className='text-(--color-text) mb-4'>
           Necesitas iniciar sesión para reservar.
         </p>
         <Link
@@ -65,9 +65,7 @@ export function ReservePage() {
   if (!courtId || !startStr) {
     return (
       <Card className='p-6 text-center'>
-        <p className='text-[var(--color-text-muted)]'>
-          Faltan datos de la reserva.
-        </p>
+        <p className='text-(--color-text-muted)'>Faltan datos de la reserva.</p>
         <Link href='/'>
           <Button variant='secondary' className='mt-4'>
             Ver disponibilidad
@@ -139,7 +137,7 @@ export function ReservePage() {
         <Card elevated className='w-full max-w-md p-6 text-center'>
           <div className='text-4xl mb-3'>⏳</div>
           <h1 className='text-xl font-bold mb-2'>Solicitud recibida</h1>
-          <p className='text-sm text-[var(--color-text-muted)] mb-6'>
+          <p className='text-sm text-(--color-text-muted) mb-6'>
             Tu reserva está <strong>pendiente de confirmación</strong> por el
             negocio. Te avisaremos por correo cuando la confirmen o rechacen.
           </p>
@@ -162,7 +160,7 @@ export function ReservePage() {
     <div className='flex flex-col gap-4 max-w-md mx-auto'>
       <div>
         <h1 className='text-2xl font-bold'>Confirmar reserva</h1>
-        <p className='text-sm text-[var(--color-text-muted)]'>
+        <p className='text-sm text-(--color-text-muted)'>
           Revisa los datos antes de enviar.
         </p>
       </div>
@@ -170,19 +168,19 @@ export function ReservePage() {
       <Card className='p-4'>
         <dl className='flex flex-col gap-2 text-sm'>
           <div className='flex justify-between'>
-            <dt className='text-[var(--color-text-muted)]'>Cancha</dt>
+            <dt className='text-(--color-text-muted)'>Cancha</dt>
             <dd className='font-medium'>{courtName}</dd>
           </div>
           <div className='flex justify-between'>
-            <dt className='text-[var(--color-text-muted)]'>Fecha</dt>
+            <dt className='text-(--color-text-muted)'>Fecha</dt>
             <dd className='font-medium capitalize'>{dateLabel}</dd>
           </div>
           <div className='flex justify-between'>
-            <dt className='text-[var(--color-text-muted)]'>Hora</dt>
+            <dt className='text-(--color-text-muted)'>Hora</dt>
             <dd className='font-medium'>{timeLabel}</dd>
           </div>
           <div className='flex justify-between'>
-            <dt className='text-[var(--color-text-muted)]'>Duración</dt>
+            <dt className='text-(--color-text-muted)'>Duración</dt>
             <dd className='font-medium'>60 minutos</dd>
           </div>
         </dl>
@@ -215,7 +213,7 @@ export function ReservePage() {
           />
 
           {error && (
-            <p className='text-sm text-[var(--color-danger)] bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
+            <p className='text-sm text-(--color-danger) bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
               {error}
             </p>
           )}
@@ -238,7 +236,7 @@ export function ReservePage() {
 
       <Link
         href='/'
-        className='text-center text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+        className='text-center text-sm text-(--color-text-muted) hover:text-(--color-text)'
       >
         ← Volver a disponibilidad
       </Link>

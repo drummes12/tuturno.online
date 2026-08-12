@@ -54,85 +54,106 @@ export function AdminConfigPage() {
 
   if (!business) {
     return (
-      <Card className="p-6 text-center text-[var(--color-text-muted)]">
+      <Card className='p-6 text-center text-(--color-text-muted)'>
         No se encontró la configuración del negocio.
       </Card>
     )
   }
 
   return (
-    <div className="flex flex-col gap-4 max-w-md">
-      <h1 className="text-2xl font-bold">Configuración</h1>
+    <div className='flex flex-col gap-4 max-w-md'>
+      <h1 className='text-2xl font-bold'>Configuración</h1>
 
-      <Card className="p-4">
-        <form onSubmit={handleSave} className="flex flex-col gap-4">
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-[var(--color-text-muted)]">
+      <Card className='p-4'>
+        <form onSubmit={handleSave} className='flex flex-col gap-4'>
+          <h2 className='font-semibold text-sm uppercase tracking-wide text-(--color-text-muted)'>
             Datos del negocio
           </h2>
           <Input
-            label="Nombre"
+            label='Nombre'
             value={business.name}
             onChange={(e) => setBusiness({ ...business, name: e.target.value })}
             required
           />
           <Input
-            label="Dirección"
+            label='Dirección'
             value={business.address ?? ''}
-            onChange={(e) => setBusiness({ ...business, address: e.target.value })}
+            onChange={(e) =>
+              setBusiness({ ...business, address: e.target.value })
+            }
           />
           <Input
-            label="Teléfono"
+            label='Teléfono'
             value={business.phone ?? ''}
-            onChange={(e) => setBusiness({ ...business, phone: e.target.value })}
+            onChange={(e) =>
+              setBusiness({ ...business, phone: e.target.value })
+            }
           />
 
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-[var(--color-text-muted)] pt-2">
+          <h2 className='font-semibold text-sm uppercase tracking-wide text-(--color-text-muted) pt-2'>
             Reglas de operación
           </h2>
           <Input
-            label="Duración del bloqueo temporal (minutos)"
-            type="number"
+            label='Duración del bloqueo temporal (minutos)'
+            type='number'
             value={String(business.hold_duration_minutes)}
             onChange={(e) =>
-              setBusiness({ ...business, hold_duration_minutes: parseInt(e.target.value) || 30 })
+              setBusiness({
+                ...business,
+                hold_duration_minutes: parseInt(e.target.value) || 30
+              })
             }
-            hint="Tiempo que un turno queda retenido mientras el negocio decide."
+            hint='Tiempo que un turno queda retenido mientras el negocio decide.'
           />
           <Input
-            label="Límite de cancelación (horas antes)"
-            type="number"
+            label='Límite de cancelación (horas antes)'
+            type='number'
             value={String(business.cancellation_limit_hours)}
             onChange={(e) =>
-              setBusiness({ ...business, cancellation_limit_hours: parseInt(e.target.value) || 2 })
+              setBusiness({
+                ...business,
+                cancellation_limit_hours: parseInt(e.target.value) || 2
+              })
             }
-            hint="El cliente puede cancelar hasta X horas antes del turno."
+            hint='El cliente puede cancelar hasta X horas antes del turno.'
           />
           <Input
-            label="Anticipación máxima (días)"
-            type="number"
+            label='Anticipación máxima (días)'
+            type='number'
             value={String(business.max_advance_days)}
             onChange={(e) =>
-              setBusiness({ ...business, max_advance_days: parseInt(e.target.value) || 30 })
+              setBusiness({
+                ...business,
+                max_advance_days: parseInt(e.target.value) || 30
+              })
             }
-            hint="Hasta cuántos días en adelante se puede reservar."
+            hint='Hasta cuántos días en adelante se puede reservar.'
           />
 
           {saved && (
-            <p className="text-sm text-[var(--color-success)] bg-[var(--color-pitch-100)] border border-[var(--color-pitch-300)] rounded-lg px-3 py-2">
+            <p className='text-sm text-(--color-success) bg-pitch-100 border border-pitch-300 rounded-lg px-3 py-2'>
               ✓ Configuración guardada
             </p>
           )}
 
-          <Button type="submit" loading={saving}>
+          <Button type='submit' loading={saving}>
             Guardar cambios
           </Button>
         </form>
       </Card>
 
-      <Card className="p-4">
-        <div className="text-sm flex flex-col gap-1">
-          <p><span className="text-[var(--color-text-muted)]">Zona horaria:</span> {business.timezone}</p>
-          <p><span className="text-[var(--color-text-muted)]">Duración de turnos:</span> {business.slot_duration_minutes} min</p>
+      <Card className='p-4'>
+        <div className='text-sm flex flex-col gap-1'>
+          <p>
+            <span className='text-(--color-text-muted)'>Zona horaria:</span>{' '}
+            {business.timezone}
+          </p>
+          <p>
+            <span className='text-(--color-text-muted)'>
+              Duración de turnos:
+            </span>{' '}
+            {business.slot_duration_minutes} min
+          </p>
         </div>
       </Card>
     </div>

@@ -103,7 +103,7 @@ export function AdminReservationsPage() {
         type='date'
         value={selectedDate}
         onChange={(e) => setSelectedDate(e.target.value)}
-        className='rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-inset)] px-4 py-2.5 text-base touch-target'
+        className='rounded-lg border border-border bg-surface-inset px-4 py-2.5 text-base touch-target'
       />
 
       {/* Filter chips */}
@@ -114,8 +114,8 @@ export function AdminReservationsPage() {
             onClick={() => setFilter(f.key)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium border whitespace-nowrap transition-colors touch-target ${
               filter === f.key
-                ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                : 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] border-[var(--color-border)]'
+                ? 'bg-(--color-primary) text-white border-(--color-primary)'
+                : 'bg-surface-elevated text-(--color-text-muted) border-border'
             }`}
           >
             {f.label}
@@ -126,7 +126,7 @@ export function AdminReservationsPage() {
       {loading ? (
         <Spinner size='lg' />
       ) : reservations.length === 0 ? (
-        <Card className='p-6 text-center text-[var(--color-text-muted)]'>
+        <Card className='p-6 text-center text-(--color-text-muted)'>
           No hay reservas para este filtro.
         </Card>
       ) : (
@@ -141,16 +141,16 @@ export function AdminReservationsPage() {
                   <p className='font-medium text-sm'>
                     {formatLocal(r.starts_at, 'HH:mm')} — {r.court?.name}
                   </p>
-                  <p className='text-xs text-[var(--color-text-muted)] mt-0.5'>
+                  <p className='text-xs text-(--color-text-muted) mt-0.5'>
                     {r.profile?.full_name} · {r.profile?.phone}
                   </p>
                   {r.notes && (
-                    <p className='text-xs italic text-[var(--color-text-muted)] mt-1'>
+                    <p className='text-xs italic text-(--color-text-muted) mt-1'>
                       "{r.notes}"
                     </p>
                   )}
                   {r.decision_reason && (
-                    <p className='text-xs text-[var(--color-text-muted)] mt-1'>
+                    <p className='text-xs text-(--color-text-muted) mt-1'>
                       Motivo: {r.decision_reason}
                     </p>
                   )}

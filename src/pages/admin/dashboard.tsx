@@ -103,7 +103,7 @@ export function AdminDashboardPage() {
 
         {pending.length === 0 ? (
           <Card className='p-6 text-center'>
-            <p className='text-[var(--color-text-muted)]'>
+            <p className='text-(--color-text-muted)'>
               No hay solicitudes pendientes. 🎉
             </p>
           </Card>
@@ -118,7 +118,7 @@ export function AdminDashboardPage() {
                 <div className='flex items-start justify-between gap-3 mb-3'>
                   <div>
                     <p className='font-semibold'>{r.court?.name}</p>
-                    <p className='text-sm text-[var(--color-text-muted)] capitalize'>
+                    <p className='text-sm text-(--color-text-muted) capitalize'>
                       {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
                     </p>
                   </div>
@@ -127,25 +127,19 @@ export function AdminDashboardPage() {
 
                 <div className='text-sm flex flex-col gap-1 mb-3'>
                   <p>
-                    <span className='text-[var(--color-text-muted)]'>
-                      Cliente:
-                    </span>{' '}
+                    <span className='text-(--color-text-muted)'>Cliente:</span>{' '}
                     {r.profile?.full_name}
                   </p>
                   <p>
-                    <span className='text-[var(--color-text-muted)]'>
-                      Teléfono:
-                    </span>{' '}
+                    <span className='text-(--color-text-muted)'>Teléfono:</span>{' '}
                     {r.profile?.phone}
                   </p>
                   <p>
-                    <span className='text-[var(--color-text-muted)]'>
-                      Email:
-                    </span>{' '}
+                    <span className='text-(--color-text-muted)'>Email:</span>{' '}
                     {r.profile?.id}
                   </p>
                   {r.notes && (
-                    <p className='italic text-[var(--color-text-muted)]'>
+                    <p className='italic text-(--color-text-muted)'>
                       "{r.notes}"
                     </p>
                   )}
@@ -210,7 +204,7 @@ export function AdminDashboardPage() {
       <section>
         <h2 className='text-lg font-semibold mb-3'>Reservas de hoy</h2>
         {today.length === 0 ? (
-          <Card className='p-4 text-center text-sm text-[var(--color-text-muted)]'>
+          <Card className='p-4 text-center text-sm text-(--color-text-muted)'>
             Sin reservas para hoy.
           </Card>
         ) : (
@@ -222,7 +216,7 @@ export function AdminDashboardPage() {
                     <p className='font-medium text-sm truncate'>
                       {formatLocal(r.starts_at, 'HH:mm')} — {r.court?.name}
                     </p>
-                    <p className='text-xs text-[var(--color-text-muted)] truncate'>
+                    <p className='text-xs text-(--color-text-muted) truncate'>
                       {r.profile?.full_name}
                     </p>
                   </div>

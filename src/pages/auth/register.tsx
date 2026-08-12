@@ -53,16 +53,18 @@ export function RegisterPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8">
-        <Card elevated className="w-full max-w-md p-6 md:p-8 text-center">
-          <div className="text-4xl mb-4">📧</div>
-          <h1 className="text-xl font-bold mb-2">Revisa tu correo</h1>
-          <p className="text-sm text-[var(--color-text-muted)] mb-6">
+      <div className='flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8'>
+        <Card elevated className='w-full max-w-md p-6 md:p-8 text-center'>
+          <div className='text-4xl mb-4'>📧</div>
+          <h1 className='text-xl font-bold mb-2'>Revisa tu correo</h1>
+          <p className='text-sm text-(--color-text-muted) mb-6'>
             Te enviamos un enlace de confirmación a <strong>{email}</strong>.
             Haz clic en el enlace para activar tu cuenta.
           </p>
-          <Link href="/login">
-            <Button variant="secondary" className="w-full">Volver a iniciar sesión</Button>
+          <Link href='/login'>
+            <Button variant='secondary' className='w-full'>
+              Volver a iniciar sesión
+            </Button>
           </Link>
         </Card>
       </div>
@@ -70,71 +72,74 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8">
-      <Card elevated className="w-full max-w-md p-6 md:p-8">
-        <h1 className="text-2xl font-bold mb-1">Crear cuenta</h1>
-        <p className="text-sm text-[var(--color-text-muted)] mb-6">
+    <div className='flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8'>
+      <Card elevated className='w-full max-w-md p-6 md:p-8'>
+        <h1 className='text-2xl font-bold mb-1'>Crear cuenta</h1>
+        <p className='text-sm text-(--color-text-muted) mb-6'>
           Regístrate para solicitar reservas.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
           <Input
-            label="Nombre completo"
-            type="text"
-            name="full_name"
+            label='Nombre completo'
+            type='text'
+            name='full_name'
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Juan Pérez"
+            placeholder='Juan Pérez'
             required
-            autoComplete="name"
+            autoComplete='name'
             autoFocus
           />
           <Input
-            label="Teléfono"
-            type="tel"
-            name="phone"
+            label='Teléfono'
+            type='tel'
+            name='phone'
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="+57 300 123 4567"
+            placeholder='+57 300 123 4567'
             required
-            autoComplete="tel"
-            hint="Lo usará el negocio para contactarte. No se verifica automáticamente."
+            autoComplete='tel'
+            hint='Lo usará el negocio para contactarte. No se verifica automáticamente.'
           />
           <Input
-            label="Email"
-            type="email"
-            name="email"
+            label='Email'
+            type='email'
+            name='email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="tu@email.com"
+            placeholder='tu@email.com'
             required
-            autoComplete="email"
+            autoComplete='email'
           />
           <Input
-            label="Contraseña"
-            type="password"
-            name="password"
+            label='Contraseña'
+            type='password'
+            name='password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Mínimo 6 caracteres"
+            placeholder='Mínimo 6 caracteres'
             required
-            autoComplete="new-password"
+            autoComplete='new-password'
           />
 
           {error && (
-            <p className="text-sm text-[var(--color-danger)] bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <p className='text-sm text-(--color-danger) bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
               {error}
             </p>
           )}
 
-          <Button type="submit" loading={loading} size="lg" className="w-full">
+          <Button type='submit' loading={loading} size='lg' className='w-full'>
             Crear cuenta
           </Button>
         </form>
 
-        <p className="mt-6 text-sm text-center text-[var(--color-text-muted)]">
+        <p className='mt-6 text-sm text-center text-(--color-text-muted)'>
           ¿Ya tienes cuenta?{' '}
-          <Link href="/login" className="text-[var(--color-primary)] font-medium hover:underline">
+          <Link
+            href='/login'
+            className='text-(--color-primary) font-medium hover:underline'
+          >
             Inicia sesión
           </Link>
         </p>

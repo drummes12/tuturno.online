@@ -77,34 +77,41 @@ export function AdminCourtsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Canchas</h1>
-        <Button size="sm" onClick={startNew}>+ Nueva</Button>
+    <div className='flex flex-col gap-4'>
+      <div className='flex items-center justify-between'>
+        <h1 className='text-2xl font-bold'>Canchas</h1>
+        <Button size='sm' onClick={startNew}>
+          + Nueva
+        </Button>
       </div>
 
       {showForm && (
-        <Card elevated className="p-4">
-          <form onSubmit={handleSave} className="flex flex-col gap-3">
+        <Card elevated className='p-4'>
+          <form onSubmit={handleSave} className='flex flex-col gap-3'>
             <Input
-              label="Nombre"
+              label='Nombre'
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Ej: Cancha 1"
+              placeholder='Ej: Cancha 1'
               required
               autoFocus
             />
             <Input
-              label="Descripción (opcional)"
+              label='Descripción (opcional)'
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ej: Cancha techada con iluminación"
+              placeholder='Ej: Cancha techada con iluminación'
             />
-            <div className="flex gap-2">
-              <Button type="submit" loading={saving} size="sm">
+            <div className='flex gap-2'>
+              <Button type='submit' loading={saving} size='sm'>
                 {editingId ? 'Guardar' : 'Crear'}
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={() => setShowForm(false)}>
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={() => setShowForm(false)}
+              >
                 Cancelar
               </Button>
             </div>
@@ -113,31 +120,45 @@ export function AdminCourtsPage() {
       )}
 
       {courts.length === 0 ? (
-        <Card className="p-6 text-center text-[var(--color-text-muted)]">
+        <Card className='p-6 text-center text-(--color-text-muted)'>
           No hay canchas. Crea la primera.
         </Card>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className='flex flex-col gap-2'>
           {courts.map((court) => (
-            <Card key={court.id} className="p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium">{court.name}</p>
+            <Card key={court.id} className='p-4'>
+              <div className='flex items-center justify-between gap-3'>
+                <div className='min-w-0'>
+                  <p className='font-medium'>{court.name}</p>
                   {court.description && (
-                    <p className="text-sm text-[var(--color-text-muted)]">{court.description}</p>
+                    <p className='text-sm text-(--color-text-muted)'>
+                      {court.description}
+                    </p>
                   )}
-                  <p className="text-xs mt-1">
-                    <span className={`inline-flex items-center gap-1 ${court.is_active ? 'text-[var(--color-success)]' : 'text-[var(--color-text-muted)]'}`}>
-                      <span className={`w-2 h-2 rounded-full ${court.is_active ? 'bg-[var(--color-success)]' : 'bg-[var(--color-graphite-400)]'}`} />
+                  <p className='text-xs mt-1'>
+                    <span
+                      className={`inline-flex items-center gap-1 ${court.is_active ? 'text-(--color-success)' : 'text-(--color-text-muted)'}`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${court.is_active ? 'bg-(--color-success)' : 'bg-graphite-400'}`}
+                      />
                       {court.is_active ? 'Activa' : 'Inactiva'}
                     </span>
                   </p>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  <Button variant="secondary" size="sm" onClick={() => startEdit(court)}>
+                <div className='flex gap-2 shrink-0'>
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    onClick={() => startEdit(court)}
+                  >
                     Editar
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => toggleActive(court)}>
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    onClick={() => toggleActive(court)}
+                  >
                     {court.is_active ? 'Desactivar' : 'Activar'}
                   </Button>
                 </div>

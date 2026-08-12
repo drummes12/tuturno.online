@@ -88,53 +88,62 @@ export function AdminHoursPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Horarios</h1>
-      <p className="text-sm text-[var(--color-text-muted)]">
-        Define el horario semanal de operación. Los turnos se generan en bloques de 60 minutos.
+    <div className='flex flex-col gap-4'>
+      <h1 className='text-2xl font-bold'>Horarios</h1>
+      <p className='text-sm text-(--color-text-muted)'>
+        Define el horario semanal de operación. Los turnos se generan en bloques
+        de 60 minutos.
       </p>
 
-      <Card className="p-4">
-        <div className="flex flex-col gap-3">
+      <Card className='p-4'>
+        <div className='flex flex-col gap-3'>
           {days.map((dayName, dayIdx) => {
             const h = hoursByDay.get(dayIdx)
             const isActive = h?.is_active ?? false
             return (
               <div
                 key={dayIdx}
-                className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 py-2 border-b border-[var(--color-border)] last:border-0`}
+                className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 py-2 border-b border-border last:border-0`}
               >
-                <div className="flex items-center gap-2 sm:w-32 shrink-0">
+                <div className='flex items-center gap-2 sm:w-32 shrink-0'>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={isActive}
                     onChange={() => toggleDay(dayIdx)}
-                    className="w-4 h-4 accent-[var(--color-primary)]"
+                    className='w-4 h-4 accent-(--color-primary)'
                     aria-label={`${dayName} abierto`}
                   />
-                  <span className={`text-sm font-medium ${isActive ? '' : 'text-[var(--color-text-muted)]'}`}>
+                  <span
+                    className={`text-sm font-medium ${isActive ? '' : 'text-(--color-text-muted)'}`}
+                  >
                     {dayName}
                   </span>
                 </div>
                 {isActive && (
-                  <div className="flex items-center gap-2">
+                  <div className='flex items-center gap-2'>
                     <input
-                      type="time"
+                      type='time'
                       value={h?.open_time ?? '08:00'}
-                      onChange={(e) => updateDay(dayIdx, 'open_time', e.target.value)}
-                      className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface-inset)] px-3 py-2 text-sm touch-target"
+                      onChange={(e) =>
+                        updateDay(dayIdx, 'open_time', e.target.value)
+                      }
+                      className='rounded-md border border-border bg-surface-inset px-3 py-2 text-sm touch-target'
                     />
-                    <span className="text-[var(--color-text-muted)]">—</span>
+                    <span className='text-(--color-text-muted)'>—</span>
                     <input
-                      type="time"
+                      type='time'
                       value={h?.close_time ?? '22:00'}
-                      onChange={(e) => updateDay(dayIdx, 'close_time', e.target.value)}
-                      className="rounded-md border border-[var(--color-border)] bg-[var(--color-surface-inset)] px-3 py-2 text-sm touch-target"
+                      onChange={(e) =>
+                        updateDay(dayIdx, 'close_time', e.target.value)
+                      }
+                      className='rounded-md border border-border bg-surface-inset px-3 py-2 text-sm touch-target'
                     />
                   </div>
                 )}
                 {!isActive && (
-                  <span className="text-sm text-[var(--color-text-muted)]">Cerrado</span>
+                  <span className='text-sm text-(--color-text-muted)'>
+                    Cerrado
+                  </span>
                 )}
               </div>
             )
