@@ -184,7 +184,7 @@ export function AvailabilityPage() {
             return isAvailable ? (
               <Link
                 key={`${slot.court_id}-${slot.starts_at}`}
-                href={`/reservar?court=${slot.court_id}&date=${selectedDate}&start=${slot.starts_at}`}
+                href={`/reservar?court=${slot.court_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
               >
                 <button
                   className={`w-full flex flex-col items-center gap-1 py-3 px-2 rounded-lg border text-sm font-medium transition-colors touch-target ${config.className}`}

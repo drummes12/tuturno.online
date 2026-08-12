@@ -194,12 +194,12 @@ begin
 
   -- Verificar que no haya reserva activa para este slot
   select * into v_existing
-  from public.reservations
-  where court_id = p_court_id
-    and starts_at = p_starts_at
+  from public.reservations r
+  where r.court_id = p_court_id
+    and r.starts_at = p_starts_at
     and (
-      (status = 'pending' and hold_expires_at > v_now)
-      or status = 'confirmed'
+      (r.status = 'pending' and r.hold_expires_at > v_now)
+      or r.status = 'confirmed'
     )
   limit 1;
 
@@ -210,11 +210,11 @@ begin
 
   -- Verificar que no haya excepción/bloqueo
   select * into v_exception
-  from public.availability_exceptions
-  where business_id = v_business_id
-    and (court_id is null or court_id = p_court_id)
-    and starts_at <= p_starts_at
-    and ends_at >= v_ends_at
+  from public.availability_exceptions ae
+  where ae.business_id = v_business_id
+    and (ae.court_id is null or ae.court_id = p_court_id)
+    and ae.starts_at <= p_starts_at
+    and ae.ends_at >= v_ends_at
   limit 1;
 
   if found then
@@ -231,14 +231,14 @@ begin
     status, hold_expires_at, notes
   )
   values (v_business_id, p_court_id, v_user_id, p_starts_at, v_ends_at, 'pending', v_hold_expires, p_notes)
-  returning id into v_reservation_id;
+  returning public.reservations.id into v_reservation_id;
 
   -- Registrar evento
   perform public.log_reservation_event(v_reservation_id, null, 'pending', v_user_id, null);
 
   -- Obtener datos del usuario para notificación
-  select email into v_user_email from auth.users where id = v_user_id;
-  select full_name into v_user_name from public.profiles where id = v_user_id;
+  select au.email into v_user_email from auth.users au where au.id = v_user_id;
+  select p.full_name into v_user_name from public.profiles p where p.id = v_user_id;
 
   -- Encolar notificación al cliente
   perform public.enqueue_notification(
