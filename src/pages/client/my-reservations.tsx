@@ -12,6 +12,7 @@ import type { Reservation } from '@/types'
 import { parseISO, isAfter, subHours } from 'date-fns'
 import { formatLocal } from '@/lib/time'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
+import { sortReservationsByPriority } from '@/lib/sort'
 
 type Filter = 'upcoming' | 'pending' | 'confirmed' | 'past'
 
@@ -80,6 +81,9 @@ export function MyReservationsPage() {
         return true
     }
   })
+
+  // Ordenar: 1) pendientes antiguas, 2) próximas, 3) vencidas
+  const sorted = sortReservationsByPriority(filtered)
 
   function canCancel(r: Reservation): boolean {
     if (!['pending', 'confirmed'].includes(r.status)) return false
@@ -159,7 +163,7 @@ export function MyReservationsPage() {
             <ReservationSkeleton key={i} />
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : sorted.length === 0 ? (
         <Card className='p-8 text-center animate-fade-up'>
           <div className='flex flex-col items-center gap-4'>
             <div className='w-14 h-14 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
@@ -188,7 +192,7 @@ export function MyReservationsPage() {
         </Card>
       ) : (
         <div className='flex flex-col gap-3'>
-          {filtered.map((r, index) => (
+          {sorted.map((r, index) => (
             <Card
               key={r.id}
               className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
@@ -22,6 +22,8 @@ import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
 import { waLink } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
+import { sortReservationsByPriority } from '@/lib/sort'
+import { parseISO, isAfter } from 'date-fns'
 
 export function AdminDashboardPage() {
   const [pending, setPending] = useState<Reservation[]>([])
@@ -68,6 +70,27 @@ export function AdminDashboardPage() {
 
   // Realtime: recargar cuando cambien reservas
   useReservationsRealtime(load)
+
+  // Pendientes ordenadas: más antiguas primero (mayor urgencia)
+  const sortedPending = useMemo(
+    () => sortReservationsByPriority(pending),
+    [pending]
+  )
+
+  // Reservas de hoy separadas en próximas y ya pasadas
+  const { todayUpcoming, todayPast } = useMemo(() => {
+    const now = new Date()
+    const upcoming: Reservation[] = []
+    const past: Reservation[] = []
+    for (const r of today) {
+      if (isAfter(parseISO(r.starts_at), now)) {
+        upcoming.push(r)
+      } else {
+        past.push(r)
+      }
+    }
+    return { todayUpcoming: upcoming, todayPast: past }
+  }, [today])
 
   async function handleConfirm(id: string) {
     setActingId(id)
@@ -152,7 +175,7 @@ export function AdminDashboardPage() {
           </h2>
         </div>
 
-        {pending.length === 0 ? (
+        {sortedPending.length === 0 ? (
           <Card className='p-8 text-center animate-fade-up'>
             <div className='flex flex-col items-center gap-3'>
               <div className='w-12 h-12 rounded-2xl bg-pitch-100 flex items-center justify-center text-pitch-600'>
@@ -165,7 +188,7 @@ export function AdminDashboardPage() {
           </Card>
         ) : (
           <div className='flex flex-col gap-3'>
-            {pending.map((r, index) => (
+            {sortedPending.map((r, index) => (
               <Card
                 key={r.id}
                 elevated
@@ -285,7 +308,7 @@ export function AdminDashboardPage() {
         )}
       </section>
 
-      {/* Today's schedule */}
+      {/* Today's schedule — separadas en próximas y pasadas */}
       <section>
         <div className='flex items-center gap-2 mb-3'>
           <CalendarIcon size={18} className='text-text-muted' />
@@ -301,47 +324,108 @@ export function AdminDashboardPage() {
             </div>
           </Card>
         ) : (
-          <div className='flex flex-col gap-2'>
-            {today.map((r, index) => (
-              <Card
-                key={r.id}
-                className='p-3 animate-stagger'
-                style={{ '--index': index } as React.CSSProperties}
-              >
-                <div className='flex items-center justify-between gap-2'>
-                  <div className='min-w-0 flex-1'>
-                    <p className='font-medium text-sm truncate flex items-center gap-1.5'>
-                      <span className='nums font-bold text-primary'>
-                        {formatLocal(r.starts_at, 'HH:mm')}
-                      </span>
-                      <span className='text-text-muted'>·</span>
-                      <span className='truncate'>{r.court?.name}</span>
-                    </p>
-                    <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
-                      <UserIcon size={12} />
-                      <span className='truncate'>{r.profile?.full_name}</span>
-                      {waLink(r.profile?.phone) && (
-                        <a
-                          href={
-                            waLink(
-                              r.profile?.phone,
-                              `Hola ${r.profile?.full_name ?? ''}, te contacto sobre tu reserva.`
-                            )!
-                          }
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='ml-auto flex items-center justify-center w-7 h-7 -mr-1 text-green-700 hover:bg-green-50 rounded-lg transition-colors touch-target shrink-0'
-                          aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
-                        >
-                          <WhatsAppIcon size={14} />
-                        </a>
-                      )}
-                    </p>
-                  </div>
-                  <StatusBadge status={r.status} />
-                </div>
-              </Card>
-            ))}
+          <div className='flex flex-col gap-4'>
+            {/* Próximas de hoy */}
+            {todayUpcoming.length > 0 && (
+              <div className='flex flex-col gap-2'>
+                <p className='text-xs font-semibold uppercase tracking-wide text-text-muted'>
+                  Próximas
+                </p>
+                {todayUpcoming.map((r, index) => (
+                  <Card
+                    key={r.id}
+                    className='p-3 animate-stagger'
+                    style={{ '--index': index } as React.CSSProperties}
+                  >
+                    <div className='flex items-center justify-between gap-2'>
+                      <div className='min-w-0 flex-1'>
+                        <p className='font-medium text-sm truncate flex items-center gap-1.5'>
+                          <span className='nums font-bold text-primary'>
+                            {formatLocal(r.starts_at, 'HH:mm')}
+                          </span>
+                          <span className='text-text-muted'>·</span>
+                          <span className='truncate'>{r.court?.name}</span>
+                        </p>
+                        <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
+                          <UserIcon size={12} />
+                          <span className='truncate'>
+                            {r.profile?.full_name}
+                          </span>
+                          {waLink(r.profile?.phone) && (
+                            <a
+                              href={
+                                waLink(
+                                  r.profile?.phone,
+                                  `Hola ${r.profile?.full_name ?? ''}, te contacto sobre tu reserva.`
+                                )!
+                              }
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='ml-auto flex items-center justify-center w-7 h-7 -mr-1 text-green-700 hover:bg-green-50 rounded-lg transition-colors touch-target shrink-0'
+                              aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                            >
+                              <WhatsAppIcon size={14} />
+                            </a>
+                          )}
+                        </p>
+                      </div>
+                      <StatusBadge status={r.status} />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Ya pasadas de hoy */}
+            {todayPast.length > 0 && (
+              <div className='flex flex-col gap-2'>
+                <p className='text-xs font-semibold uppercase tracking-wide text-text-muted'>
+                  Ya pasadas
+                </p>
+                {todayPast.map((r, index) => (
+                  <Card
+                    key={r.id}
+                    className={`p-3 animate-stagger opacity-60 ${r.status === 'completed' ? '' : ''}`}
+                    style={{ '--index': index } as React.CSSProperties}
+                  >
+                    <div className='flex items-center justify-between gap-2'>
+                      <div className='min-w-0 flex-1'>
+                        <p className='font-medium text-sm truncate flex items-center gap-1.5'>
+                          <span className='nums font-bold text-text-muted'>
+                            {formatLocal(r.starts_at, 'HH:mm')}
+                          </span>
+                          <span className='text-text-muted'>·</span>
+                          <span className='truncate'>{r.court?.name}</span>
+                        </p>
+                        <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
+                          <UserIcon size={12} />
+                          <span className='truncate'>
+                            {r.profile?.full_name}
+                          </span>
+                          {waLink(r.profile?.phone) && (
+                            <a
+                              href={
+                                waLink(
+                                  r.profile?.phone,
+                                  `Hola ${r.profile?.full_name ?? ''}, te contacto sobre tu reserva.`
+                                )!
+                              }
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='ml-auto flex items-center justify-center w-7 h-7 -mr-1 text-green-700 hover:bg-green-50 rounded-lg transition-colors touch-target shrink-0'
+                              aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                            >
+                              <WhatsAppIcon size={14} />
+                            </a>
+                          )}
+                        </p>
+                      </div>
+                      <StatusBadge status={r.status} />
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </section>

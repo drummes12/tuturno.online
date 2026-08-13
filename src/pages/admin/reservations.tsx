@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
@@ -20,6 +20,7 @@ import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
 import { waLink } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
+import { sortReservationsByPriority } from '@/lib/sort'
 
 const statusFilters: { key: ReservationStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'Todas' },
@@ -138,6 +139,12 @@ export function AdminReservationsPage() {
   // Realtime: recargar cuando cambien reservas
   useReservationsRealtime(load)
 
+  // Ordenar: 1) pendientes antiguas, 2) próximas, 3) vencidas
+  const sortedReservations = useMemo(
+    () => sortReservationsByPriority(reservations),
+    [reservations]
+  )
+
   return (
     <div className='flex flex-col gap-5'>
       {/* Header */}
@@ -199,7 +206,7 @@ export function AdminReservationsPage() {
             <ReservationSkeleton key={i} />
           ))}
         </div>
-      ) : reservations.length === 0 ? (
+      ) : sortedReservations.length === 0 ? (
         <Card className='p-8 text-center animate-fade-up'>
           <div className='flex flex-col items-center gap-3'>
             <div className='w-12 h-12 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
@@ -212,7 +219,7 @@ export function AdminReservationsPage() {
         </Card>
       ) : (
         <div className='flex flex-col gap-2.5'>
-          {reservations.map((r, index) => (
+          {sortedReservations.map((r, index) => (
             <Card
               key={r.id}
               className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
