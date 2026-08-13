@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -21,6 +20,12 @@ import { waLink } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 import { sortReservationsByPriority } from '@/lib/sort'
+import {
+  fetchReservationsByDate,
+  confirmReservation,
+  rejectReservation,
+  cancelReservationByBusiness
+} from '@/services/reservations'
 
 const statusFilters: { key: ReservationStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'Todas' },
@@ -49,41 +54,29 @@ export function AdminReservationsPage() {
     setLoading(true)
     setError(null)
     const { start, end } = dayRangeUtc(selectedDate)
-    let query = supabase
-      .from('reservations')
-      .select(
-        '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*)'
-      )
-      .gte('starts_at', start)
-      .lte('starts_at', end)
-      .order('starts_at', { ascending: true })
 
-    if (filter !== 'all') {
-      query = query.eq('status', filter)
-    }
-
-    const { data, error: err } = await query
-    setLoading(false)
-
-    if (err) {
+    try {
+      const data = await fetchReservationsByDate(start, end, filter)
+      setReservations(data)
+    } catch {
       setError('No pudimos cargar las reservas.')
-      return
     }
-
-    setReservations((data as Reservation[]) ?? [])
+    setLoading(false)
   }, [filter, selectedDate])
 
   async function handleConfirm(id: string) {
     setActingId(id)
     setError(null)
-    const { error: rpcError } = await supabase.rpc('confirm_reservation', {
-      p_reservation_id: id
-    })
-    setActingId(null)
-    if (rpcError) {
-      setError('Error al confirmar: ' + rpcError.message)
+    try {
+      await confirmReservation(id)
+    } catch (err) {
+      setError(
+        'Error al confirmar: ' + (err instanceof Error ? err.message : '')
+      )
+      setActingId(null)
       return
     }
+    setActingId(null)
     await load()
   }
 
@@ -94,17 +87,18 @@ export function AdminReservationsPage() {
     }
     setActingId(id)
     setError(null)
-    const { error: rpcError } = await supabase.rpc('reject_reservation', {
-      p_reservation_id: id,
-      p_reason: rejectReason.trim()
-    })
+    try {
+      await rejectReservation(id, rejectReason.trim())
+    } catch (err) {
+      setError(
+        'Error al rechazar: ' + (err instanceof Error ? err.message : '')
+      )
+      setActingId(null)
+      return
+    }
     setActingId(null)
     setRejectingId(null)
     setRejectReason('')
-    if (rpcError) {
-      setError('Error al rechazar: ' + rpcError.message)
-      return
-    }
     await load()
   }
 
@@ -115,20 +109,18 @@ export function AdminReservationsPage() {
     }
     setActingId(id)
     setError(null)
-    const { error: rpcError } = await supabase.rpc(
-      'cancel_reservation_by_business',
-      {
-        p_reservation_id: id,
-        p_reason: cancelReason.trim()
-      }
-    )
+    try {
+      await cancelReservationByBusiness(id, cancelReason.trim())
+    } catch (err) {
+      setError(
+        'Error al cancelar: ' + (err instanceof Error ? err.message : '')
+      )
+      setActingId(null)
+      return
+    }
     setActingId(null)
     setCancellingId(null)
     setCancelReason('')
-    if (rpcError) {
-      setError('Error al cancelar: ' + rpcError.message)
-      return
-    }
     await load()
   }
 

@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import {
+  fetchAllCourts,
+  createCourt,
+  updateCourt,
+  toggleCourtActive
+} from '@/services/courts'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -27,12 +32,15 @@ export function AdminCourtsPage() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('courts')
-      .select('*')
-      .order('sort_order')
-    setCourts((data as Court[]) ?? [])
-    setLoading(false)
+    try {
+      const data = await fetchAllCourts()
+      setCourts(data)
+    } catch {
+      setError('Error al cargar las canchas.')
+      setCourts([])
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -79,29 +87,26 @@ export function AdminCourtsPage() {
     setSaving(true)
     setError(null)
 
-    if (editingCourt) {
-      const { error: updErr } = await supabase
-        .from('courts')
-        .update({ name: name.trim(), description: description.trim() || null })
-        .eq('id', editingCourt.id)
-      setSaving(false)
-      if (updErr) {
-        setError('Error al guardar: ' + updErr.message)
-        return
+    try {
+      if (editingCourt) {
+        await updateCourt(
+          editingCourt.id,
+          name.trim(),
+          description.trim() || null
+        )
+      } else {
+        const maxOrder = courts.reduce(
+          (max, c) => Math.max(max, c.sort_order),
+          0
+        )
+        await createCourt(name.trim(), description.trim() || null, maxOrder + 1)
       }
-    } else {
-      const maxOrder = courts.reduce((max, c) => Math.max(max, c.sort_order), 0)
-      const { error: insErr } = await supabase.from('courts').insert({
-        name: name.trim(),
-        description: description.trim() || null,
-        sort_order: maxOrder + 1
-      })
+    } catch (err) {
       setSaving(false)
-      if (insErr) {
-        setError('Error al crear: ' + insErr.message)
-        return
-      }
+      setError('Error al guardar: ' + (err as Error).message)
+      return
     }
+    setSaving(false)
 
     setShowForm(false)
     setEditingCourt(null)
@@ -111,10 +116,12 @@ export function AdminCourtsPage() {
   }
 
   async function toggleActive(court: Court) {
-    await supabase
-      .from('courts')
-      .update({ is_active: !court.is_active })
-      .eq('id', court.id)
+    try {
+      await toggleCourtActive(court.id, court.is_active)
+    } catch (err) {
+      setError('Error al cambiar el estado: ' + (err as Error).message)
+      return
+    }
     await load()
   }
 

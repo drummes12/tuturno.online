@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { WhatsAppIcon } from '@/components/common/icon'
 import { waLink } from '@/lib/whatsapp'
+import { fetchBusinessContact } from '@/services/business'
 
 /**
  * Botón flotante de WhatsApp para usuarios.
@@ -14,12 +14,7 @@ export function WhatsAppFab() {
 
   useEffect(() => {
     async function loadBusiness() {
-      const { data } = await supabase
-        .from('businesses')
-        .select('phone, name')
-        .not('phone', 'is', null)
-        .limit(1)
-        .single()
+      const data = await fetchBusinessContact()
       if (data) {
         setPhone(data.phone)
         setBusinessName(data.name)
@@ -28,7 +23,10 @@ export function WhatsAppFab() {
     loadBusiness()
   }, [])
 
-  const link = waLink(phone, `Hola, tengo una duda sobre las reservas en ${businessName}.`)
+  const link = waLink(
+    phone,
+    `Hola, tengo una duda sobre las reservas en ${businessName}.`
+  )
 
   if (!link) return null
 

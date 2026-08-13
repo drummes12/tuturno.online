@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'wouter'
-import { supabase } from '@/lib/supabase'
+import { signInWithEmail } from '@/services/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Card } from '@/components/common/card'
@@ -22,18 +22,15 @@ export function LoginPage() {
     setError(null)
     setLoading(true)
 
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password
-    })
-
-    setLoading(false)
-
-    if (authError) {
+    try {
+      await signInWithEmail(email, password)
+    } catch {
       setError('Email o contraseña incorrectos.')
+      setLoading(false)
       return
     }
 
+    setLoading(false)
     navigate(redirect)
   }
 

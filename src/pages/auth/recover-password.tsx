@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'wouter'
-import { supabase } from '@/lib/supabase'
+import { resetPassword } from '@/services/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Card } from '@/components/common/card'
@@ -16,20 +16,17 @@ export function RecoverPasswordPage() {
     setError(null)
     setLoading(true)
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
-      email.trim().toLowerCase(),
-      {
-        redirectTo: `${window.location.origin}/recuperar-password`,
-      },
-    )
-
-    setLoading(false)
-
-    if (resetError) {
-      setError(resetError.message)
+    try {
+      await resetPassword(email)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Error al enviar el enlace.'
+      )
+      setLoading(false)
       return
     }
 
+    setLoading(false)
     setSent(true)
   }
 

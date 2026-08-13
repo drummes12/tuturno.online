@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'wouter'
-import { supabase } from '@/lib/supabase'
+import { fetchActiveCourts } from '@/services/courts'
+import { fetchAvailability } from '@/services/availability'
 import { Card } from '@/components/common/card'
 import {
   SlotGridSkeleton,
@@ -34,22 +35,16 @@ export function AvailabilityPage() {
   // Cargar canchas activas
   useEffect(() => {
     async function loadCourts() {
-      const { data, error: err } = await supabase
-        .from('courts')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order')
-
-      setLoadingCourts(false)
-
-      if (err) {
+      try {
+        const data = await fetchActiveCourts()
+        setCourts(data)
+        if (data.length > 0) {
+          setSelectedCourt(data[0].id)
+        }
+      } catch {
         setError('No pudimos cargar las canchas.')
-        return
-      }
-
-      setCourts(data as Court[])
-      if (data && data.length > 0) {
-        setSelectedCourt(data[0].id)
+      } finally {
+        setLoadingCourts(false)
       }
     }
     loadCourts()
@@ -61,20 +56,15 @@ export function AvailabilityPage() {
     setLoading(true)
     setError(null)
 
-    const { data, error: err } = await supabase.rpc('get_availability', {
-      p_court_id: selectedCourt,
-      p_date: selectedDate
-    })
-
-    setLoading(false)
-
-    if (err) {
+    try {
+      const data = await fetchAvailability(selectedCourt, selectedDate)
+      setSlots((data as AvailabilitySlot[]) ?? [])
+    } catch {
       setError('No pudimos cargar la disponibilidad.')
       setSlots([])
-      return
+    } finally {
+      setLoading(false)
     }
-
-    setSlots((data as AvailabilitySlot[]) ?? [])
   }, [selectedCourt, selectedDate])
 
   useEffect(() => {

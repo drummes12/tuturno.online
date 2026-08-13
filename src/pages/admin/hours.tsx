@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { supabase } from '@/lib/supabase'
+import {
+  fetchBusinessHours,
+  insertBusinessHour,
+  updateBusinessHour,
+  deleteBusinessHour
+} from '@/services/business-hours'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Spinner } from '@/components/common/spinner'
@@ -75,11 +80,13 @@ export function AdminHoursPage() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('business_hours')
-      .select('*')
-      .order('day_of_week, open_time')
-    setFranjas((data as BusinessHours[]).map((h) => ({ ...h })) ?? [])
+    try {
+      const data = await fetchBusinessHours()
+      setFranjas(data.map((h) => ({ ...h })))
+    } catch (err) {
+      setError('Error al cargar los horarios: ' + (err as Error).message)
+      setFranjas([])
+    }
     setLoading(false)
   }, [])
 
@@ -178,39 +185,32 @@ export function AdminHoursPage() {
 
     for (const f of franjas) {
       if (f._isDeleted && !f._isNew) {
-        const { error: delErr } = await supabase
-          .from('business_hours')
-          .delete()
-          .eq('id', f.id)
-        if (delErr) {
-          setError('Error al eliminar franja: ' + delErr.message)
+        try {
+          await deleteBusinessHour(f.id)
+        } catch (err) {
+          setError('Error al eliminar franja: ' + (err as Error).message)
           setSaving(false)
           return
         }
       } else if (f._isNew && !f._isDeleted) {
-        const { error: insErr } = await supabase.from('business_hours').insert({
-          business_id: businessId,
-          day_of_week: f.day_of_week,
-          open_time: f.open_time,
-          close_time: f.close_time,
-          is_active: f.is_active
-        })
-        if (insErr) {
-          setError('Error al crear franja: ' + insErr.message)
+        try {
+          await insertBusinessHour(
+            businessId,
+            f.day_of_week,
+            f.open_time,
+            f.close_time,
+            f.is_active
+          )
+        } catch (err) {
+          setError('Error al crear franja: ' + (err as Error).message)
           setSaving(false)
           return
         }
       } else if (!f._isNew && !f._isDeleted) {
-        const { error: updErr } = await supabase
-          .from('business_hours')
-          .update({
-            open_time: f.open_time,
-            close_time: f.close_time,
-            is_active: f.is_active
-          })
-          .eq('id', f.id)
-        if (updErr) {
-          setError('Error al actualizar franja: ' + updErr.message)
+        try {
+          await updateBusinessHour(f.id, f.open_time, f.close_time, f.is_active)
+        } catch (err) {
+          setError('Error al actualizar franja: ' + (err as Error).message)
           setSaving(false)
           return
         }

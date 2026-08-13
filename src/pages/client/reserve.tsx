@@ -1,6 +1,11 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { Link } from 'wouter'
-import { supabase } from '@/lib/supabase'
+import { fetchCourtName } from '@/services/courts'
+import {
+  createReservation,
+  createReservationAdmin
+} from '@/services/reservations'
+import { updateProfile } from '@/services/profiles'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -45,13 +50,14 @@ export function ReservePage() {
   useEffect(() => {
     async function loadCourt() {
       if (!courtId) return
-      const { data } = await supabase
-        .from('courts')
-        .select('name')
-        .eq('id', courtId)
-        .single()
-      setCourtName(data?.name ?? null)
-      setLoadingCourt(false)
+      try {
+        const name = await fetchCourtName(courtId)
+        setCourtName(name)
+      } catch {
+        setCourtName(null)
+      } finally {
+        setLoadingCourt(false)
+      }
     }
     loadCourt()
   }, [courtId])
@@ -127,62 +133,56 @@ export function ReservePage() {
     setError(null)
     setSubmitting(true)
 
-    if (isAdmin) {
-      // Admin: crear reserva directamente confirmada
-      const { data, error: rpcError } = await supabase.rpc(
-        'create_reservation_admin',
-        {
-          p_court_id: courtId!,
-          p_starts_at: startStr!,
-          p_client_name: fullName.trim() || null,
-          p_client_phone: phone.trim() || null,
-          p_notes: notes.trim() || null
+    try {
+      if (isAdmin) {
+        // Admin: crear reserva directamente confirmada
+        const { error: rpcError } = await createReservationAdmin(
+          courtId!,
+          startStr!,
+          fullName.trim() || null,
+          phone.trim() || null,
+          notes.trim() || null
+        )
+
+        setSubmitting(false)
+
+        if (rpcError) {
+          setError(rpcError)
+          return
         }
+
+        setSuccess(true)
+        return
+      }
+
+      // Cliente: actualizar perfil si cambió
+      if (fullName !== profile?.full_name || phone !== profile?.phone) {
+        await updateProfile(user!.id, {
+          full_name: fullName.trim(),
+          phone: phone.trim()
+        })
+      }
+
+      const { error: rpcError } = await createReservation(
+        courtId!,
+        startStr!,
+        notes.trim() || null
       )
 
       setSubmitting(false)
 
       if (rpcError) {
-        setError(rpcError.message)
-        return
-      }
-
-      if (data?.error) {
-        setError(data.error)
+        setError(rpcError)
         return
       }
 
       setSuccess(true)
-      return
+    } catch (err) {
+      setSubmitting(false)
+      setError(
+        err instanceof Error ? err.message : 'Ocurrió un error inesperado'
+      )
     }
-
-    // Cliente: actualizar perfil si cambió
-    if (fullName !== profile?.full_name || phone !== profile?.phone) {
-      await supabase
-        .from('profiles')
-        .update({ full_name: fullName.trim(), phone: phone.trim() })
-        .eq('id', user!.id)
-    }
-
-    const { data, error: rpcError } = await supabase.rpc('create_reservation', {
-      p_court_id: courtId!,
-      p_starts_at: startStr!,
-      p_notes: notes.trim() || null
-    })
-
-    setSubmitting(false)
-
-    if (rpcError) {
-      setError(rpcError.message)
-      return
-    }
-
-    if (data?.error) {
-      setError(data.error)
-      return
-    }
-
-    setSuccess(true)
   }
 
   if (success) {

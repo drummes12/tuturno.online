@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { fetchBusiness, updateBusiness } from '@/services/business'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -23,13 +23,18 @@ export function AdminConfigPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from('businesses')
-        .select('*')
-        .limit(1)
-        .maybeSingle()
-      setBusiness(data as Business | null)
-      setLoading(false)
+      try {
+        const data = await fetchBusiness()
+        setBusiness(data)
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Error al cargar la configuración.'
+        )
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [])
@@ -51,9 +56,8 @@ export function AdminConfigPage() {
     setSaved(false)
     setError(null)
 
-    const { error: updErr } = await supabase
-      .from('businesses')
-      .update({
+    try {
+      await updateBusiness(business.id, {
         name: business.name,
         address: business.address,
         phone: business.phone,
@@ -63,15 +67,16 @@ export function AdminConfigPage() {
         cancellation_limit_hours: business.cancellation_limit_hours,
         max_advance_days: business.max_advance_days
       })
-      .eq('id', business.id)
-
-    setSaving(false)
-
-    if (updErr) {
-      setError('Error al guardar: ' + updErr.message)
+    } catch (err) {
+      setSaving(false)
+      setError(
+        'Error al guardar: ' +
+          (err instanceof Error ? err.message : 'Error desconocido.')
+      )
       return
     }
 
+    setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
   }

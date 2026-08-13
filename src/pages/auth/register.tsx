@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'wouter'
-import { supabase } from '@/lib/supabase'
+import { signUpWithEmail } from '@/services/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Card } from '@/components/common/card'
@@ -34,28 +34,24 @@ export function RegisterPage() {
 
     setLoading(true)
 
-    const { data, error: authError } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
-      password,
-      options: {
-        data: {
-          full_name: fullName.trim(),
-          phone: phone.trim(),
-        },
-      },
-    })
+    try {
+      const { user, session } = await signUpWithEmail(
+        email,
+        password,
+        fullName,
+        phone
+      )
 
-    setLoading(false)
+      setLoading(false)
 
-    if (authError) {
-      setError(authError.message)
-      return
-    }
-
-    if (data.user && !data.session) {
-      setSuccess(true)
-    } else if (data.session) {
-      navigate('/')
+      if (user && !session) {
+        setSuccess(true)
+      } else if (session) {
+        navigate('/')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al registrar')
+      setLoading(false)
     }
   }
 

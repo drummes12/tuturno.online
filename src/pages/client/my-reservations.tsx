@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'wouter'
-import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth'
+import {
+  fetchUserReservations,
+  cancelReservationByClient
+} from '@/services/reservations'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { StatusBadge } from '@/components/common/badge'
@@ -28,20 +31,14 @@ export function MyReservationsPage() {
     if (!user) return
     setLoading(true)
 
-    const { data, error: err } = await supabase
-      .from('reservations')
-      .select('*, court:courts(*)')
-      .eq('user_id', user.id)
-      .order('starts_at', { ascending: false })
-
-    setLoading(false)
-
-    if (err) {
+    try {
+      const data = await fetchUserReservations(user.id)
+      setReservations(data)
+    } catch {
       setError('No pudimos cargar tus reservas.')
-      return
+    } finally {
+      setLoading(false)
     }
-
-    setReservations((data as Reservation[]) ?? [])
   }, [user])
 
   useEffect(() => {
@@ -98,21 +95,16 @@ export function MyReservationsPage() {
     setCancellingId(id)
     setError(null)
 
-    const { error: rpcError } = await supabase.rpc(
-      'cancel_reservation_by_client',
-      {
-        p_reservation_id: id
-      }
-    )
-
-    setCancellingId(null)
-
-    if (rpcError) {
-      setError(rpcError.message)
-      return
+    try {
+      await cancelReservationByClient(id)
+      await loadReservations()
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'No pudimos cancelar la reserva.'
+      )
+    } finally {
+      setCancellingId(null)
     }
-
-    await loadReservations()
   }
 
   const filters: { key: Filter; label: string }[] = [

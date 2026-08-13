@@ -17,6 +17,7 @@
 
 ## Estructura
 - `src/lib/` — cliente Supabase y utilidades
+- `src/services/` — capa de servicios (toda consulta a Supabase va aquí, nunca directa desde páginas/hooks)
 - `src/stores/` — stores de zustand
 - `src/hooks/` — hooks personalizados
 - `src/types/` — tipos compartidos

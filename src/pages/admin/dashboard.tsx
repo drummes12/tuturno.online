@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { StatusBadge } from '@/components/common/badge'
@@ -24,6 +23,12 @@ import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 import { sortReservationsByPriority } from '@/lib/sort'
 import { parseISO, isAfter } from 'date-fns'
+import {
+  fetchPendingReservations,
+  fetchTodayReservations,
+  confirmReservation,
+  rejectReservation
+} from '@/services/reservations'
 
 export function AdminDashboardPage() {
   const [pending, setPending] = useState<Reservation[]>([])
@@ -41,27 +46,16 @@ export function AdminDashboardPage() {
     const todayStr = format(toZonedTime(now, BUSINESS_TIMEZONE), 'yyyy-MM-dd')
     const { start, end } = dayRangeUtc(todayStr)
 
-    const [pendingRes, todayRes] = await Promise.all([
-      supabase
-        .from('reservations')
-        .select(
-          '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*)'
-        )
-        .eq('status', 'pending')
-        .order('starts_at', { ascending: true }),
-      supabase
-        .from('reservations')
-        .select(
-          '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*)'
-        )
-        .gte('starts_at', start)
-        .lte('starts_at', end)
-        .neq('status', 'pending')
-        .order('starts_at', { ascending: true })
-    ])
-
-    setPending((pendingRes.data as Reservation[]) ?? [])
-    setToday((todayRes.data as Reservation[]) ?? [])
+    try {
+      const [pendingData, todayData] = await Promise.all([
+        fetchPendingReservations(),
+        fetchTodayReservations(start, end)
+      ])
+      setPending(pendingData)
+      setToday(todayData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar')
+    }
     setLoading(false)
   }, [])
 
@@ -96,14 +90,16 @@ export function AdminDashboardPage() {
   async function handleConfirm(id: string) {
     setActingId(id)
     setError(null)
-    const { error: rpcError } = await supabase.rpc('confirm_reservation', {
-      p_reservation_id: id
-    })
-    setActingId(null)
-    if (rpcError) {
-      setError('Error al confirmar: ' + rpcError.message)
+    try {
+      await confirmReservation(id)
+    } catch (err) {
+      setError(
+        'Error al confirmar: ' + (err instanceof Error ? err.message : '')
+      )
+      setActingId(null)
       return
     }
+    setActingId(null)
     await load()
   }
 
@@ -114,17 +110,18 @@ export function AdminDashboardPage() {
     }
     setActingId(id)
     setError(null)
-    const { error: rpcError } = await supabase.rpc('reject_reservation', {
-      p_reservation_id: id,
-      p_reason: rejectReason.trim()
-    })
+    try {
+      await rejectReservation(id, rejectReason.trim())
+    } catch (err) {
+      setError(
+        'Error al rechazar: ' + (err instanceof Error ? err.message : '')
+      )
+      setActingId(null)
+      return
+    }
     setActingId(null)
     setRejectingId(null)
     setRejectReason('')
-    if (rpcError) {
-      setError('Error al rechazar: ' + rpcError.message)
-      return
-    }
     await load()
   }
 

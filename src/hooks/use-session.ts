@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth'
+import { fetchProfile, fetchBusinessId } from '@/services/profiles'
 import type { Profile } from '@/types'
 
 /**
@@ -57,21 +58,9 @@ async function loadProfileAndRole(
   setProfile: (p: Profile | null) => void,
   setIsAdmin: (v: boolean) => void,
 ) {
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single()
+  const profileData = await fetchProfile(userId)
+  setProfile(profileData)
 
-  setProfile(profileData as Profile | null)
-
-  // Verificar si es miembro de algún negocio
-  const { data: membership } = await supabase
-    .from('business_members')
-    .select('business_id')
-    .eq('user_id', userId)
-    .limit(1)
-    .maybeSingle()
-
-  setIsAdmin(!!membership)
+  const businessId = await fetchBusinessId(userId)
+  setIsAdmin(!!businessId)
 }

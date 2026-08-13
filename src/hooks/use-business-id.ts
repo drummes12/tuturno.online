@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth'
+import { fetchBusinessId } from '@/services/profiles'
 
 /**
  * Hook para obtener el business_id del admin actual.
- * Busca en business_members la membresía del usuario.
  */
 export function useBusinessId() {
   const { user } = useAuthStore()
@@ -13,13 +12,8 @@ export function useBusinessId() {
   useEffect(() => {
     async function load() {
       if (!user) return
-      const { data } = await supabase
-        .from('business_members')
-        .select('business_id')
-        .eq('user_id', user.id)
-        .limit(1)
-        .maybeSingle()
-      setBusinessId(data?.business_id ?? null)
+      const id = await fetchBusinessId(user.id)
+      setBusinessId(id)
     }
     load()
   }, [user])

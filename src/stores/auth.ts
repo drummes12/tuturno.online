@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { signOut as signOutService } from '@/services/auth'
 import type { Profile } from '@/types'
 
 interface AuthState {
@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
   signOut: async () => {
-    await supabase.auth.signOut()
+    await signOutService()
     set({ session: null, user: null, profile: null, isAdmin: false })
   },
 }))
