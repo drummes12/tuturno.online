@@ -14,6 +14,10 @@
 - `pnpm build` — build de producción (tsc + vite)
 - `pnpm lint` — lint con oxlint
 - `pnpm preview` — previsualizar build
+- `pnpm test` — tests con Vitest (watch)
+- `pnpm test:run` — tests sin watch (CI)
+- `pnpm test:coverage` — tests con cobertura
+- `bash supabase/seed-dev-users.sh` — crea 3 usuarios de prueba (owner, admin, cliente) con contraseña `123456`
 
 ## Estructura
 - `src/lib/` — cliente Supabase y utilidades
@@ -23,8 +27,10 @@
 - `src/types/` — tipos compartidos
 - `src/components/{common,layout,auth,client,admin}/` — componentes
 - `src/pages/{auth,client,admin}/` — páginas
+- `src/test/` — infraestructura de tests (setup, mocks, helper de BD)
 - `supabase/migrations/` — migraciones SQL (numeradas)
 - `supabase/functions/` — Edge Functions
+- `supabase/seed-dev-users.sh` — script de seed para desarrollo local
 
 ## Configuración
 1. Crear `.env.local` con `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`
@@ -39,3 +45,38 @@
 - Estados con texto + icono + color, nunca solo color
 - RLS en todas las tablas; operaciones sensibles vía RPC
 - Zona horaria: `America/Bogota` (almacenar UTC, mostrar local)
+
+## Roles y permisos
+- **`business_role`** es un enum PostgreSQL con dos valores: `owner` y `manager`
+- La tabla `business_members` vincula usuarios a negocios con un rol
+- `is_business_member(business_id)` verifica si el usuario actual (`auth.uid()`) es miembro de un negocio (cualquier rol)
+- El frontend determina `isAdmin` consultando si el usuario tiene un registro en `business_members` (vía `fetchBusinessId`)
+- **owner**: puede añadir/eliminar miembros del negocio (RLS lo restringe)
+- **manager**: puede administrar canchas, horarios, reservas, pero NO añadir miembros
+- Ambos roles tienen acceso completo al panel admin (confirmar/rechazar/cancelar reservas, editar canchas, horarios, configuración)
+- Un cliente normal (sin membership) solo puede ver disponibilidad y crear/cancelar sus propias reservas
+
+### Cómo habilitar un admin en producción
+1. El usuario se registra normalmente desde la app
+2. Un owner existente lo añade como miembro desde el panel (cuando se implemente) o manualmente:
+   ```sql
+   insert into public.business_members (business_id, user_id, role)
+   values ('<business-uuid>', '<user-uuid>', 'manager');
+   ```
+3. Para promover a owner:
+   ```sql
+   insert into public.business_members (business_id, user_id, role)
+   values ('<business-uuid>', '<user-uuid>', 'owner')
+   on conflict (business_id, user_id) do update set role = 'owner';
+   ```
+4. El primer owner debe insertarse manualmente en la BD después del registro
+
+## Testing
+- **Stack:** Vitest + @testing-library/react + jsdom + pg (para tests de BD)
+- **Tests unitarios:** `src/lib/*.test.ts`, `src/services/*.test.ts`, `src/stores/*.test.ts`
+- **Tests de hooks:** `src/hooks/*.test.ts`
+- **Tests de componentes:** `src/components/common/*.test.tsx`
+- **Tests de backend (PostgreSQL):** `src/test/rpc-*.test.ts` — requieren Supabase local corriendo; se saltan automáticamente si no hay BD
+- **Tests de Edge Functions:** `src/test/edge-templates.test.ts` — testea las plantillas de email sin necesidad de Deno
+- **Helper de BD:** `src/test/db.ts` — pool de pg con transacciones auto-rollback
+- **Mock de Supabase:** `src/test/supabase-mock.ts` — para tests unitarios sin BD
