@@ -224,6 +224,29 @@ export function CalendarPlusIcon(props: IconProps) {
   )
 }
 
+/* Plus — for adding items */
+export function PlusIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <line x1='12' y1='5' x2='12' y2='19' />
+      <line x1='5' y1='12' x2='19' y2='12' />
+    </svg>
+  )
+}
+
+/* Trash — for deleting items */
+export function TrashIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <polyline points='3 6 5 6 21 6' />
+      <path d='M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6' />
+      <path d='M10 11v6' />
+      <path d='M14 11v6' />
+      <path d='M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2' />
+    </svg>
+  )
+}
+
 /* Chevron left — for date navigation */
 export function ChevronLeftIcon(props: IconProps) {
   return (
@@ -290,6 +313,19 @@ export function MoonIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
       <path d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z' />
+    </svg>
+  )
+}
+
+/* Coffee — for afternoon break/shift */
+export function CoffeeIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d='M18 8h1a4 4 0 0 1 0 8h-1' />
+      <path d='M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z' />
+      <line x1='6' y1='2' x2='6' y2='4' />
+      <line x1='10' y1='2' x2='10' y2='4' />
+      <line x1='14' y1='2' x2='14' y2='4' />
     </svg>
   )
 }

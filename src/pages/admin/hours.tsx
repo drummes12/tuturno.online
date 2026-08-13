@@ -1,24 +1,85 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Spinner } from '@/components/common/spinner'
+import { Alert } from '@/components/common/alert'
+import {
+  PlusIcon,
+  TrashIcon,
+  ClockIcon,
+  SunIcon,
+  MoonIcon,
+  CoffeeIcon
+} from '@/components/common/icon'
 import type { BusinessHours } from '@/types'
+import { useBusinessId } from '@/hooks/use-business-id'
 
-const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const days = [
+  'Domingo',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado'
+]
+
+interface FranjaState extends BusinessHours {
+  _isNew?: boolean
+  _isDeleted?: boolean
+}
+
+// Convierte "HH:MM" a minutos para comparación
+function toMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number)
+  return h * 60 + m
+}
+
+// Detecta solapamiento entre franjas de un mismo día
+function findOverlap(
+  franjas: FranjaState[]
+): { a: FranjaState; b: FranjaState } | null {
+  const active = franjas.filter((f) => !f._isDeleted && f.is_active)
+  for (let i = 0; i < active.length; i++) {
+    for (let j = i + 1; j < active.length; j++) {
+      const a = active[i]
+      const b = active[j]
+      const aStart = toMinutes(a.open_time)
+      const aEnd = toMinutes(a.close_time)
+      const bStart = toMinutes(b.open_time)
+      const bEnd = toMinutes(b.close_time)
+      if (aStart < bEnd && bStart < aEnd) {
+        return { a, b }
+      }
+    }
+  }
+  return null
+}
+
+// Etiqueta visual para una franja según su hora
+function franjaLabel(open: string): { text: string; icon: typeof SunIcon } {
+  const h = parseInt(open.split(':')[0])
+  if (h < 12) return { text: 'Mañana', icon: SunIcon }
+  if (h < 18) return { text: 'Tarde', icon: CoffeeIcon }
+  return { text: 'Noche', icon: MoonIcon }
+}
 
 export function AdminHoursPage() {
-  const [hours, setHours] = useState<BusinessHours[]>([])
+  const businessId = useBusinessId()
+  const [franjas, setFranjas] = useState<FranjaState[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
       .from('business_hours')
       .select('*')
-      .order('day_of_week')
-    setHours((data as BusinessHours[]) ?? [])
+      .order('day_of_week, open_time')
+    setFranjas((data as BusinessHours[]).map((h) => ({ ...h })) ?? [])
     setLoading(false)
   }, [])
 
@@ -26,134 +87,375 @@ export function AdminHoursPage() {
     load()
   }, [load])
 
-  // Build a map: day_of_week -> BusinessHours
-  const hoursByDay = new Map<number, BusinessHours>()
-  hours.forEach((h) => hoursByDay.set(h.day_of_week, h))
+  // Agrupar por día
+  const franjasByDay = useMemo(() => {
+    const map = new Map<number, FranjaState[]>()
+    for (let i = 0; i < 7; i++) map.set(i, [])
+    franjas.forEach((f) => {
+      if (!f._isDeleted) map.get(f.day_of_week)?.push(f)
+    })
+    return map
+  }, [franjas])
 
-  function updateDay(day: number, field: 'open_time' | 'close_time', value: string) {
-    const existing = hoursByDay.get(day)
-    if (existing) {
-      setHours((prev) =>
-        prev.map((h) => (h.day_of_week === day ? { ...h, [field]: value } : h)),
-      )
-    } else {
-      // Create new entry locally
-      const newEntry: BusinessHours = {
-        id: '',
-        business_id: '',
-        day_of_week: day,
-        open_time: field === 'open_time' ? value : '08:00',
-        close_time: field === 'close_time' ? value : '22:00',
-        is_active: true,
-      }
-      setHours((prev) => [...prev, newEntry])
-      hoursByDay.set(day, newEntry)
+  // Detectar solapamientos por día
+  const overlapsByDay = useMemo(() => {
+    const map = new Map<number, boolean>()
+    for (let i = 0; i < 7; i++) {
+      const dayFranjas = franjasByDay.get(i) ?? []
+      map.set(i, !!findOverlap(dayFranjas))
     }
+    return map
+  }, [franjasByDay])
+
+  const hasOverlaps = Array.from(overlapsByDay.values()).some((v) => v)
+
+  function addFranja(day: number) {
+    const dayFranjas = franjasByDay.get(day) ?? []
+    // Sugerir horario según cuántas franjas existan
+    const defaultOpen = dayFranjas.length === 0 ? '08:00' : '14:00'
+    const defaultClose = dayFranjas.length === 0 ? '12:00' : '22:00'
+    setFranjas((prev) => [
+      ...prev,
+      {
+        id: '',
+        business_id: businessId ?? '',
+        day_of_week: day,
+        open_time: defaultOpen,
+        close_time: defaultClose,
+        is_active: true,
+        _isNew: true
+      }
+    ])
+  }
+
+  function updateFranja(
+    index: number,
+    field: 'open_time' | 'close_time',
+    value: string
+  ) {
+    setFranjas((prev) =>
+      prev.map((f, i) => (i === index ? { ...f, [field]: value } : f))
+    )
+  }
+
+  function deleteFranja(index: number) {
+    setFranjas((prev) =>
+      prev.map((f, i) => (i === index ? { ...f, _isDeleted: true } : f))
+    )
   }
 
   function toggleDay(day: number) {
-    const existing = hoursByDay.get(day)
-    if (existing) {
-      setHours((prev) =>
-        prev.map((h) => (h.day_of_week === day ? { ...h, is_active: !h.is_active } : h)),
+    const dayFranjas = franjasByDay.get(day) ?? []
+    if (dayFranjas.length === 0) {
+      addFranja(day)
+    } else {
+      const allActive = dayFranjas.every((f) => f.is_active)
+      setFranjas((prev) =>
+        prev.map((f) =>
+          f.day_of_week === day && !f._isDeleted
+            ? { ...f, is_active: !allActive }
+            : f
+        )
       )
     }
   }
 
   async function handleSave() {
+    if (!businessId) {
+      setError('No se pudo determinar el negocio. Recarga la página.')
+      return
+    }
+    if (hasOverlaps) {
+      setError(
+        'Hay franjas que se solapan. Corrige los horarios antes de guardar.'
+      )
+      return
+    }
+
     setSaving(true)
-    for (const h of hours) {
-      if (h.id) {
-        await supabase
+    setError(null)
+    setSaved(false)
+
+    for (const f of franjas) {
+      if (f._isDeleted && !f._isNew) {
+        const { error: delErr } = await supabase
           .from('business_hours')
-          .update({ open_time: h.open_time, close_time: h.close_time, is_active: h.is_active })
-          .eq('id', h.id)
-      } else {
-        await supabase
+          .delete()
+          .eq('id', f.id)
+        if (delErr) {
+          setError('Error al eliminar franja: ' + delErr.message)
+          setSaving(false)
+          return
+        }
+      } else if (f._isNew && !f._isDeleted) {
+        const { error: insErr } = await supabase.from('business_hours').insert({
+          business_id: businessId,
+          day_of_week: f.day_of_week,
+          open_time: f.open_time,
+          close_time: f.close_time,
+          is_active: f.is_active
+        })
+        if (insErr) {
+          setError('Error al crear franja: ' + insErr.message)
+          setSaving(false)
+          return
+        }
+      } else if (!f._isNew && !f._isDeleted) {
+        const { error: updErr } = await supabase
           .from('business_hours')
-          .insert({
-            day_of_week: h.day_of_week,
-            open_time: h.open_time,
-            close_time: h.close_time,
-            is_active: h.is_active,
+          .update({
+            open_time: f.open_time,
+            close_time: f.close_time,
+            is_active: f.is_active
           })
+          .eq('id', f.id)
+        if (updErr) {
+          setError('Error al actualizar franja: ' + updErr.message)
+          setSaving(false)
+          return
+        }
       }
     }
+
     setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
     await load()
   }
 
   if (loading) {
-    return <Spinner size="lg" />
+    return <Spinner size='lg' />
   }
 
   return (
-    <div className='flex flex-col gap-4'>
-      <h1 className='text-2xl font-bold'>Horarios</h1>
-      <p className='text-sm text-(--color-text-muted)'>
-        Define el horario semanal de operación. Los turnos se generan en bloques
-        de 60 minutos.
-      </p>
+    <div className='flex flex-col gap-5 max-w-2xl mx-auto'>
+      {/* Header */}
+      <div className='animate-fade-up'>
+        <h1 className='text-2xl font-bold tracking-tight'>
+          Horarios de operación
+        </h1>
+        <p className='text-sm text-(--color-text-muted) mt-1'>
+          Configura las franjas horarias de cada día. Puedes tener múltiples
+          franjas (ej: mañana y tarde con descanso al mediodía).
+        </p>
+      </div>
 
-      <Card className='p-4'>
-        <div className='flex flex-col gap-3'>
-          {days.map((dayName, dayIdx) => {
-            const h = hoursByDay.get(dayIdx)
-            const isActive = h?.is_active ?? false
-            return (
+      {error && (
+        <Alert variant='error' onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+      {saved && (
+        <Alert variant='success'>Horarios guardados correctamente.</Alert>
+      )}
+      {hasOverlaps && (
+        <Alert variant='warning'>
+          Hay franjas que se solapan en uno o más días. Ajusta los horarios
+          antes de guardar.
+        </Alert>
+      )}
+
+      {/* Días */}
+      <div className='flex flex-col gap-3'>
+        {days.map((dayName, dayIdx) => {
+          const dayFranjas = franjasByDay.get(dayIdx) ?? []
+          const isActive =
+            dayFranjas.length > 0 && dayFranjas.some((f) => f.is_active)
+          const hasOverlap = overlapsByDay.get(dayIdx)
+          const activeCount = dayFranjas.filter((f) => f.is_active).length
+
+          return (
+            <Card
+              key={dayIdx}
+              className={`p-0 overflow-hidden animate-fade-up ${hasOverlap ? 'border-red-300' : ''}`}
+              style={{ animationDelay: `${dayIdx * 20}ms` }}
+            >
+              {/* Header del día */}
               <div
-                key={dayIdx}
-                className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 py-2 border-b border-border last:border-0`}
+                className={`flex items-center gap-3 px-4 py-3 border-b border-border transition-colors ${
+                  isActive ? 'bg-surface-inset' : ''
+                }`}
               >
-                <div className='flex items-center gap-2 sm:w-32 shrink-0'>
-                  <input
-                    type='checkbox'
-                    checked={isActive}
-                    onChange={() => toggleDay(dayIdx)}
-                    className='w-4 h-4 accent-(--color-primary)'
-                    aria-label={`${dayName} abierto`}
-                  />
+                <button
+                  onClick={() => toggleDay(dayIdx)}
+                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                    isActive ? 'bg-primary' : 'bg-graphite-300'
+                  }`}
+                  aria-label={`${isActive ? 'Cerrar' : 'Abrir'} ${dayName}`}
+                  aria-pressed={isActive}
+                >
                   <span
-                    className={`text-sm font-medium ${isActive ? '' : 'text-(--color-text-muted)'}`}
-                  >
-                    {dayName}
-                  </span>
-                </div>
+                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${
+                      isActive ? 'translate-x-5' : ''
+                    }`}
+                  />
+                </button>
+                <span
+                  className={`text-sm font-semibold tracking-tight ${
+                    isActive ? 'text-text' : 'text-text-muted'
+                  }`}
+                >
+                  {dayName}
+                </span>
                 {isActive && (
-                  <div className='flex items-center gap-2'>
-                    <input
-                      type='time'
-                      value={h?.open_time ?? '08:00'}
-                      onChange={(e) =>
-                        updateDay(dayIdx, 'open_time', e.target.value)
-                      }
-                      className='rounded-md border border-border bg-surface-inset px-3 py-2 text-sm touch-target'
-                    />
-                    <span className='text-(--color-text-muted)'>—</span>
-                    <input
-                      type='time'
-                      value={h?.close_time ?? '22:00'}
-                      onChange={(e) =>
-                        updateDay(dayIdx, 'close_time', e.target.value)
-                      }
-                      className='rounded-md border border-border bg-surface-inset px-3 py-2 text-sm touch-target'
-                    />
-                  </div>
-                )}
-                {!isActive && (
-                  <span className='text-sm text-(--color-text-muted)'>
-                    Cerrado
+                  <span className='text-xs text-text-muted nums'>
+                    {activeCount} {activeCount === 1 ? 'franja' : 'franjas'}
                   </span>
+                )}
+                {isActive && (
+                  <button
+                    onClick={() => addFranja(dayIdx)}
+                    className='ml-auto flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-50 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
+                    aria-label={`Agregar franja a ${dayName}`}
+                  >
+                    <PlusIcon size={14} />
+                    <span className='hidden sm:inline'>Agregar</span>
+                  </button>
                 )}
               </div>
-            )
-          })}
-        </div>
-      </Card>
 
-      <Button loading={saving} onClick={handleSave}>
-        Guardar horarios
-      </Button>
+              {/* Franjas */}
+              {isActive && dayFranjas.length === 0 && (
+                <div className='px-4 py-3'>
+                  <p className='text-xs text-text-muted'>
+                    Sin franjas. Agrega una para empezar.
+                  </p>
+                </div>
+              )}
+              {isActive && dayFranjas.length > 0 && (
+                <div className='flex flex-col divide-y divide-border'>
+                  {dayFranjas.map((f) => {
+                    const globalIdx = franjas.indexOf(f)
+                    const label = franjaLabel(f.open_time)
+                    const LabelIcon = label.icon
+                    const franjaOverlap =
+                      hasOverlap &&
+                      dayFranjas.some(
+                        (other) =>
+                          other !== f &&
+                          !other._isDeleted &&
+                          other.is_active &&
+                          toMinutes(other.open_time) <
+                            toMinutes(f.close_time) &&
+                          toMinutes(f.open_time) < toMinutes(other.close_time)
+                      )
+                    return (
+                      <div
+                        key={f.id || `new-${globalIdx}`}
+                        className='flex items-center gap-3 px-4 py-3'
+                      >
+                        {/* Etiqueta de franja */}
+                        <div
+                          className={`flex items-center gap-1.5 text-xs font-medium w-20 shrink-0 ${
+                            franjaOverlap ? 'text-red-600' : 'text-text-muted'
+                          }`}
+                        >
+                          <LabelIcon size={14} />
+                          {label.text}
+                        </div>
+
+                        {/* Inputs de tiempo */}
+                        <div className='flex items-center gap-2 flex-1'>
+                          <input
+                            type='time'
+                            value={f.open_time}
+                            onChange={(e) =>
+                              updateFranja(
+                                globalIdx,
+                                'open_time',
+                                e.target.value
+                              )
+                            }
+                            className={`rounded-lg border bg-surface-inset px-3 py-2 text-sm touch-target nums ${
+                              franjaOverlap
+                                ? 'border-red-300 focus:border-red-500'
+                                : 'border-border focus:border-primary'
+                            } focus:outline-none transition-colors`}
+                            aria-label={`Apertura ${dayName} ${label.text}`}
+                          />
+                          <span className='text-text-muted text-xs'>→</span>
+                          <input
+                            type='time'
+                            value={f.close_time}
+                            onChange={(e) =>
+                              updateFranja(
+                                globalIdx,
+                                'close_time',
+                                e.target.value
+                              )
+                            }
+                            className={`rounded-lg border bg-surface-inset px-3 py-2 text-sm touch-target nums ${
+                              franjaOverlap
+                                ? 'border-red-300 focus:border-red-500'
+                                : 'border-border focus:border-primary'
+                            } focus:outline-none transition-colors`}
+                            aria-label={`Cierre ${dayName} ${label.text}`}
+                          />
+                        </div>
+
+                        {/* Duración calculada */}
+                        <span className='text-xs text-text-muted nums w-16 text-right shrink-0 hidden sm:block'>
+                          {Math.round(
+                            (toMinutes(f.close_time) - toMinutes(f.open_time)) /
+                              60
+                          )}
+                          h{' '}
+                          {(toMinutes(f.close_time) - toMinutes(f.open_time)) %
+                            60 >
+                          0
+                            ? `${(toMinutes(f.close_time) - toMinutes(f.open_time)) % 60}m`
+                            : ''}
+                        </span>
+
+                        {/* Eliminar */}
+                        <button
+                          onClick={() => deleteFranja(globalIdx)}
+                          className='flex items-center justify-center w-8 h-8 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0'
+                          aria-label={`Eliminar franja de ${label.text}`}
+                        >
+                          <TrashIcon size={16} />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+              {!isActive && (
+                <div className='px-4 py-3'>
+                  <p className='text-sm text-text-muted flex items-center gap-1.5'>
+                    <ClockIcon size={14} />
+                    Cerrado
+                  </p>
+                </div>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Footer con guardar */}
+      <div className='sticky bottom-20 md:bottom-4 z-10'>
+        <Card elevated className='p-3 flex items-center gap-3'>
+          <div className='flex-1 text-xs text-text-muted'>
+            {franjas.filter((f) => !f._isDeleted && f.is_active).length} franjas
+            activas
+            {hasOverlaps && (
+              <span className='text-red-600 font-medium'>
+                {' '}
+                · solapamientos detectados
+              </span>
+            )}
+          </div>
+          <Button
+            loading={saving}
+            onClick={handleSave}
+            disabled={hasOverlaps}
+            size='lg'
+          >
+            Guardar horarios
+          </Button>
+        </Card>
+      </div>
     </div>
   )
 }

@@ -26,9 +26,9 @@ declare
   v_slot_minutes integer;
   v_max_advance integer;
   v_day_of_week integer;
-  v_hours record;
-  v_day_start timestamptz;
-  v_day_end timestamptz;
+  v_franja record;
+  v_franja_start timestamptz;
+  v_franja_end timestamptz;
   v_slot_start timestamptz;
   v_slot_end timestamptz;
   v_now timestamptz := now();
@@ -57,66 +57,63 @@ begin
   -- Determinar el día de la semana (0 = domingo)
   v_day_of_week := extract(dow from p_date);
 
-  -- Obtener el horario para ese día
-  select * into v_hours
-  from public.business_hours
-  where business_id = v_business_id
-    and day_of_week = v_day_of_week
-    and is_active = true;
+  -- Iterar sobre todas las franjas horarias activas para ese día
+  for v_franja in
+    select * from public.business_hours
+    where business_id = v_business_id
+      and day_of_week = v_day_of_week
+      and is_active = true
+    order by open_time asc
+  loop
+    -- Construir las marcas de tiempo en la zona horaria del negocio
+    v_franja_start := (p_date::text || ' ' || v_franja.open_time || ':00')::timestamp at time zone v_timezone;
+    v_franja_end := (p_date::text || ' ' || v_franja.close_time || ':00')::timestamp at time zone v_timezone;
 
-  if not found then
-    return; -- No hay horario para este día
-  end if;
+    -- Generar slots dentro de esta franja
+    v_slot_start := v_franja_start;
+    while v_slot_start + (v_slot_minutes || ' minutes')::interval <= v_franja_end loop
+      v_slot_end := v_slot_start + (v_slot_minutes || ' minutes')::interval;
 
-  -- Construir las marcas de tiempo en la zona horaria del negocio
-  -- Usamos AT TIME ZONE para convertir correctamente
-  v_day_start := (p_date::text || ' ' || v_hours.open_time || ':00')::timestamp at time zone v_timezone;
-  v_day_end := (p_date::text || ' ' || v_hours.close_time || ':00')::timestamp at time zone v_timezone;
+      -- Determinar el estado del slot
+      if v_slot_start <= v_now then
+        -- Slot en el pasado
+        v_slot_start := v_slot_end;
+        continue;
+      end if;
 
-  -- Generar slots
-  v_slot_start := v_day_start;
-  while v_slot_start + (v_slot_minutes || ' minutes')::interval <= v_day_end loop
-    v_slot_end := v_slot_start + (v_slot_minutes || ' minutes')::interval;
+      return query
+      select
+        p_court_id,
+        v_court.name,
+        v_slot_start,
+        v_slot_end,
+        coalesce(
+          (select case
+            when r.status = 'pending' and r.hold_expires_at > v_now then 'held'
+            when r.status = 'confirmed' then 'reserved'
+            when r.status = 'pending' and r.hold_expires_at <= v_now then 'available' -- expirada, disponible
+            else 'reserved'
+          end
+          from public.reservations r
+          where r.court_id = p_court_id
+            and r.status in ('pending', 'confirmed')
+            and r.starts_at = v_slot_start
+          limit 1),
+          -- Verificar excepciones/bloqueos
+          (select case
+            when exists(
+              select 1 from public.availability_exceptions ae
+              where ae.business_id = v_business_id
+                and (ae.court_id is null or ae.court_id = p_court_id)
+                and ae.starts_at <= v_slot_start
+                and ae.ends_at >= v_slot_end
+            ) then 'blocked'
+            else 'available'
+          end)
+        )::text;
 
-    -- Determinar el estado del slot
-    if v_slot_start <= v_now then
-      -- Slot en el pasado
       v_slot_start := v_slot_end;
-      continue;
-    end if;
-
-    return query
-    select
-      p_court_id,
-      v_court.name,
-      v_slot_start,
-      v_slot_end,
-      coalesce(
-        (select case
-          when r.status = 'pending' and r.hold_expires_at > v_now then 'held'
-          when r.status = 'confirmed' then 'reserved'
-          when r.status = 'pending' and r.hold_expires_at <= v_now then 'available' -- expirada, disponible
-          else 'reserved'
-        end
-        from public.reservations r
-        where r.court_id = p_court_id
-          and r.status in ('pending', 'confirmed')
-          and r.starts_at = v_slot_start
-        limit 1),
-        -- Verificar excepciones/bloqueos
-        (select case
-          when exists(
-            select 1 from public.availability_exceptions ae
-            where ae.business_id = v_business_id
-              and (ae.court_id is null or ae.court_id = p_court_id)
-              and ae.starts_at <= v_slot_start
-              and ae.ends_at >= v_slot_end
-          ) then 'blocked'
-          else 'available'
-        end)
-      )::text;
-
-    v_slot_start := v_slot_end;
+    end loop;
   end loop;
 end;
 $$;

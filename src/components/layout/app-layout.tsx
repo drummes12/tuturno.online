@@ -38,14 +38,15 @@ const adminNav: NavItem[] = [
     label: 'Configuración',
     href: '/admin/configuracion',
     icon: <SettingsIcon size={22} />
-  }
+  },
+  { label: 'Disponibilidad', href: '/', icon: <CalendarIcon size={22} /> }
 ]
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, isAdmin, signOut } = useAuthStore()
   const [location] = useLocation()
 
-  const nav = isAdmin ? [...adminNav, ...clientNav] : clientNav
+  const nav = isAdmin ? adminNav : clientNav
 
   return (
     <div className='min-h-dvh flex flex-col bg-surface overflow-clip'>
