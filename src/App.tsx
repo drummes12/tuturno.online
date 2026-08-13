@@ -53,7 +53,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className='min-h-[100dvh] flex items-center justify-center'>
+      <div className='min-h-dvh flex items-center justify-center'>
         <Spinner size='lg' />
       </div>
     )

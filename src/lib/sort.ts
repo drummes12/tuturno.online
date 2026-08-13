@@ -16,10 +16,21 @@ export function sortReservationsByPriority(items: Reservation[]): Reservation[] 
     .filter((r) => r.status === 'pending')
     .sort((a, b) => parseISO(a.starts_at).getTime() - parseISO(b.starts_at).getTime())
 
+  const confirmed = items
+    .filter((r) => r.status === 'confirmed')
+    .sort(
+      (a, b) =>
+        parseISO(a.starts_at).getTime() - parseISO(b.starts_at).getTime()
+    )
+
   const upcoming = items
     .filter((r) => {
       const start = parseISO(r.starts_at)
-      return isAfter(start, now) && r.status !== 'pending'
+      return (
+        isAfter(start, now) &&
+        r.status !== 'pending' &&
+        r.status !== 'confirmed'
+      )
     })
     .sort((a, b) => parseISO(a.starts_at).getTime() - parseISO(b.starts_at).getTime())
 
@@ -30,5 +41,5 @@ export function sortReservationsByPriority(items: Reservation[]): Reservation[] 
     })
     .sort((a, b) => parseISO(b.starts_at).getTime() - parseISO(a.starts_at).getTime())
 
-  return [...pending, ...upcoming, ...past]
+  return [...pending, ...confirmed, ...upcoming, ...past]
 }

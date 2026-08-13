@@ -133,7 +133,7 @@ export function MyReservationsPage() {
 
       {/* Filter chips */}
       <div
-        className='scrollbar-none flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 snap-x animate-fade-up'
+        className='scrollbar-none flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
         style={{ animationDelay: '60ms' }}
       >
         {filters.map((f) => (

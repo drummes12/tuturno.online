@@ -3,17 +3,27 @@ import { supabase } from '@/lib/supabase'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
+import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
+import {
+  CourtIcon,
+  PlusIcon,
+  CheckIcon,
+  XIcon,
+  EditIcon
+} from '@/components/common/icon'
 import type { Court } from '@/types'
 
 export function AdminCourtsPage() {
   const [courts, setCourts] = useState<Court[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingCourt, setEditingCourt] = useState<Court | null>(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -30,37 +40,73 @@ export function AdminCourtsPage() {
   }, [load])
 
   function startEdit(court: Court) {
-    setEditingId(court.id)
+    setEditingCourt(court)
     setName(court.name)
     setDescription(court.description ?? '')
     setShowForm(true)
+    // Remover la cancha de la lista mientras se edita
+    setCourts((prev) => prev.filter((c) => c.id !== court.id))
   }
 
   function startNew() {
-    setEditingId(null)
+    setEditingCourt(null)
     setName('')
     setDescription('')
     setShowForm(true)
   }
 
+  function cancelEdit() {
+    // Restaurar la cancha a la lista si se estaba editando
+    if (editingCourt) {
+      setCourts((prev) => {
+        // Insertar en la posición original según sort_order
+        const updated = [...prev, editingCourt]
+        return updated.sort((a, b) => a.sort_order - b.sort_order)
+      })
+    }
+    setShowForm(false)
+    setEditingCourt(null)
+    setName('')
+    setDescription('')
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
+    if (!name.trim()) {
+      setError('El nombre es obligatorio.')
+      return
+    }
     setSaving(true)
+    setError(null)
 
-    if (editingId) {
-      await supabase
+    if (editingCourt) {
+      const { error: updErr } = await supabase
         .from('courts')
         .update({ name: name.trim(), description: description.trim() || null })
-        .eq('id', editingId)
+        .eq('id', editingCourt.id)
+      setSaving(false)
+      if (updErr) {
+        setError('Error al guardar: ' + updErr.message)
+        return
+      }
     } else {
       const maxOrder = courts.reduce((max, c) => Math.max(max, c.sort_order), 0)
-      await supabase
-        .from('courts')
-        .insert({ name: name.trim(), description: description.trim() || null, sort_order: maxOrder + 1 })
+      const { error: insErr } = await supabase.from('courts').insert({
+        name: name.trim(),
+        description: description.trim() || null,
+        sort_order: maxOrder + 1
+      })
+      setSaving(false)
+      if (insErr) {
+        setError('Error al crear: ' + insErr.message)
+        return
+      }
     }
 
-    setSaving(false)
     setShowForm(false)
+    setEditingCourt(null)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
     await load()
   }
 
@@ -73,21 +119,52 @@ export function AdminCourtsPage() {
   }
 
   if (loading) {
-    return <Spinner size="lg" />
+    return <Spinner size='lg' />
   }
 
   return (
-    <div className='flex flex-col gap-4'>
-      <div className='flex items-center justify-between'>
-        <h1 className='text-2xl font-bold'>Canchas</h1>
-        <Button size='sm' onClick={startNew}>
-          + Nueva
-        </Button>
+    <div className='flex flex-col gap-5 max-w-2xl mx-auto'>
+      {/* Header */}
+      <div className='flex items-center justify-between animate-fade-up'>
+        <div>
+          <h1 className='text-2xl font-bold tracking-tight'>Canchas</h1>
+          <p className='text-sm text-(--color-text-muted) mt-0.5'>
+            {courts.length} {courts.length === 1 ? 'cancha' : 'canchas'}{' '}
+            configuradas
+          </p>
+        </div>
+        {!showForm && (
+          <Button size='sm' onClick={startNew}>
+            <PlusIcon size={16} />
+            <span className='hidden sm:inline'>Nueva cancha</span>
+            <span className='sm:hidden'>Nueva</span>
+          </Button>
+        )}
       </div>
 
+      {error && (
+        <Alert variant='error' onDismiss={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+      {saved && (
+        <Alert variant='success'>Cambios guardados correctamente.</Alert>
+      )}
+
+      {/* Formulario de creación/edición */}
       {showForm && (
-        <Card elevated className='p-4'>
-          <form onSubmit={handleSave} className='flex flex-col gap-3'>
+        <Card elevated className='p-5 animate-fade-up'>
+          <div className='flex items-center gap-2 mb-4'>
+            <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+              {editingCourt ? <EditIcon size={16} /> : <PlusIcon size={16} />}
+            </div>
+            <h2 className='font-semibold text-sm tracking-tight'>
+              {editingCourt
+                ? `Editando "${editingCourt.name}"`
+                : 'Nueva cancha'}
+            </h2>
+          </div>
+          <form onSubmit={handleSave} className='flex flex-col gap-4'>
             <Input
               label='Nombre'
               value={name}
@@ -101,17 +178,20 @@ export function AdminCourtsPage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder='Ej: Cancha techada con iluminación'
+              hint='Ayuda a los clientes a identificar la cancha.'
             />
             <div className='flex gap-2'>
               <Button type='submit' loading={saving} size='sm'>
-                {editingId ? 'Guardar' : 'Crear'}
+                <CheckIcon size={16} />
+                {editingCourt ? 'Guardar cambios' : 'Crear cancha'}
               </Button>
               <Button
                 type='button'
                 variant='ghost'
                 size='sm'
-                onClick={() => setShowForm(false)}
+                onClick={cancelEdit}
               >
+                <XIcon size={16} />
                 Cancelar
               </Button>
             </div>
@@ -119,47 +199,80 @@ export function AdminCourtsPage() {
         </Card>
       )}
 
-      {courts.length === 0 ? (
-        <Card className='p-6 text-center text-(--color-text-muted)'>
-          No hay canchas. Crea la primera.
+      {/* Lista de canchas */}
+      {courts.length === 0 && !showForm ? (
+        <Card className='p-8 text-center animate-fade-up'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-12 h-12 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
+              <CourtIcon size={24} />
+            </div>
+            <div>
+              <p className='font-medium text-sm'>No hay canchas</p>
+              <p className='text-xs text-text-muted mt-0.5'>
+                Crea la primera cancha para empezar a recibir reservas.
+              </p>
+            </div>
+            <Button size='sm' onClick={startNew}>
+              <PlusIcon size={16} />
+              Crear cancha
+            </Button>
+          </div>
         </Card>
       ) : (
-        <div className='flex flex-col gap-2'>
-          {courts.map((court) => (
-            <Card key={court.id} className='p-4'>
+        <div className='flex flex-col gap-2.5'>
+          {courts.map((court, index) => (
+            <Card
+              key={court.id}
+              className={`p-4 animate-stagger ${!court.is_active ? 'opacity-60' : ''}`}
+              style={{ '--index': index } as React.CSSProperties}
+            >
               <div className='flex items-center justify-between gap-3'>
-                <div className='min-w-0'>
-                  <p className='font-medium'>{court.name}</p>
-                  {court.description && (
-                    <p className='text-sm text-(--color-text-muted)'>
-                      {court.description}
-                    </p>
-                  )}
-                  <p className='text-xs mt-1'>
-                    <span
-                      className={`inline-flex items-center gap-1 ${court.is_active ? 'text-(--color-success)' : 'text-(--color-text-muted)'}`}
+                <div className='min-w-0 flex-1'>
+                  <div className='flex items-center gap-2'>
+                    <div
+                      className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${
+                        court.is_active
+                          ? 'bg-pitch-100 text-pitch-700'
+                          : 'bg-surface-inset text-text-muted'
+                      }`}
                     >
-                      <span
-                        className={`w-2 h-2 rounded-full ${court.is_active ? 'bg-(--color-success)' : 'bg-graphite-400'}`}
-                      />
-                      {court.is_active ? 'Activa' : 'Inactiva'}
-                    </span>
-                  </p>
+                      <CourtIcon size={18} />
+                    </div>
+                    <div className='min-w-0'>
+                      <p className='font-medium text-sm truncate'>
+                        {court.name}
+                      </p>
+                      {court.description && (
+                        <p className='text-xs text-(--color-text-muted) truncate mt-0.5'>
+                          {court.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className='flex gap-2 shrink-0'>
+                <div className='flex items-center gap-2 shrink-0'>
+                  {/* Toggle de estado */}
+                  <button
+                    onClick={() => toggleActive(court)}
+                    className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                      court.is_active ? 'bg-primary' : 'bg-graphite-300'
+                    }`}
+                    aria-label={`${court.is_active ? 'Desactivar' : 'Activar'} ${court.name}`}
+                    aria-pressed={court.is_active}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${
+                        court.is_active ? 'translate-x-5' : ''
+                      }`}
+                    />
+                  </button>
                   <Button
                     variant='secondary'
                     size='sm'
                     onClick={() => startEdit(court)}
                   >
-                    Editar
-                  </Button>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    onClick={() => toggleActive(court)}
-                  >
-                    {court.is_active ? 'Desactivar' : 'Activar'}
+                    <EditIcon size={14} />
+                    <span className='hidden sm:inline'>Editar</span>
                   </Button>
                 </div>
               </div>
