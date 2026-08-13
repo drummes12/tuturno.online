@@ -137,14 +137,14 @@ export function AdminReservationsPage() {
 
       {/* Filter chips */}
       <div
-        className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        className='scrollbar-none flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
         style={{ animationDelay: '120ms' }}
       >
         {statusFilters.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-3.5 py-1.5 rounded-full text-sm font-medium border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
+            className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
               filter === f.key
                 ? 'bg-(--color-primary) text-white border-(--color-primary) shadow-(--shadow-pitch)'
                 : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'

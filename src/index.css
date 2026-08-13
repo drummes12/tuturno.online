@@ -141,6 +141,16 @@ body {
   min-height: 44px;
 }
 
+/* Horizontal chip rails stay clean while remaining swipeable */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Utility: text balance for headings */
 .text-balance {
   text-wrap: balance;
@@ -164,13 +174,13 @@ body {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.6s var(--ease-out-quart) both;
+  animation: fade-up 0.3s var(--ease-out-quart) both;
 }
 
 /* Staggered children — use with --index CSS var */
 .animate-stagger {
-  animation: fade-up 0.5s var(--ease-out-quart) both;
-  animation-delay: calc(var(--index, 0) * 60ms);
+  animation: fade-up 0.1s var(--ease-out-quart) both;
+  animation-delay: calc(var(--index, 0) * 20ms);
 }
 
 /* Skeleton shimmer */

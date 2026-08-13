@@ -82,7 +82,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Desktop nav — horizontal, below header */}
       {user && (
-        <nav className='hidden md:block border-b border-border bg-surface-elevated'>
+        <nav className='hidden md:block border-b overflow-x-auto border-border bg-surface-elevated'>
           <div className='mx-auto max-w-5xl px-4 flex items-center gap-1'>
             {nav.map((item) => {
               const active =
@@ -99,7 +99,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   }`}
                 >
                   <span className='opacity-70'>{item.icon}</span>
-                  {item.label}
+                  <span className='truncate'>{item.label}</span>
                 </Link>
               )
             })}
@@ -115,7 +115,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* Bottom nav — mobile, thumb zone, with icons */}
       {user && (
         <nav className='fixed bottom-0 left-0 right-0 z-40 bg-surface-elevated/95 backdrop-blur-lg border-t border-border md:hidden'>
-          <div className='flex items-center justify-around px-2 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
+          <div className='flex items-center justify-around px-1 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
             {nav.map((item) => {
               const active =
                 location === item.href ||
@@ -131,7 +131,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <span className={active ? 'text-primary' : ''}>
                     {item.icon}
                   </span>
-                  <span className='truncate max-w-12'>{item.label}</span>
+                  <span className='truncate max-w-full'>{item.label}</span>
                 </Link>
               )
             })}

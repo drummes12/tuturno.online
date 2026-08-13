@@ -6,12 +6,19 @@ import {
   SlotGridSkeleton,
   DatePickerSkeleton
 } from '@/components/common/skeleton'
-import { CalendarIcon, InboxIcon } from '@/components/common/icon'
+import {
+  CalendarIcon,
+  InboxIcon,
+  SunIcon,
+  CloudSunIcon,
+  MoonIcon
+} from '@/components/common/icon'
 import type { Court, AvailabilitySlot } from '@/types'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BUSINESS_TIMEZONE } from '@/lib/time'
 import { toZonedTime } from 'date-fns-tz'
+import type { ReactNode } from 'react'
 
 export function AvailabilityPage() {
   const [courts, setCourts] = useState<Court[]>([])
@@ -81,6 +88,48 @@ export function AvailabilityPage() {
       return selectedDate
     }
   }, [selectedDate])
+
+  // Agrupar slots por turno (Mañana / Tarde / Noche)
+  const slotGroups = useMemo(() => {
+    const groups: {
+      key: string
+      label: string
+      range: string
+      icon: ReactNode
+      slots: AvailabilitySlot[]
+    }[] = [
+      {
+        key: 'morning',
+        label: 'Mañana',
+        range: '6:00 — 12:00',
+        icon: <SunIcon size={18} />,
+        slots: []
+      },
+      {
+        key: 'afternoon',
+        label: 'Tarde',
+        range: '12:00 — 18:00',
+        icon: <CloudSunIcon size={18} />,
+        slots: []
+      },
+      {
+        key: 'evening',
+        label: 'Noche',
+        range: '18:00 — 24:00',
+        icon: <MoonIcon size={18} />,
+        slots: []
+      }
+    ]
+
+    for (const slot of slots) {
+      const hour = parseISO(slot.starts_at).getHours()
+      if (hour >= 6 && hour < 12) groups[0].slots.push(slot)
+      else if (hour >= 12 && hour < 18) groups[1].slots.push(slot)
+      else groups[2].slots.push(slot)
+    }
+
+    return groups
+  }, [slots])
 
   return (
     <div className='flex flex-col gap-5'>
@@ -186,60 +235,107 @@ export function AvailabilityPage() {
           </div>
         </Card>
       ) : (
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 animate-fade-up'>
-          {slots.map((slot, index) => {
-            const time = format(parseISO(slot.starts_at), 'HH:mm')
-            const isAvailable = slot.status === 'available'
+        <div className='flex flex-col gap-6 animate-fade-up'>
+          {slotGroups.map((group, groupIndex) => {
+            if (group.slots.length === 0) return null
+            const availableCount = group.slots.filter(
+              (s) => s.status === 'available'
+            ).length
 
-            const statusConfig = {
-              available: {
-                className:
-                  'bg-pitch-100 text-(--color-pitch-800) border-pitch-400 hover:bg-pitch-200 hover:shadow-(--shadow-pitch) hover:scale-[1.03]',
-                label: 'Disponible'
-              },
-              held: {
-                className: 'bg-yellow-50 text-yellow-800 border-yellow-300',
-                label: 'En espera'
-              },
-              reserved: {
-                className:
-                  'bg-surface-inset text-(--color-text-muted) border-border',
-                label: 'Reservado'
-              },
-              blocked: {
-                className: 'bg-red-50 text-red-700 border-red-200',
-                label: 'Bloqueado'
-              }
-            }
-            const config = statusConfig[slot.status]
+            return (
+              <section key={group.key}>
+                {/* Turno header */}
+                <div className='flex items-center justify-between mb-3'>
+                  <div className='flex items-center gap-2.5'>
+                    <span className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-graphite-500'>
+                      {group.icon}
+                    </span>
+                    <div>
+                      <h3 className='text-sm font-semibold tracking-tight'>
+                        {group.label}
+                      </h3>
+                      <p className='text-[11px] text-text-muted nums'>
+                        {group.range}
+                      </p>
+                    </div>
+                  </div>
+                  {availableCount > 0 && (
+                    <span className='text-xs font-medium text-pitch-700 bg-pitch-100 px-2.5 py-1 rounded-full border border-pitch-300 nums'>
+                      {availableCount} libre{availableCount !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
 
-            return isAvailable ? (
-              <Link
-                key={`${slot.court_id}-${slot.starts_at}`}
-                href={`/reservar?court=${slot.court_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
-              >
-                <button
-                  style={{ '--index': index } as React.CSSProperties}
-                  className={`w-full flex flex-col items-center gap-1 py-3.5 px-2 rounded-xl border text-sm font-medium transition-all duration-200 ease-spring touch-target animate-stagger ${config.className}`}
-                >
-                  <span className='text-lg font-bold nums'>{time}</span>
-                  <span className='text-[10px] uppercase tracking-wide opacity-80'>
-                    {config.label}
-                  </span>
-                </button>
-              </Link>
-            ) : (
-              <div
-                key={`${slot.court_id}-${slot.starts_at}`}
-                style={{ '--index': index } as React.CSSProperties}
-                className={`flex flex-col items-center gap-1 py-3.5 px-2 rounded-xl border text-sm font-medium animate-stagger ${config.className} opacity-60`}
-                aria-label={`${time} — ${config.label}`}
-              >
-                <span className='text-lg font-bold nums'>{time}</span>
-                <span className='text-[10px] uppercase tracking-wide opacity-80'>
-                  {config.label}
-                </span>
-              </div>
+                {/* Slots grid for this turno */}
+                <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2'>
+                  {group.slots.map((slot, index) => {
+                    const time = format(parseISO(slot.starts_at), 'HH:mm')
+                    const isAvailable = slot.status === 'available'
+
+                    const statusConfig = {
+                      available: {
+                        className:
+                          'bg-pitch-100 text-(--color-pitch-800) border-pitch-400 hover:bg-pitch-200 hover:shadow-(--shadow-pitch) hover:scale-[1.03]',
+                        label: 'Disponible'
+                      },
+                      held: {
+                        className:
+                          'bg-yellow-50 text-yellow-800 border-yellow-300',
+                        label: 'En espera'
+                      },
+                      reserved: {
+                        className:
+                          'bg-surface-inset text-(--color-text-muted) border-border',
+                        label: 'Reservado'
+                      },
+                      blocked: {
+                        className: 'bg-red-50 text-red-700 border-red-200',
+                        label: 'Bloqueado'
+                      }
+                    }
+                    const config = statusConfig[slot.status]
+
+                    return isAvailable ? (
+                      <Link
+                        key={`${slot.court_id}-${slot.starts_at}`}
+                        href={`/reservar?court=${slot.court_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
+                      >
+                        <button
+                          style={
+                            {
+                              '--index': groupIndex * 10 + index
+                            } as React.CSSProperties
+                          }
+                          className={`w-full flex flex-col items-center gap-0.5 py-3 px-1 rounded-xl border text-sm font-medium transition-all duration-200 ease-spring touch-target animate-stagger ${config.className}`}
+                        >
+                          <span className='text-base font-bold nums'>
+                            {time}
+                          </span>
+                          <span className='text-[9px] uppercase tracking-wide opacity-70'>
+                            {config.label}
+                          </span>
+                        </button>
+                      </Link>
+                    ) : (
+                      <div
+                        key={`${slot.court_id}-${slot.starts_at}`}
+                        style={
+                          {
+                            '--index': groupIndex * 10 + index
+                          } as React.CSSProperties
+                        }
+                        className={`flex flex-col items-center gap-0.5 py-3 px-1 rounded-xl border text-sm font-medium animate-stagger ${config.className} opacity-50`}
+                        aria-label={`${time} — ${config.label}`}
+                      >
+                        <span className='text-base font-bold nums'>{time}</span>
+                        <span className='text-[9px] uppercase tracking-wide opacity-70'>
+                          {config.label}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
             )
           })}
         </div>
