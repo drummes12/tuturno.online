@@ -19,6 +19,7 @@ import { format } from 'date-fns'
 import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
 import { waLink } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
+import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 
 const statusFilters: { key: ReservationStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'Todas' },
@@ -133,6 +134,9 @@ export function AdminReservationsPage() {
   useEffect(() => {
     load()
   }, [load])
+
+  // Realtime: recargar cuando cambien reservas
+  useReservationsRealtime(load)
 
   return (
     <div className='flex flex-col gap-5'>

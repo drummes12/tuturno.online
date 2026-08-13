@@ -11,6 +11,7 @@ import { CalendarPlusIcon, InboxIcon } from '@/components/common/icon'
 import type { Reservation } from '@/types'
 import { parseISO, isAfter, subHours } from 'date-fns'
 import { formatLocal } from '@/lib/time'
+import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 
 type Filter = 'upcoming' | 'pending' | 'confirmed' | 'past'
 
@@ -46,18 +47,35 @@ export function MyReservationsPage() {
     loadReservations()
   }, [loadReservations])
 
+  // Realtime: recargar cuando el admin confirme/rechace/cancele
+  useReservationsRealtime(
+    loadReservations,
+    user?.id ? `user_id=eq.${user.id}` : undefined
+  )
+
   const filtered = reservations.filter((r) => {
     const now = new Date()
     const start = parseISO(r.starts_at)
     switch (filter) {
       case 'upcoming':
-        return isAfter(start, now) && ['pending', 'confirmed'].includes(r.status)
+        return (
+          isAfter(start, now) && ['pending', 'confirmed'].includes(r.status)
+        )
       case 'pending':
         return r.status === 'pending'
       case 'confirmed':
         return r.status === 'confirmed'
       case 'past':
-        return !isAfter(start, now) || ['completed', 'cancelled_by_client', 'cancelled_by_business', 'rejected', 'expired'].includes(r.status)
+        return (
+          !isAfter(start, now) ||
+          [
+            'completed',
+            'cancelled_by_client',
+            'cancelled_by_business',
+            'rejected',
+            'expired'
+          ].includes(r.status)
+        )
       default:
         return true
     }
@@ -97,7 +115,7 @@ export function MyReservationsPage() {
     { key: 'upcoming', label: 'Próximas' },
     { key: 'pending', label: 'Pendientes' },
     { key: 'confirmed', label: 'Confirmadas' },
-    { key: 'past', label: 'Pasadas' },
+    { key: 'past', label: 'Pasadas' }
   ]
 
   return (
