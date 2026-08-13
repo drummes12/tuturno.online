@@ -24,6 +24,7 @@ declare
   v_business_id uuid;
   v_timezone text;
   v_slot_minutes integer;
+  v_gap_minutes integer;
   v_max_advance integer;
   v_day_of_week integer;
   v_franja record;
@@ -34,7 +35,7 @@ declare
   v_now timestamptz := now();
 begin
   -- Obtener datos de la cancha y negocio
-  select c.*, b.timezone, b.slot_duration_minutes, b.max_advance_days
+  select c.*, b.timezone, b.slot_duration_minutes, b.gap_minutes, b.max_advance_days
   into v_court
   from public.courts c
   join public.businesses b on c.business_id = b.id
@@ -47,6 +48,7 @@ begin
   v_business_id := v_court.business_id;
   v_timezone := v_court.timezone;
   v_slot_minutes := v_court.slot_duration_minutes;
+  v_gap_minutes := v_court.gap_minutes;
   v_max_advance := v_court.max_advance_days;
 
   -- Validar que la fecha no esté demasiado en el futuro
@@ -112,7 +114,7 @@ begin
           end)
         )::text;
 
-      v_slot_start := v_slot_end;
+      v_slot_start := v_slot_end + (v_gap_minutes || ' minutes')::interval;
     end loop;
   end loop;
 end;

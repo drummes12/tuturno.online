@@ -339,6 +339,38 @@ export function WhatsAppIcon(props: IconProps) {
   )
 }
 
+/* Store — for business info */
+export function StoreIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d='M3 9l1-5h16l1 5' />
+      <path d='M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9' />
+      <path d='M9 21V12h6v9' />
+    </svg>
+  )
+}
+
+/* MapPin — for location/timezone */
+export function MapPinIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z' />
+      <circle cx='12' cy='10' r='3' />
+    </svg>
+  )
+}
+
+/* Timer — for gap/buffer between turns */
+export function TimerIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx='12' cy='13' r='8' />
+      <path d='M12 9v4l2 2' />
+      <path d='M9 2h6' />
+    </svg>
+  )
+}
+
 /* MessageSquare — for notes/messages */
 export function MessageIcon(props: IconProps) {
   return (
