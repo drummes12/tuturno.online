@@ -12,6 +12,14 @@ import { parseISO, isAfter } from 'date-fns'
 export function sortReservationsByPriority(items: Reservation[]): Reservation[] {
   const now = new Date()
 
+  const TERMINAL_STATUSES = [
+    'completed',
+    'cancelled_by_client',
+    'cancelled_by_business',
+    'rejected',
+    'expired'
+  ]
+
   const pending = items
     .filter((r) => r.status === 'pending')
     .sort((a, b) => parseISO(a.starts_at).getTime() - parseISO(b.starts_at).getTime())
@@ -29,7 +37,8 @@ export function sortReservationsByPriority(items: Reservation[]): Reservation[] 
       return (
         isAfter(start, now) &&
         r.status !== 'pending' &&
-        r.status !== 'confirmed'
+        r.status !== 'confirmed' &&
+        !TERMINAL_STATUSES.includes(r.status)
       )
     })
     .sort((a, b) => parseISO(a.starts_at).getTime() - parseISO(b.starts_at).getTime())
@@ -37,7 +46,7 @@ export function sortReservationsByPriority(items: Reservation[]): Reservation[] 
   const past = items
     .filter((r) => {
       const start = parseISO(r.starts_at)
-      return !isAfter(start, now) || ['completed', 'cancelled_by_client', 'cancelled_by_business', 'rejected', 'expired'].includes(r.status)
+      return !isAfter(start, now) || TERMINAL_STATUSES.includes(r.status)
     })
     .sort((a, b) => parseISO(b.starts_at).getTime() - parseISO(a.starts_at).getTime())
 

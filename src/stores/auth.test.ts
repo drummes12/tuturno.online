@@ -1,0 +1,97 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+const { mockSignOut } = vi.hoisted(() => ({
+  mockSignOut: vi.fn()
+}))
+
+vi.mock('@/services/auth', () => ({
+  signOut: mockSignOut
+}))
+
+import { useAuthStore } from '@/stores/auth'
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  // Reset store to initial state
+  useAuthStore.setState({
+    session: null,
+    user: null,
+    profile: null,
+    isAdmin: false,
+    loading: true,
+    error: null
+  })
+})
+
+describe('useAuthStore', () => {
+  it('tiene estado inicial correcto', () => {
+    const state = useAuthStore.getState()
+    expect(state.session).toBeNull()
+    expect(state.user).toBeNull()
+    expect(state.profile).toBeNull()
+    expect(state.isAdmin).toBe(false)
+    expect(state.loading).toBe(true)
+    expect(state.error).toBeNull()
+  })
+
+  it('setSession establece session y user', () => {
+    const mockUser = { id: 'user-1' } as any
+    const mockSession = { user: mockUser } as any
+    useAuthStore.getState().setSession(mockSession)
+    const state = useAuthStore.getState()
+    expect(state.session).toBe(mockSession)
+    expect(state.user).toBe(mockUser)
+  })
+
+  it('setSession con null limpia user', () => {
+    useAuthStore.getState().setSession({ user: { id: 'x' } } as any)
+    useAuthStore.getState().setSession(null)
+    expect(useAuthStore.getState().session).toBeNull()
+    expect(useAuthStore.getState().user).toBeNull()
+  })
+
+  it('setProfile establece el perfil', () => {
+    const profile = {
+      id: '1',
+      full_name: 'Test',
+      phone: null,
+      phone_verified: false,
+      created_at: '',
+      updated_at: ''
+    }
+    useAuthStore.getState().setProfile(profile)
+    expect(useAuthStore.getState().profile).toBe(profile)
+  })
+
+  it('setIsAdmin establece el flag', () => {
+    useAuthStore.getState().setIsAdmin(true)
+    expect(useAuthStore.getState().isAdmin).toBe(true)
+  })
+
+  it('setLoading establece el flag', () => {
+    useAuthStore.getState().setLoading(false)
+    expect(useAuthStore.getState().loading).toBe(false)
+  })
+
+  it('setError establece el error', () => {
+    useAuthStore.getState().setError('algo salió mal')
+    expect(useAuthStore.getState().error).toBe('algo salió mal')
+  })
+
+  it('signOut llama al servicio y limpia el estado', async () => {
+    mockSignOut.mockResolvedValue(undefined)
+    // Llenar el estado primero
+    useAuthStore.getState().setSession({ user: { id: 'x' } } as any)
+    useAuthStore.getState().setIsAdmin(true)
+    useAuthStore.getState().setProfile({ id: '1' } as any)
+
+    await useAuthStore.getState().signOut()
+
+    expect(mockSignOut).toHaveBeenCalledTimes(1)
+    const state = useAuthStore.getState()
+    expect(state.session).toBeNull()
+    expect(state.user).toBeNull()
+    expect(state.profile).toBeNull()
+    expect(state.isAdmin).toBe(false)
+  })
+})
