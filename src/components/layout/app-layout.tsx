@@ -86,16 +86,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <nav className='hidden md:block border-b overflow-x-auto border-border bg-surface-elevated'>
           <div className='mx-auto max-w-5xl px-4 flex items-center gap-1'>
             {nav.map((item) => {
-              const active =
-                location === item.href ||
-                (item.href !== '/' && location.startsWith(item.href))
+              const active = location === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 ease-spring ${
                     active
-                      ? 'border-primary text-primary'
+                      ? 'border-primary! text-primary!'
                       : 'border-transparent text-text-muted hover:text-text'
                   }`}
                 >
@@ -118,9 +116,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <nav className='fixed bottom-0 left-0 right-0 z-40 bg-surface-elevated/95 backdrop-blur-lg border-t border-border md:hidden'>
           <div className='flex items-center justify-around px-1 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
             {nav.map((item) => {
-              const active =
-                location === item.href ||
-                (item.href !== '/' && location.startsWith(item.href))
+              const active = location === item.href
               return (
                 <Link
                   key={item.href}

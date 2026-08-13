@@ -56,6 +56,7 @@ export function AdminDashboardPage() {
         )
         .gte('starts_at', start)
         .lte('starts_at', end)
+        .neq('status', 'pending')
         .order('starts_at', { ascending: true })
     ])
 
@@ -351,25 +352,28 @@ export function AdminDashboardPage() {
                           <span className='truncate'>
                             {r.profile?.full_name}
                           </span>
-                          {waLink(r.profile?.phone) && (
-                            <a
-                              href={
-                                waLink(
-                                  r.profile?.phone,
-                                  `Hola ${r.profile?.full_name ?? ''}, te contacto sobre tu reserva.`
-                                )!
-                              }
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              className='ml-auto flex items-center justify-center w-7 h-7 -mr-1 text-green-700 hover:bg-green-50 rounded-lg transition-colors touch-target shrink-0'
-                              aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
-                            >
-                              <WhatsAppIcon size={14} />
-                            </a>
-                          )}
                         </p>
                       </div>
-                      <StatusBadge status={r.status} />
+                      <div className='flex flex-col items-end gap-1'>
+                        {waLink(r.profile?.phone) && (
+                          <a
+                            href={
+                              waLink(
+                                r.profile?.phone,
+                                `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                              )!
+                            }
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                            aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                          >
+                            <WhatsAppIcon size={16} />
+                            <span className='hidden sm:inline'>WhatsApp</span>
+                          </a>
+                        )}
+                        <StatusBadge status={r.status} />
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -402,25 +406,28 @@ export function AdminDashboardPage() {
                           <span className='truncate'>
                             {r.profile?.full_name}
                           </span>
-                          {waLink(r.profile?.phone) && (
-                            <a
-                              href={
-                                waLink(
-                                  r.profile?.phone,
-                                  `Hola ${r.profile?.full_name ?? ''}, te contacto sobre tu reserva.`
-                                )!
-                              }
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              className='ml-auto flex items-center justify-center w-7 h-7 -mr-1 text-green-700 hover:bg-green-50 rounded-lg transition-colors touch-target shrink-0'
-                              aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
-                            >
-                              <WhatsAppIcon size={14} />
-                            </a>
-                          )}
                         </p>
                       </div>
-                      <StatusBadge status={r.status} />
+                      <div className='flex flex-col items-end gap-1'>
+                        {waLink(r.profile?.phone) && (
+                          <a
+                            href={
+                              waLink(
+                                r.profile?.phone,
+                                `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                              )!
+                            }
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                            aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                          >
+                            <WhatsAppIcon size={16} />
+                            <span className='hidden sm:inline'>WhatsApp</span>
+                          </a>
+                        )}
+                        <StatusBadge status={r.status} />
+                      </div>
                     </div>
                   </Card>
                 ))}
