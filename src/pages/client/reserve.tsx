@@ -12,13 +12,14 @@ import {
   CourtIcon,
   ClockIcon,
   CalendarIcon,
-  HourglassIcon
+  HourglassIcon,
+  CheckIcon
 } from '@/components/common/icon'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 export function ReservePage() {
-  const { user, profile } = useAuthStore()
+  const { user, profile, isAdmin } = useAuthStore()
 
   const params = new URLSearchParams(window.location.search)
   const courtId = params.get('court')
@@ -126,7 +127,36 @@ export function ReservePage() {
     setError(null)
     setSubmitting(true)
 
-    // Actualizar perfil si cambió
+    if (isAdmin) {
+      // Admin: crear reserva directamente confirmada
+      const { data, error: rpcError } = await supabase.rpc(
+        'create_reservation_admin',
+        {
+          p_court_id: courtId!,
+          p_starts_at: startStr!,
+          p_client_name: fullName.trim() || null,
+          p_client_phone: phone.trim() || null,
+          p_notes: notes.trim() || null
+        }
+      )
+
+      setSubmitting(false)
+
+      if (rpcError) {
+        setError(rpcError.message)
+        return
+      }
+
+      if (data?.error) {
+        setError(data.error)
+        return
+      }
+
+      setSuccess(true)
+      return
+    }
+
+    // Cliente: actualizar perfil si cambió
     if (fullName !== profile?.full_name || phone !== profile?.phone) {
       await supabase
         .from('profiles')
@@ -160,23 +190,27 @@ export function ReservePage() {
       <div className='flex flex-col items-center gap-4 py-12 max-w-md mx-auto animate-fade-up'>
         <Card elevated className='w-full p-8 text-center'>
           <div className='flex flex-col items-center gap-4'>
-            <div className='w-16 h-16 rounded-2xl bg-pitch-100 flex items-center justify-center text-pitch-700'>
-              <HourglassIcon size={32} />
+            <div
+              className={`w-16 h-16 rounded-2xl flex items-center justify-center ${isAdmin ? 'bg-pitch-100 text-pitch-700' : 'bg-yellow-50 text-yellow-700'}`}
+            >
+              {isAdmin ? <CheckIcon size={32} /> : <HourglassIcon size={32} />}
             </div>
             <div>
               <h1 className='text-xl font-bold mb-1.5 tracking-tight'>
-                Solicitud recibida
+                {isAdmin ? 'Reserva confirmada' : 'Solicitud recibida'}
               </h1>
               <p className='text-sm text-(--color-text-muted) max-w-xs'>
-                Tu reserva está <strong>pendiente de confirmación</strong> por
-                el negocio. Te avisaremos por correo cuando la confirmen o
-                rechacen.
+                {isAdmin
+                  ? 'La reserva fue creada y confirmada directamente.'
+                  : 'Tu reserva está pendiente de confirmación por el negocio. Te avisaremos por correo cuando la confirmen o rechacen.'}
               </p>
             </div>
           </div>
           <div className='flex flex-col gap-2 mt-6'>
-            <Link href='/mis-reservas'>
-              <Button className='w-full'>Ver mis reservas</Button>
+            <Link href={isAdmin ? '/admin/reservas' : '/mis-reservas'}>
+              <Button className='w-full'>
+                {isAdmin ? 'Ver reservas' : 'Ver mis reservas'}
+              </Button>
             </Link>
             <Link href='/'>
               <Button variant='secondary' className='w-full'>
@@ -212,9 +246,13 @@ export function ReservePage() {
       </Link>
 
       <div className='animate-fade-up'>
-        <h1 className='text-2xl font-bold tracking-tight'>Confirmar reserva</h1>
+        <h1 className='text-2xl font-bold tracking-tight'>
+          {isAdmin ? 'Crear reserva' : 'Confirmar reserva'}
+        </h1>
         <p className='text-sm text-(--color-text-muted) mt-0.5'>
-          Revisa los datos antes de enviar.
+          {isAdmin
+            ? 'Registra una reserva directamente confirmada.'
+            : 'Revisa los datos antes de enviar.'}
         </p>
       </div>
 
@@ -223,9 +261,7 @@ export function ReservePage() {
           {details.map((d) => (
             <div key={d.label} className='flex justify-between items-center'>
               <dt className='flex items-center gap-2 text-(--color-text-muted)'>
-                <span className='text-graphite-400'>
-                  {d.icon}
-                </span>
+                <span className='text-graphite-400'>{d.icon}</span>
                 {d.label}
               </dt>
               <dd
@@ -240,22 +276,44 @@ export function ReservePage() {
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-          <Input
-            label='Nombre completo'
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            required
-            autoComplete='name'
-          />
-          <Input
-            label='Teléfono'
-            type='tel'
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required
-            autoComplete='tel'
-            hint='El negocio lo usará para contactarte.'
-          />
+          {isAdmin ? (
+            <>
+              <Input
+                label='Nombre del cliente'
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder='Ej: Juan Pérez'
+                hint='Opcional. Nombre de la persona que reserva.'
+              />
+              <Input
+                label='Teléfono del cliente'
+                type='tel'
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder='+57 300 123 4567'
+                hint='Opcional. Si coincide con un usuario registrado, se vincula a su cuenta.'
+              />
+            </>
+          ) : (
+            <>
+              <Input
+                label='Nombre completo'
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                autoComplete='name'
+              />
+              <Input
+                label='Teléfono'
+                type='tel'
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                autoComplete='tel'
+                hint='El negocio lo usará para contactarte.'
+              />
+            </>
+          )}
           <Input
             label='Notas (opcional)'
             value={notes}
@@ -266,10 +324,13 @@ export function ReservePage() {
 
           {error && <Alert variant='error'>{error}</Alert>}
 
-          <Alert variant='warning'>
-            <strong>Importante:</strong> Esta es una solicitud. El negocio debe
-            confirmarla. El turno queda reservado temporalmente por 30 minutos.
-          </Alert>
+          {!isAdmin && (
+            <Alert variant='warning'>
+              <strong>Importante:</strong> Esta es una solicitud. El negocio
+              debe confirmarla. El turno queda reservado temporalmente por 30
+              minutos.
+            </Alert>
+          )}
 
           <Button
             type='submit'
@@ -277,7 +338,7 @@ export function ReservePage() {
             size='lg'
             className='w-full'
           >
-            Enviar solicitud
+            {isAdmin ? 'Crear reserva confirmada' : 'Enviar solicitud'}
           </Button>
         </form>
       </Card>

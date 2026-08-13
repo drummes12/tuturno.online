@@ -13,11 +13,13 @@ import {
   PhoneIcon,
   ClockIcon,
   InboxIcon,
-  CalendarIcon
+  CalendarIcon,
+  WhatsAppIcon
 } from '@/components/common/icon'
 import type { Reservation } from '@/types'
 import { format } from 'date-fns'
 import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
+import { waLink } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 
 export function AdminDashboardPage() {
@@ -234,24 +236,43 @@ export function AdminDashboardPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className='flex gap-2'>
-                    <Button
-                      variant='success'
-                      size='sm'
-                      loading={actingId === r.id}
-                      onClick={() => handleConfirm(r.id)}
-                    >
-                      <CheckIcon size={16} />
-                      Confirmar
-                    </Button>
-                    <Button
-                      variant='danger'
-                      size='sm'
-                      onClick={() => setRejectingId(r.id)}
-                    >
-                      <XIcon size={16} />
-                      Rechazar
-                    </Button>
+                  <div className='flex items-center gap-2 flex-wrap'>
+                    {waLink(r.profile?.phone) && (
+                      <a
+                        href={
+                          waLink(
+                            r.profile?.phone,
+                            `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                          )!
+                        }
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                        aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                      >
+                        <WhatsAppIcon size={16} />
+                        <span className='hidden sm:inline'>WhatsApp</span>
+                      </a>
+                    )}
+                    <div className='flex gap-2 ml-auto'>
+                      <Button
+                        variant='success'
+                        size='sm'
+                        loading={actingId === r.id}
+                        onClick={() => handleConfirm(r.id)}
+                      >
+                        <CheckIcon size={16} />
+                        Confirmar
+                      </Button>
+                      <Button
+                        variant='danger'
+                        size='sm'
+                        onClick={() => setRejectingId(r.id)}
+                      >
+                        <XIcon size={16} />
+                        Rechazar
+                      </Button>
+                    </div>
                   </div>
                 )}
               </Card>
@@ -272,9 +293,7 @@ export function AdminDashboardPage() {
           <Card className='p-6 text-center animate-fade-up'>
             <div className='flex flex-col items-center gap-2'>
               <InboxIcon size={20} className='text-text-muted' />
-              <p className='text-sm text-text-muted'>
-                Sin reservas para hoy.
-              </p>
+              <p className='text-sm text-text-muted'>Sin reservas para hoy.</p>
             </div>
           </Card>
         ) : (
@@ -296,7 +315,23 @@ export function AdminDashboardPage() {
                     </p>
                     <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
                       <UserIcon size={12} />
-                      {r.profile?.full_name}
+                      <span className='truncate'>{r.profile?.full_name}</span>
+                      {waLink(r.profile?.phone) && (
+                        <a
+                          href={
+                            waLink(
+                              r.profile?.phone,
+                              `Hola ${r.profile?.full_name ?? ''}, te contacto sobre tu reserva.`
+                            )!
+                          }
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='ml-auto flex items-center justify-center w-7 h-7 -mr-1 text-green-700 hover:bg-green-50 rounded-lg transition-colors touch-target shrink-0'
+                          aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                        >
+                          <WhatsAppIcon size={14} />
+                        </a>
+                      )}
                     </p>
                   </div>
                   <StatusBadge status={r.status} />

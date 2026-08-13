@@ -11,6 +11,7 @@ import {
   LogOutIcon,
   LogInIcon
 } from '@/components/common/icon'
+import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 
 interface NavItem {
   label: string
@@ -138,6 +139,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </nav>
       )}
+
+      {/* FAB de WhatsApp — solo para clientes */}
+      {user && !isAdmin && <WhatsAppFab />}
     </div>
   )
 }

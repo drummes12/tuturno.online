@@ -11,11 +11,13 @@ import {
   XIcon,
   UserIcon,
   CalendarIcon,
-  InboxIcon
+  InboxIcon,
+  WhatsAppIcon
 } from '@/components/common/icon'
 import type { Reservation, ReservationStatus } from '@/types'
 import { format } from 'date-fns'
 import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
+import { waLink } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 
 const statusFilters: { key: ReservationStatus | 'all'; label: string }[] = [
@@ -33,6 +35,8 @@ export function AdminReservationsPage() {
   const [actingId, setActingId] = useState<string | null>(null)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<ReservationStatus | 'all'>('all')
   const [selectedDate, setSelectedDate] = useState(
@@ -97,6 +101,30 @@ export function AdminReservationsPage() {
     setRejectReason('')
     if (rpcError) {
       setError('Error al rechazar: ' + rpcError.message)
+      return
+    }
+    await load()
+  }
+
+  async function handleCancelByBusiness(id: string) {
+    if (!cancelReason.trim()) {
+      setError('Escribe un motivo para la cancelación.')
+      return
+    }
+    setActingId(id)
+    setError(null)
+    const { error: rpcError } = await supabase.rpc(
+      'cancel_reservation_by_business',
+      {
+        p_reservation_id: id,
+        p_reason: cancelReason.trim()
+      }
+    )
+    setActingId(null)
+    setCancellingId(null)
+    setCancelReason('')
+    if (rpcError) {
+      setError('Error al cancelar: ' + rpcError.message)
       return
     }
     await load()
@@ -215,61 +243,126 @@ export function AdminReservationsPage() {
                 <StatusBadge status={r.status} />
               </div>
 
-              {r.status === 'pending' && (
-                <div className='mt-3 pt-3 border-t border-border'>
-                  {rejectingId === r.id ? (
-                    <div className='flex flex-col gap-2.5 animate-fade-up'>
-                      <Input
-                        label='Motivo del rechazo'
-                        value={rejectReason}
-                        onChange={(e) => setRejectReason(e.target.value)}
-                        placeholder='Ej: cancha en mantenimiento'
-                        autoFocus
-                      />
-                      <div className='flex gap-2'>
-                        <Button
-                          variant='danger'
-                          size='sm'
-                          loading={actingId === r.id}
-                          onClick={() => handleReject(r.id)}
-                        >
-                          Confirmar rechazo
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => {
-                            setRejectingId(null)
-                            setRejectReason('')
-                          }}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
+              {/* Action bar — WhatsApp siempre disponible + acciones por estado */}
+              <div className='mt-3 pt-3 border-t border-border'>
+                {rejectingId === r.id ? (
+                  <div className='flex flex-col gap-2.5 animate-fade-up'>
+                    <Input
+                      label='Motivo del rechazo'
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      placeholder='Ej: cancha en mantenimiento'
+                      autoFocus
+                    />
                     <div className='flex gap-2'>
-                      <Button
-                        variant='success'
-                        size='sm'
-                        loading={actingId === r.id}
-                        onClick={() => handleConfirm(r.id)}
-                      >
-                        <CheckIcon size={16} />
-                        Confirmar
-                      </Button>
                       <Button
                         variant='danger'
                         size='sm'
-                        onClick={() => setRejectingId(r.id)}
+                        loading={actingId === r.id}
+                        onClick={() => handleReject(r.id)}
                       >
-                        <XIcon size={16} />
-                        Rechazar
+                        Confirmar rechazo
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => {
+                          setRejectingId(null)
+                          setRejectReason('')
+                        }}
+                      >
+                        Cancelar
                       </Button>
                     </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                ) : cancellingId === r.id ? (
+                  <div className='flex flex-col gap-2.5 animate-fade-up'>
+                    <Input
+                      label='Motivo de cancelación'
+                      value={cancelReason}
+                      onChange={(e) => setCancelReason(e.target.value)}
+                      placeholder='Ej: el cliente no llegó'
+                      autoFocus
+                    />
+                    <div className='flex gap-2'>
+                      <Button
+                        variant='danger'
+                        size='sm'
+                        loading={actingId === r.id}
+                        onClick={() => handleCancelByBusiness(r.id)}
+                      >
+                        Confirmar cancelación
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => {
+                          setCancellingId(null)
+                          setCancelReason('')
+                        }}
+                      >
+                        Cerrar
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className='flex items-center gap-2 flex-wrap'>
+                    {/* WhatsApp — acción de contacto, sutil pero visible */}
+                    {waLink(r.profile?.phone) && (
+                      <a
+                        href={
+                          waLink(
+                            r.profile?.phone,
+                            `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                          )!
+                        }
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                        aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                      >
+                        <WhatsAppIcon size={16} />
+                        <span className='hidden sm:inline'>WhatsApp</span>
+                      </a>
+                    )}
+
+                    {/* Spacer empuja las acciones a la derecha en desktop */}
+                    <div className='flex gap-2 ml-auto'>
+                      {r.status === 'pending' && (
+                        <>
+                          <Button
+                            variant='success'
+                            size='sm'
+                            loading={actingId === r.id}
+                            onClick={() => handleConfirm(r.id)}
+                          >
+                            <CheckIcon size={16} />
+                            Confirmar
+                          </Button>
+                          <Button
+                            variant='danger'
+                            size='sm'
+                            onClick={() => setRejectingId(r.id)}
+                          >
+                            <XIcon size={16} />
+                            Rechazar
+                          </Button>
+                        </>
+                      )}
+                      {r.status === 'confirmed' && (
+                        <Button
+                          variant='danger'
+                          size='sm'
+                          onClick={() => setCancellingId(r.id)}
+                        >
+                          <XIcon size={16} />
+                          Cancelar reserva
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </Card>
           ))}
         </div>
