@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'wouter'
 import { fetchActiveCourts } from '@/services/courts'
 import { fetchAvailability } from '@/services/availability'
+import { fetchBusinessContact } from '@/services/business'
 import { Card } from '@/components/common/card'
+import { LocationMap } from '@/components/common/location-map'
 import {
   SlotGridSkeleton,
   DatePickerSkeleton
@@ -12,8 +14,11 @@ import {
   InboxIcon,
   SunIcon,
   CloudSunIcon,
-  MoonIcon
+  MoonIcon,
+  MapPinIcon,
+  ExternalLinkIcon
 } from '@/components/common/icon'
+import { formatFullAddress, googleMapsLink } from '@/lib/address'
 import type { Court, AvailabilitySlot } from '@/types'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -31,6 +36,14 @@ export function AvailabilityPage() {
   const [loading, setLoading] = useState(true)
   const [loadingCourts, setLoadingCourts] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [location, setLocation] = useState<{
+    street: string | null
+    neighborhood: string | null
+    city: string | null
+    state: string | null
+    latitude: number | null
+    longitude: number | null
+  } | null>(null)
 
   // Cargar canchas activas
   useEffect(() => {
@@ -48,6 +61,28 @@ export function AvailabilityPage() {
       }
     }
     loadCourts()
+  }, [])
+
+  // Cargar ubicación del negocio
+  useEffect(() => {
+    async function loadLocation() {
+      try {
+        const data = await fetchBusinessContact()
+        if (data) {
+          setLocation({
+            street: data.street,
+            neighborhood: data.neighborhood,
+            city: data.city,
+            state: data.state,
+            latitude: data.latitude,
+            longitude: data.longitude
+          })
+        }
+      } catch {
+        // Silencioso: la ubicación es opcional
+      }
+    }
+    loadLocation()
   }, [])
 
   // Cargar disponibilidad
@@ -139,6 +174,66 @@ export function AvailabilityPage() {
           <span>canchas</span>
         </div>
       </div>
+
+      {/* Ubicación del negocio */}
+      {location &&
+        (location.street ||
+          location.city ||
+          (location.latitude != null && location.longitude != null)) && (
+          <Card
+            className='p-4 animate-fade-up'
+            style={{ animationDelay: '30ms' }}
+          >
+            <div className='flex items-start gap-3'>
+              <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-pitch-100 text-pitch-700 shrink-0'>
+                <MapPinIcon size={18} />
+              </div>
+              <div className='flex-1 min-w-0'>
+                <h3 className='text-sm font-semibold tracking-tight mb-0.5'>
+                  Cómo llegar
+                </h3>
+                {(() => {
+                  const addr = formatFullAddress({
+                    street: location.street,
+                    neighborhood: location.neighborhood,
+                    city: location.city,
+                    state: location.state
+                  })
+                  return addr ? (
+                    <p className='text-xs text-(--color-text-muted) mb-2'>
+                      {addr}
+                    </p>
+                  ) : null
+                })()}
+                {location.latitude != null && location.longitude != null && (
+                  <div className='mt-2'>
+                    <LocationMap
+                      latitude={location.latitude}
+                      longitude={location.longitude}
+                      height={180}
+                    />
+                  </div>
+                )}
+                <a
+                  href={googleMapsLink({
+                    street: location.street,
+                    neighborhood: location.neighborhood,
+                    city: location.city,
+                    state: location.state,
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                  })}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-(--color-primary) hover:underline touch-target'
+                >
+                  <ExternalLinkIcon size={14} />
+                  Abrir en Google Maps
+                </a>
+              </div>
+            </div>
+          </Card>
+        )}
 
       {/* Date picker — mobile-first horizontal scroll */}
       {loadingCourts ? (

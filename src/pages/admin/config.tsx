@@ -4,6 +4,8 @@ import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { PhoneInput } from '@/components/common/phone-input'
+import { LocationMap } from '@/components/common/location-map'
+import { SearchLocationButton } from '@/components/common/search-location-button'
 import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
 import {
@@ -61,6 +63,13 @@ export function AdminConfigPage() {
       await updateBusiness(business.id, {
         name: business.name,
         address: business.address,
+        street: business.street,
+        neighborhood: business.neighborhood,
+        city: business.city,
+        state: business.state,
+        country: business.country,
+        latitude: business.latitude,
+        longitude: business.longitude,
         phone: business.phone,
         slot_duration_minutes: business.slot_duration_minutes,
         gap_minutes: business.gap_minutes,
@@ -133,14 +142,6 @@ export function AdminConfigPage() {
               }
               required
             />
-            <Input
-              label='Dirección'
-              value={business.address ?? ''}
-              onChange={(e) =>
-                setBusiness({ ...business, address: e.target.value })
-              }
-              hint='Dirección visible para los clientes.'
-            />
             <PhoneInput
               label='Teléfono'
               value={business.phone ?? ''}
@@ -148,6 +149,131 @@ export function AdminConfigPage() {
               hint='Número de contacto. Se usa en el botón flotante de WhatsApp.'
               optional
             />
+          </div>
+        </Card>
+
+        {/* Ubicación */}
+        <Card
+          className='p-5 animate-fade-up'
+          style={{ animationDelay: '20ms' }}
+        >
+          <div className='flex items-center gap-2 mb-4'>
+            <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+              <MapPinIcon size={18} />
+            </div>
+            <h2 className='font-semibold text-sm tracking-tight'>Ubicación</h2>
+          </div>
+          <div className='flex flex-col gap-4'>
+            <Input
+              label='Calle / Carrera y número'
+              value={business.street ?? ''}
+              onChange={(e) =>
+                setBusiness({ ...business, street: e.target.value })
+              }
+              placeholder='Ej: Calle 123 #45-67'
+              hint='Dirección física del establecimiento.'
+            />
+            <Input
+              label='Barrio / Zona'
+              value={business.neighborhood ?? ''}
+              onChange={(e) =>
+                setBusiness({ ...business, neighborhood: e.target.value })
+              }
+              placeholder='Ej: El Poblado'
+            />
+            <div className='grid grid-cols-2 gap-3'>
+              <Input
+                label='Ciudad'
+                value={business.city ?? ''}
+                onChange={(e) =>
+                  setBusiness({ ...business, city: e.target.value })
+                }
+                placeholder='Ej: Medellín'
+              />
+              <Input
+                label='Departamento'
+                value={business.state ?? ''}
+                onChange={(e) =>
+                  setBusiness({ ...business, state: e.target.value })
+                }
+                placeholder='Ej: Antioquia'
+              />
+            </div>
+            <Input
+              label='País'
+              value={business.country ?? ''}
+              onChange={(e) =>
+                setBusiness({ ...business, country: e.target.value })
+              }
+              placeholder='Colombia'
+            />
+
+            {/* Mapa interactivo */}
+            <div>
+              <label className='text-sm font-medium text-(--color-text) tracking-tight mb-2 block'>
+                Mapa
+              </label>
+              <p className='text-xs text-(--color-text-muted) mb-3'>
+                Arrastra el pin para ajustar la ubicación exacta. Esto ayuda a
+                los clientes a llegar.
+              </p>
+              {business.latitude != null && business.longitude != null ? (
+                <LocationMap
+                  latitude={business.latitude}
+                  longitude={business.longitude}
+                  draggable
+                  onChange={(lat, lng) =>
+                    setBusiness({
+                      ...business,
+                      latitude: lat,
+                      longitude: lng
+                    })
+                  }
+                  height={260}
+                />
+              ) : (
+                <div className='rounded-xl border border-dashed border-border bg-surface-inset p-6 text-center'>
+                  <MapPinIcon
+                    size={28}
+                    className='mx-auto text-text-muted mb-2'
+                  />
+                  <p className='text-sm text-text-muted mb-3'>
+                    Busca la ubicación en el mapa para fijar el pin.
+                  </p>
+                  <SearchLocationButton
+                    onFound={(lat, lng) =>
+                      setBusiness({
+                        ...business,
+                        latitude: lat,
+                        longitude: lng
+                      })
+                    }
+                    addressParts={{
+                      street: business.street,
+                      neighborhood: business.neighborhood,
+                      city: business.city,
+                      state: business.state,
+                      country: business.country
+                    }}
+                  />
+                </div>
+              )}
+              {business.latitude != null && business.longitude != null && (
+                <button
+                  type='button'
+                  onClick={() =>
+                    setBusiness({
+                      ...business,
+                      latitude: null,
+                      longitude: null
+                    })
+                  }
+                  className='mt-2 text-xs text-text-muted hover:text-danger transition-colors'
+                >
+                  Quitar ubicación del mapa
+                </button>
+              )}
+            </div>
           </div>
         </Card>
 

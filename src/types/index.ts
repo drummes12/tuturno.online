@@ -42,6 +42,13 @@ export interface Business {
   slug: string
   timezone: string
   address: string | null
+  street: string | null
+  neighborhood: string | null
+  city: string | null
+  state: string | null
+  country: string | null
+  latitude: number | null
+  longitude: number | null
   phone: string | null
   slot_duration_minutes: number
   gap_minutes: number
