@@ -119,7 +119,7 @@ export function AdminConfigPage() {
   })
 
   return (
-    <div className='flex flex-col gap-5 max-w-2xl mx-auto'>
+    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
       {/* Header */}
       <div className='animate-fade-up'>
         <h1 className='text-2xl font-bold tracking-tight'>Configuración</h1>
@@ -142,349 +142,354 @@ export function AdminConfigPage() {
       <form onSubmit={handleSave} className='flex flex-col gap-4'>
         <fieldset
           disabled={!canEdit}
-          className='flex flex-col gap-4 border-0 p-0 m-0'
+          className='flex flex-col gap-4 border-0 p-0 m-0 md:grid md:grid-cols-2 md:items-start'
         >
-          {/* Datos del negocio */}
-          <Card className='p-5 animate-fade-up'>
-            <div className='flex items-center gap-2 mb-4'>
-              <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
-                <StoreIcon size={18} />
+          <div className='contents md:order-1 md:flex md:flex-col md:gap-4'>
+            {/* Datos del negocio */}
+            <Card className='order-1 p-5 animate-fade-up'>
+              <div className='flex items-center gap-2 mb-4'>
+                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+                  <StoreIcon size={18} />
+                </div>
+                <h2 className='font-semibold text-sm tracking-tight'>
+                  Datos del negocio
+                </h2>
               </div>
-              <h2 className='font-semibold text-sm tracking-tight'>
-                Datos del negocio
-              </h2>
-            </div>
-            <div className='flex flex-col gap-4'>
-              <Input
-                label='Nombre'
-                value={business.name}
-                onChange={(e) =>
-                  setBusiness({ ...business, name: e.target.value })
-                }
-                required
-              />
-              <PhoneInput
-                label='Teléfono'
-                value={business.phone ?? ''}
-                onChange={(val) => setBusiness({ ...business, phone: val })}
-                hint='Número de contacto. Se usa en el botón flotante de WhatsApp.'
-                optional
-              />
-            </div>
-          </Card>
-
-          {/* Ubicación */}
-          <Card
-            className='p-5 animate-fade-up'
-            style={{ animationDelay: '20ms' }}
-          >
-            <div className='flex items-center gap-2 mb-4'>
-              <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
-                <MapPinIcon size={18} />
-              </div>
-              <h2 className='font-semibold text-sm tracking-tight'>
-                Ubicación
-              </h2>
-            </div>
-            <div className='flex flex-col gap-4'>
-              <Input
-                label='Calle / Carrera y número'
-                value={business.street ?? ''}
-                onChange={(e) =>
-                  setBusiness({ ...business, street: e.target.value })
-                }
-                placeholder='Ej: Calle 123 #45-67'
-                hint='Dirección física del establecimiento.'
-              />
-              <Input
-                label='Barrio / Zona'
-                value={business.neighborhood ?? ''}
-                onChange={(e) =>
-                  setBusiness({ ...business, neighborhood: e.target.value })
-                }
-                placeholder='Ej: El Poblado'
-              />
-              <div className='grid grid-cols-2 gap-3'>
+              <div className='flex flex-col gap-4'>
                 <Input
-                  label='Ciudad'
-                  value={business.city ?? ''}
+                  label='Nombre'
+                  value={business.name}
                   onChange={(e) =>
-                    setBusiness({ ...business, city: e.target.value })
+                    setBusiness({ ...business, name: e.target.value })
                   }
-                  placeholder='Ej: Medellín'
+                  required
                 />
-                <Input
-                  label='Departamento'
-                  value={business.state ?? ''}
-                  onChange={(e) =>
-                    setBusiness({ ...business, state: e.target.value })
-                  }
-                  placeholder='Ej: Antioquia'
+                <PhoneInput
+                  label='Teléfono'
+                  value={business.phone ?? ''}
+                  onChange={(val) => setBusiness({ ...business, phone: val })}
+                  hint='Número de contacto. Se usa en el botón flotante de WhatsApp.'
+                  optional
                 />
               </div>
-              <Input
-                label='País'
-                value={business.country ?? ''}
-                onChange={(e) =>
-                  setBusiness({ ...business, country: e.target.value })
-                }
-                placeholder='Colombia'
-              />
+            </Card>
 
-              {/* Ubicación en mapas */}
-              <div>
-                <label className='text-sm font-medium text-(--color-text) tracking-tight mb-2 block'>
-                  Ubicación en mapas
-                </label>
-                <p className='text-xs text-(--color-text-muted) mb-3'>
-                  Completa la dirección manualmente y usa el botón para
-                  comprobarla o compartirla en Google Maps. No requiere una API
-                  key.
-                </p>
-                <div className='rounded-xl border border-border bg-surface-inset p-4'>
-                  <div className='flex items-start gap-3'>
-                    <MapPinIcon
-                      size={20}
-                      className='text-pitch-700 shrink-0 mt-0.5'
-                    />
-                    <div className='min-w-0 flex-1'>
-                      <p className='text-sm font-medium'>
-                        {fullAddress || 'Aún no hay una dirección configurada.'}
-                      </p>
+            {/* Ubicación */}
+            <Card
+              className='order-3 p-5 animate-fade-up'
+              style={{ animationDelay: '20ms' }}
+            >
+              <div className='flex items-center gap-2 mb-4'>
+                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+                  <MapPinIcon size={18} />
+                </div>
+                <h2 className='font-semibold text-sm tracking-tight'>
+                  Ubicación
+                </h2>
+              </div>
+              <div className='flex flex-col gap-4'>
+                <Input
+                  label='Calle / Carrera y número'
+                  value={business.street ?? ''}
+                  onChange={(e) =>
+                    setBusiness({ ...business, street: e.target.value })
+                  }
+                  placeholder='Ej: Calle 123 #45-67'
+                  hint='Dirección física del establecimiento.'
+                />
+                <Input
+                  label='Barrio / Zona'
+                  value={business.neighborhood ?? ''}
+                  onChange={(e) =>
+                    setBusiness({ ...business, neighborhood: e.target.value })
+                  }
+                  placeholder='Ej: El Poblado'
+                />
+                <div className='grid grid-cols-2 gap-3'>
+                  <Input
+                    label='Ciudad'
+                    value={business.city ?? ''}
+                    onChange={(e) =>
+                      setBusiness({ ...business, city: e.target.value })
+                    }
+                    placeholder='Ej: Medellín'
+                  />
+                  <Input
+                    label='Departamento'
+                    value={business.state ?? ''}
+                    onChange={(e) =>
+                      setBusiness({ ...business, state: e.target.value })
+                    }
+                    placeholder='Ej: Antioquia'
+                  />
+                </div>
+                <Input
+                  label='País'
+                  value={business.country ?? ''}
+                  onChange={(e) =>
+                    setBusiness({ ...business, country: e.target.value })
+                  }
+                  placeholder='Colombia'
+                />
+
+                {/* Ubicación en mapas */}
+                <div>
+                  <label className='text-sm font-medium text-(--color-text) tracking-tight mb-2 block'>
+                    Ubicación en mapas
+                  </label>
+                  <p className='text-xs text-(--color-text-muted) mb-3'>
+                    Completa la dirección manualmente y usa el botón para
+                    comprobarla o compartirla en Google Maps. No requiere una
+                    API key.
+                  </p>
+                  <div className='rounded-xl border border-border bg-surface-inset p-4'>
+                    <div className='flex items-start gap-3'>
+                      <MapPinIcon
+                        size={20}
+                        className='text-pitch-700 shrink-0 mt-0.5'
+                      />
+                      <div className='min-w-0 flex-1'>
+                        <p className='text-sm font-medium'>
+                          {fullAddress ||
+                            'Aún no hay una dirección configurada.'}
+                        </p>
+                      </div>
                     </div>
+                    <a
+                      href={mapsUrl}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      aria-disabled={!fullAddress}
+                      className={`inline-flex items-center justify-center gap-2 mt-4 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        fullAddress
+                          ? 'bg-(--color-primary) text-white hover:bg-(--color-primary-hover)'
+                          : 'pointer-events-none bg-graphite-100 text-text-muted opacity-60'
+                      }`}
+                    >
+                      <ExternalLinkIcon size={15} />
+                      Abrir en Google Maps
+                    </a>
                   </div>
-                  <a
-                    href={mapsUrl}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    aria-disabled={!fullAddress}
-                    className={`inline-flex items-center justify-center gap-2 mt-4 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                      fullAddress
-                        ? 'bg-(--color-primary) text-white hover:bg-(--color-primary-hover)'
-                        : 'pointer-events-none bg-graphite-100 text-text-muted opacity-60'
-                    }`}
-                  >
-                    <ExternalLinkIcon size={15} />
-                    Abrir en Google Maps
-                  </a>
                 </div>
               </div>
-            </div>
-          </Card>
-
-          {/* Turnos */}
-          <Card
-            className='p-5 animate-fade-up'
-            style={{ animationDelay: '40ms' }}
-            elevated
-          >
-            <div className='flex items-center gap-2 mb-4'>
-              <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
-                <ClockIcon size={18} />
+            </Card>
+          </div>
+          <div className='contents md:order-2 md:flex md:flex-col md:gap-4'>
+            {/* Turnos */}
+            <Card
+              className='order-2 p-5 animate-fade-up'
+              style={{ animationDelay: '40ms' }}
+            >
+              <div className='flex items-center gap-2 mb-4'>
+                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+                  <ClockIcon size={18} />
+                </div>
+                <h2 className='font-semibold text-sm tracking-tight'>Turnos</h2>
               </div>
-              <h2 className='font-semibold text-sm tracking-tight'>Turnos</h2>
-            </div>
-            <div className='flex flex-col gap-4'>
-              {/* Duración del turno — selector visual */}
-              <div>
-                <label className='block text-sm font-medium mb-2'>
-                  Duración del turno
-                </label>
-                <div className='grid grid-cols-4 gap-2'>
-                  {[30, 45, 60, 90].map((min) => (
-                    <button
-                      key={min}
-                      type='button'
-                      onClick={() =>
-                        setBusiness({ ...business, slot_duration_minutes: min })
+              <div className='flex flex-col gap-4'>
+                {/* Duración del turno — selector visual */}
+                <div>
+                  <label className='block text-sm font-medium mb-2'>
+                    Duración del turno
+                  </label>
+                  <div className='grid grid-cols-4 gap-2'>
+                    {[30, 45, 60, 90].map((min) => (
+                      <button
+                        key={min}
+                        type='button'
+                        onClick={() =>
+                          setBusiness({
+                            ...business,
+                            slot_duration_minutes: min
+                          })
+                        }
+                        className={`flex flex-col items-center justify-center py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                          business.slot_duration_minutes === min
+                            ? 'border-primary bg-pitch-50 text-primary'
+                            : 'border-border bg-surface-inset text-text-muted hover:border-graphite-300'
+                        }`}
+                        aria-pressed={business.slot_duration_minutes === min}
+                      >
+                        <span className='nums font-bold text-base'>{min}</span>
+                        <span className='text-xs'>min</span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className='flex items-center gap-2 mt-2'>
+                    <input
+                      type='number'
+                      min={15}
+                      step={5}
+                      value={business.slot_duration_minutes}
+                      onChange={(e) =>
+                        setBusiness({
+                          ...business,
+                          slot_duration_minutes: parseInt(e.target.value) || 60
+                        })
                       }
-                      className={`flex flex-col items-center justify-center py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                        business.slot_duration_minutes === min
-                          ? 'border-primary bg-pitch-50 text-primary'
-                          : 'border-border bg-surface-inset text-text-muted hover:border-graphite-300'
-                      }`}
-                      aria-pressed={business.slot_duration_minutes === min}
-                    >
-                      <span className='nums font-bold text-base'>{min}</span>
-                      <span className='text-xs'>min</span>
-                    </button>
-                  ))}
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums focus:outline-none focus:border-primary'
+                      aria-label='Duración personalizada'
+                    />
+                    <span className='text-xs text-text-muted'>
+                      Minutos personalizados (mínimo 15)
+                    </span>
+                  </div>
                 </div>
-                <div className='flex items-center gap-2 mt-2'>
-                  <input
-                    type='number'
-                    min={15}
-                    step={5}
-                    value={business.slot_duration_minutes}
-                    onChange={(e) =>
-                      setBusiness({
-                        ...business,
-                        slot_duration_minutes: parseInt(e.target.value) || 60
-                      })
-                    }
-                    className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums focus:outline-none focus:border-primary'
-                    aria-label='Duración personalizada'
-                  />
-                  <span className='text-xs text-text-muted'>
-                    Minutos personalizados (mínimo 15)
-                  </span>
-                </div>
-              </div>
 
-              {/* Gap entre turnos */}
-              <div>
-                <label className='text-sm font-medium mb-2 flex items-center gap-1.5'>
-                  <TimerIcon size={14} className='text-text-muted' />
-                  Gap entre turnos
-                </label>
-                <div className='grid grid-cols-4 gap-2'>
-                  {[
-                    { v: 0, label: 'Sin gap' },
-                    { v: 10, label: '10 min' },
-                    { v: 15, label: '15 min' },
-                    { v: 30, label: '30 min' }
-                  ].map((opt) => (
-                    <button
-                      key={opt.v}
-                      type='button'
-                      onClick={() =>
-                        setBusiness({ ...business, gap_minutes: opt.v })
-                      }
-                      className={`flex flex-col items-center justify-center py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                        business.gap_minutes === opt.v
-                          ? 'border-primary bg-pitch-50 text-primary'
-                          : 'border-border bg-surface-inset text-text-muted hover:border-graphite-300'
-                      }`}
-                      aria-pressed={business.gap_minutes === opt.v}
-                    >
-                      <span className='nums font-bold text-base'>
-                        {opt.v === 0 ? '0' : opt.v}
-                      </span>
-                      <span className='text-xs'>
-                        {opt.v === 0 ? 'seguidos' : 'min'}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <div className='flex items-center gap-2 mt-2'>
-                  <input
-                    type='number'
-                    min={0}
-                    step={5}
-                    value={business.gap_minutes}
-                    onChange={(e) =>
-                      setBusiness({
-                        ...business,
-                        gap_minutes: parseInt(e.target.value) || 0
-                      })
-                    }
-                    className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums focus:outline-none focus:border-primary'
-                    aria-label='Gap personalizado'
-                  />
-                  <span className='text-xs text-text-muted'>
-                    Descanso entre reservas (limpieza, preparación)
-                  </span>
-                </div>
-              </div>
-
-              {/* Preview de cómo quedan los turnos */}
-              <div className='bg-surface-inset rounded-lg p-3 border border-border'>
-                <p className='text-xs font-medium text-text-muted mb-2 flex items-center gap-1.5'>
-                  <ClockIcon size={12} />
-                  Vista previa
-                </p>
-                <div className='flex items-center gap-1.5 flex-wrap'>
-                  {(() => {
-                    const slots: string[] = []
-                    const start = 8 * 60 // 08:00
-                    const dur = business.slot_duration_minutes
-                    const gap = business.gap_minutes
-                    let t = start
-                    for (let i = 0; i < 5; i++) {
-                      const h = Math.floor(t / 60)
-                      const m = t % 60
-                      slots.push(
-                        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
-                      )
-                      t += dur + gap
-                    }
-                    return slots.map((s, i) => (
-                      <span key={i} className='flex items-center gap-1.5'>
-                        <span className='nums text-sm font-medium bg-surface px-2.5 py-1 rounded-md border border-border'>
-                          {s}
+                {/* Gap entre turnos */}
+                <div>
+                  <label className='text-sm font-medium mb-2 flex items-center gap-1.5'>
+                    <TimerIcon size={14} className='text-text-muted' />
+                    Gap entre turnos
+                  </label>
+                  <div className='grid grid-cols-4 gap-2'>
+                    {[
+                      { v: 0, label: 'Sin gap' },
+                      { v: 10, label: '10 min' },
+                      { v: 15, label: '15 min' },
+                      { v: 30, label: '30 min' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.v}
+                        type='button'
+                        onClick={() =>
+                          setBusiness({ ...business, gap_minutes: opt.v })
+                        }
+                        className={`flex flex-col items-center justify-center py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                          business.gap_minutes === opt.v
+                            ? 'border-primary bg-pitch-50 text-primary'
+                            : 'border-border bg-surface-inset text-text-muted hover:border-graphite-300'
+                        }`}
+                        aria-pressed={business.gap_minutes === opt.v}
+                      >
+                        <span className='nums font-bold text-base'>
+                          {opt.v === 0 ? '0' : opt.v}
                         </span>
-                        {i < slots.length - 1 && (
-                          <span className='text-text-muted text-xs'>
-                            {gap > 0 ? `${gap}m` : '→'}
+                        <span className='text-xs'>
+                          {opt.v === 0 ? 'seguidos' : 'min'}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className='flex items-center gap-2 mt-2'>
+                    <input
+                      type='number'
+                      min={0}
+                      step={5}
+                      value={business.gap_minutes}
+                      onChange={(e) =>
+                        setBusiness({
+                          ...business,
+                          gap_minutes: parseInt(e.target.value) || 0
+                        })
+                      }
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums focus:outline-none focus:border-primary'
+                      aria-label='Gap personalizado'
+                    />
+                    <span className='text-xs text-text-muted'>
+                      Descanso entre reservas (limpieza, preparación)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Preview de cómo quedan los turnos */}
+                <div className='bg-surface-inset rounded-lg p-3 border border-border'>
+                  <p className='text-xs font-medium text-text-muted mb-2 flex items-center gap-1.5'>
+                    <ClockIcon size={12} />
+                    Vista previa
+                  </p>
+                  <div className='flex items-center gap-1.5 flex-wrap'>
+                    {(() => {
+                      const slots: string[] = []
+                      const start = 8 * 60 // 08:00
+                      const dur = business.slot_duration_minutes
+                      const gap = business.gap_minutes
+                      let t = start
+                      for (let i = 0; i < 5; i++) {
+                        const h = Math.floor(t / 60)
+                        const m = t % 60
+                        slots.push(
+                          `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+                        )
+                        t += dur + gap
+                      }
+                      return slots.map((s, i) => (
+                        <span key={i} className='flex items-center gap-1.5'>
+                          <span className='nums text-sm font-medium bg-surface px-2.5 py-1 rounded-md border border-border'>
+                            {s}
                           </span>
-                        )}
-                      </span>
-                    ))
-                  })()}
+                          {i < slots.length - 1 && (
+                            <span className='text-text-muted text-xs'>
+                              {gap > 0 ? `${gap}m` : '→'}
+                            </span>
+                          )}
+                        </span>
+                      ))
+                    })()}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Card>
+            </Card>
 
-          {/* Reglas de operación */}
-          <Card
-            className='p-5 animate-fade-up'
-            style={{ animationDelay: '80ms' }}
-          >
-            <div className='flex items-center gap-2 mb-4'>
-              <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
-                <CalendarIcon size={18} />
+            {/* Reglas de operación */}
+            <Card
+              className='order-4 p-5 animate-fade-up'
+              style={{ animationDelay: '80ms' }}
+            >
+              <div className='flex items-center gap-2 mb-4'>
+                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
+                  <CalendarIcon size={18} />
+                </div>
+                <h2 className='font-semibold text-sm tracking-tight'>
+                  Reglas de operación
+                </h2>
               </div>
-              <h2 className='font-semibold text-sm tracking-tight'>
-                Reglas de operación
-              </h2>
-            </div>
-            <div className='flex flex-col gap-4'>
-              <Input
-                label='Hold temporal (minutos)'
-                type='number'
-                min={5}
-                value={String(business.hold_duration_minutes)}
-                onChange={(e) =>
-                  setBusiness({
-                    ...business,
-                    hold_duration_minutes: parseInt(e.target.value) || 30
-                  })
-                }
-                hint='Tiempo que un turno queda retenido mientras el negocio decide confirmar.'
-              />
-              <Input
-                label='Límite de cancelación (horas antes)'
-                type='number'
-                min={0}
-                value={String(business.cancellation_limit_hours)}
-                onChange={(e) =>
-                  setBusiness({
-                    ...business,
-                    cancellation_limit_hours: parseInt(e.target.value) || 2
-                  })
-                }
-                hint='El cliente puede cancelar hasta X horas antes del turno.'
-              />
-              <Input
-                label='Anticipación máxima (días)'
-                type='number'
-                min={1}
-                value={String(business.max_advance_days)}
-                onChange={(e) =>
-                  setBusiness({
-                    ...business,
-                    max_advance_days: parseInt(e.target.value) || 30
-                  })
-                }
-                hint='Hasta cuántos días en adelante se puede reservar.'
-              />
-            </div>
-          </Card>
-
+              <div className='flex flex-col gap-4'>
+                <Input
+                  label='Hold temporal (minutos)'
+                  type='number'
+                  min={5}
+                  value={String(business.hold_duration_minutes)}
+                  onChange={(e) =>
+                    setBusiness({
+                      ...business,
+                      hold_duration_minutes: parseInt(e.target.value) || 30
+                    })
+                  }
+                  hint='Tiempo que un turno queda retenido mientras el negocio decide confirmar.'
+                />
+                <Input
+                  label='Límite de cancelación (horas antes)'
+                  type='number'
+                  min={0}
+                  value={String(business.cancellation_limit_hours)}
+                  onChange={(e) =>
+                    setBusiness({
+                      ...business,
+                      cancellation_limit_hours: parseInt(e.target.value) || 2
+                    })
+                  }
+                  hint='El cliente puede cancelar hasta X horas antes del turno.'
+                />
+                <Input
+                  label='Anticipación máxima (días)'
+                  type='number'
+                  min={1}
+                  value={String(business.max_advance_days)}
+                  onChange={(e) =>
+                    setBusiness({
+                      ...business,
+                      max_advance_days: parseInt(e.target.value) || 30
+                    })
+                  }
+                  hint='Hasta cuántos días en adelante se puede reservar.'
+                />
+              </div>
+            </Card>
+          </div>
           {/* Info read-only */}
           <Card
-            className='p-4 animate-fade-up'
+            className='order-5 p-4 animate-fade-up md:col-span-2'
             style={{ animationDelay: '100ms' }}
           >
             <div className='flex flex-col gap-2 text-sm'>

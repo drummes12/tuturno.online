@@ -231,7 +231,7 @@ export function AdminHoursPage() {
   }
 
   return (
-    <div className='flex flex-col gap-5 max-w-2xl mx-auto'>
+    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
       {/* Header */}
       <div className='animate-fade-up'>
         <h1 className='text-2xl font-bold tracking-tight'>
@@ -348,11 +348,11 @@ export function AdminHoursPage() {
                     return (
                       <div
                         key={f.id || `new-${globalIdx}`}
-                        className='flex items-center gap-3 px-4 py-3'
+                        className='grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2 px-4 py-3 sm:flex sm:items-center'
                       >
                         {/* Etiqueta de franja */}
                         <div
-                          className={`flex items-center gap-1.5 text-xs font-medium w-20 shrink-0 ${
+                          className={`col-span-2 flex items-center gap-1.5 text-xs font-medium sm:w-20 sm:shrink-0 ${
                             franjaOverlap ? 'text-red-600' : 'text-text-muted'
                           }`}
                         >
@@ -361,7 +361,7 @@ export function AdminHoursPage() {
                         </div>
 
                         {/* Inputs de tiempo */}
-                        <div className='flex items-center gap-2 flex-1'>
+                        <div className='col-span-2 flex min-w-0 items-center gap-2 sm:flex-1'>
                           <input
                             type='time'
                             value={f.open_time}
@@ -373,14 +373,16 @@ export function AdminHoursPage() {
                                 e.target.value
                               )
                             }
-                            className={`rounded-lg border bg-surface-inset px-3 py-2 text-sm touch-target nums ${
+                            className={`min-w-0 flex-1 rounded-lg border bg-surface-inset px-2.5 py-2 text-sm touch-target nums sm:px-3 ${
                               franjaOverlap
                                 ? 'border-red-300 focus:border-red-500'
                                 : 'border-border focus:border-primary'
                             } focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Apertura ${dayName} ${label.text}`}
                           />
-                          <span className='text-text-muted text-xs'>→</span>
+                          <span className='text-text-muted text-xs shrink-0'>
+                            →
+                          </span>
                           <input
                             type='time'
                             value={f.close_time}
@@ -392,7 +394,7 @@ export function AdminHoursPage() {
                                 e.target.value
                               )
                             }
-                            className={`rounded-lg border bg-surface-inset px-3 py-2 text-sm touch-target nums ${
+                            className={`min-w-0 flex-1 rounded-lg border bg-surface-inset px-2.5 py-2 text-sm touch-target nums sm:px-3 ${
                               franjaOverlap
                                 ? 'border-red-300 focus:border-red-500'
                                 : 'border-border focus:border-primary'
@@ -402,8 +404,9 @@ export function AdminHoursPage() {
                         </div>
 
                         {/* Duración calculada */}
-                        <span className='text-xs text-text-muted nums w-16 text-right shrink-0 hidden sm:block'>
-                          {Math.round(
+                        <span className='text-xs text-text-muted nums justify-self-start rounded-md bg-surface-inset px-2 py-1 h-fit sm:w-16 sm:justify-self-auto sm:bg-transparent sm:px-0 sm:py-0 sm:text-right'>
+                          <span className='sm:hidden'>Duración: </span>
+                          {Math.floor(
                             (toMinutes(f.close_time) - toMinutes(f.open_time)) /
                               60
                           )}
@@ -419,10 +422,11 @@ export function AdminHoursPage() {
                         {canEdit && (
                           <button
                             onClick={() => deleteFranja(globalIdx)}
-                            className='flex items-center justify-center w-8 h-8 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0'
+                            className='col-start-2 flex items-center justify-center w-10 h-10 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0 sm:w-8 sm:h-8'
                             aria-label={`Eliminar franja de ${label.text}`}
+                            title='Eliminar franja'
                           >
-                            <TrashIcon size={16} />
+                            <TrashIcon size={17} />
                           </button>
                         )}
                       </div>

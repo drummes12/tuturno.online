@@ -133,7 +133,7 @@ export function AdminCourtsPage() {
   }
 
   return (
-    <div className='flex flex-col gap-5 max-w-2xl mx-auto'>
+    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
       {/* Header */}
       <div className='flex items-center justify-between animate-fade-up'>
         <div>
