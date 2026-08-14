@@ -1,122 +1,18 @@
 import { describe, it, expect } from 'vitest'
+import {
+  createTemplates,
+  type TemplatePayload
+} from '../../supabase/functions/send-notifications/templates'
 
 /**
  * Tests de las plantillas de correo de la Edge Function send-notifications.
  *
- * Las plantillas son funciones puras que generan { subject, html } a partir
- * de un payload. Las extraemos aquí para testear sin necesidad de Deno.
- *
- * La Edge Function completa requiere Deno + Resend API, pero las plantillas
- * son la lógica de negocio que más vale la pena testear.
+ * Las plantillas se importan directamente desde templates.ts (archivo
+ * compartido entre la Edge Function y los tests — sin imports de Deno).
  */
 
-// Duplicamos las plantillas aquí porque la Edge Function usa Deno imports
-// que no se pueden importar desde Vitest (jsdom/node).
-// Si las plantillas cambian en index.ts, hay que actualizar aquí también.
-// TODO: extraer las plantillas a un archivo compartido importable.
-
-interface TemplatePayload {
-  business_name?: string
-  court_name?: string
-  starts_at?: string
-  recipient_name?: string | null
-  client_name?: string
-  client_email?: string
-  reason?: string
-}
-
-const templates: Record<
-  string,
-  (p: TemplatePayload) => { subject: string; html: string }
-> = {
-  reservation_created_client: (p) => ({
-    subject: `Solicitud de reserva recibida — ${p.business_name}`,
-    html: `
-      <h2>Solicitud recibida</h2>
-      <p>Hola ${p.recipient_name ?? ''},</p>
-      <p>Tu solicitud de reserva está <strong>pendiente de confirmación</strong>.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-      <p>Te avisaremos cuando el negocio confirme o rechace tu solicitud.</p>
-    `
-  }),
-  reservation_created_business: (p) => ({
-    subject: `Nueva solicitud de reserva — ${p.client_name}`,
-    html: `
-      <h2>Nueva solicitud de reserva</h2>
-      <ul>
-        <li><strong>Cliente:</strong> ${p.client_name}</li>
-        <li><strong>Email:</strong> ${p.client_email}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-      <p>Entra al panel para confirmar o rechazar.</p>
-    `
-  }),
-  reservation_confirmed: (p) => ({
-    subject: `Reserva confirmada — ${p.business_name}`,
-    html: `
-      <h2>¡Reserva confirmada!</h2>
-      <p>Hola ${p.recipient_name ?? ''}, tu reserva fue confirmada.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  }),
-  reservation_rejected: (p) => ({
-    subject: `Reserva rechazada — ${p.business_name}`,
-    html: `
-      <h2>Reserva rechazada</h2>
-      <p>Hola ${p.recipient_name ?? ''}, tu solicitud fue rechazada.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-        ${p.reason ? `<li><strong>Motivo:</strong> ${p.reason}</li>` : ''}
-      </ul>
-      <p>Puedes solicitar otro turno desde la app.</p>
-    `
-  }),
-  reservation_cancelled_client: (p) => ({
-    subject: `Reserva cancelada — ${p.business_name}`,
-    html: `
-      <h2>Reserva cancelada</h2>
-      <p>Tu reserva fue cancelada.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  }),
-  reservation_cancelled_business: (p) => ({
-    subject: `Reserva cancelada por el cliente — ${p.client_name}`,
-    html: `
-      <h2>Reserva cancelada por el cliente</h2>
-      <ul>
-        <li><strong>Cliente:</strong> ${p.client_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  }),
-  reservation_expired: (p) => ({
-    subject: `Solicitud expirada — ${p.business_name}`,
-    html: `
-      <h2>Solicitud expirada</h2>
-      <p>Tu solicitud expiró porque el negocio no la confirmó a tiempo.</p>
-      <ul>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  })
-}
+const APP_URL = 'https://tuturno.online'
+const templates = createTemplates(APP_URL)
 
 const validPayload: TemplatePayload = {
   business_name: 'Canchas El Parque',
@@ -125,7 +21,7 @@ const validPayload: TemplatePayload = {
   recipient_name: 'Juan Pérez',
   client_name: 'Juan Pérez',
   client_email: 'juan@example.com',
-  reason: 'Cancha en mantenimiento',
+  reason: 'Cancha en mantenimiento'
 }
 
 describe('Email templates', () => {
@@ -151,9 +47,16 @@ describe('Email templates', () => {
     it('maneja recipient_name null sin crashear', () => {
       const { html } = templates.reservation_created_client({
         ...validPayload,
-        recipient_name: null,
+        recipient_name: null
       })
-      expect(html).toContain('Hola ,') // string vacío
+      // El template renderiza un <strong> vacío
+      expect(html).toContain('Hola <strong></strong>')
+    })
+
+    it('incluye un botón CTA hacia /mis-reservas', () => {
+      const { html } = templates.reservation_created_client(validPayload)
+      expect(html).toContain(`${APP_URL}/mis-reservas`)
+      expect(html).toContain('Ver mis reservas')
     })
   })
 
@@ -168,6 +71,12 @@ describe('Email templates', () => {
       const { html } = templates.reservation_created_business(validPayload)
       expect(html).toContain('juan@example.com')
     })
+
+    it('incluye un botón CTA hacia /admin/reservas', () => {
+      const { html } = templates.reservation_created_business(validPayload)
+      expect(html).toContain(`${APP_URL}/admin/reservas`)
+      expect(html).toContain('Confirmar o rechazar')
+    })
   })
 
   describe('reservation_confirmed', () => {
@@ -180,6 +89,11 @@ describe('Email templates', () => {
     it('incluye mensaje de confirmación en html', () => {
       const { html } = templates.reservation_confirmed(validPayload)
       expect(html).toContain('confirmada')
+    })
+
+    it('incluye un botón CTA hacia /mis-reservas', () => {
+      const { html } = templates.reservation_confirmed(validPayload)
+      expect(html).toContain(`${APP_URL}/mis-reservas`)
     })
   })
 
@@ -198,7 +112,7 @@ describe('Email templates', () => {
     it('omite el motivo cuando no se proporciona', () => {
       const { html } = templates.reservation_rejected({
         ...validPayload,
-        reason: undefined,
+        reason: undefined
       })
       expect(html).not.toContain('Motivo')
     })
@@ -206,9 +120,15 @@ describe('Email templates', () => {
     it('omite el motivo cuando es string vacío', () => {
       const { html } = templates.reservation_rejected({
         ...validPayload,
-        reason: '',
+        reason: ''
       })
       expect(html).not.toContain('Motivo')
+    })
+
+    it('incluye un botón CTA hacia la home', () => {
+      const { html } = templates.reservation_rejected(validPayload)
+      expect(html).toContain(`${APP_URL}/`)
+      expect(html).toContain('Buscar otro turno')
     })
   })
 
@@ -217,6 +137,11 @@ describe('Email templates', () => {
       const { subject } = templates.reservation_cancelled_client(validPayload)
       expect(subject).toContain('cancelada')
     })
+
+    it('incluye un botón CTA hacia la home', () => {
+      const { html } = templates.reservation_cancelled_client(validPayload)
+      expect(html).toContain(`${APP_URL}/`)
+    })
   })
 
   describe('reservation_cancelled_business', () => {
@@ -224,6 +149,11 @@ describe('Email templates', () => {
       const { subject } = templates.reservation_cancelled_business(validPayload)
       expect(subject).toContain('cancelada por el cliente')
       expect(subject).toContain('Juan Pérez')
+    })
+
+    it('incluye un botón CTA hacia /admin/reservas', () => {
+      const { html } = templates.reservation_cancelled_business(validPayload)
+      expect(html).toContain(`${APP_URL}/admin/reservas`)
     })
   })
 
@@ -238,11 +168,16 @@ describe('Email templates', () => {
       expect(html).toContain('no la confirmó a tiempo')
     })
 
-    it('no incluye business_name en el html (solo cancha)', () => {
+    it('no incluye business_name en los detalles (solo cancha)', () => {
       const { html } = templates.reservation_expired(validPayload)
       expect(html).toContain('Cancha 1')
-      // El template de expired no lista el negocio
-      expect(html).not.toContain('Negocio')
+      // El template de expired no lista el negocio en los detalles
+      expect(html).not.toContain('>Negocio<')
+    })
+
+    it('incluye un botón CTA hacia la home', () => {
+      const { html } = templates.reservation_expired(validPayload)
+      expect(html).toContain(`${APP_URL}/`)
     })
   })
 
@@ -274,6 +209,39 @@ describe('Email templates', () => {
         if (html.includes('Fecha y hora')) {
           expect(html).toMatch(/10:00|10:/)
         }
+      }
+    })
+
+    it('cada plantilla incluye el header branded de TuTurno', () => {
+      for (const name of templateNames) {
+        const { html } = templates[name](validPayload)
+        expect(html).toContain('TuTurno')
+        expect(html).toContain('#0a5226') // pitch-800 header
+      }
+    })
+
+    it('cada plantilla incluye un enlace al footer con tuturno.online', () => {
+      for (const name of templateNames) {
+        const { html } = templates[name](validPayload)
+        expect(html).toContain(APP_URL)
+        expect(html).toContain('tuturno.online')
+      }
+    })
+
+    it('ninguna plantilla contiene localhost', () => {
+      for (const name of templateNames) {
+        const { html } = templates[name](validPayload)
+        expect(html).not.toContain('localhost')
+        expect(html).not.toContain('127.0.0.1')
+      }
+    })
+
+    it('cada plantilla incluye al menos un botón CTA', () => {
+      for (const name of templateNames) {
+        const { html } = templates[name](validPayload)
+        // El botón CTA usa bgcolor="#0a7d3b" (pitch-700)
+        expect(html).toContain('#0a7d3b')
+        expect(html).toContain('target="_blank"')
       }
     })
   })

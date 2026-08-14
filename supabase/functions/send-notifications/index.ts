@@ -5,10 +5,15 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 import '@supabase/functions-js/edge-runtime.d.ts'
 import { withSupabase } from '@supabase/server'
+import { createTemplates, type TemplatePayload } from './templates.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const RESEND_FROM_EMAIL =
   Deno.env.get('RESEND_FROM_EMAIL') ?? 'hola@tuturno.online'
+// URL pública del frontend. Configúrala en Supabase secrets:
+//   supabase secrets set APP_URL=https://tuturno.online
+const APP_URL = (Deno.env.get('APP_URL') ?? 'https://tuturno.online')
+  .replace(/\/+$/, '')
 
 interface OutboxRow {
   id: string
@@ -21,99 +26,8 @@ interface OutboxRow {
 
 const MAX_ATTEMPTS = 3
 
-// Plantillas de correo
-const templates: Record<
-  string,
-  (p: Record<string, unknown>) => { subject: string; html: string }
-> = {
-  reservation_created_client: (p) => ({
-    subject: `Solicitud de reserva recibida — ${p.business_name}`,
-    html: `
-      <h2>Solicitud recibida</h2>
-      <p>Hola ${p.recipient_name ?? ''},</p>
-      <p>Tu solicitud de reserva está <strong>pendiente de confirmación</strong>.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-      <p>Te avisaremos cuando el negocio confirme o rechace tu solicitud.</p>
-    `
-  }),
-  reservation_created_business: (p) => ({
-    subject: `Nueva solicitud de reserva — ${p.client_name}`,
-    html: `
-      <h2>Nueva solicitud de reserva</h2>
-      <ul>
-        <li><strong>Cliente:</strong> ${p.client_name}</li>
-        <li><strong>Email:</strong> ${p.client_email}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-      <p>Entra al panel para confirmar o rechazar.</p>
-    `
-  }),
-  reservation_confirmed: (p) => ({
-    subject: `Reserva confirmada — ${p.business_name}`,
-    html: `
-      <h2>¡Reserva confirmada!</h2>
-      <p>Hola ${p.recipient_name ?? ''}, tu reserva fue confirmada.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  }),
-  reservation_rejected: (p) => ({
-    subject: `Reserva rechazada — ${p.business_name}`,
-    html: `
-      <h2>Reserva rechazada</h2>
-      <p>Hola ${p.recipient_name ?? ''}, tu solicitud fue rechazada.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-        ${p.reason ? `<li><strong>Motivo:</strong> ${p.reason}</li>` : ''}
-      </ul>
-      <p>Puedes solicitar otro turno desde la app.</p>
-    `
-  }),
-  reservation_cancelled_client: (p) => ({
-    subject: `Reserva cancelada — ${p.business_name}`,
-    html: `
-      <h2>Reserva cancelada</h2>
-      <p>Tu reserva fue cancelada.</p>
-      <ul>
-        <li><strong>Negocio:</strong> ${p.business_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  }),
-  reservation_cancelled_business: (p) => ({
-    subject: `Reserva cancelada por el cliente — ${p.client_name}`,
-    html: `
-      <h2>Reserva cancelada por el cliente</h2>
-      <ul>
-        <li><strong>Cliente:</strong> ${p.client_name}</li>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  }),
-  reservation_expired: (p) => ({
-    subject: `Solicitud expirada — ${p.business_name}`,
-    html: `
-      <h2>Solicitud expirada</h2>
-      <p>Tu solicitud expiró porque el negocio no la confirmó a tiempo.</p>
-      <ul>
-        <li><strong>Cancha:</strong> ${p.court_name}</li>
-        <li><strong>Fecha y hora:</strong> ${new Date(p.starts_at as string).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}</li>
-      </ul>
-    `
-  })
-}
+// Plantillas de correo parametrizadas con la URL pública del frontend.
+const templates = createTemplates(APP_URL)
 
 // This endpoint uses 'secret' access, apiKey is required.
 // Use secret for Server-to-server, internal calls (e.g. cron).
@@ -163,13 +77,16 @@ export default {
             status: 'failed',
             last_error: 'Unknown template type',
             attempts: row.attempts + 1
-          })
+          } as never)
           .eq('id', row.id)
         failed++
         continue
       }
 
-      const payload = { ...row.payload, recipient_name: row.recipient_name }
+      const payload = {
+        ...row.payload,
+        recipient_name: row.recipient_name
+      } as TemplatePayload
       const { subject, html } = template(payload)
 
       try {
@@ -194,7 +111,7 @@ export default {
               status: 'sent',
               sent_at: new Date().toISOString(),
               attempts: row.attempts + 1
-            })
+            } as never)
             .eq('id', row.id)
           sent++
         } else {
@@ -205,7 +122,7 @@ export default {
               attempts: row.attempts + 1,
               last_error: `Resend API error: ${res.status} ${errText}`,
               status: row.attempts + 1 >= MAX_ATTEMPTS ? 'failed' : 'pending'
-            })
+            } as never)
             .eq('id', row.id)
           failed++
         }
@@ -216,7 +133,7 @@ export default {
             attempts: row.attempts + 1,
             last_error: String(err),
             status: row.attempts + 1 >= MAX_ATTEMPTS ? 'failed' : 'pending'
-          })
+          } as never)
           .eq('id', row.id)
         failed++
       }
