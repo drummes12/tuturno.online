@@ -55,11 +55,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className='mx-auto max-w-5xl px-4 h-14 flex items-center justify-between'>
           <Link
             href='/'
-            className='flex items-center gap-2.5 font-semibold text-base tracking-tight'
+            className='flex items-center gap-2 font-bold text-base tracking-tight'
           >
-            <span className='flex items-center justify-center w-7 h-7 rounded-lg bg-flood-400 text-pitch-900'>
-              <CourtIcon size={18} strokeWidth={2.5} />
-            </span>
+            <img
+              src='/logo-mark.svg'
+              alt='TuTurno'
+              className='w-8 h-8 rounded-lg'
+            />
             <span>TuTurno</span>
           </Link>
           {user ? (

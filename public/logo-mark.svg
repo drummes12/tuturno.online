@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Icon-only version: clock in rounded square, no pitch lines -->
+  <rect width="512" height="512" rx="112" fill="#0a5226"/>
+
+  <!-- Clock face -->
+  <circle cx="256" cy="256" r="150" fill="#f8faf7"/>
+  <circle cx="256" cy="256" r="138" fill="none" stroke="#e2e8e0" stroke-width="4"/>
+
+  <!-- Hour marks -->
+  <rect x="252" y="130" width="8" height="22" rx="3" fill="#2c342f"/>
+  <rect x="360" y="252" width="22" height="8" rx="3" fill="#2c342f"/>
+  <rect x="252" y="360" width="8" height="22" rx="3" fill="#2c342f"/>
+  <rect x="130" y="252" width="22" height="8" rx="3" fill="#2c342f"/>
+
+  <!-- Minor marks -->
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(30 256 256)"/>
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(60 256 256)"/>
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(120 256 256)"/>
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(150 256 256)"/>
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(210 256 256)"/>
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(240 256 256)"/>
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(300 256 256)"/>
+  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(330 256 256)"/>
+
+  <!-- Hour hand — ~10 o'clock -->
+  <line x1="256" y1="256" x2="190" y2="190" stroke="#0a5226" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- Minute hand — ~2 o'clock -->
+  <line x1="256" y1="256" x2="346" y2="200" stroke="#0a7d3b" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Center dot — floodlight yellow -->
+  <circle cx="256" cy="256" r="18" fill="#facc15"/>
+  <circle cx="256" cy="256" r="9" fill="#0a5226"/>
+</svg>

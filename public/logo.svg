@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" fill="none">
+  <!-- Logo mark: clock in rounded square -->
+  <rect x="40" y="40" width="240" height="240" rx="56" fill="#0a5226"/>
+
+  <!-- Pitch line decoration -->
+  <rect x="72" y="72" width="176" height="176" rx="16" stroke="#0a7d3b" stroke-width="2" opacity="0.5"/>
+  <line x1="160" y1="72" x2="160" y2="248" stroke="#0a7d3b" stroke-width="2" opacity="0.4"/>
+  <circle cx="160" cy="160" r="24" stroke="#0a7d3b" stroke-width="2" opacity="0.4"/>
+
+  <!-- Clock face -->
+  <circle cx="160" cy="160" r="72" fill="#f8faf7"/>
+  <circle cx="160" cy="160" r="66" fill="none" stroke="#e2e8e0" stroke-width="3"/>
+
+  <!-- Hour marks -->
+  <rect x="157" y="100" width="6" height="12" rx="2" fill="#2c342f"/>
+  <rect x="208" y="157" width="12" height="6" rx="2" fill="#2c342f"/>
+  <rect x="157" y="208" width="6" height="12" rx="2" fill="#2c342f"/>
+  <rect x="100" y="157" width="12" height="6" rx="2" fill="#2c342f"/>
+
+  <!-- Hands -->
+  <line x1="160" y1="160" x2="128" y2="128" stroke="#0a5226" stroke-width="8" stroke-linecap="round"/>
+  <line x1="160" y1="160" x2="204" y2="136" stroke="#0a7d3b" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Center dot -->
+  <circle cx="160" cy="160" r="10" fill="#facc15"/>
+  <circle cx="160" cy="160" r="5" fill="#0a5226"/>
+
+  <!-- Wordmark: TuTurno -->
+  <text x="320" y="180" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="96" font-weight="800" fill="#0a5226" letter-spacing="-3">
+    Tu<tspan fill="#0a7d3b">Turno</tspan>
+  </text>
+
+  <!-- Accent dot after the name -->
+  <circle cx="760" cy="150" r="10" fill="#facc15"/>
+</svg>
