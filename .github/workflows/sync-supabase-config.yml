@@ -1,0 +1,56 @@
+# Sincroniza la configuración de Supabase (config.toml) con el proyecto en la nube.
+#
+# La integración Supabase ↔ GitHub despliega automáticamente migraciones y
+# Edge Functions, pero NO aplica los cambios de config.toml (site_url, email
+# templates, redirect URLs, rate limits, etc.). Este workflow cubre ese hueco.
+#
+# Se ejecuta cuando:
+#   - Se hace push a main que toque supabase/config.toml o supabase/templates/
+#   - Manualmente desde la pestaña "Actions" del repo
+#
+# Secrets necesarios (Settings → Secrets and variables → Actions):
+#   SUPABASE_ACCESS_TOKEN  — token de acceso personal de Supabase
+#                            (cómpralo en: https://supabase.com/dashboard/account/tokens)
+#   SUPABASE_PROJECT_REF   — el ID del proyecto (visible en la URL del dashboard)
+#
+# Seguridad con repo público:
+#   - Los secrets están cifrados y se enmascaran en los logs automáticamente.
+#   - NO se exponen en PRs que vengan de forks (solo en ramas del propio repo).
+#   - El project ref es información pública (está en la URL de Supabase).
+
+name: Sync Supabase Config
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/config.toml'
+      - 'supabase/templates/**'
+  workflow_dispatch:
+
+# Evita ejecuciones concurrentes del mismo workflow
+concurrency:
+  group: sync-supabase-config
+  cancel-in-progress: false
+
+jobs:
+  config-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Push config
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase config push
