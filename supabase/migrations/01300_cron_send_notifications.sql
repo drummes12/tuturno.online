@@ -67,7 +67,7 @@ $$;
 -- -----------------------------------------------------------------------------
 -- Programar el cron: cada minuto
 -- -----------------------------------------------------------------------------
-do $$
+do $cron$
 begin
   -- Eliminar job previo si existe (idempotente)
   if exists (
@@ -80,9 +80,9 @@ begin
   perform cron.schedule(
     'send-notifications',
     '* * * * *',
-    $$select public.dispatch_send_notifications();$$
+    $job$select public.dispatch_send_notifications();$job$
   );
-end$$;
+end$cron$;
 
 -- Permisos: solo el rol service_role puede ejecutar el wrapper
 -- (pg_cron corre como el rol que programa el job, típicamente postgres)
