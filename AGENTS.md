@@ -35,9 +35,21 @@
 ## Configuración
 1. Crear `.env.local` con `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`
 2. Ejecutar migraciones en Supabase
-3. Configurar `RESEND_API_KEY` y `RESEND_FROM_EMAIL` en secrets de Supabase
-4. Deployar la Edge Function `send-notifications`
-5. Configurar cron en Supabase para ejecutar `expire_pending_reservations` y `send-notifications`
+3. Configurar secrets de Supabase:
+   - `RESEND_API_KEY` — API key de Resend
+   - `RESEND_FROM_EMAIL` — email remitente (ej: `hola@tuturno.online`)
+   - `APP_URL` — URL pública del frontend (ej: `https://tuturno.online`)
+   - `SUPABASE_BASE_URL` — URL del proyecto Supabase (ej: `https://xxx.supabase.co`)
+   - `SERVICE_ROLE_KEY` — service role key para el cron
+4. Cargar secrets en vault (desde el SQL Editor de Supabase):
+   ```sql
+   select vault.create_secret('https://xxx.supabase.co', 'supabase_base_url');
+   select vault.create_secret('sb_secret_xxx', 'service_role_key');
+   ```
+5. Deployar la Edge Function `send-notifications`
+6. Los crons se configuran automáticamente con las migraciones:
+   - `expire-pending-reservations` (cada 5 min) — migración 01000
+   - `send-notifications` (cada 2 min) — migración 01300, invoca la Edge Function vía pg_net
 
 ## Convenciones
 - Mobile-first en todas las vistas, incluida administración
