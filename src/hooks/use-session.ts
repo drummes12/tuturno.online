@@ -29,9 +29,21 @@ export function useSession() {
 
     // Escuchar cambios de auth
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       if (!mounted) return
+
+      // Cuando el usuario viene del enlace de recuperación de contraseña,
+      // Supabase crea una sesión temporal y dispara PASSWORD_RECOVERY.
+      // Redirigimos a /recuperar-password para que pueda establecer la nueva.
+      if (
+        event === 'PASSWORD_RECOVERY' &&
+        window.location.pathname !== '/recuperar-password'
+      ) {
+        window.location.href = '/recuperar-password'
+        return
+      }
+
       setSession(newSession)
 
       if (newSession?.user) {
