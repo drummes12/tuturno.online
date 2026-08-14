@@ -9,6 +9,8 @@ import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Spinner } from '@/components/common/spinner'
 import { Alert } from '@/components/common/alert'
+import { ReadOnlyNotice } from '@/components/common/read-only-notice'
+import { useCanEdit } from '@/hooks/use-can-edit'
 import {
   PlusIcon,
   TrashIcon,
@@ -72,6 +74,7 @@ function franjaLabel(open: string): { text: string; icon: typeof SunIcon } {
 
 export function AdminHoursPage() {
   const businessId = useBusinessId()
+  const canEdit = useCanEdit()
   const [franjas, setFranjas] = useState<FranjaState[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -240,6 +243,8 @@ export function AdminHoursPage() {
         </p>
       </div>
 
+      {!canEdit && <ReadOnlyNotice />}
+
       {error && (
         <Alert variant='error' onDismiss={() => setError(null)}>
           {error}
@@ -277,10 +282,11 @@ export function AdminHoursPage() {
                 }`}
               >
                 <button
-                  onClick={() => toggleDay(dayIdx)}
+                  onClick={() => canEdit && toggleDay(dayIdx)}
+                  disabled={!canEdit}
                   className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
                     isActive ? 'bg-primary' : 'bg-graphite-300'
-                  }`}
+                  } ${!canEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
                   aria-label={`${isActive ? 'Cerrar' : 'Abrir'} ${dayName}`}
                   aria-pressed={isActive}
                 >
@@ -302,7 +308,7 @@ export function AdminHoursPage() {
                     {activeCount} {activeCount === 1 ? 'franja' : 'franjas'}
                   </span>
                 )}
-                {isActive && (
+                {isActive && canEdit && (
                   <button
                     onClick={() => addFranja(dayIdx)}
                     className='ml-auto flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-50 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
@@ -359,6 +365,7 @@ export function AdminHoursPage() {
                           <input
                             type='time'
                             value={f.open_time}
+                            disabled={!canEdit}
                             onChange={(e) =>
                               updateFranja(
                                 globalIdx,
@@ -370,13 +377,14 @@ export function AdminHoursPage() {
                               franjaOverlap
                                 ? 'border-red-300 focus:border-red-500'
                                 : 'border-border focus:border-primary'
-                            } focus:outline-none transition-colors`}
+                            } focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Apertura ${dayName} ${label.text}`}
                           />
                           <span className='text-text-muted text-xs'>→</span>
                           <input
                             type='time'
                             value={f.close_time}
+                            disabled={!canEdit}
                             onChange={(e) =>
                               updateFranja(
                                 globalIdx,
@@ -388,7 +396,7 @@ export function AdminHoursPage() {
                               franjaOverlap
                                 ? 'border-red-300 focus:border-red-500'
                                 : 'border-border focus:border-primary'
-                            } focus:outline-none transition-colors`}
+                            } focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Cierre ${dayName} ${label.text}`}
                           />
                         </div>
@@ -408,13 +416,15 @@ export function AdminHoursPage() {
                         </span>
 
                         {/* Eliminar */}
-                        <button
-                          onClick={() => deleteFranja(globalIdx)}
-                          className='flex items-center justify-center w-8 h-8 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0'
-                          aria-label={`Eliminar franja de ${label.text}`}
-                        >
-                          <TrashIcon size={16} />
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={() => deleteFranja(globalIdx)}
+                            className='flex items-center justify-center w-8 h-8 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0'
+                            aria-label={`Eliminar franja de ${label.text}`}
+                          >
+                            <TrashIcon size={16} />
+                          </button>
+                        )}
                       </div>
                     )
                   })}
@@ -449,7 +459,7 @@ export function AdminHoursPage() {
           <Button
             loading={saving}
             onClick={handleSave}
-            disabled={hasOverlaps}
+            disabled={hasOverlaps || !canEdit}
             size='lg'
           >
             Guardar horarios

@@ -10,6 +10,8 @@ import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
+import { ReadOnlyNotice } from '@/components/common/read-only-notice'
+import { useCanEdit } from '@/hooks/use-can-edit'
 import {
   CourtIcon,
   PlusIcon,
@@ -20,6 +22,7 @@ import {
 import type { Court } from '@/types'
 
 export function AdminCourtsPage() {
+  const canEdit = useCanEdit()
   const [courts, setCourts] = useState<Court[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -140,7 +143,7 @@ export function AdminCourtsPage() {
             configuradas
           </p>
         </div>
-        {!showForm && (
+        {!showForm && canEdit && (
           <Button size='sm' onClick={startNew}>
             <PlusIcon size={16} />
             <span className='hidden sm:inline'>Nueva cancha</span>
@@ -148,6 +151,8 @@ export function AdminCourtsPage() {
           </Button>
         )}
       </div>
+
+      {!canEdit && <ReadOnlyNotice />}
 
       {error && (
         <Alert variant='error' onDismiss={() => setError(null)}>
@@ -219,10 +224,12 @@ export function AdminCourtsPage() {
                 Crea la primera cancha para empezar a recibir reservas.
               </p>
             </div>
-            <Button size='sm' onClick={startNew}>
-              <PlusIcon size={16} />
-              Crear cancha
-            </Button>
+            {canEdit && (
+              <Button size='sm' onClick={startNew}>
+                <PlusIcon size={16} />
+                Crear cancha
+              </Button>
+            )}
           </div>
         </Card>
       ) : (
@@ -259,28 +266,32 @@ export function AdminCourtsPage() {
                 </div>
                 <div className='flex items-center gap-2 shrink-0'>
                   {/* Toggle de estado */}
-                  <button
-                    onClick={() => toggleActive(court)}
-                    className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-                      court.is_active ? 'bg-primary' : 'bg-graphite-300'
-                    }`}
-                    aria-label={`${court.is_active ? 'Desactivar' : 'Activar'} ${court.name}`}
-                    aria-pressed={court.is_active}
-                  >
-                    <span
-                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${
-                        court.is_active ? 'translate-x-5' : ''
+                  {canEdit && (
+                    <button
+                      onClick={() => toggleActive(court)}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                        court.is_active ? 'bg-primary' : 'bg-graphite-300'
                       }`}
-                    />
-                  </button>
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    onClick={() => startEdit(court)}
-                  >
-                    <EditIcon size={14} />
-                    <span className='hidden sm:inline'>Editar</span>
-                  </Button>
+                      aria-label={`${court.is_active ? 'Desactivar' : 'Activar'} ${court.name}`}
+                      aria-pressed={court.is_active}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${
+                          court.is_active ? 'translate-x-5' : ''
+                        }`}
+                      />
+                    </button>
+                  )}
+                  {canEdit && (
+                    <Button
+                      variant='secondary'
+                      size='sm'
+                      onClick={() => startEdit(court)}
+                    >
+                      <EditIcon size={14} />
+                      <span className='hidden sm:inline'>Editar</span>
+                    </Button>
+                  )}
                 </div>
               </div>
             </Card>

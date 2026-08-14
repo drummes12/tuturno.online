@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth'
-import { fetchProfile, fetchBusinessId } from '@/services/profiles'
+import { fetchProfile, fetchBusinessMembership } from '@/services/profiles'
 import type { Profile } from '@/types'
 
 /**
@@ -9,8 +9,18 @@ import type { Profile } from '@/types'
  * Se usa una sola vez en el nivel raíz de la app.
  */
 export function useSession() {
-  const { session, profile, isAdmin, loading, setSession, setProfile, setIsAdmin, setLoading } =
-    useAuthStore()
+  const {
+    session,
+    profile,
+    isAdmin,
+    isOwner,
+    loading,
+    setSession,
+    setProfile,
+    setIsAdmin,
+    setIsOwner,
+    setLoading
+  } = useAuthStore()
 
   useEffect(() => {
     let mounted = true
@@ -21,7 +31,12 @@ export function useSession() {
       setSession(data.session)
 
       if (data.session?.user) {
-        await loadProfileAndRole(data.session.user.id, setProfile, setIsAdmin)
+        await loadProfileAndRole(
+          data.session.user.id,
+          setProfile,
+          setIsAdmin,
+          setIsOwner
+        )
       }
 
       setLoading(false)
@@ -47,10 +62,16 @@ export function useSession() {
       setSession(newSession)
 
       if (newSession?.user) {
-        await loadProfileAndRole(newSession.user.id, setProfile, setIsAdmin)
+        await loadProfileAndRole(
+          newSession.user.id,
+          setProfile,
+          setIsAdmin,
+          setIsOwner
+        )
       } else {
         setProfile(null)
         setIsAdmin(false)
+        setIsOwner(false)
       }
 
       setLoading(false)
@@ -60,19 +81,21 @@ export function useSession() {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [setSession, setProfile, setIsAdmin, setLoading])
+  }, [setSession, setProfile, setIsAdmin, setIsOwner, setLoading])
 
-  return { session, profile, isAdmin, loading }
+  return { session, profile, isAdmin, isOwner, loading }
 }
 
 async function loadProfileAndRole(
   userId: string,
   setProfile: (p: Profile | null) => void,
   setIsAdmin: (v: boolean) => void,
+  setIsOwner: (v: boolean) => void
 ) {
   const profileData = await fetchProfile(userId)
   setProfile(profileData)
 
-  const businessId = await fetchBusinessId(userId)
-  setIsAdmin(!!businessId)
+  const membership = await fetchBusinessMembership(userId)
+  setIsAdmin(!!membership)
+  setIsOwner(membership?.role === 'owner')
 }

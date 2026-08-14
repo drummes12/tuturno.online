@@ -28,3 +28,19 @@ export async function fetchBusinessId(userId: string): Promise<string | null> {
     .maybeSingle()
   return data?.business_id ?? null
 }
+
+export async function fetchBusinessMembership(
+  userId: string
+): Promise<{ businessId: string; role: 'owner' | 'manager' } | null> {
+  const { data } = await supabase
+    .from('business_members')
+    .select('business_id, role')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle()
+  if (!data) return null
+  return {
+    businessId: data.business_id,
+    role: data.role as 'owner' | 'manager'
+  }
+}
