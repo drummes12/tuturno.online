@@ -50,6 +50,7 @@ supabase/migrations/01200_gap_minutes.sql
 supabase/migrations/01300_cron_send_notifications.sql
 supabase/migrations/01400_business_location.sql
 supabase/migrations/01500_remove_legacy_location_fields.sql
+supabase/migrations/01600_expired_reservation_notifications.sql
 ```
 
 ### 3. Correos con Resend

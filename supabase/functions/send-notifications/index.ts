@@ -26,19 +26,32 @@ interface OutboxRow {
 
 const MAX_ATTEMPTS = 3
 
-// Plantillas de correo parametrizadas con la URL pública del frontend.
+// Plantillas de correo parametrizadas con la URL base del frontend.
 const templates = createTemplates(APP_URL)
 
 // This endpoint uses 'secret' access, apiKey is required.
 // Use secret for Server-to-server, internal calls (e.g. cron).
 export default {
-  fetch: withSupabase({ auth: ['secret'] }, async (_req, ctx) => {
+  fetch: withSupabase({ auth: ['secret'] }, async function (_req, ctx) {
     if (!RESEND_API_KEY) {
       return new Response('Missing RESEND_API_KEY', { status: 500 })
     }
 
     // ctx.supabaseAdmin bypasses RLS — use for privileged operations
     const supabase = ctx.supabaseAdmin
+
+    // Expirar primero para que las notificaciones recién encoladas se
+    // procesen en el mismo ciclo del cron.
+    const { data: expiredCount, error: expirationError } = await supabase.rpc(
+      'expire_pending_reservations'
+    )
+
+    if (expirationError) {
+      return new Response(JSON.stringify({ error: expirationError.message }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
 
     // Obtener notificaciones pendientes
     const { data: pending, error } = await supabase
@@ -57,7 +70,12 @@ export default {
 
     if (!pending || pending.length === 0) {
       return new Response(
-        JSON.stringify({ sent: 0, message: 'No pending notifications' }),
+        JSON.stringify({
+          sent: 0,
+          failed: 0,
+          expired: expiredCount ?? 0,
+          message: 'No pending notifications'
+        }),
         {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -139,11 +157,13 @@ export default {
       }
     }
 
-    // También expirar reservas pendientes cuyo hold venció
-    await supabase.rpc('expire_pending_reservations')
-
     return new Response(
-      JSON.stringify({ sent, failed, total: pending.length }),
+      JSON.stringify({
+        sent,
+        failed,
+        expired: expiredCount ?? 0,
+        total: pending.length
+      }),
       {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
