@@ -88,3 +88,21 @@ pnpm dev
 - Notificaciones por correo (Resend)
 - Concurrencia protegida con advisory locks
 - RLS en todas las tablas
+
+## Licencia
+
+Este proyecto está bajo la licencia **GNU Affero General Public License v3.0** (AGPL v3). Consulta el archivo [LICENSE](./LICENSE) para más detalles.
+
+En resumen: puedes usar, modificar y distribuir este software, pero **debes compartir tus modificaciones** bajo la misma licencia. Si ofreces el software como servicio web (SaaS), también debes poner el código fuente modificado a disposición de los usuarios del servicio.
+
+## Contribuir
+
+Las contribuciones son bienvenidas. Por favor:
+
+1. Abre un issue antes de empezar a trabajar en un cambio grande
+2. Crea un fork y una rama con tu cambio (`feat/mi-mejora` o `fix/mi-fix`)
+3. Asegúrate de que `pnpm build` y `pnpm lint` pasen sin errores
+4. Envía un pull request describiendo el cambio y la motivación
+
+Al contribuir, aceptas que tus cambios se publiquen bajo la misma licencia AGPL v3.
+
