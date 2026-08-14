@@ -48,6 +48,22 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+/**
+ * Rutas para invitados (no autenticados).
+ * Si el usuario ya tiene sesión, lo redirige a la página de destino
+ * (parámetro `next`) o a la home por defecto.
+ * /recuperar-password NO usa este guard porque el flow de recovery
+ * crea una sesión temporal que necesita acceder a la página.
+ */
+function GuestRoute({ children }: { children: React.ReactNode }) {
+  const { user } = useAuthStore()
+  if (user) {
+    const next = new URLSearchParams(window.location.search).get('next')
+    return <Redirect to={next ?? '/'} />
+  }
+  return <>{children}</>
+}
+
 export default function App() {
   const { loading } = useSession()
 
@@ -62,9 +78,18 @@ export default function App() {
   return (
     <AppLayout>
       <Switch>
-        {/* Auth */}
-        <Route path='/login' component={LoginPage} />
-        <Route path='/registro' component={RegisterPage} />
+        {/* Auth — solo accesibles sin sesión */}
+        <Route path='/login'>
+          <GuestRoute>
+            <LoginPage />
+          </GuestRoute>
+        </Route>
+        <Route path='/registro'>
+          <GuestRoute>
+            <RegisterPage />
+          </GuestRoute>
+        </Route>
+        {/* /recuperar-password es accesible con y sin sesión (recovery flow) */}
         <Route path='/recuperar-password' component={RecoverPasswordPage} />
 
         {/* Client */}
@@ -110,9 +135,7 @@ export default function App() {
         {/* 404 */}
         <Route>
           <div className='text-center py-12'>
-            <p className='text-text-muted'>
-              Página no encontrada.
-            </p>
+            <p className='text-text-muted'>Página no encontrada.</p>
           </div>
         </Route>
       </Switch>
