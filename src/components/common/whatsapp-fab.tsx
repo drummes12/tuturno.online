@@ -35,7 +35,7 @@ export function WhatsAppFab() {
       href={link}
       target='_blank'
       rel='noopener noreferrer'
-      className='fixed bottom-20 right-4 z-30 md:bottom-6 md:right-6 flex items-center justify-center w-12 h-12 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 hover:shadow-xl active:scale-95 transition-all duration-200 ease-spring md:hidden'
+      className='flex items-center justify-center w-12 h-12 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 hover:shadow-xl active:scale-95 transition-all duration-200 ease-spring md:hidden'
       aria-label={`Contactar a ${businessName} por WhatsApp`}
     >
       <WhatsAppIcon size={24} />

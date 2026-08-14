@@ -180,7 +180,7 @@ export function AvailabilityPage() {
           location.state ||
           location.country) && (
           <Card
-            className='p-4 animate-fade-up'
+            className='hidden md:block p-4 animate-fade-up'
             style={{ animationDelay: '30ms' }}
           >
             <div className='flex items-start gap-3'>

@@ -12,6 +12,7 @@ import {
   LogInIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
+import { GoogleMapsFab } from '@/components/common/google-maps-fab'
 
 interface NavItem {
   label: string
@@ -139,8 +140,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
       )}
 
-      {/* FAB de WhatsApp — solo para clientes */}
-      {user && !isAdmin && <WhatsAppFab />}
+      <div className='fixed bottom-20 right-4 z-30 md:bottom-6 md:right-6 flex flex-col gap-2'>
+        {/* FAB de WhatsApp — solo para clientes */}
+        {!isAdmin && <WhatsAppFab />}
+
+        {/* FAB de ubicación — disponible en la página pública */}
+        {location === '/' && <GoogleMapsFab />}
+      </div>
     </div>
   )
 }
