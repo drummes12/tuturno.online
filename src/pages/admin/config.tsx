@@ -3,6 +3,7 @@ import { fetchBusiness, updateBusiness } from '@/services/business'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
+import { PhoneInput } from '@/components/common/phone-input'
 import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
 import {
@@ -140,14 +141,12 @@ export function AdminConfigPage() {
               }
               hint='Dirección visible para los clientes.'
             />
-            <Input
+            <PhoneInput
               label='Teléfono'
-              type='tel'
               value={business.phone ?? ''}
-              onChange={(e) =>
-                setBusiness({ ...business, phone: e.target.value })
-              }
+              onChange={(val) => setBusiness({ ...business, phone: val })}
               hint='Número de contacto. Se usa en el botón flotante de WhatsApp.'
+              optional
             />
           </div>
         </Card>

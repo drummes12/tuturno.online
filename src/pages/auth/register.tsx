@@ -3,13 +3,13 @@ import { Link, useLocation } from 'wouter'
 import { signUpWithEmail } from '@/services/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
+import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
 import {
   CourtIcon,
   MailIcon,
   UserIcon,
-  PhoneIcon,
   ArrowLeftIcon
 } from '@/components/common/icon'
 
@@ -117,17 +117,12 @@ export function RegisterPage() {
               autoFocus
               icon={<UserIcon size={18} />}
             />
-            <Input
+            <PhoneInput
               label='Teléfono'
-              type='tel'
-              name='phone'
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder='+57 300 123 4567'
+              onChange={setPhone}
               required
-              autoComplete='tel'
               hint='Lo usará el negocio para contactarte. No se verifica automáticamente.'
-              icon={<PhoneIcon size={18} />}
             />
             <Input
               label='Email'

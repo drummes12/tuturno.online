@@ -200,3 +200,99 @@ body {
   animation: shimmer 1.5s infinite linear;
   border-radius: var(--radius-sm);
 }
+
+/* ─────────────────────────────────────────────────────────────
+   react-phone-number-input — estilos alineados con TuTurno
+   ───────────────────────────────────────────────────────────── */
+.tuturno-phone-input {
+  --PhoneInput-color--focus: var(--color-primary);
+  --PhoneInput-color: var(--color-text);
+  --PhoneInput-color--icon: var(--color-text-muted);
+  --PhoneInput-flag-height: 1em;
+  --PhoneInputInternationalIconPhone-opacity: 1;
+
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-inset);
+  padding: 0.75rem 1rem;
+  gap: 0.5rem;
+  transition: all 0.2s var(--ease-spring);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.tuturno-phone-input:focus-within {
+  background-color: var(--color-surface-elevated);
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.tuturno-phone-input--error,
+.tuturno-phone-input--error:focus-within {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-danger) 15%, transparent);
+}
+
+.tuturno-phone-input .PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tuturno-phone-input .PhoneInputCountrySelect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 4.5rem;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.tuturno-phone-input .PhoneInputCountrySelectArrow {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: 0.25rem;
+  border-style: solid;
+  border-color: var(--color-text-muted);
+  border-width: 0 1px 1px 0;
+  transform: rotate(45deg);
+  opacity: 0.6;
+}
+
+.tuturno-phone-input .PhoneInputCountryIcon {
+  width: 1.5em;
+  height: 1em;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
+.tuturno-phone-input .PhoneInputCountryIconImg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.tuturno-phone-input .PhoneInputInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuturno-phone-input .PhoneInputInput::placeholder {
+  color: var(--color-text-muted);
+}

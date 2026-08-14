@@ -9,6 +9,7 @@ import { updateProfile } from '@/services/profiles'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
+import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
 import { Skeleton } from '@/components/common/skeleton'
@@ -285,13 +286,13 @@ export function ReservePage() {
                 placeholder='Ej: Juan Pérez'
                 hint='Opcional. Nombre de la persona que reserva.'
               />
-              <Input
+              <PhoneInput
                 label='Teléfono del cliente'
-                type='tel'
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder='+57 300 123 4567'
+                onChange={setPhone}
+                placeholder='300 123 4567'
                 hint='Opcional. Si coincide con un usuario registrado, se vincula a su cuenta.'
+                optional
               />
             </>
           ) : (
@@ -303,13 +304,11 @@ export function ReservePage() {
                 required
                 autoComplete='name'
               />
-              <Input
+              <PhoneInput
                 label='Teléfono'
-                type='tel'
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={setPhone}
                 required
-                autoComplete='tel'
                 hint='El negocio lo usará para contactarte.'
               />
             </>
