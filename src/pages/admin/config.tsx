@@ -4,17 +4,17 @@ import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { PhoneInput } from '@/components/common/phone-input'
-import { LocationMap } from '@/components/common/location-map'
-import { SearchLocationButton } from '@/components/common/search-location-button'
 import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { useCanEdit } from '@/hooks/use-can-edit'
+import { formatFullAddress, googleMapsLink } from '@/lib/address'
 import {
   ClockIcon,
   CalendarIcon,
   StoreIcon,
   MapPinIcon,
+  ExternalLinkIcon,
   TimerIcon
 } from '@/components/common/icon'
 import type { Business } from '@/types'
@@ -65,14 +65,11 @@ export function AdminConfigPage() {
     try {
       await updateBusiness(business.id, {
         name: business.name,
-        address: business.address,
         street: business.street,
         neighborhood: business.neighborhood,
         city: business.city,
         state: business.state,
         country: business.country,
-        latitude: business.latitude,
-        longitude: business.longitude,
         phone: business.phone,
         slot_duration_minutes: business.slot_duration_minutes,
         gap_minutes: business.gap_minutes,
@@ -105,6 +102,21 @@ export function AdminConfigPage() {
       </Card>
     )
   }
+
+  const fullAddress = formatFullAddress({
+    street: business.street,
+    neighborhood: business.neighborhood,
+    city: business.city,
+    state: business.state,
+    country: business.country
+  })
+  const mapsUrl = googleMapsLink({
+    street: business.street,
+    neighborhood: business.neighborhood,
+    city: business.city,
+    state: business.state,
+    country: business.country
+  })
 
   return (
     <div className='flex flex-col gap-5 max-w-2xl mx-auto'>
@@ -219,71 +231,43 @@ export function AdminConfigPage() {
                 placeholder='Colombia'
               />
 
-              {/* Mapa interactivo */}
+              {/* Ubicación en mapas */}
               <div>
                 <label className='text-sm font-medium text-(--color-text) tracking-tight mb-2 block'>
-                  Mapa
+                  Ubicación en mapas
                 </label>
                 <p className='text-xs text-(--color-text-muted) mb-3'>
-                  Arrastra el pin para ajustar la ubicación exacta. Esto ayuda a
-                  los clientes a llegar.
+                  Completa la dirección manualmente y usa el botón para
+                  comprobarla o compartirla en Google Maps. No requiere una API
+                  key.
                 </p>
-                {business.latitude != null && business.longitude != null ? (
-                  <LocationMap
-                    latitude={business.latitude}
-                    longitude={business.longitude}
-                    draggable
-                    onChange={(lat, lng) =>
-                      setBusiness({
-                        ...business,
-                        latitude: lat,
-                        longitude: lng
-                      })
-                    }
-                    height={260}
-                  />
-                ) : (
-                  <div className='rounded-xl border border-dashed border-border bg-surface-inset p-6 text-center'>
+                <div className='rounded-xl border border-border bg-surface-inset p-4'>
+                  <div className='flex items-start gap-3'>
                     <MapPinIcon
-                      size={28}
-                      className='mx-auto text-text-muted mb-2'
+                      size={20}
+                      className='text-pitch-700 shrink-0 mt-0.5'
                     />
-                    <p className='text-sm text-text-muted mb-3'>
-                      Busca la ubicación en el mapa para fijar el pin.
-                    </p>
-                    <SearchLocationButton
-                      onFound={(lat, lng) =>
-                        setBusiness({
-                          ...business,
-                          latitude: lat,
-                          longitude: lng
-                        })
-                      }
-                      addressParts={{
-                        street: business.street,
-                        neighborhood: business.neighborhood,
-                        city: business.city,
-                        state: business.state,
-                        country: business.country
-                      }}
-                    />
+                    <div className='min-w-0 flex-1'>
+                      <p className='text-sm font-medium'>
+                        {fullAddress || 'Aún no hay una dirección configurada.'}
+                      </p>
+                    </div>
                   </div>
-                )}
-                {business.latitude != null && business.longitude != null && (
-                  <button
-                    type='button'
-                    onClick={() =>
-                      setBusiness({
-                        ...business,
-                        latitude: null,
-                        longitude: null
-                      })
-                    }
-                    className='mt-2 text-xs text-text-muted hover:text-danger transition-colors'
+                  <a
+                    href={mapsUrl}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-disabled={!fullAddress}
+                    className={`inline-flex items-center justify-center gap-2 mt-4 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      fullAddress
+                        ? 'bg-(--color-primary) text-white hover:bg-(--color-primary-hover)'
+                        : 'pointer-events-none bg-graphite-100 text-text-muted opacity-60'
+                    }`}
                   >
-                    Quitar ubicación del mapa
-                  </button>
-                )}
+                    <ExternalLinkIcon size={15} />
+                    Abrir en Google Maps
+                  </a>
+                </div>
               </div>
             </div>
           </Card>

@@ -18,14 +18,11 @@ export async function fetchBusinessContact(): Promise<{
   neighborhood: string | null
   city: string | null
   state: string | null
-  latitude: number | null
-  longitude: number | null
+  country: string | null
 } | null> {
   const { data } = await supabase
     .from('businesses')
-    .select(
-      'phone, name, street, neighborhood, city, state, latitude, longitude'
-    )
+    .select('phone, name, street, neighborhood, city, state, country')
     .limit(1)
     .single()
   return data as {
@@ -35,8 +32,7 @@ export async function fetchBusinessContact(): Promise<{
     neighborhood: string | null
     city: string | null
     state: string | null
-    latitude: number | null
-    longitude: number | null
+    country: string | null
   } | null
 }
 
@@ -46,14 +42,11 @@ export async function updateBusiness(
     Pick<
       Business,
       | 'name'
-      | 'address'
       | 'street'
       | 'neighborhood'
       | 'city'
       | 'state'
       | 'country'
-      | 'latitude'
-      | 'longitude'
       | 'phone'
       | 'slot_duration_minutes'
       | 'gap_minutes'

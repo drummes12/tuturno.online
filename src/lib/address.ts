@@ -21,21 +21,10 @@ export function formatFullAddress(parts: AddressParts): string {
 }
 
 /**
- * Construye una dirección corta (calle + ciudad).
- * Ej: "Calle 123 #45-67, Medellín"
+ * Genera un enlace a Google Maps a partir de la dirección textual.
+ * No requiere API key ni acceso a la API de Google.
  */
-export function formatShortAddress(parts: AddressParts): string {
-  return [parts.street, parts.city].filter((s) => s && s.trim()).join(', ')
-}
-
-/**
- * Genera un link a Google Maps para una dirección o coordenadas.
- * Usa coordenadas si están disponibles (más preciso), sino usa la dirección.
- */
-export function googleMapsLink(opts: AddressParts & { latitude?: number | null; longitude?: number | null }): string {
-  if (opts.latitude != null && opts.longitude != null) {
-    return `https://www.google.com/maps/search/?api=1&query=${opts.latitude},${opts.longitude}`
-  }
-  const address = formatFullAddress(opts)
+export function googleMapsLink(parts: AddressParts): string {
+  const address = formatFullAddress(parts)
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
 }

@@ -21,14 +21,11 @@ const mockBusiness: Business = {
   name: 'Canchas El Parque',
   slug: 'canchas-el-parque',
   timezone: 'America/Bogota',
-  address: 'Calle 123 #45-67',
   street: 'Calle 123 #45-67',
   neighborhood: 'El Poblado',
   city: 'Medellín',
   state: 'Antioquia',
   country: 'Colombia',
-  latitude: 6.217,
-  longitude: -75.567,
   phone: '+57 300 000 0000',
   slot_duration_minutes: 60,
   gap_minutes: 10,
@@ -89,8 +86,7 @@ describe('fetchBusinessContact', () => {
       neighborhood: 'El Poblado',
       city: 'Medellín',
       state: 'Antioquia',
-      latitude: 6.217,
-      longitude: -75.567
+      country: 'Colombia'
     }
     chain = createQueryChain({ data: contact, error: null })
     mockFrom.mockReturnValue(chain)
@@ -100,7 +96,7 @@ describe('fetchBusinessContact', () => {
     expect(result).toEqual(contact)
     expect(mockFrom).toHaveBeenCalledWith('businesses')
     expect(chain.select).toHaveBeenCalledWith(
-      'phone, name, street, neighborhood, city, state, latitude, longitude'
+      'phone, name, street, neighborhood, city, state, country'
     )
     expect(chain.limit).toHaveBeenCalledWith(1)
     expect(chain.single).toHaveBeenCalled()

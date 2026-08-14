@@ -43,6 +43,13 @@ supabase/migrations/00500_init_rls.sql
 supabase/migrations/00600_init_rpc.sql
 supabase/migrations/00700_init_realtime.sql
 supabase/migrations/00800_init_seed.sql
+supabase/migrations/00900_init_grants.sql
+supabase/migrations/01000_cron_admin_cancel.sql
+supabase/migrations/01100_multi_slot_business_hours.sql
+supabase/migrations/01200_gap_minutes.sql
+supabase/migrations/01300_cron_send_notifications.sql
+supabase/migrations/01400_business_location.sql
+supabase/migrations/01500_remove_legacy_location_fields.sql
 ```
 
 ### 3. Correos con Resend

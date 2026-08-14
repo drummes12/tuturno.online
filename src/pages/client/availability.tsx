@@ -4,7 +4,6 @@ import { fetchActiveCourts } from '@/services/courts'
 import { fetchAvailability } from '@/services/availability'
 import { fetchBusinessContact } from '@/services/business'
 import { Card } from '@/components/common/card'
-import { LocationMap } from '@/components/common/location-map'
 import {
   SlotGridSkeleton,
   DatePickerSkeleton
@@ -41,8 +40,7 @@ export function AvailabilityPage() {
     neighborhood: string | null
     city: string | null
     state: string | null
-    latitude: number | null
-    longitude: number | null
+    country: string | null
   } | null>(null)
 
   // Cargar canchas activas
@@ -74,8 +72,7 @@ export function AvailabilityPage() {
             neighborhood: data.neighborhood,
             city: data.city,
             state: data.state,
-            latitude: data.latitude,
-            longitude: data.longitude
+            country: data.country
           })
         }
       } catch {
@@ -178,8 +175,10 @@ export function AvailabilityPage() {
       {/* Ubicación del negocio */}
       {location &&
         (location.street ||
+          location.neighborhood ||
           location.city ||
-          (location.latitude != null && location.longitude != null)) && (
+          location.state ||
+          location.country) && (
           <Card
             className='p-4 animate-fade-up'
             style={{ animationDelay: '30ms' }}
@@ -192,40 +191,14 @@ export function AvailabilityPage() {
                 <h3 className='text-sm font-semibold tracking-tight mb-0.5'>
                   Cómo llegar
                 </h3>
-                {(() => {
-                  const addr = formatFullAddress({
-                    street: location.street,
-                    neighborhood: location.neighborhood,
-                    city: location.city,
-                    state: location.state
-                  })
-                  return addr ? (
-                    <p className='text-xs text-(--color-text-muted) mb-2'>
-                      {addr}
-                    </p>
-                  ) : null
-                })()}
-                {location.latitude != null && location.longitude != null && (
-                  <div className='mt-2'>
-                    <LocationMap
-                      latitude={location.latitude}
-                      longitude={location.longitude}
-                      height={180}
-                    />
-                  </div>
-                )}
+                <p className='text-xs text-(--color-text-muted) mb-2'>
+                  {formatFullAddress(location)}
+                </p>
                 <a
-                  href={googleMapsLink({
-                    street: location.street,
-                    neighborhood: location.neighborhood,
-                    city: location.city,
-                    state: location.state,
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                  })}
+                  href={googleMapsLink(location)}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-(--color-primary) hover:underline touch-target'
+                  className='inline-flex items-center gap-1.5 text-xs font-medium text-(--color-primary) hover:underline touch-target'
                 >
                   <ExternalLinkIcon size={14} />
                   Abrir en Google Maps
