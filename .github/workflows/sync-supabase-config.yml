@@ -12,6 +12,7 @@
 #   SUPABASE_ACCESS_TOKEN  — token de acceso personal de Supabase
 #                            (cómpralo en: https://supabase.com/dashboard/account/tokens)
 #   SUPABASE_PROJECT_REF   — el ID del proyecto (visible en la URL del dashboard)
+#   RESEND_API_KEY         — API key de Resend (para SMTP de Supabase Auth)
 #
 # Seguridad con repo público:
 #   - Los secrets están cifrados y se enmascaran en los logs automáticamente.
@@ -53,4 +54,5 @@ jobs:
       - name: Push config
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase config push
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        run: supabase config push --yes

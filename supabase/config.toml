@@ -233,15 +233,18 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
-# [auth.email.smtp]
-# enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# Use a production-ready SMTP server (Resend).
+# Permite personalizar las plantillas de correo en el plan gratuito de Supabase.
+# RESEND_API_KEY se configura en Supabase secrets:
+#   supabase secrets set RESEND_API_KEY=re_xxx
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "env(RESEND_API_KEY)"
+admin_email = "hola@tuturno.online"
+sender_name = "TuTurno"
 
 # Plantillas de correo de Supabase Auth (confirmación, recuperación, etc.)
 # Los archivos HTML viven en supabase/templates/ y usan Go template syntax:
