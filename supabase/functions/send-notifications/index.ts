@@ -8,7 +8,7 @@ import { withSupabase } from '@supabase/server'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const RESEND_FROM_EMAIL =
-  Deno.env.get('RESEND_FROM_EMAIL') ?? 'reservas@tudominio.com'
+  Deno.env.get('RESEND_FROM_EMAIL') ?? 'hola@tuturno.online'
 
 interface OutboxRow {
   id: string

@@ -1,4 +1,4 @@
-# Reservas Canchas — Guía del proyecto
+# TuTurno — Guía del proyecto
 
 ## Stack
 - **Frontend:** React 19 + Vite + TypeScript

@@ -60,7 +60,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <span className='flex items-center justify-center w-7 h-7 rounded-lg bg-flood-400 text-pitch-900'>
               <CourtIcon size={18} strokeWidth={2.5} />
             </span>
-            <span>Reservas</span>
+            <span>TuTurno</span>
           </Link>
           {user ? (
             <button

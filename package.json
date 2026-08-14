@@ -1,5 +1,5 @@
 {
-  "name": "reservas-canchas",
+  "name": "tuturno",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -26,9 +26,12 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@supabase/functions-js": "^2.112.3",
+    "@supabase/server": "^1.4.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.4",
+    "@types/deno": "^2.7.0",
     "@types/node": "^24.13.3",
     "@types/pg": "^8.21.0",
     "@types/react": "^19.2.17",

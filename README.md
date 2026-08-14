@@ -1,4 +1,4 @@
-# Reservas Canchas
+# TuTurno
 
 Aplicación web para agendar espacios en un negocio (primer caso: cancha de fútbol 5). Permite consultar disponibilidad pública, solicitar turnos de 60 minutos, y al negocio confirmar o rechazar reservas manualmente.
 
@@ -48,7 +48,7 @@ supabase/migrations/00800_init_seed.sql
 Configura los secrets en Supabase:
 
 ```bash
-supabase secrets set RESEND_API_KEY=re_xxx RESEND_FROM_EMAIL=reservas@tudominio.com
+supabase secrets set RESEND_API_KEY=re_xxx RESEND_FROM_EMAIL=hola@tuturno.online
 ```
 
 Deploya la Edge Function:
