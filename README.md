@@ -25,8 +25,10 @@ Edita `.env.local` con tus valores de Supabase:
 
 ```
 VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
-VITE_SUPABASE_ANON_KEY=tu-anon-key
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxxxxxx
 ```
+
+En Vercel debes crear estas mismas variables en **Settings → Environment Variables** y marcar al menos **Production**. Vite las inyecta durante el build, por lo que después de guardarlas debes hacer un nuevo deploy; un refresh no es suficiente.
 
 ### 2. Base de datos
 
