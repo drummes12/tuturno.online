@@ -66,6 +66,7 @@ declare
   v_slot_minutes integer;
   v_hold_minutes integer;
   v_max_advance integer;
+  v_min_advance_minutes integer;
   v_ends_at timestamptz;
   v_hold_expires timestamptz;
   v_now timestamptz := now();
@@ -82,7 +83,7 @@ begin
   end if;
 
   select c.*, b.timezone, b.slot_duration_minutes, b.hold_duration_minutes,
-         b.max_advance_days, b.cancellation_limit_hours, b.name as business_name
+         b.max_advance_days, b.min_advance_minutes, b.cancellation_limit_hours, b.name as business_name
   into v_resource
   from public.resources c
   join public.businesses b on c.business_id = b.id
@@ -97,10 +98,16 @@ begin
   v_slot_minutes := v_resource.slot_duration_minutes;
   v_hold_minutes := v_resource.hold_duration_minutes;
   v_max_advance := v_resource.max_advance_days;
+  v_min_advance_minutes := v_resource.min_advance_minutes;
   v_ends_at := p_starts_at + (v_slot_minutes || ' minutes')::interval;
 
   if p_starts_at <= v_now then
     return query select null::uuid, null::text, null::timestamptz, 'El turno ya pasó'::text;
+    return;
+  end if;
+
+  if p_starts_at < v_now + (v_min_advance_minutes || ' minutes')::interval then
+    return query select null::uuid, null::text, null::timestamptz, format('Debes reservar con al menos %s minutos de anticipación', v_min_advance_minutes);
     return;
   end if;
 

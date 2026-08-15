@@ -30,6 +30,7 @@ const mockBusiness: Business = {
   slot_duration_minutes: 60,
   gap_minutes: 10,
   hold_duration_minutes: 15,
+  min_advance_minutes: 60,
   cancellation_limit_hours: 24,
   max_advance_days: 30,
   resource_label_singular: 'Cancha',

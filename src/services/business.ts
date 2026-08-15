@@ -61,6 +61,7 @@ export async function updateBusiness(
       | 'slot_duration_minutes'
       | 'gap_minutes'
       | 'hold_duration_minutes'
+      | 'min_advance_minutes'
       | 'cancellation_limit_hours'
       | 'max_advance_days'
       | 'reservation_instructions_md'

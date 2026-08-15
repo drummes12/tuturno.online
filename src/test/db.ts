@@ -86,12 +86,27 @@ export async function isDbAvailable(): Promise<boolean> {
  */
 export async function isResourcesSchemaAvailable(): Promise<boolean> {
   try {
-    const result = await query<{ resources: string | null; availability_rpc: string | null }>(`
+    const result = await query<{
+      resources: string | null
+      availability_rpc: string | null
+      min_advance: string | null
+    }>(`
       select
         to_regclass('public.resources')::text as resources,
-        to_regprocedure('public.get_resource_availability(uuid,date)')::text as availability_rpc
+        to_regprocedure('public.get_resource_availability(uuid,date)')::text as availability_rpc,
+        (
+          select column_name
+          from information_schema.columns
+          where table_schema = 'public'
+            and table_name = 'businesses'
+            and column_name = 'min_advance_minutes'
+        ) as min_advance
     `)
-    return Boolean(result.rows[0]?.resources && result.rows[0]?.availability_rpc)
+    return Boolean(
+      result.rows[0]?.resources &&
+      result.rows[0]?.availability_rpc &&
+      result.rows[0]?.min_advance
+    )
   } catch {
     return false
   }

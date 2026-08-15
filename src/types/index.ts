@@ -52,6 +52,7 @@ export interface Business {
   slot_duration_minutes: number
   gap_minutes: number
   hold_duration_minutes: number
+  min_advance_minutes: number
   cancellation_limit_hours: number
   max_advance_days: number
   resource_label_singular: string

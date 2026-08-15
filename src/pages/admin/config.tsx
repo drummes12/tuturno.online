@@ -58,6 +58,10 @@ export function AdminConfigPage() {
       setError('El gap entre turnos no puede ser negativo.')
       return
     }
+    if (business.min_advance_minutes < 0) {
+      setError('La anticipación mínima no puede ser negativa.')
+      return
+    }
     if (
       !business.resource_label_singular.trim() ||
       !business.resource_label_plural.trim()
@@ -82,6 +86,7 @@ export function AdminConfigPage() {
         slot_duration_minutes: business.slot_duration_minutes,
         gap_minutes: business.gap_minutes,
         hold_duration_minutes: business.hold_duration_minutes,
+        min_advance_minutes: business.min_advance_minutes,
         cancellation_limit_hours: business.cancellation_limit_hours,
         max_advance_days: business.max_advance_days,
         resource_label_singular: business.resource_label_singular.trim(),
@@ -500,6 +505,19 @@ export function AdminConfigPage() {
                     })
                   }
                   hint='Tiempo que un turno queda retenido mientras el negocio decide confirmar.'
+                />
+                <Input
+                  label='Anticipación mínima para reservar (minutos)'
+                  type='number'
+                  min={0}
+                  value={String(business.min_advance_minutes)}
+                  onChange={(e) =>
+                    setBusiness({
+                      ...business,
+                      min_advance_minutes: parseInt(e.target.value) || 0
+                    })
+                  }
+                  hint='El cliente solo podrá reservar si faltan al menos estos minutos para el turno.'
                 />
                 <Input
                   label='Límite de cancelación (horas antes)'

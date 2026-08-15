@@ -99,7 +99,7 @@ pnpm dev
 
 - Consulta de disponibilidad pública sin registro
 - Registro/login con email y contraseña
-- Solicitud de reservas con bloqueo temporal configurable por negocio
+- Solicitud de reservas con bloqueo temporal y anticipación mínima configurables por negocio
 - Panel administrativo mobile-first con cola de pendientes
 - Confirmar/rechazar reservas con motivo
 - Cancelación por parte del cliente (2 horas antes)

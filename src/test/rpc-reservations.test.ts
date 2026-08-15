@@ -108,6 +108,25 @@ describe.skipIf(!DB_AVAILABLE)('create_reservation RPC', () => {
     })
   })
 
+  it('rechaza reservas dentro de la anticipación mínima configurada', async () => {
+    await withTransaction(async (client) => {
+      await setAuthContext(client, REAL_USER_ID)
+
+      const startsAt = new Date(Date.now() + 30 * 60 * 1000).toISOString()
+      const result = await client.query(
+        `select * from public.create_reservation(
+          p_resource_id := $1,
+          p_starts_at := $2,
+          p_notes := null
+        )`,
+        [ACTIVE_RESOURCE_ID, startsAt]
+      )
+
+      const row = result.rows[0] as Record<string, unknown>
+      expect(row.error).toContain('anticipación')
+    })
+  })
+
   it('rechaza reserva para una cancha inactiva', async () => {
     await withTransaction(async (client) => {
       await setAuthContext(client, REAL_USER_ID)

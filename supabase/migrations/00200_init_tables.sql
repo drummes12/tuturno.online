@@ -22,6 +22,7 @@ create table if not exists public.businesses (
   phone text,
   slot_duration_minutes integer not null default 60 check (slot_duration_minutes > 0),
   hold_duration_minutes integer not null default 30 check (hold_duration_minutes > 0),
+  min_advance_minutes integer not null default 60 check (min_advance_minutes >= 0),
   cancellation_limit_hours integer not null default 2 check (cancellation_limit_hours >= 0),
   max_advance_days integer not null default 30 check (max_advance_days > 0),
   resource_label_singular text not null default 'Espacio' check (char_length(btrim(resource_label_singular)) between 2 and 40),
