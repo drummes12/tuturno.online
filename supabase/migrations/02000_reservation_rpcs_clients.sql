@@ -218,7 +218,8 @@ begin
   end if;
 
   select c.*, b.timezone, b.slot_duration_minutes, b.hold_duration_minutes,
-         b.max_advance_days, b.min_advance_minutes, b.cancellation_limit_hours, b.name as business_name
+         b.max_advance_days, b.min_advance_minutes, b.cancellation_limit_hours, b.name as business_name,
+         b.is_demo
   into v_resource
   from public.resources c
   join public.businesses b on c.business_id = b.id
@@ -226,6 +227,12 @@ begin
 
   if not found then
     return query select null::uuid, null::text, null::timestamptz, 'Recurso no disponible'::text;
+    return;
+  end if;
+
+  -- Bloquear reservas en negocios de demostración
+  if v_resource.is_demo then
+    return query select null::uuid, null::text, null::timestamptz, 'Este negocio está en modo demostración y no acepta reservas reales.'::text;
     return;
   end if;
 
@@ -392,7 +399,7 @@ begin
   end if;
 
   select c.*, b.timezone, b.slot_duration_minutes,
-         b.max_advance_days, b.name as business_name
+         b.max_advance_days, b.name as business_name, b.is_demo
   into v_resource
   from public.resources c
   join public.businesses b on c.business_id = b.id
@@ -406,6 +413,12 @@ begin
   v_business_id := v_resource.business_id;
   v_slot_minutes := v_resource.slot_duration_minutes;
   v_max_advance := v_resource.max_advance_days;
+
+  -- Bloquear reservas en negocios de demostración (antes del check de permisos)
+  if v_resource.is_demo then
+    return query select null::uuid, null::text, 'Este negocio está en modo demostración y no acepta reservas reales.'::text;
+    return;
+  end if;
 
   if not public.is_business_member(v_business_id) then
     return query select null::uuid, null::text, 'Sin permisos para crear reservas en este negocio'::text;

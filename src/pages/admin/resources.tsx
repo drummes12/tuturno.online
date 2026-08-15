@@ -5,7 +5,8 @@ import {
   updateResource,
   toggleResourceActive
 } from '@/services/resources'
-import { fetchBusiness } from '@/services/business'
+import { fetchBusinessById } from '@/services/business'
+import { useBusinessId } from '@/hooks/use-business-id'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -24,6 +25,7 @@ import type { Resource } from '@/types'
 
 export function AdminResourcesPage() {
   const canEdit = useCanEdit()
+  const businessId = useBusinessId()
   const [resources, setResources] = useState<Resource[]>([])
   const [label, setLabel] = useState('recursos')
   const [singularLabel, setSingularLabel] = useState('recurso')
@@ -37,11 +39,12 @@ export function AdminResourcesPage() {
   const [saved, setSaved] = useState(false)
 
   const load = useCallback(async () => {
+    if (!businessId) return
     setLoading(true)
     try {
       const [data, business] = await Promise.all([
-        fetchAllResources(),
-        fetchBusiness()
+        fetchAllResources(businessId),
+        fetchBusinessById(businessId)
       ])
       setResources(data)
       setLabel((business?.resource_label_plural || 'Recursos').toLowerCase())
@@ -54,7 +57,7 @@ export function AdminResourcesPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [businessId])
 
   useEffect(() => {
     load()
@@ -104,7 +107,12 @@ export function AdminResourcesPage() {
           (max, resource) => Math.max(max, resource.sort_order),
           0
         )
-        await createResource(name, description || null, maxOrder + 1)
+        await createResource(
+          businessId!,
+          name,
+          description || null,
+          maxOrder + 1
+        )
       }
     } catch (err) {
       setSaving(false)

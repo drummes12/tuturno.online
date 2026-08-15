@@ -58,6 +58,7 @@ export interface Business {
   resource_label_singular: string
   resource_label_plural: string
   reservation_instructions_md: string | null
+  is_demo: boolean
   created_at: string
   updated_at: string
 }

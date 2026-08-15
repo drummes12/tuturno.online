@@ -24,7 +24,7 @@ set -euo pipefail
 SUPABASE_URL="${SUPABASE_URL:-http://127.0.0.1:55321}"
 SERVICE_ROLE_KEY="${SERVICE_ROLE_KEY:-}"
 DB_URL="${DATABASE_URL:-postgresql://postgres:postgres@127.0.0.1:55322/postgres}"
-BUSINESS_SLUG="cancha-futbol-5"
+BUSINESS_SLUG="canchas-el-parque"
 
 # Colores
 GREEN='\033[0;32m'
@@ -168,6 +168,6 @@ cat >&2 <<'SUMMARY'
   admin@tuturno.dev    (password: 123456)  → Admin (manager)
   cliente@tuturno.dev  (password: 123456)  → Cliente
 
-  Negocio: cancha-futbol-5
+  Negocio: canchas-el-parque
 
 SUMMARY

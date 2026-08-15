@@ -27,6 +27,7 @@ create table if not exists public.businesses (
   max_advance_days integer not null default 30 check (max_advance_days > 0),
   resource_label_singular text not null default 'Espacio' check (char_length(btrim(resource_label_singular)) between 2 and 40),
   resource_label_plural text not null default 'Espacios' check (char_length(btrim(resource_label_plural)) between 2 and 40),
+  is_demo boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

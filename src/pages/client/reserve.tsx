@@ -7,7 +7,8 @@ import {
 } from '@/services/reservations'
 import { updateProfile } from '@/services/profiles'
 import { fetchBusinessId } from '@/services/profiles'
-import { fetchBusinessContact } from '@/services/business'
+import { fetchBusinessContactById } from '@/services/business'
+import { useTenant } from '@/hooks/use-tenant'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -15,6 +16,7 @@ import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
 import { Skeleton } from '@/components/common/skeleton'
+import { Spinner } from '@/components/common/spinner'
 import { MarkdownContent } from '@/components/common/markdown-content'
 import {
   ClientSelector,
@@ -27,7 +29,8 @@ import {
   CalendarIcon,
   HourglassIcon,
   CheckIcon,
-  WhatsAppIcon
+  WhatsAppIcon,
+  InfoIcon
 } from '@/components/common/icon'
 import { waLink } from '@/lib/whatsapp'
 import { format, parseISO } from 'date-fns'
@@ -51,8 +54,15 @@ function buildWhatsAppMessage(opts: {
   )
 }
 
-export function ReservePage() {
+type ReservePageProps = {
+  slug?: string
+}
+
+export function ReservePage({ slug }: ReservePageProps = {}) {
   const { user, profile, isAdmin } = useAuthStore()
+  const { business, loading: tenantLoading } = useTenant(slug)
+  const businessId = business?.id ?? null
+  const isDemo = business?.is_demo ?? false
 
   const params = new URLSearchParams(window.location.search)
   const resourceId = params.get('resource')
@@ -67,7 +77,7 @@ export function ReservePage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [businessId, setBusinessId] = useState<string | null>(null)
+  const [adminBusinessId, setAdminBusinessId] = useState<string | null>(null)
   const [businessContact, setBusinessContact] = useState<{
     phone: string
     name: string
@@ -90,14 +100,15 @@ export function ReservePage() {
   useEffect(() => {
     if (isAdmin && user) {
       fetchBusinessId(user.id)
-        .then(setBusinessId)
+        .then(setAdminBusinessId)
         .catch(() => {})
     }
   }, [isAdmin, user])
 
-  // Cargar info del negocio (nombre, teléfono, instrucciones)
+  // Cargar info del negocio por businessId
   useEffect(() => {
-    fetchBusinessContact()
+    if (!businessId) return
+    fetchBusinessContactById(businessId)
       .then((data) => {
         if (data) {
           setBusinessContact({
@@ -109,7 +120,7 @@ export function ReservePage() {
         }
       })
       .catch(() => {})
-  }, [])
+  }, [businessId])
 
   useEffect(() => {
     if (profile) {
@@ -120,7 +131,10 @@ export function ReservePage() {
 
   useEffect(() => {
     async function loadResource() {
-      if (!resourceId) return
+      if (!resourceId) {
+        setLoadingResource(false)
+        return
+      }
       try {
         const name = await fetchResourceName(resourceId)
         setResourceName(name)
@@ -133,7 +147,36 @@ export function ReservePage() {
     loadResource()
   }, [resourceId])
 
-  if (!user) {
+  // Tenant loading
+  if (tenantLoading) {
+    return (
+      <div className='flex flex-col items-center justify-center py-20 gap-3'>
+        <Spinner size='lg' />
+        <p className='text-sm text-(--color-text-muted)'>Cargando negocio…</p>
+      </div>
+    )
+  }
+
+  // For demo mode: show visual form without auth requirement
+  if (isDemo && !user) {
+    return (
+      <DemoReservePreview
+        slug={slug}
+        resourceId={resourceId}
+        dateStr={dateStr}
+        startStr={startStr}
+        resourceName={resourceName}
+        loadingResource={loadingResource}
+        businessName={business?.name ?? 'Demo'}
+        resourceLabelSingular={
+          businessContact?.resource_label_singular ?? 'Recurso'
+        }
+      />
+    )
+  }
+
+  // For real tenants: require auth
+  if (!isDemo && !user) {
     return (
       <Card className='p-8 text-center max-w-md mx-auto mt-8 animate-fade-up'>
         <div className='flex flex-col items-center gap-4'>
@@ -164,7 +207,7 @@ export function ReservePage() {
         <p className='text-(--color-text-muted) mb-4'>
           Faltan datos de la reserva.
         </p>
-        <Link href='/'>
+        <Link href={slug ? `/b/${slug}` : '/'}>
           <Button variant='secondary'>Ver disponibilidad</Button>
         </Link>
       </Card>
@@ -319,14 +362,22 @@ export function ReservePage() {
                 Abrir WhatsApp
               </a>
             )}
-            <Link href={isAdmin ? '/admin/reservas' : '/mis-reservas'}>
+            <Link
+              href={
+                isAdmin
+                  ? '/admin/reservas'
+                  : slug
+                    ? `/b/${slug}/mis-reservas`
+                    : '/mis-reservas'
+              }
+            >
               <Button className='w-full'>
                 {isAdmin ? 'Ver reservas' : 'Ver mis reservas'}
               </Button>
             </Link>
-            <Link href='/'>
+            <Link href={slug ? `/b/${slug}` : '/'}>
               <Button variant='secondary' className='w-full'>
-                Volver al inicio
+                Volver a la disponibilidad
               </Button>
             </Link>
           </div>
@@ -354,7 +405,7 @@ export function ReservePage() {
   return (
     <div className='flex flex-col gap-4 max-w-md mx-auto'>
       <Link
-        href='/'
+        href={slug ? `/b/${slug}` : '/'}
         className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
       >
         <ArrowLeftIcon size={16} />
@@ -397,9 +448,9 @@ export function ReservePage() {
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
           {isAdmin ? (
-            businessId ? (
+            adminBusinessId ? (
               <ClientSelector
-                businessId={businessId}
+                businessId={adminBusinessId}
                 onChange={handleClientChange}
               />
             ) : (
@@ -475,6 +526,189 @@ export function ReservePage() {
             </Button>
           </div>
         </form>
+      </Card>
+    </div>
+  )
+}
+
+/**
+ * Visual-only reserve preview for demo businesses.
+ * No auth required, no submit, no real reservation.
+ */
+function DemoReservePreview({
+  slug,
+  resourceId,
+  dateStr,
+  startStr,
+  resourceName,
+  loadingResource,
+  businessName,
+  resourceLabelSingular
+}: {
+  slug?: string
+  resourceId: string | null
+  dateStr: string | null
+  startStr: string | null
+  resourceName: string | null
+  loadingResource: boolean
+  businessName: string
+  resourceLabelSingular: string
+}) {
+  const timeLabel = (() => {
+    try {
+      return startStr ? format(parseISO(startStr), 'HH:mm') : ''
+    } catch {
+      return startStr ?? ''
+    }
+  })()
+
+  const dateLabel = (() => {
+    try {
+      return dateStr
+        ? format(parseISO(dateStr), "EEEE d 'de' MMMM", { locale: es })
+        : ''
+    } catch {
+      return dateStr ?? ''
+    }
+  })()
+
+  if (!resourceId || !startStr) {
+    return (
+      <Card className='p-8 text-center max-w-md mx-auto mt-8 animate-fade-up'>
+        <p className='text-(--color-text-muted) mb-4'>
+          Faltan datos de la reserva.
+        </p>
+        <Link href={slug ? `/b/${slug}` : '/'}>
+          <Button variant='secondary'>Ver disponibilidad</Button>
+        </Link>
+      </Card>
+    )
+  }
+
+  if (loadingResource) {
+    return (
+      <div className='max-w-md mx-auto mt-8 flex flex-col gap-4'>
+        <Skeleton className='h-8 w-48' />
+        <Skeleton className='h-32 rounded-xl' />
+        <Skeleton className='h-64 rounded-xl' />
+      </div>
+    )
+  }
+
+  const details = [
+    {
+      icon: <StoreIcon size={16} />,
+      label: resourceLabelSingular,
+      value: resourceName
+    },
+    {
+      icon: <CalendarIcon size={16} />,
+      label: 'Fecha',
+      value: dateLabel,
+      capitalize: true
+    },
+    { icon: <ClockIcon size={16} />, label: 'Hora', value: timeLabel },
+    { icon: <ClockIcon size={16} />, label: 'Duración', value: '60 minutos' }
+  ]
+
+  return (
+    <div className='flex flex-col gap-4 max-w-md mx-auto'>
+      <Link
+        href={slug ? `/b/${slug}` : '/'}
+        className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
+      >
+        <ArrowLeftIcon size={16} />
+        Disponibilidad
+      </Link>
+
+      <div className='animate-fade-up'>
+        <h1 className='text-2xl font-bold tracking-tight'>
+          Vista previa de reserva
+        </h1>
+        <p className='text-sm text-(--color-text-muted) mt-0.5'>
+          Así se vería el formulario de reserva en {businessName}.
+        </p>
+      </div>
+
+      {/* Demo banner */}
+      <div
+        className='flex items-start gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-300 text-yellow-900 animate-fade-up'
+        role='status'
+      >
+        <InfoIcon size={20} className='shrink-0 mt-0.5' />
+        <div className='flex-1'>
+          <p className='text-sm font-semibold'>Modo demostración</p>
+          <p className='text-xs mt-0.5'>
+            Las reservas no son reales. Este formulario es solo una vista
+            previa del flujo que verían tus clientes.
+          </p>
+        </div>
+      </div>
+
+      <Card
+        className='p-5 animate-fade-up'
+        elevated
+        data-tour='reservation-summary'
+      >
+        <dl className='flex flex-col gap-3 text-sm'>
+          {details.map((d) => (
+            <div key={d.label} className='flex justify-between items-center'>
+              <dt className='flex items-center gap-2 text-(--color-text-muted)'>
+                <span className='text-graphite-400'>{d.icon}</span>
+                {d.label}
+              </dt>
+              <dd
+                className={`font-medium nums ${d.capitalize ? 'capitalize' : ''}`}
+              >
+                {d.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </Card>
+
+      <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
+        <div className='flex flex-col gap-4'>
+          <div>
+            <Input
+              label='Nombre completo'
+              value=''
+              disabled
+              placeholder='El cliente escribiría su nombre aquí'
+            />
+            <PhoneInput
+              label='Teléfono'
+              value=''
+              onChange={() => {}}
+              disabled
+              hint='El negocio lo usará para contactarte.'
+            />
+          </div>
+          <Input
+            label='Notas (opcional)'
+            value=''
+            disabled
+            placeholder='Ej: llegaremos 10 min antes'
+            hint='Información adicional para el negocio.'
+          />
+
+          <Alert variant='info'>
+            <strong>Demostración:</strong> En un negocio real, aquí el cliente
+            enviaría la solicitud y el negocio la confirmaría.
+          </Alert>
+
+          <Link href={slug ? `/b/${slug}` : '/'}>
+            <Button variant='secondary' size='lg' className='w-full'>
+              <ArrowLeftIcon size={18} />
+              Volver a la disponibilidad
+            </Button>
+          </Link>
+          <Link href='/'>
+            <Button variant='ghost' size='sm' className='w-full'>
+              ¿Buscas tu organización? Volver al inicio
+            </Button>
+          </Link>
+        </div>
       </Card>
     </div>
   )

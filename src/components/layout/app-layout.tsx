@@ -16,6 +16,7 @@ import {
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
+import { extractSlugFromPath } from '@/lib/slug'
 
 interface NavItem {
   label: string
@@ -23,11 +24,6 @@ interface NavItem {
   adminOnly?: boolean
   icon: ReactNode
 }
-
-const clientNav: NavItem[] = [
-  { label: 'Disponibilidad', href: '/', icon: <CalendarIcon size={22} /> },
-  { label: 'Mis reservas', href: '/mis-reservas', icon: <ListIcon size={22} /> }
-]
 
 const adminNav: NavItem[] = [
   { label: 'Operación', href: '/admin', icon: <LayoutIcon size={22} /> },
@@ -47,8 +43,7 @@ const adminNav: NavItem[] = [
     label: 'Configuración',
     href: '/admin/configuracion',
     icon: <SettingsIcon size={22} />
-  },
-  { label: 'Disponibilidad', href: '/', icon: <CalendarIcon size={22} /> }
+  }
 ]
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -56,10 +51,28 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation()
   const { startTour, isStarting } = useClientTutorial()
 
+  // Build tenant-aware client nav
+  const slug = extractSlugFromPath(location)
+  const tenantBase = slug ? `/b/${slug}` : null
+  const clientNav: NavItem[] = tenantBase
+    ? [
+        {
+          label: 'Disponibilidad',
+          href: tenantBase,
+          icon: <CalendarIcon size={22} />
+        },
+        {
+          label: 'Mis reservas',
+          href: `${tenantBase}/mis-reservas`,
+          icon: <ListIcon size={22} />
+        }
+      ]
+    : []
+
   const nav = isAdmin ? adminNav : clientNav
 
   // El tutorial solo aplica a clientes (visitantes o autenticados sin rol admin)
-  const showTutorialButton = !isAdmin
+  const showTutorialButton = !isAdmin && !!tenantBase
 
   return (
     <div className='min-h-dvh flex flex-col bg-surface overflow-clip'>
@@ -115,7 +128,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </header>
 
       {/* Desktop nav — horizontal, below header */}
-      {user && (
+      {user && nav.length > 0 && (
         <nav className='hidden md:block border-b overflow-x-auto border-border bg-surface-elevated'>
           <div className='mx-auto max-w-5xl px-4 flex items-center gap-1'>
             {nav.map((item) => {
@@ -150,7 +163,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </main>
 
       {/* Bottom nav — mobile, thumb zone, with icons */}
-      {user && (
+      {user && nav.length > 0 && (
         <nav className='fixed bottom-0 left-0 right-0 z-40 bg-surface-elevated/95 backdrop-blur-lg border-t border-border md:hidden'>
           <div className='flex items-center justify-around px-1 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
             {nav.map((item) => {
@@ -175,11 +188,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
       )}
 
       <div className='fixed bottom-20 right-4 z-30 md:bottom-6 md:right-6 flex flex-col gap-2'>
-        {/* FAB de WhatsApp — solo para clientes */}
-        {!isAdmin && <WhatsAppFab />}
+        {/* FAB de WhatsApp — solo para clientes en rutas tenant */}
+        {!isAdmin && location.startsWith('/b/') && <WhatsAppFab />}
 
-        {/* FAB de ubicación — disponible en la página pública */}
-        {location === '/' && <GoogleMapsFab />}
+        {/* FAB de ubicación — disponible en la página pública tenant */}
+        {location.startsWith('/b/') && <GoogleMapsFab />}
       </div>
     </div>
   )

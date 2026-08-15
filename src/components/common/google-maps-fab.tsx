@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react'
 import { MapPinIcon } from '@/components/common/icon'
-import { fetchBusinessContact } from '@/services/business'
+import { fetchBusinessContactById } from '@/services/business'
+import { getSlugFromUrl } from '@/lib/slug'
+import { useTenant } from '@/hooks/use-tenant'
 import { googleMapsLink } from '@/lib/address'
+
+type GoogleMapsFabProps = {
+  /** Explicit business ID. If not provided, resolves from URL slug. */
+  businessId?: string
+}
 
 /**
  * Botón flotante para abrir la ubicación del negocio en Google Maps.
  * No usa API key: genera un enlace a partir de la dirección textual.
  */
-export function GoogleMapsFab() {
+export function GoogleMapsFab({ businessId }: GoogleMapsFabProps = {}) {
+  const slug = getSlugFromUrl() ?? undefined
+  const { business: tenantBusiness } = useTenant(businessId ? undefined : slug)
+  const resolvedBusinessId = businessId ?? tenantBusiness?.id ?? null
+
   const [address, setAddress] = useState<{
     street: string | null
     neighborhood: string | null
@@ -17,9 +28,10 @@ export function GoogleMapsFab() {
   } | null>(null)
 
   useEffect(() => {
+    if (!resolvedBusinessId) return
     let mounted = true
 
-    fetchBusinessContact()
+    fetchBusinessContactById(resolvedBusinessId)
       .then((data) => {
         if (!mounted || !data) return
         setAddress({
@@ -37,7 +49,7 @@ export function GoogleMapsFab() {
     return () => {
       mounted = false
     }
-  }, [])
+  }, [resolvedBusinessId])
 
   if (!address) return null
 

@@ -65,11 +65,12 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: resources, error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchAllResources()
+      const result = await fetchAllResources('biz-1')
 
       expect(result).toEqual(resources)
       expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.select).toHaveBeenCalledWith('*')
+      expect(chain.eq).toHaveBeenCalledWith('business_id', 'biz-1')
       expect(chain.order).toHaveBeenCalledWith('sort_order')
     })
 
@@ -77,7 +78,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchAllResources()
+      const result = await fetchAllResources('biz-1')
 
       expect(result).toEqual([])
     })
@@ -87,7 +88,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(fetchAllResources()).rejects.toThrow(
+      await expect(fetchAllResources('biz-1')).rejects.toThrow(
         'Error de base de datos'
       )
       expect(mockFrom).toHaveBeenCalledWith('resources')
@@ -97,7 +98,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      await fetchAllResources()
+      await fetchAllResources('biz-1')
 
       expect(mockFrom).toHaveBeenCalledTimes(1)
       expect(mockFrom).toHaveBeenNthCalledWith(1, 'resources')
@@ -116,12 +117,13 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: resources, error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchActiveResources()
+      const result = await fetchActiveResources('biz-1')
 
       expect(result).toEqual(resources)
       expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.select).toHaveBeenCalledWith('*')
       expect(chain.eq).toHaveBeenCalledWith('is_active', true)
+      expect(chain.eq).toHaveBeenCalledWith('business_id', 'biz-1')
       expect(chain.order).toHaveBeenCalledWith('sort_order')
     })
 
@@ -129,7 +131,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchActiveResources()
+      const result = await fetchActiveResources('biz-1')
 
       expect(result).toEqual([])
     })
@@ -139,7 +141,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(fetchActiveResources()).rejects.toThrow(
+      await expect(fetchActiveResources('biz-1')).rejects.toThrow(
         'Error al obtener canchas activas'
       )
       expect(mockFrom).toHaveBeenCalledWith('resources')
@@ -149,7 +151,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      await fetchActiveResources()
+      await fetchActiveResources('biz-1')
 
       expect(chain.eq).toHaveBeenCalledWith('is_active', true)
     })
@@ -226,10 +228,16 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createResource('  Cancha B  ', '  Descripción de la cancha  ', 2)
+      await createResource(
+        'biz-1',
+        '  Cancha B  ',
+        '  Descripción de la cancha  ',
+        2
+      )
 
       expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.insert).toHaveBeenCalledWith({
+        business_id: 'biz-1',
         name: 'Cancha B',
         description: 'Descripción de la cancha',
         sort_order: 2
@@ -240,7 +248,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createResource('   Cancha Trimmed   ', null, 1)
+      await createResource('biz-1', '   Cancha Trimmed   ', null, 1)
 
       expect(chain.insert).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'Cancha Trimmed' })
@@ -251,9 +259,10 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createResource('Cancha C', '   ', 3)
+      await createResource('biz-1', 'Cancha C', '   ', 3)
 
       expect(chain.insert).toHaveBeenCalledWith({
+        business_id: 'biz-1',
         name: 'Cancha C',
         description: null,
         sort_order: 3
@@ -264,9 +273,10 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createResource('Cancha D', null, 4)
+      await createResource('biz-1', 'Cancha D', null, 4)
 
       expect(chain.insert).toHaveBeenCalledWith({
+        business_id: 'biz-1',
         name: 'Cancha D',
         description: null,
         sort_order: 4
@@ -277,7 +287,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createResource('Cancha E', '  Texto con espacios  ', 5)
+      await createResource('biz-1', 'Cancha E', '  Texto con espacios  ', 5)
 
       expect(chain.insert).toHaveBeenCalledWith(
         expect.objectContaining({ description: 'Texto con espacios' })
@@ -289,9 +299,9 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(createResource('Cancha F', null, 6)).rejects.toThrow(
-        'Error al crear cancha'
-      )
+      await expect(
+        createResource('biz-1', 'Cancha F', null, 6)
+      ).rejects.toThrow('Error al crear cancha')
       expect(mockFrom).toHaveBeenCalledWith('resources')
     })
 
@@ -299,7 +309,7 @@ describe('resources service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createResource('Cancha G', null, 7)
+      await createResource('biz-1', 'Cancha G', null, 7)
 
       expect(mockFrom).toHaveBeenCalledTimes(1)
       expect(mockFrom).toHaveBeenCalledWith('resources')

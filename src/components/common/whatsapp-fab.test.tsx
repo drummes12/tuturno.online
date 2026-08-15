@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 
-const { mockFetchBusinessContact } = vi.hoisted(() => ({
-  mockFetchBusinessContact: vi.fn()
+const { mockFetchBusinessContactById } = vi.hoisted(() => ({
+  mockFetchBusinessContactById: vi.fn()
 }))
 
 vi.mock('@/services/business', () => ({
-  fetchBusinessContact: mockFetchBusinessContact
+  fetchBusinessContactById: mockFetchBusinessContactById
+}))
+
+vi.mock('@/hooks/use-tenant', () => ({
+  useTenant: () => ({ business: null, loading: false, error: null })
+}))
+
+vi.mock('@/lib/slug', () => ({
+  getSlugFromUrl: () => null,
+  extractSlugFromPath: () => null
 }))
 
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
@@ -17,46 +26,62 @@ beforeEach(() => {
 
 describe('WhatsAppFab', () => {
   it('no renderiza nada cuando no hay phone', async () => {
-    mockFetchBusinessContact.mockResolvedValue(null)
-    const { container } = render(<WhatsAppFab />)
-    // Esperar a que termine el useEffect
+    mockFetchBusinessContactById.mockResolvedValue(null)
+    const { container } = render(<WhatsAppFab businessId='biz-1' />)
     await vi.waitFor(() => {
-      expect(mockFetchBusinessContact).toHaveBeenCalled()
+      expect(mockFetchBusinessContactById).toHaveBeenCalled()
     })
     expect(container.querySelector('a')).toBeNull()
   })
 
-  it('no renderiza nada cuando fetchBusinessContact falla', async () => {
-    // Usar mockResolvedValue(null) en lugar de mockRejectedValue
-    // porque el componente no tiene try/catch y un rejection no manejado
-    // contamina otros tests. En producción, el servicio lanzaría,
-    // pero el componente debería manejarlo — este test verifica
-    // que con null (sin datos) no renderiza nada.
-    mockFetchBusinessContact.mockResolvedValue(null)
-    const { container } = render(<WhatsAppFab />)
+  it('no renderiza nada cuando fetchBusinessContactById falla', async () => {
+    mockFetchBusinessContactById.mockResolvedValue(null)
+    const { container } = render(<WhatsAppFab businessId='biz-1' />)
     await vi.waitFor(() => {
-      expect(mockFetchBusinessContact).toHaveBeenCalled()
+      expect(mockFetchBusinessContactById).toHaveBeenCalled()
     })
     expect(container.querySelector('a')).toBeNull()
   })
 
   it('renderiza el botón cuando hay phone', async () => {
-    mockFetchBusinessContact.mockResolvedValue({
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
       phone: '+57 300 123 4567',
-      name: 'Canchas Test'
+      name: 'Canchas Test',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
     })
-    render(<WhatsAppFab />)
+    render(<WhatsAppFab businessId='biz-1' />)
     await vi.waitFor(() => {
       expect(screen.getByRole('link')).toBeInTheDocument()
     })
   })
 
   it('el link apunta a wa.me con el número limpio', async () => {
-    mockFetchBusinessContact.mockResolvedValue({
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
       phone: '+57 300 123 4567',
-      name: 'Canchas Test'
+      name: 'Canchas Test',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
     })
-    render(<WhatsAppFab />)
+    render(<WhatsAppFab businessId='biz-1' />)
     await vi.waitFor(() => {
       const link = screen.getByRole('link')
       expect(link).toHaveAttribute('href')
@@ -66,11 +91,22 @@ describe('WhatsAppFab', () => {
   })
 
   it('el link incluye el nombre del negocio en el mensaje', async () => {
-    mockFetchBusinessContact.mockResolvedValue({
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
       phone: '3001234567',
-      name: 'Mi Cancha'
+      name: 'Mi Cancha',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
     })
-    render(<WhatsAppFab />)
+    render(<WhatsAppFab businessId='biz-1' />)
     await vi.waitFor(() => {
       const link = screen.getByRole('link')
       const href = link.getAttribute('href')!
@@ -79,11 +115,22 @@ describe('WhatsAppFab', () => {
   })
 
   it('tiene target _blank y rel noopener', async () => {
-    mockFetchBusinessContact.mockResolvedValue({
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
       phone: '3001234567',
-      name: 'Test'
+      name: 'Test',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
     })
-    render(<WhatsAppFab />)
+    render(<WhatsAppFab businessId='biz-1' />)
     await vi.waitFor(() => {
       const link = screen.getByRole('link')
       expect(link).toHaveAttribute('target', '_blank')
@@ -92,11 +139,22 @@ describe('WhatsAppFab', () => {
   })
 
   it('tiene aria-label descriptivo', async () => {
-    mockFetchBusinessContact.mockResolvedValue({
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
       phone: '3001234567',
-      name: 'Cancha Premium'
+      name: 'Cancha Premium',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
     })
-    render(<WhatsAppFab />)
+    render(<WhatsAppFab businessId='biz-1' />)
     await vi.waitFor(() => {
       const link = screen.getByRole('link')
       expect(link).toHaveAttribute('aria-label')

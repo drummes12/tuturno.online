@@ -1,20 +1,26 @@
 import { supabase } from '@/lib/supabase'
 import type { Resource } from '@/types'
 
-export async function fetchActiveResources(): Promise<Resource[]> {
+export async function fetchActiveResources(
+  businessId: string
+): Promise<Resource[]> {
   const { data, error } = await supabase
     .from('resources')
     .select('*')
     .eq('is_active', true)
+    .eq('business_id', businessId)
     .order('sort_order')
   if (error) throw error
   return data as Resource[]
 }
 
-export async function fetchAllResources(): Promise<Resource[]> {
+export async function fetchAllResources(
+  businessId: string
+): Promise<Resource[]> {
   const { data, error } = await supabase
     .from('resources')
     .select('*')
+    .eq('business_id', businessId)
     .order('sort_order')
   if (error) throw error
   return data as Resource[]
@@ -32,11 +38,13 @@ export async function fetchResourceName(
 }
 
 export async function createResource(
+  businessId: string,
   name: string,
   description: string | null,
   sortOrder: number
 ): Promise<void> {
   const { error } = await supabase.from('resources').insert({
+    business_id: businessId,
     name: name.trim(),
     description: description?.trim() || null,
     sort_order: sortOrder

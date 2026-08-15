@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchBusiness, updateBusiness } from '@/services/business'
+import { fetchBusinessById, updateBusiness } from '@/services/business'
+import { useBusinessId } from '@/hooks/use-business-id'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -22,6 +23,7 @@ import type { Business } from '@/types'
 
 export function AdminConfigPage() {
   const canEdit = useCanEdit()
+  const businessId = useBusinessId()
   const [business, setBusiness] = useState<Business | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -30,8 +32,9 @@ export function AdminConfigPage() {
 
   useEffect(() => {
     async function load() {
+      if (!businessId) return
       try {
-        const data = await fetchBusiness()
+        const data = await fetchBusinessById(businessId)
         setBusiness(data)
       } catch (err) {
         setError(
@@ -44,7 +47,7 @@ export function AdminConfigPage() {
       }
     }
     load()
-  }, [])
+  }, [businessId])
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()

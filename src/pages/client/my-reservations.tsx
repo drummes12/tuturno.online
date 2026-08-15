@@ -5,7 +5,8 @@ import {
   fetchUserReservations,
   cancelReservationByClient
 } from '@/services/reservations'
-import { fetchBusinessContact } from '@/services/business'
+import { fetchBusinessContactById } from '@/services/business'
+import { useTenant } from '@/hooks/use-tenant'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { StatusBadge } from '@/components/common/badge'
@@ -25,8 +26,14 @@ import { sortReservationsByPriority } from '@/lib/sort'
 
 type Filter = 'upcoming' | 'pending' | 'confirmed' | 'past'
 
-export function MyReservationsPage() {
+type MyReservationsPageProps = {
+  slug?: string
+}
+
+export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   const { user, profile } = useAuthStore()
+  const { business } = useTenant(slug)
+  const tenantBusinessId = business?.id ?? null
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('upcoming')
@@ -56,7 +63,8 @@ export function MyReservationsPage() {
 
   // Cargar teléfono del negocio para el botón de WhatsApp
   useEffect(() => {
-    fetchBusinessContact()
+    if (!tenantBusinessId) return
+    fetchBusinessContactById(tenantBusinessId)
       .then((data) => {
         if (data) {
           setBusinessPhone(data.phone)
@@ -65,7 +73,7 @@ export function MyReservationsPage() {
         }
       })
       .catch(() => {})
-  }, [])
+  }, [tenantBusinessId])
 
   // Realtime: recargar cuando el admin confirme/rechace/cancele
   useReservationsRealtime(
@@ -214,7 +222,7 @@ export function MyReservationsPage() {
                 {filter === 'past' && 'No hay historial de reservas pasadas.'}
               </p>
             </div>
-            <Link href='/'>
+            <Link href={slug ? `/b/${slug}` : '/'}>
               <Button variant='secondary'>
                 <CalendarPlusIcon size={18} />
                 Ver disponibilidad

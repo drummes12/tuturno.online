@@ -14,6 +14,7 @@ interface PhoneInputProps {
   defaultCountry?: Country
   /** Cuando es true, el campo puede estar vacío sin marcar error */
   optional?: boolean
+  disabled?: boolean
 }
 
 export function PhoneInput({
@@ -25,7 +26,8 @@ export function PhoneInput({
   error,
   required,
   defaultCountry = 'CO',
-  optional
+  optional,
+  disabled
 }: PhoneInputProps) {
   const [touched, setTouched] = useState(false)
   const inputId = `phone-${label.toLowerCase().replace(/\s+/g, '-')}`
@@ -54,10 +56,9 @@ export function PhoneInput({
         onBlur={() => setTouched(true)}
         placeholder={placeholder}
         required={required}
+        disabled={disabled}
         className={`tuturno-phone-input ${
-          showError
-            ? 'tuturno-phone-input--error'
-            : ''
+          showError ? 'tuturno-phone-input--error' : ''
         }`}
       />
       {showError ? (

@@ -1,19 +1,11 @@
 import { supabase } from '@/lib/supabase'
 import type { Business } from '@/types'
 
-export async function fetchBusiness(): Promise<Business | null> {
-  const { data, error } = await supabase
-    .from('businesses')
-    .select('*')
-    .limit(1)
-    .maybeSingle()
-  if (error) throw error
-  return data as Business | null
-}
-
-export async function fetchBusinessContact(): Promise<{
+export type BusinessContact = {
+  id: string
   phone: string
   name: string
+  slug: string
   street: string | null
   neighborhood: string | null
   city: string | null
@@ -22,26 +14,54 @@ export async function fetchBusinessContact(): Promise<{
   resource_label_singular: string
   resource_label_plural: string
   reservation_instructions_md: string | null
-} | null> {
-  const { data } = await supabase
+  is_demo: boolean
+}
+
+/**
+ * Resolve a public business by its slug.
+ * Replaces the old fetchBusiness() that used .limit(1).
+ */
+export async function fetchBusinessBySlug(
+  slug: string
+): Promise<Business | null> {
+  const { data, error } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle()
+  if (error) throw error
+  return data as Business | null
+}
+
+/**
+ * Fetch public contact/config data for a specific business by ID.
+ * Replaces the old fetchBusinessContact() that used .limit(1).
+ */
+export async function fetchBusinessContactById(
+  businessId: string
+): Promise<BusinessContact | null> {
+  const { data, error } = await supabase
     .from('businesses')
     .select(
-      'phone, name, street, neighborhood, city, state, country, resource_label_singular, resource_label_plural, reservation_instructions_md'
+      'id, phone, name, slug, street, neighborhood, city, state, country, resource_label_singular, resource_label_plural, reservation_instructions_md, is_demo'
     )
-    .limit(1)
-    .single()
-  return data as {
-    phone: string
-    name: string
-    street: string | null
-    neighborhood: string | null
-    city: string | null
-    state: string | null
-    country: string | null
-    resource_label_singular: string
-    resource_label_plural: string
-    reservation_instructions_md: string | null
-  } | null
+    .eq('id', businessId)
+    .maybeSingle()
+  if (error) throw error
+  return data as BusinessContact | null
+}
+
+/**
+ * Fetch a business by ID (used by admin pages).
+ */
+export async function fetchBusinessById(id: string): Promise<Business | null> {
+  const { data, error } = await supabase
+    .from('businesses')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw error
+  return data as Business | null
 }
 
 export async function updateBusiness(

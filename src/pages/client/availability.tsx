@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'wouter'
 import { fetchActiveResources } from '@/services/resources'
 import { fetchAvailability } from '@/services/availability'
-import { fetchBusinessContact } from '@/services/business'
+import { fetchBusinessContactById } from '@/services/business'
+import { useTenant } from '@/hooks/use-tenant'
 import { Card } from '@/components/common/card'
+import { Spinner } from '@/components/common/spinner'
 import {
   SlotGridSkeleton,
   DatePickerSkeleton
@@ -15,7 +17,8 @@ import {
   CloudSunIcon,
   MoonIcon,
   MapPinIcon,
-  ExternalLinkIcon
+  ExternalLinkIcon,
+  InfoIcon
 } from '@/components/common/icon'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
 import type { Resource, AvailabilitySlot } from '@/types'
@@ -25,7 +28,19 @@ import { BUSINESS_TIMEZONE } from '@/lib/time'
 import { toZonedTime } from 'date-fns-tz'
 import type { ReactNode } from 'react'
 
-export function AvailabilityPage() {
+type AvailabilityPageProps = {
+  slug?: string
+}
+
+export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
+  const {
+    business,
+    loading: tenantLoading,
+    error: tenantError
+  } = useTenant(slug)
+  const businessId = business?.id ?? null
+  const isDemo = business?.is_demo ?? false
+
   const [resources, setResources] = useState<Resource[]>([])
   const [selectedResource, setSelectedResource] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState(
@@ -47,11 +62,13 @@ export function AvailabilityPage() {
     country: string | null
   } | null>(null)
 
-  // Cargar recursos activas
+  // Cargar recursos activos del tenant
   useEffect(() => {
     async function loadResources() {
+      if (!businessId) return
+      setLoadingResources(true)
       try {
-        const data = await fetchActiveResources()
+        const data = await fetchActiveResources(businessId)
         setResources(data)
         if (data.length > 0) {
           setSelectedResource(data[0].id)
@@ -63,13 +80,14 @@ export function AvailabilityPage() {
       }
     }
     loadResources()
-  }, [])
+  }, [businessId])
 
-  // Cargar ubicación del negocio
+  // Cargar ubicación y etiquetas del negocio
   useEffect(() => {
     async function loadLocation() {
+      if (!businessId) return
       try {
-        const data = await fetchBusinessContact()
+        const data = await fetchBusinessContactById(businessId)
         if (data) {
           setResourceLabels({
             singular: data.resource_label_singular || 'Espacio',
@@ -88,7 +106,7 @@ export function AvailabilityPage() {
       }
     }
     loadLocation()
-  }, [])
+  }, [businessId])
 
   // Cargar disponibilidad
   const loadAvailability = useCallback(async () => {
@@ -161,13 +179,67 @@ export function AvailabilityPage() {
     return groups
   }, [slots])
 
+  // Tenant loading or not found
+  if (tenantLoading) {
+    return (
+      <div className='flex flex-col items-center justify-center py-20 gap-3'>
+        <Spinner size='lg' />
+        <p className='text-sm text-(--color-text-muted)'>Cargando negocio…</p>
+      </div>
+    )
+  }
+
+  if (tenantError || !business) {
+    return (
+      <div className='flex flex-col items-center justify-center py-20 gap-4 animate-fade-up'>
+        <div className='w-14 h-14 rounded-full bg-surface-inset flex items-center justify-center text-text-muted'>
+          <InboxIcon size={28} />
+        </div>
+        <div className='text-center'>
+          <h1 className='text-xl font-bold tracking-tight mb-1'>
+            Negocio no encontrado
+          </h1>
+          <p className='text-sm text-(--color-text-muted)'>
+            {tenantError ?? 'Verifica el enlace o contacta al negocio.'}
+          </p>
+        </div>
+        <Link href='/'>
+          <button className='text-sm font-medium text-(--color-primary) hover:underline touch-target px-4 py-2'>
+            Volver al inicio
+          </button>
+        </Link>
+      </div>
+    )
+  }
+
+  const reserveHrefBase = `/b/${slug}/reservar`
+
   return (
     <div className='flex flex-col gap-5'>
+      {/* Demo banner */}
+      {isDemo && (
+        <div
+          className='flex items-start gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-300 text-yellow-900 animate-fade-up'
+          role='status'
+        >
+          <InfoIcon size={20} className='shrink-0 mt-0.5' />
+          <div className='flex-1'>
+            <p className='text-sm font-semibold'>
+              Estás probando la demostración
+            </p>
+            <p className='text-xs mt-0.5'>
+              Las reservas no son reales. Explora la disponibilidad y el flujo
+              libremente.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className='flex items-start justify-between gap-3 animate-fade-up'>
         <div>
           <h1 className='text-2xl font-bold text-(--color-text) tracking-tight text-balance'>
-            Disponibilidad
+            {business.name}
           </h1>
           <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
             {dateLabel}
@@ -377,7 +449,7 @@ export function AvailabilityPage() {
                     return isAvailable ? (
                       <Link
                         key={`${slot.resource_id}-${slot.starts_at}`}
-                        href={`/reservar?resource=${slot.resource_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
+                        href={`${reserveHrefBase}?resource=${slot.resource_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
                       >
                         <button
                           data-tour={

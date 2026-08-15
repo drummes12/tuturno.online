@@ -6,7 +6,7 @@ import {
   countOverlappingReservations
 } from '@/services/availability-exceptions'
 import { fetchAllResources } from '@/services/resources'
-import { fetchBusiness } from '@/services/business'
+import { fetchBusinessById } from '@/services/business'
 import { useAuthStore } from '@/stores/auth'
 import { useBusinessId } from '@/hooks/use-business-id'
 import { useCanEdit } from '@/hooks/use-can-edit'
@@ -99,8 +99,8 @@ export function AdminExceptionsPage() {
     try {
       const [excData, resourceData, business] = await Promise.all([
         fetchAvailabilityExceptions(businessId),
-        fetchAllResources(),
-        fetchBusiness()
+        fetchAllResources(businessId),
+        fetchBusinessById(businessId)
       ])
       setExceptions(excData)
       setResources(resourceData)

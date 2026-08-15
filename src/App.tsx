@@ -9,6 +9,9 @@ import { LoginPage } from '@/pages/auth/login'
 import { RegisterPage } from '@/pages/auth/register'
 import { RecoverPasswordPage } from '@/pages/auth/recover-password'
 
+// Landing
+import { LandingPage } from '@/pages/landing'
+
 // Client pages
 import { AvailabilityPage } from '@/pages/client/availability'
 import { ReservePage } from '@/pages/client/reserve'
@@ -34,11 +37,8 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, isAdmin } = useAuthStore()
   if (!user) {
-    return (
-      <Redirect
-        to={`/login?next=${encodeURIComponent(window.location.pathname)}`}
-      />
-    )
+    const fullPath = window.location.pathname + window.location.search
+    return <Redirect to={`/login?next=${encodeURIComponent(fullPath)}`} />
   }
   if (!isAdmin) {
     return <Redirect to='/' />
@@ -76,6 +76,9 @@ export default function App() {
   return (
     <AppLayout>
       <Switch>
+        {/* Landing */}
+        <Route path='/' component={LandingPage} />
+
         {/* Auth — solo accesibles sin sesión */}
         <Route path='/login'>
           <GuestRoute>
@@ -90,17 +93,19 @@ export default function App() {
         {/* /recuperar-password es accesible con y sin sesión (recovery flow) */}
         <Route path='/recuperar-password' component={RecoverPasswordPage} />
 
-        {/* Client */}
-        <Route path='/' component={AvailabilityPage} />
-        <Route path='/reservar'>
-          <ProtectedRoute>
-            <ReservePage />
-          </ProtectedRoute>
+        {/* Public tenant routes */}
+        <Route path='/b/:slug'>
+          {(params) => <AvailabilityPage slug={params.slug} />}
         </Route>
-        <Route path='/mis-reservas'>
-          <ProtectedRoute>
-            <MyReservationsPage />
-          </ProtectedRoute>
+        <Route path='/b/:slug/reservar'>
+          {(params) => <ReservePage slug={params.slug} />}
+        </Route>
+        <Route path='/b/:slug/mis-reservas'>
+          {(params) => (
+            <ProtectedRoute>
+              <MyReservationsPage slug={params.slug} />
+            </ProtectedRoute>
+          )}
         </Route>
 
         {/* Admin */}
@@ -133,6 +138,14 @@ export default function App() {
           <AdminRoute>
             <AdminExceptionsPage />
           </AdminRoute>
+        </Route>
+
+        {/* Legacy redirects — old single-tenant routes */}
+        <Route path='/reservar'>
+          <Redirect to='/' />
+        </Route>
+        <Route path='/mis-reservas'>
+          <Redirect to='/' />
         </Route>
 
         {/* 404 */}

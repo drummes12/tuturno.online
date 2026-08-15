@@ -12,6 +12,7 @@ const DB_AVAILABLE = await isResourcesSchemaAvailable()
 // sin importar si la BD local fue reseteada
 let ACTIVE_RESOURCE_ID = ''
 let REAL_USER_ID = ''
+let DEMO_RESOURCE_ID = ''
 
 beforeAll(async () => {
   if (!DB_AVAILABLE) {
@@ -19,12 +20,26 @@ beforeAll(async () => {
     return
   }
 
-  // Buscar la primera cancha activa
-  const courtResult = await query(
-    'select id from public.resources where is_active = true order by sort_order limit 1'
-  )
-  if (courtResult.rows.length > 0) {
-    ACTIVE_RESOURCE_ID = courtResult.rows[0].id as string
+  // Buscar la primera cancha activa (negocio real, no demo)
+  // Si la columna is_demo no existe aún (BD local sin migrar), caemos al fallback
+  try {
+    const courtResult = await query(
+      `select r.id from public.resources r
+       join public.businesses b on b.id = r.business_id
+       where r.is_active = true and b.is_demo = false
+       order by r.sort_order limit 1`
+    )
+    if (courtResult.rows.length > 0) {
+      ACTIVE_RESOURCE_ID = courtResult.rows[0].id as string
+    }
+  } catch {
+    // Fallback: sin filtro is_demo (BD local sin migrar)
+    const courtResult = await query(
+      'select id from public.resources where is_active = true order by sort_order limit 1'
+    )
+    if (courtResult.rows.length > 0) {
+      ACTIVE_RESOURCE_ID = courtResult.rows[0].id as string
+    }
   }
 
   // Buscar el primer business member (owner)
@@ -35,6 +50,22 @@ beforeAll(async () => {
   )
   if (userResult.rows.length > 0) {
     REAL_USER_ID = userResult.rows[0].user_id as string
+  }
+
+  // Buscar un recurso del negocio demo (is_demo = true)
+  try {
+    const demoResult = await query(
+      `select r.id from public.resources r
+       join public.businesses b on b.id = r.business_id
+       where b.is_demo = true and r.is_active = true
+       order by r.sort_order limit 1`
+    )
+    if (demoResult.rows.length > 0) {
+      DEMO_RESOURCE_ID = demoResult.rows[0].id as string
+    }
+  } catch {
+    // Si is_demo no existe, no hay recurso demo disponible
+    DEMO_RESOURCE_ID = ''
   }
 })
 
@@ -411,5 +442,67 @@ describe.skipIf(!DB_AVAILABLE)('is_business_member function', () => {
       ['00000000-0000-0000-0000-000000000000']
     )
     expect((result.rows[0] as Record<string, unknown>).is_member).toBe(false)
+  })
+})
+
+describe.skipIf(!DB_AVAILABLE)('demo business reservation blocking', () => {
+  it('create_reservation rechaza reservas en negocios demo', async () => {
+    if (!DEMO_RESOURCE_ID) {
+      console.warn('No hay recurso demo — test saltado')
+      return
+    }
+    await withTransaction(async (client) => {
+      await setAuthContext(client, REAL_USER_ID)
+
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(10, 0, 0, 0)
+      const startsAt = tomorrow.toISOString()
+
+      const result = await client.query(
+        `select * from public.create_reservation(
+          p_resource_id := $1,
+          p_starts_at := $2,
+          p_notes := null
+        )`,
+        [DEMO_RESOURCE_ID, startsAt]
+      )
+
+      const row = result.rows[0] as Record<string, unknown>
+      expect(row.error).toBeTruthy()
+      expect(String(row.error).toLowerCase()).toContain('demo')
+    })
+  })
+
+  it('create_reservation_admin rechaza reservas en negocios demo', async () => {
+    if (!DEMO_RESOURCE_ID) {
+      console.warn('No hay recurso demo — test saltado')
+      return
+    }
+    await withTransaction(async (client) => {
+      await setAuthContext(client, REAL_USER_ID)
+
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      tomorrow.setHours(11, 0, 0, 0)
+      const startsAt = tomorrow.toISOString()
+
+      const result = await client.query(
+        `select * from public.create_reservation_admin(
+          p_resource_id := $1,
+          p_starts_at := $2,
+          p_client_id := null,
+          p_client_name := 'Cliente Demo',
+          p_client_phone := null,
+          p_client_email := null,
+          p_notes := null
+        )`,
+        [DEMO_RESOURCE_ID, startsAt]
+      )
+
+      const row = result.rows[0] as Record<string, unknown>
+      expect(row.error).toBeTruthy()
+      expect(String(row.error).toLowerCase()).toContain('demo')
+    })
   })
 })

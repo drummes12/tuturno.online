@@ -327,18 +327,18 @@ function selectTour(
     return tours.find((t) => t.id === 'auth') ?? null
   }
 
-  // En /reservar, tour de reserva
-  if (route === '/reservar') {
+  // En /b/:slug/reservar, tour de reserva
+  if (/^\/b\/[^/]+\/reservar$/.test(route)) {
     return tours.find((t) => t.id === 'reservation') ?? null
   }
 
-  // En /mis-reservas, tour de mis reservas
-  if (route === '/mis-reservas') {
+  // En /b/:slug/mis-reservas, tour de mis reservas
+  if (/^\/b\/[^/]+\/mis-reservas$/.test(route)) {
     return tours.find((t) => t.id === 'my-reservations') ?? null
   }
 
-  // En /, depende de si hay sesión
-  if (route === '/') {
+  // En /b/:slug (disponibilidad), depende de si hay sesión
+  if (/^\/b\/[^/]+$/.test(route)) {
     return userId
       ? (tours.find((t) => t.id === 'client-home') ?? null)
       : (tours.find((t) => t.id === 'visitor-home') ?? null)
