@@ -64,14 +64,23 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
 
   // Cargar recursos activos del tenant
   useEffect(() => {
-    async function loadResources() {
-      if (!businessId) return
+    if (!businessId) {
+      setResources([])
+      setSelectedResource(null)
+      setLoadingResources(false)
+      setLoading(false)
+      return
+    }
+    async function loadResources(bizId: string) {
       setLoadingResources(true)
       try {
-        const data = await fetchActiveResources(businessId)
+        const data = await fetchActiveResources(bizId)
         setResources(data)
         if (data.length > 0) {
           setSelectedResource(data[0].id)
+        } else {
+          setSelectedResource(null)
+          setLoading(false)
         }
       } catch {
         setError('No pudimos cargar los recursos.')
@@ -79,7 +88,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
         setLoadingResources(false)
       }
     }
-    loadResources()
+    loadResources(businessId)
   }, [businessId])
 
   // Cargar ubicación y etiquetas del negocio
@@ -110,7 +119,11 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
 
   // Cargar disponibilidad
   const loadAvailability = useCallback(async () => {
-    if (!selectedResource || !selectedDate) return
+    if (!selectedResource || !selectedDate) {
+      setSlots([])
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
 
@@ -288,10 +301,28 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
           </Card>
         )}
 
+      {/* Sin recursos — el negocio no tiene espacios configurados */}
+      {!loadingResources && resources.length === 0 ? (
+        <Card className='p-8 text-center animate-fade-up'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='w-12 h-12 rounded-full bg-surface-inset flex items-center justify-center text-text-muted'>
+              <InboxIcon size={24} />
+            </div>
+            <p className='text-text-muted text-sm'>
+              Este negocio aún no tiene {resourceLabels.plural.toLowerCase()}{' '}
+              configurados.
+            </p>
+            <p className='text-text-muted text-xs'>
+              Vuelve más tarde o contacta al negocio directamente.
+            </p>
+          </div>
+        </Card>
+      ) : null}
+
       {/* Date picker — mobile-first horizontal scroll */}
       {loadingResources ? (
         <DatePickerSkeleton />
-      ) : (
+      ) : resources.length > 0 ? (
         <div
           className='flex gap-2 overflow-x-auto py-4 px-4 snap-x snap-mandatory animate-fade-up'
           style={{ animationDelay: '60ms' }}
@@ -326,7 +357,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             )
           })}
         </div>
-      )}
+      ) : null}
 
       {/* Resource selector — chips */}
       {resources.length > 1 && (
@@ -354,16 +385,16 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
         </div>
       )}
 
-      {/* Slots grid */}
-      {error && (
+      {/* Slots grid — solo si hay recursos */}
+      {resources.length > 0 && error && (
         <Card className='p-4 text-center text-sm text-danger border-red-200 animate-fade-up'>
           {error}
         </Card>
       )}
 
-      {loading ? (
+      {resources.length > 0 && loading ? (
         <SlotGridSkeleton />
-      ) : slots.length === 0 ? (
+      ) : resources.length > 0 && slots.length === 0 ? (
         <Card className='p-8 text-center animate-fade-up'>
           <div className='flex flex-col items-center gap-3'>
             <div className='w-12 h-12 rounded-full bg-surface-inset flex items-center justify-center text-text-muted'>
@@ -374,7 +405,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             </p>
           </div>
         </Card>
-      ) : (
+      ) : resources.length > 0 ? (
         <div className='flex flex-col gap-6 animate-fade-up'>
           {slotGroups.map((group, groupIndex) => {
             if (group.slots.length === 0) return null
@@ -493,7 +524,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             )
           })}
         </div>
-      )}
+      ) : null}
 
       {/* Legend */}
       {!loading && slots.length > 0 && (
