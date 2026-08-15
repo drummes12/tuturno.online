@@ -5,7 +5,7 @@ import {
   CalendarIcon,
   LayoutIcon,
   ListIcon,
-  CourtIcon,
+  StoreIcon,
   ScheduleIcon,
   SettingsIcon,
   LogOutIcon,
@@ -32,7 +32,7 @@ const clientNav: NavItem[] = [
 const adminNav: NavItem[] = [
   { label: 'Operación', href: '/admin', icon: <LayoutIcon size={22} /> },
   { label: 'Reservas', href: '/admin/reservas', icon: <ListIcon size={22} /> },
-  { label: 'Canchas', href: '/admin/canchas', icon: <CourtIcon size={22} /> },
+  { label: 'Recursos', href: '/admin/recursos', icon: <StoreIcon size={22} /> },
   {
     label: 'Horarios',
     href: '/admin/horarios',

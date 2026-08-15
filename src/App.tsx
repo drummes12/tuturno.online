@@ -17,7 +17,7 @@ import { MyReservationsPage } from '@/pages/client/my-reservations'
 // Admin pages
 import { AdminDashboardPage } from '@/pages/admin/dashboard'
 import { AdminReservationsPage } from '@/pages/admin/reservations'
-import { AdminCourtsPage } from '@/pages/admin/courts'
+import { AdminResourcesPage } from '@/pages/admin/resources'
 import { AdminHoursPage } from '@/pages/admin/hours'
 import { AdminConfigPage } from '@/pages/admin/config'
 import { AdminExceptionsPage } from '@/pages/admin/exceptions'
@@ -114,9 +114,9 @@ export default function App() {
             <AdminReservationsPage />
           </AdminRoute>
         </Route>
-        <Route path='/admin/canchas'>
+        <Route path='/admin/recursos'>
           <AdminRoute>
-            <AdminCourtsPage />
+            <AdminResourcesPage />
           </AdminRoute>
         </Route>
         <Route path='/admin/horarios'>

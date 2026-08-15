@@ -48,9 +48,9 @@ create trigger trg_businesses_updated
   before update on public.businesses
   for each row execute function public.handle_updated_at();
 
-drop trigger if exists trg_courts_updated on public.courts;
-create trigger trg_courts_updated
-  before update on public.courts
+drop trigger if exists trg_resources_updated on public.resources;
+create trigger trg_resources_updated
+  before update on public.resources
   for each row execute function public.handle_updated_at();
 
 drop trigger if exists trg_reservations_updated on public.reservations;

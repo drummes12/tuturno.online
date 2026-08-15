@@ -5,7 +5,8 @@ import {
   deleteAvailabilityException,
   countOverlappingReservations
 } from '@/services/availability-exceptions'
-import { fetchAllCourts } from '@/services/courts'
+import { fetchAllResources } from '@/services/resources'
+import { fetchBusiness } from '@/services/business'
 import { useAuthStore } from '@/stores/auth'
 import { useBusinessId } from '@/hooks/use-business-id'
 import { useCanEdit } from '@/hooks/use-can-edit'
@@ -18,15 +19,14 @@ import {
   LockIcon,
   TrashIcon,
   PlusIcon,
-  AlertIcon,
   CalendarIcon
 } from '@/components/common/icon'
-import type { AvailabilityException, Court } from '@/types'
+import type { AvailabilityException, Resource } from '@/types'
 import { formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
 import { fromZonedTime } from 'date-fns-tz'
 import { format } from 'date-fns'
 
-type Scope = 'business' | 'court'
+type Scope = 'business' | 'resource'
 
 function todayLocal(): string {
   return format(
@@ -70,7 +70,8 @@ export function AdminExceptionsPage() {
   const { user } = useAuthStore()
 
   const [exceptions, setExceptions] = useState<AvailabilityException[]>([])
-  const [courts, setCourts] = useState<Court[]>([])
+  const [resources, setResources] = useState<Resource[]>([])
+  const [resourceLabelSingular, setResourceLabelSingular] = useState('Recurso')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -79,7 +80,7 @@ export function AdminExceptionsPage() {
 
   // Formulario
   const [scope, setScope] = useState<Scope>('business')
-  const [selectedCourtId, setSelectedCourtId] = useState<string>('')
+  const [selectedResourceId, setSelectedResourceId] = useState<string>('')
   const [startDate, setStartDate] = useState(todayLocal())
   const [endDate, setEndDate] = useState(todayLocal())
   const [allDay, setAllDay] = useState(true)
@@ -96,21 +97,25 @@ export function AdminExceptionsPage() {
     if (!businessId) return
     setLoading(true)
     try {
-      const [excData, courtData] = await Promise.all([
+      const [excData, resourceData, business] = await Promise.all([
         fetchAvailabilityExceptions(businessId),
-        fetchAllCourts()
+        fetchAllResources(),
+        fetchBusiness()
       ])
       setExceptions(excData)
-      setCourts(courtData)
-      if (courtData.length > 0 && !selectedCourtId) {
-        setSelectedCourtId(courtData[0].id)
+      setResources(resourceData)
+      setResourceLabelSingular(
+        business?.resource_label_singular || 'Recurso'
+      )
+      if (resourceData.length > 0 && !selectedResourceId) {
+        setSelectedResourceId(resourceData[0].id)
       }
     } catch (err) {
       setError('Error al cargar las excepciones: ' + (err as Error).message)
     } finally {
       setLoading(false)
     }
-  }, [businessId, selectedCourtId])
+  }, [businessId, selectedResourceId])
 
   useEffect(() => {
     load()
@@ -119,7 +124,8 @@ export function AdminExceptionsPage() {
   // Validar formulario
   const validationError = useMemo(() => {
     if (!businessId) return 'No se pudo determinar el negocio.'
-    if (scope === 'court' && !selectedCourtId) return 'Selecciona una cancha.'
+    if (scope === 'resource' && !selectedResourceId)
+      return 'Selecciona un recurso.'
     if (!startDate || !endDate) return 'Indica fecha de inicio y fin.'
     if (!allDay && (!startTime || !endTime))
       return 'Indica hora de inicio y fin.'
@@ -132,7 +138,7 @@ export function AdminExceptionsPage() {
   }, [
     businessId,
     scope,
-    selectedCourtId,
+    selectedResourceId,
     startDate,
     endDate,
     allDay,
@@ -176,14 +182,14 @@ export function AdminExceptionsPage() {
     setConfirmedCreate(false)
     countOverlappingReservations({
       businessId,
-      courtId: scope === 'court' ? selectedCourtId : null,
+      resourceId: scope === 'resource' ? selectedResourceId : null,
       startsAt: interval.start,
       endsAt: interval.end
     })
       .then((count) => setAffectedCount(count))
       .catch(() => setAffectedCount(null))
       .finally(() => setCheckingOverlap(false))
-  }, [interval, businessId, scope, selectedCourtId])
+  }, [interval, businessId, scope, selectedResourceId])
 
   async function handleCreate() {
     if (validationError || !interval || !businessId) return
@@ -196,7 +202,7 @@ export function AdminExceptionsPage() {
     try {
       await createAvailabilityException({
         businessId,
-        courtId: scope === 'court' ? selectedCourtId : null,
+        resourceId: scope === 'resource' ? selectedResourceId : null,
         startsAt: interval.start,
         endsAt: interval.end,
         reason: reason.trim() || null,
@@ -234,9 +240,9 @@ export function AdminExceptionsPage() {
   const upcomingExceptions = exceptions.filter((e) => new Date(e.ends_at) > now)
   const pastExceptions = exceptions.filter((e) => new Date(e.ends_at) <= now)
 
-  function courtName(courtId: string | null): string {
-    if (!courtId) return 'Todo el negocio'
-    return courts.find((c) => c.id === courtId)?.name ?? 'Cancha'
+  function resourceName(resourceId: string | null): string {
+    if (!resourceId) return 'Todo el negocio'
+    return resources.find((resource) => resource.id === resourceId)?.name ?? resourceLabelSingular
   }
 
   function formatRange(start: string, end: string): string {
@@ -308,36 +314,36 @@ export function AdminExceptionsPage() {
               </button>
               <button
                 type='button'
-                onClick={() => setScope('court')}
-                disabled={!canEdit || courts.length === 0}
+                onClick={() => setScope('resource')}
+                disabled={!canEdit || resources.length === 0}
                 className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all touch-target ${
-                  scope === 'court'
+                  scope === 'resource'
                     ? 'bg-(--color-primary) text-white border-(--color-primary)'
                     : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
                 } disabled:opacity-60`}
               >
-                Cancha específica
+                {resourceLabelSingular} específico
               </button>
             </div>
           </div>
 
-          {/* Selector de cancha */}
-          {scope === 'court' && (
+          {/* Selector de recurso */}
+          {scope === 'resource' && (
             <div className='flex flex-col gap-2'>
               <label
-                htmlFor='exception-court'
+                htmlFor='exception-resource'
                 className='text-sm font-medium text-(--color-text)'
               >
-                Cancha
+                Recurso
               </label>
               <select
-                id='exception-court'
-                value={selectedCourtId}
-                onChange={(e) => setSelectedCourtId(e.target.value)}
+                id='exception-resource'
+                value={selectedResourceId}
+                onChange={(e) => setSelectedResourceId(e.target.value)}
                 disabled={!canEdit}
                 className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               >
-                {courts.map((c) => (
+                {resources.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
@@ -347,8 +353,8 @@ export function AdminExceptionsPage() {
           )}
 
           {/* Fechas */}
-          <div className='grid grid-cols-2 gap-3'>
-            <div className='flex flex-col gap-2'>
+          <div className='flex flex-wrap gap-3'>
+            <div className='flex-1 flex flex-col gap-2'>
               <label
                 htmlFor='exception-start-date'
                 className='text-sm font-medium text-(--color-text)'
@@ -364,7 +370,7 @@ export function AdminExceptionsPage() {
                 className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               />
             </div>
-            <div className='flex flex-col gap-2'>
+            <div className='flex-1 flex flex-col gap-2'>
               <label
                 htmlFor='exception-end-date'
                 className='text-sm font-medium text-(--color-text)'
@@ -462,31 +468,28 @@ export function AdminExceptionsPage() {
           {/* Advertencia de reservas afectadas */}
           {affectedCount !== null && affectedCount > 0 && !validationError && (
             <Alert variant='warning'>
-              <div className='flex items-start gap-2'>
-                <AlertIcon size={18} className='shrink-0 mt-0.5' />
-                <div>
-                  <p className='font-medium'>
-                    {affectedCount} reserva{affectedCount !== 1 ? 's' : ''}{' '}
-                    {affectedCount !== 1 ? 'afectadas' : 'afectada'}
-                  </p>
-                  <p className='text-sm mt-1'>
-                    Este cierre bloquea nuevas reservas pero no cancela las
-                    existentes. Revisa y contacta a los clientes manualmente si
-                    es necesario.
-                  </p>
-                  <label className='flex items-center gap-2 mt-2 cursor-pointer'>
-                    <input
-                      type='checkbox'
-                      checked={confirmedCreate}
-                      onChange={(e) => setConfirmedCreate(e.target.checked)}
-                      disabled={!canEdit}
-                      className='w-4 h-4 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15'
-                    />
-                    <span className='text-sm'>
-                      Entiendo y quiero crear el cierre de todas formas
-                    </span>
-                  </label>
-                </div>
+              <div>
+                <p className='font-medium'>
+                  {affectedCount} reserva{affectedCount !== 1 ? 's' : ''}{' '}
+                  {affectedCount !== 1 ? 'afectadas' : 'afectada'}
+                </p>
+                <p className='text-sm mt-1'>
+                  Este cierre bloquea nuevas reservas pero no cancela las
+                  existentes. Revisa y contacta a los clientes manualmente si es
+                  necesario.
+                </p>
+                <label className='flex items-center gap-2 mt-2 cursor-pointer'>
+                  <input
+                    type='checkbox'
+                    checked={confirmedCreate}
+                    onChange={(e) => setConfirmedCreate(e.target.checked)}
+                    disabled={!canEdit}
+                    className='w-4 h-4 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15'
+                  />
+                  <span className='text-sm'>
+                    Entiendo y quiero crear el cierre de todas formas
+                  </span>
+                </label>
               </div>
             </Alert>
           )}
@@ -528,12 +531,12 @@ export function AdminExceptionsPage() {
                   <div className='flex items-center gap-2 mb-1'>
                     <span
                       className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        exc.court_id
+                        exc.resource_id
                           ? 'bg-pitch-100 text-pitch-700'
                           : 'bg-blue-50 text-blue-700'
                       }`}
                     >
-                      {courtName(exc.court_id)}
+                      {resourceName(exc.resource_id)}
                     </span>
                   </div>
                   <p className='text-sm font-medium text-(--color-text) nums'>
@@ -580,7 +583,7 @@ export function AdminExceptionsPage() {
               >
                 <div className='min-w-0 flex-1'>
                   <span className='text-xs font-medium text-text-muted'>
-                    {courtName(exc.court_id)}
+                    {resourceName(exc.resource_id)}
                   </span>
                   <p className='text-sm text-text-muted nums'>
                     {formatRange(exc.starts_at, exc.ends_at)}

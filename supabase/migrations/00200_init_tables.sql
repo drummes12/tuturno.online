@@ -24,6 +24,8 @@ create table if not exists public.businesses (
   hold_duration_minutes integer not null default 30 check (hold_duration_minutes > 0),
   cancellation_limit_hours integer not null default 2 check (cancellation_limit_hours >= 0),
   max_advance_days integer not null default 30 check (max_advance_days > 0),
+  resource_label_singular text not null default 'Espacio' check (char_length(btrim(resource_label_singular)) between 2 and 40),
+  resource_label_plural text not null default 'Espacios' check (char_length(btrim(resource_label_plural)) between 2 and 40),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -37,8 +39,8 @@ create table if not exists public.business_members (
   primary key (business_id, user_id)
 );
 
--- COURTS — canchas/espacios reservables
-create table if not exists public.courts (
+-- RESOURCES — unidades/espacios reservables
+create table if not exists public.resources (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
   name text not null,
@@ -64,7 +66,7 @@ create table if not exists public.business_hours (
 create table if not exists public.availability_exceptions (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
-  court_id uuid references public.courts(id) on delete cascade,
+  resource_id uuid references public.resources(id) on delete cascade,
   starts_at timestamptz not null,
   ends_at timestamptz not null,
   type exception_type not null default 'closed',
@@ -78,7 +80,7 @@ create table if not exists public.availability_exceptions (
 create table if not exists public.reservations (
   id uuid primary key default gen_random_uuid(),
   business_id uuid not null references public.businesses(id) on delete cascade,
-  court_id uuid not null references public.courts(id) on delete restrict,
+  resource_id uuid not null references public.resources(id) on delete restrict,
   user_id uuid not null references public.profiles(id) on delete cascade,
   starts_at timestamptz not null,
   ends_at timestamptz not null,

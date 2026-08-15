@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Link } from 'wouter'
-import { fetchActiveCourts } from '@/services/courts'
+import { fetchActiveResources } from '@/services/resources'
 import { fetchAvailability } from '@/services/availability'
 import { fetchBusinessContact } from '@/services/business'
 import { Card } from '@/components/common/card'
@@ -18,7 +18,7 @@ import {
   ExternalLinkIcon
 } from '@/components/common/icon'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
-import type { Court, AvailabilitySlot } from '@/types'
+import type { Resource, AvailabilitySlot } from '@/types'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BUSINESS_TIMEZONE } from '@/lib/time'
@@ -26,15 +26,19 @@ import { toZonedTime } from 'date-fns-tz'
 import type { ReactNode } from 'react'
 
 export function AvailabilityPage() {
-  const [courts, setCourts] = useState<Court[]>([])
-  const [selectedCourt, setSelectedCourt] = useState<string | null>(null)
+  const [resources, setResources] = useState<Resource[]>([])
+  const [selectedResource, setSelectedResource] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState(
     format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
   )
   const [slots, setSlots] = useState<AvailabilitySlot[]>([])
   const [loading, setLoading] = useState(true)
-  const [loadingCourts, setLoadingCourts] = useState(true)
+  const [loadingResources, setLoadingResources] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [resourceLabels, setResourceLabels] = useState({
+    singular: 'Espacio',
+    plural: 'Espacios'
+  })
   const [location, setLocation] = useState<{
     street: string | null
     neighborhood: string | null
@@ -43,22 +47,22 @@ export function AvailabilityPage() {
     country: string | null
   } | null>(null)
 
-  // Cargar canchas activas
+  // Cargar recursos activas
   useEffect(() => {
-    async function loadCourts() {
+    async function loadResources() {
       try {
-        const data = await fetchActiveCourts()
-        setCourts(data)
+        const data = await fetchActiveResources()
+        setResources(data)
         if (data.length > 0) {
-          setSelectedCourt(data[0].id)
+          setSelectedResource(data[0].id)
         }
       } catch {
-        setError('No pudimos cargar las canchas.')
+        setError('No pudimos cargar los recursos.')
       } finally {
-        setLoadingCourts(false)
+        setLoadingResources(false)
       }
     }
-    loadCourts()
+    loadResources()
   }, [])
 
   // Cargar ubicación del negocio
@@ -67,6 +71,10 @@ export function AvailabilityPage() {
       try {
         const data = await fetchBusinessContact()
         if (data) {
+          setResourceLabels({
+            singular: data.resource_label_singular || 'Espacio',
+            plural: data.resource_label_plural || 'Espacios'
+          })
           setLocation({
             street: data.street,
             neighborhood: data.neighborhood,
@@ -84,12 +92,12 @@ export function AvailabilityPage() {
 
   // Cargar disponibilidad
   const loadAvailability = useCallback(async () => {
-    if (!selectedCourt || !selectedDate) return
+    if (!selectedResource || !selectedDate) return
     setLoading(true)
     setError(null)
 
     try {
-      const data = await fetchAvailability(selectedCourt, selectedDate)
+      const data = await fetchAvailability(selectedResource, selectedDate)
       setSlots((data as AvailabilitySlot[]) ?? [])
     } catch {
       setError('No pudimos cargar la disponibilidad.')
@@ -97,7 +105,7 @@ export function AvailabilityPage() {
     } finally {
       setLoading(false)
     }
-  }, [selectedCourt, selectedDate])
+  }, [selectedResource, selectedDate])
 
   useEffect(() => {
     loadAvailability()
@@ -167,8 +175,8 @@ export function AvailabilityPage() {
         </div>
         <div className='flex items-center gap-1.5 text-xs font-medium text-text-muted bg-surface-inset px-3 py-1.5 rounded-full'>
           <CalendarIcon size={14} />
-          <span className='nums'>{courts.length}</span>
-          <span>canchas</span>
+          <span className='nums'>{resources.length}</span>
+          <span>{resourceLabels.plural.toLowerCase()}</span>
         </div>
       </div>
 
@@ -209,7 +217,7 @@ export function AvailabilityPage() {
         )}
 
       {/* Date picker — mobile-first horizontal scroll */}
-      {loadingCourts ? (
+      {loadingResources ? (
         <DatePickerSkeleton />
       ) : (
         <div
@@ -248,26 +256,26 @@ export function AvailabilityPage() {
         </div>
       )}
 
-      {/* Court selector — chips */}
-      {courts.length > 1 && (
+      {/* Resource selector — chips */}
+      {resources.length > 1 && (
         <div
           className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
           style={{ animationDelay: '120ms' }}
-          data-tour='availability-court-selector'
+          data-tour='availability-resource-selector'
         >
-          {courts.map((court) => {
-            const isSelected = court.id === selectedCourt
+          {resources.map((resource) => {
+            const isSelected = resource.id === selectedResource
             return (
               <button
-                key={court.id}
-                onClick={() => setSelectedCourt(court.id)}
+                key={resource.id}
+                onClick={() => setSelectedResource(resource.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
                   isSelected
                     ? 'bg-pitch-100 text-(--color-pitch-800) border-pitch-400 shadow-sm'
                     : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
                 }`}
               >
-                {court.name}
+                {resource.name}
               </button>
             )
           })}
@@ -368,8 +376,8 @@ export function AvailabilityPage() {
 
                     return isAvailable ? (
                       <Link
-                        key={`${slot.court_id}-${slot.starts_at}`}
-                        href={`/reservar?court=${slot.court_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
+                        key={`${slot.resource_id}-${slot.starts_at}`}
+                        href={`/reservar?resource=${slot.resource_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
                       >
                         <button
                           data-tour={
@@ -392,7 +400,7 @@ export function AvailabilityPage() {
                       </Link>
                     ) : (
                       <div
-                        key={`${slot.court_id}-${slot.starts_at}`}
+                        key={`${slot.resource_id}-${slot.starts_at}`}
                         style={
                           {
                             '--index': groupIndex * 10 + index

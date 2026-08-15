@@ -1,11 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { query, isDbAvailable, closePool, withTransaction } from '@/test/db'
+import {
+  query,
+  isResourcesSchemaAvailable,
+  closePool,
+  withTransaction
+} from '@/test/db'
 
-const DB_AVAILABLE = await isDbAvailable()
+const DB_AVAILABLE = await isResourcesSchemaAvailable()
 
 // IDs dinámicos — se buscan antes de los tests para que funcionen
 // sin importar si la BD local fue reseteada
-let ACTIVE_COURT_ID = ''
+let ACTIVE_RESOURCE_ID = ''
 let REAL_USER_ID = ''
 
 beforeAll(async () => {
@@ -16,10 +21,10 @@ beforeAll(async () => {
 
   // Buscar la primera cancha activa
   const courtResult = await query(
-    'select id from public.courts where is_active = true order by sort_order limit 1'
+    'select id from public.resources where is_active = true order by sort_order limit 1'
   )
   if (courtResult.rows.length > 0) {
-    ACTIVE_COURT_ID = courtResult.rows[0].id as string
+    ACTIVE_RESOURCE_ID = courtResult.rows[0].id as string
   }
 
   // Buscar el primer business member (owner)
@@ -38,7 +43,7 @@ afterAll(async () => {
 })
 
 // UUID inexistente para simular cancha no disponible
-const INACTIVE_COURT_ID = '00000000-0000-0000-0000-000000000000'
+const INACTIVE_RESOURCE_ID = '00000000-0000-0000-0000-000000000000'
 
 /**
  * Setea el JWT claim para que auth.uid() funcione dentro de los RPCs.
@@ -64,11 +69,11 @@ describe.skipIf(!DB_AVAILABLE)('create_reservation RPC', () => {
 
       const result = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := 'Test reserva'
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
 
       expect(result.rows).toHaveLength(1)
@@ -91,11 +96,11 @@ describe.skipIf(!DB_AVAILABLE)('create_reservation RPC', () => {
 
       const result = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
 
       const row = result.rows[0] as Record<string, unknown>
@@ -114,11 +119,11 @@ describe.skipIf(!DB_AVAILABLE)('create_reservation RPC', () => {
 
       const result = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [INACTIVE_COURT_ID, startsAt]
+        [INACTIVE_RESOURCE_ID, startsAt]
       )
 
       const row = result.rows[0] as Record<string, unknown>
@@ -137,11 +142,11 @@ describe.skipIf(!DB_AVAILABLE)('create_reservation RPC', () => {
 
       const result = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
 
       const row = result.rows[0] as Record<string, unknown>
@@ -162,11 +167,11 @@ describe.skipIf(!DB_AVAILABLE)('confirm_reservation RPC', () => {
 
       const createResult = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
       const reservationId = (createResult.rows[0] as Record<string, unknown>).id
 
@@ -197,11 +202,11 @@ describe.skipIf(!DB_AVAILABLE)('reject_reservation RPC', () => {
 
       const createResult = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
       const reservationId = (createResult.rows[0] as Record<string, unknown>).id
 
@@ -234,11 +239,11 @@ describe.skipIf(!DB_AVAILABLE)('cancel_reservation_by_client RPC', () => {
 
       const createResult = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
       const reservationId = (createResult.rows[0] as Record<string, unknown>).id
 
@@ -269,11 +274,11 @@ describe.skipIf(!DB_AVAILABLE)('cancel_reservation_by_business RPC', () => {
       // Crear y confirmar
       const createResult = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
       const reservationId = (createResult.rows[0] as Record<string, unknown>).id
 
@@ -312,11 +317,11 @@ describe.skipIf(!DB_AVAILABLE)('expire_pending_reservations RPC', () => {
 
       const createResult = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
       const reservationId = (createResult.rows[0] as Record<string, unknown>).id
 
@@ -349,11 +354,11 @@ describe.skipIf(!DB_AVAILABLE)('expire_pending_reservations RPC', () => {
 
       const createResult = await client.query(
         `select * from public.create_reservation(
-          p_court_id := $1,
+          p_resource_id := $1,
           p_starts_at := $2,
           p_notes := null
         )`,
-        [ACTIVE_COURT_ID, startsAt]
+        [ACTIVE_RESOURCE_ID, startsAt]
       )
       const reservationId = (createResult.rows[0] as Record<string, unknown>).id
 

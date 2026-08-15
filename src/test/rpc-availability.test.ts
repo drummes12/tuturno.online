@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { rpc, query, isDbAvailable, closePool } from '@/test/db'
+import { rpc, query, isResourcesSchemaAvailable, closePool } from '@/test/db'
 
-const DB_AVAILABLE = await isDbAvailable()
+const DB_AVAILABLE = await isResourcesSchemaAvailable()
 
 // IDs dinámicos — se buscan antes de los tests
-let ACTIVE_COURT_ID = ''
+let ACTIVE_RESOURCE_ID = ''
 let SLOT_DURATION_MINUTES = 60
-const INACTIVE_COURT_ID = '00000000-0000-0000-0000-000000000000'
+const INACTIVE_RESOURCE_ID = '00000000-0000-0000-0000-000000000000'
 
 beforeAll(async () => {
   if (!DB_AVAILABLE) {
@@ -16,10 +16,10 @@ beforeAll(async () => {
 
   // Buscar la primera cancha activa con su slot_duration
   const courtResult = await query(
-    'select c.id, b.slot_duration_minutes from public.courts c join public.businesses b on c.business_id = b.id where c.is_active = true order by c.sort_order limit 1'
+    'select c.id, b.slot_duration_minutes from public.resources c join public.businesses b on c.business_id = b.id where c.is_active = true order by c.sort_order limit 1'
   )
   if (courtResult.rows.length > 0) {
-    ACTIVE_COURT_ID = courtResult.rows[0].id as string
+    ACTIVE_RESOURCE_ID = courtResult.rows[0].id as string
     SLOT_DURATION_MINUTES = courtResult.rows[0].slot_duration_minutes as number
   }
 })
@@ -28,7 +28,7 @@ afterAll(async () => {
   await closePool()
 })
 
-describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
+describe.skipIf(!DB_AVAILABLE)('get_resource_availability RPC', () => {
   it('retorna slots para una cancha activa en un día con horario', async () => {
     // Lunes (day_of_week=1) tiene 3 franjas: 08:00-12:00, 13:00-18:00, 18:00-22:00
     // Buscamos el próximo lunes
@@ -39,30 +39,30 @@ describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
     nextMonday.setDate(today.getDate() + daysUntilMonday)
     const dateStr = nextMonday.toISOString().split('T')[0]
 
-    const result = await rpc('get_availability', {
-      p_court_id: ACTIVE_COURT_ID,
+    const result = await rpc('get_resource_availability', {
+      p_resource_id: ACTIVE_RESOURCE_ID,
       p_date: dateStr
     })
 
     expect(result.rows).toBeDefined()
     expect(result.rows.length).toBeGreaterThan(0)
 
-    // Cada row debe tener court_id, court_name, starts_at, ends_at, status
+    // Cada row debe tener resource_id, resource_name, starts_at, ends_at, status
     const row = result.rows[0] as Record<string, unknown>
-    expect(row).toHaveProperty('court_id')
-    expect(row).toHaveProperty('court_name')
+    expect(row).toHaveProperty('resource_id')
+    expect(row).toHaveProperty('resource_name')
     expect(row).toHaveProperty('starts_at')
     expect(row).toHaveProperty('ends_at')
     expect(row).toHaveProperty('status')
-    expect(row.court_id).toBe(ACTIVE_COURT_ID)
+    expect(row.resource_id).toBe(ACTIVE_RESOURCE_ID)
   })
 
   it('retorna array vacío para una cancha inactiva', async () => {
     const today = new Date()
     const dateStr = today.toISOString().split('T')[0]
 
-    const result = await rpc('get_availability', {
-      p_court_id: INACTIVE_COURT_ID,
+    const result = await rpc('get_resource_availability', {
+      p_resource_id: INACTIVE_RESOURCE_ID,
       p_date: dateStr
     })
 
@@ -70,8 +70,8 @@ describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
   })
 
   it('retorna array vacío para una cancha inexistente', async () => {
-    const result = await rpc('get_availability', {
-      p_court_id: '00000000-0000-0000-0000-000000000000',
+    const result = await rpc('get_resource_availability', {
+      p_resource_id: '00000000-0000-0000-0000-000000000000',
       p_date: '2025-01-15'
     })
 
@@ -88,8 +88,8 @@ describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
     nextMonday.setDate(today.getDate() + daysUntilMonday)
     const dateStr = nextMonday.toISOString().split('T')[0]
 
-    const result = await rpc('get_availability', {
-      p_court_id: ACTIVE_COURT_ID,
+    const result = await rpc('get_resource_availability', {
+      p_resource_id: ACTIVE_RESOURCE_ID,
       p_date: dateStr
     })
 
@@ -119,8 +119,8 @@ describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
     nextMonday.setDate(today.getDate() + daysUntilMonday)
     const dateStr = nextMonday.toISOString().split('T')[0]
 
-    const result = await rpc('get_availability', {
-      p_court_id: ACTIVE_COURT_ID,
+    const result = await rpc('get_resource_availability', {
+      p_resource_id: ACTIVE_RESOURCE_ID,
       p_date: dateStr
     })
 
@@ -139,8 +139,8 @@ describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
     yesterday.setDate(yesterday.getDate() - 1)
     const dateStr = yesterday.toISOString().split('T')[0]
 
-    const result = await rpc('get_availability', {
-      p_court_id: ACTIVE_COURT_ID,
+    const result = await rpc('get_resource_availability', {
+      p_resource_id: ACTIVE_RESOURCE_ID,
       p_date: dateStr
     })
 
@@ -154,8 +154,8 @@ describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
     future.setDate(future.getDate() + 400)
     const dateStr = future.toISOString().split('T')[0]
 
-    const result = await rpc('get_availability', {
-      p_court_id: ACTIVE_COURT_ID,
+    const result = await rpc('get_resource_availability', {
+      p_resource_id: ACTIVE_RESOURCE_ID,
       p_date: dateStr
     })
 

@@ -24,14 +24,14 @@ import {
 } from '@/services/reservations'
 
 const RESERVATION_SELECT =
-  '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
+  '*, resource:resources(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
 
 const sampleReservation = (
   overrides: Partial<Reservation> = {}
 ): Reservation => ({
   id: 'res-1',
   business_id: 'biz-1',
-  court_id: 'court-1',
+  resource_id: 'court-1',
   user_id: 'user-1',
   client_id: null,
   starts_at: '2025-01-01T10:00:00Z',
@@ -203,7 +203,7 @@ describe('fetchUserReservations', () => {
     expect(clientsChain.eq).toHaveBeenCalledWith('user_id', userId)
     expect(mockFrom).toHaveBeenNthCalledWith(2, 'reservations')
     expect(reservationsChain.select).toHaveBeenCalledWith(
-      '*, court:courts(*), client:clients(*)'
+      '*, resource:resources(*), client:clients(*)'
     )
     expect(reservationsChain.or).toHaveBeenCalledWith(
       `user_id.eq.${userId},client_id.in.(client-1,client-2)`
@@ -339,7 +339,7 @@ describe('createReservation', () => {
     )
 
     expect(mockRpc).toHaveBeenCalledWith('create_reservation', {
-      p_court_id: 'court-1',
+      p_resource_id: 'court-1',
       p_starts_at: '2025-01-01T10:00:00Z',
       p_notes: null
     })
@@ -359,7 +359,7 @@ describe('createReservation', () => {
     )
 
     expect(mockRpc).toHaveBeenCalledWith('create_reservation', {
-      p_court_id: 'court-1',
+      p_resource_id: 'court-1',
       p_starts_at: '2025-01-01T10:00:00Z',
       p_notes: 'notas'
     })
@@ -393,7 +393,7 @@ describe('createReservationAdmin', () => {
     )
 
     expect(mockRpc).toHaveBeenCalledWith('create_reservation_admin', {
-      p_court_id: 'court-1',
+      p_resource_id: 'court-1',
       p_starts_at: '2025-01-01T10:00:00Z',
       p_client_id: 'client-1',
       p_client_name: 'Juan Pérez',
@@ -420,7 +420,7 @@ describe('createReservationAdmin', () => {
     )
 
     expect(mockRpc).toHaveBeenCalledWith('create_reservation_admin', {
-      p_court_id: 'court-1',
+      p_resource_id: 'court-1',
       p_starts_at: '2025-01-01T10:00:00Z',
       p_client_id: null,
       p_client_name: 'Juan Pérez',

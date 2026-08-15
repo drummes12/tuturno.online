@@ -24,11 +24,11 @@ grant select on public.business_members to authenticated;
 grant insert on public.business_members to authenticated;
 grant delete on public.business_members to authenticated;
 
--- COURTS
-grant select on public.courts to anon, authenticated;
-grant insert on public.courts to authenticated;
-grant update on public.courts to authenticated;
-grant delete on public.courts to authenticated;
+-- RESOURCES
+grant select on public.resources to anon, authenticated;
+grant insert on public.resources to authenticated;
+grant update on public.resources to authenticated;
+grant delete on public.resources to authenticated;
 
 -- BUSINESS HOURS
 grant select on public.business_hours to anon, authenticated;

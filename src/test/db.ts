@@ -80,6 +80,24 @@ export async function isDbAvailable(): Promise<boolean> {
 }
 
 /**
+ * Verifica que el esquema genérico de recursos esté aplicado.
+ * Permite que los tests RPC se salten automáticamente si el entorno local
+ * todavía usa una base anterior al reset de la migración.
+ */
+export async function isResourcesSchemaAvailable(): Promise<boolean> {
+  try {
+    const result = await query<{ resources: string | null; availability_rpc: string | null }>(`
+      select
+        to_regclass('public.resources')::text as resources,
+        to_regprocedure('public.get_resource_availability(uuid,date)')::text as availability_rpc
+    `)
+    return Boolean(result.rows[0]?.resources && result.rows[0]?.availability_rpc)
+  } catch {
+    return false
+  }
+}
+
+/**
  * Cierra el pool al final de todos los tests.
  */
 export async function closePool(): Promise<void> {

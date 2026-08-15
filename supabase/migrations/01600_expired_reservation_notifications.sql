@@ -21,12 +21,12 @@ begin
       r.user_id,
       r.starts_at,
       r.ends_at,
-      c.name as court_name,
+      c.name as resource_name,
       b.name as business_name,
       au.email as user_email,
       p.full_name as user_name
     from public.reservations r
-    join public.courts c on c.id = r.court_id
+    join public.resources c on c.id = r.resource_id
     join public.businesses b on b.id = r.business_id
     left join auth.users au on au.id = r.user_id
     left join public.profiles p on p.id = r.user_id
@@ -53,7 +53,7 @@ begin
         jsonb_build_object(
           'reservation_id', v_row.id,
           'business_name', v_row.business_name,
-          'court_name', v_row.court_name,
+          'resource_name', v_row.resource_name,
           'starts_at', v_row.starts_at,
           'ends_at', v_row.ends_at
         ),

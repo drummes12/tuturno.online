@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createQueryChain } from '@/test/supabase-mock'
-import type { Court } from '@/types'
+import type { Resource } from '@/types'
 
 const { mockFrom } = vi.hoisted(() => ({
   mockFrom: vi.fn()
@@ -12,13 +12,13 @@ vi.mock('@/lib/supabase', () => ({
 }))
 
 import {
-  fetchAllCourts,
-  fetchActiveCourts,
-  fetchCourtName,
-  createCourt,
-  updateCourt,
-  toggleCourtActive
-} from '@/services/courts'
+  fetchAllResources,
+  fetchActiveResources,
+  fetchResourceName,
+  createResource,
+  updateResource,
+  toggleResourceActive
+} from '@/services/resources'
 
 /**
  * Crea una query chain thenable.
@@ -37,7 +37,7 @@ function createThenableChain(result: { data: any; error: any }) {
   return chain
 }
 
-const mockCourt: Court = {
+const mockResource: Resource = {
   id: 'court-1',
   business_id: 'biz-1',
   name: 'Cancha A',
@@ -48,27 +48,27 @@ const mockCourt: Court = {
   updated_at: '2024-01-01T00:00:00Z'
 }
 
-describe('courts service', () => {
+describe('resources service', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   // -----------------------------------------------------------------------
-  // fetchAllCourts
+  // fetchAllResources
   // -----------------------------------------------------------------------
-  describe('fetchAllCourts', () => {
+  describe('fetchAllResources', () => {
     it('retorna todas las canchas ordenadas por sort_order', async () => {
-      const courts: Court[] = [
-        mockCourt,
-        { ...mockCourt, id: 'court-2', name: 'Cancha B', sort_order: 2 }
+      const resources: Resource[] = [
+        mockResource,
+        { ...mockResource, id: 'court-2', name: 'Cancha B', sort_order: 2 }
       ]
-      const chain = createThenableChain({ data: courts, error: null })
+      const chain = createThenableChain({ data: resources, error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchAllCourts()
+      const result = await fetchAllResources()
 
-      expect(result).toEqual(courts)
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(result).toEqual(resources)
+      expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.select).toHaveBeenCalledWith('*')
       expect(chain.order).toHaveBeenCalledWith('sort_order')
     })
@@ -77,7 +77,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchAllCourts()
+      const result = await fetchAllResources()
 
       expect(result).toEqual([])
     })
@@ -87,37 +87,39 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(fetchAllCourts()).rejects.toThrow('Error de base de datos')
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      await expect(fetchAllResources()).rejects.toThrow(
+        'Error de base de datos'
+      )
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
 
-    it('consulta la tabla courts', async () => {
+    it('consulta la tabla resources', async () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      await fetchAllCourts()
+      await fetchAllResources()
 
       expect(mockFrom).toHaveBeenCalledTimes(1)
-      expect(mockFrom).toHaveBeenNthCalledWith(1, 'courts')
+      expect(mockFrom).toHaveBeenNthCalledWith(1, 'resources')
     })
   })
 
   // -----------------------------------------------------------------------
-  // fetchActiveCourts
+  // fetchActiveResources
   // -----------------------------------------------------------------------
-  describe('fetchActiveCourts', () => {
+  describe('fetchActiveResources', () => {
     it('retorna solo las canchas activas', async () => {
-      const courts: Court[] = [
-        { ...mockCourt, is_active: true },
-        { ...mockCourt, id: 'court-2', name: 'Cancha B', is_active: true }
+      const resources: Resource[] = [
+        { ...mockResource, is_active: true },
+        { ...mockResource, id: 'court-2', name: 'Cancha B', is_active: true }
       ]
-      const chain = createThenableChain({ data: courts, error: null })
+      const chain = createThenableChain({ data: resources, error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchActiveCourts()
+      const result = await fetchActiveResources()
 
-      expect(result).toEqual(courts)
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(result).toEqual(resources)
+      expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.select).toHaveBeenCalledWith('*')
       expect(chain.eq).toHaveBeenCalledWith('is_active', true)
       expect(chain.order).toHaveBeenCalledWith('sort_order')
@@ -127,7 +129,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchActiveCourts()
+      const result = await fetchActiveResources()
 
       expect(result).toEqual([])
     })
@@ -137,26 +139,26 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(fetchActiveCourts()).rejects.toThrow(
+      await expect(fetchActiveResources()).rejects.toThrow(
         'Error al obtener canchas activas'
       )
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
 
     it('filtra por is_active = true', async () => {
       const chain = createThenableChain({ data: [], error: null })
       mockFrom.mockReturnValue(chain)
 
-      await fetchActiveCourts()
+      await fetchActiveResources()
 
       expect(chain.eq).toHaveBeenCalledWith('is_active', true)
     })
   })
 
   // -----------------------------------------------------------------------
-  // fetchCourtName
+  // fetchResourceName
   // -----------------------------------------------------------------------
-  describe('fetchCourtName', () => {
+  describe('fetchResourceName', () => {
     it('retorna el nombre de la cancha', async () => {
       const chain = createThenableChain({
         data: { name: 'Cancha A' },
@@ -164,10 +166,10 @@ describe('courts service', () => {
       })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchCourtName('court-1')
+      const result = await fetchResourceName('court-1')
 
       expect(result).toBe('Cancha A')
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.select).toHaveBeenCalledWith('name')
       expect(chain.eq).toHaveBeenCalledWith('id', 'court-1')
       expect(chain.single).toHaveBeenCalledTimes(1)
@@ -177,7 +179,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchCourtName('nonexistent-id')
+      const result = await fetchResourceName('nonexistent-id')
 
       expect(result).toBeNull()
     })
@@ -186,7 +188,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: {}, error: null })
       mockFrom.mockReturnValue(chain)
 
-      const result = await fetchCourtName('court-1')
+      const result = await fetchResourceName('court-1')
 
       expect(result).toBeNull()
     })
@@ -198,7 +200,7 @@ describe('courts service', () => {
       })
       mockFrom.mockReturnValue(chain)
 
-      await fetchCourtName('court-abc-123')
+      await fetchResourceName('court-abc-123')
 
       expect(chain.eq).toHaveBeenCalledWith('id', 'court-abc-123')
     })
@@ -210,23 +212,23 @@ describe('courts service', () => {
       })
       mockFrom.mockReturnValue(chain)
 
-      await fetchCourtName('court-1')
+      await fetchResourceName('court-1')
 
       expect(chain.single).toHaveBeenCalledTimes(1)
     })
   })
 
   // -----------------------------------------------------------------------
-  // createCourt
+  // createResource
   // -----------------------------------------------------------------------
-  describe('createCourt', () => {
+  describe('createResource', () => {
     it('inserta una cancha con los campos correctos', async () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createCourt('  Cancha B  ', '  Descripción de la cancha  ', 2)
+      await createResource('  Cancha B  ', '  Descripción de la cancha  ', 2)
 
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.insert).toHaveBeenCalledWith({
         name: 'Cancha B',
         description: 'Descripción de la cancha',
@@ -238,7 +240,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createCourt('   Cancha Trimmed   ', null, 1)
+      await createResource('   Cancha Trimmed   ', null, 1)
 
       expect(chain.insert).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'Cancha Trimmed' })
@@ -249,7 +251,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createCourt('Cancha C', '   ', 3)
+      await createResource('Cancha C', '   ', 3)
 
       expect(chain.insert).toHaveBeenCalledWith({
         name: 'Cancha C',
@@ -262,7 +264,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createCourt('Cancha D', null, 4)
+      await createResource('Cancha D', null, 4)
 
       expect(chain.insert).toHaveBeenCalledWith({
         name: 'Cancha D',
@@ -275,7 +277,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createCourt('Cancha E', '  Texto con espacios  ', 5)
+      await createResource('Cancha E', '  Texto con espacios  ', 5)
 
       expect(chain.insert).toHaveBeenCalledWith(
         expect.objectContaining({ description: 'Texto con espacios' })
@@ -287,38 +289,38 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(createCourt('Cancha F', null, 6)).rejects.toThrow(
+      await expect(createResource('Cancha F', null, 6)).rejects.toThrow(
         'Error al crear cancha'
       )
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
 
-    it('consulta la tabla courts', async () => {
+    it('consulta la tabla resources', async () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await createCourt('Cancha G', null, 7)
+      await createResource('Cancha G', null, 7)
 
       expect(mockFrom).toHaveBeenCalledTimes(1)
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
   })
 
   // -----------------------------------------------------------------------
-  // updateCourt
+  // updateResource
   // -----------------------------------------------------------------------
-  describe('updateCourt', () => {
+  describe('updateResource', () => {
     it('actualiza una cancha con los campos correctos', async () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await updateCourt(
+      await updateResource(
         'court-1',
         '  Cancha Actualizada  ',
         '  Nueva descripción  '
       )
 
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.update).toHaveBeenCalledWith({
         name: 'Cancha Actualizada',
         description: 'Nueva descripción'
@@ -330,7 +332,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await updateCourt('court-1', '   Nombre Trimmed   ', null)
+      await updateResource('court-1', '   Nombre Trimmed   ', null)
 
       expect(chain.update).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'Nombre Trimmed' })
@@ -341,7 +343,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await updateCourt('court-1', 'Cancha', '   ')
+      await updateResource('court-1', 'Cancha', '   ')
 
       expect(chain.update).toHaveBeenCalledWith({
         name: 'Cancha',
@@ -353,7 +355,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await updateCourt('court-1', 'Cancha', null)
+      await updateResource('court-1', 'Cancha', null)
 
       expect(chain.update).toHaveBeenCalledWith({
         name: 'Cancha',
@@ -365,7 +367,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await updateCourt('court-1', 'Cancha', '  Descripción actualizada  ')
+      await updateResource('court-1', 'Cancha', '  Descripción actualizada  ')
 
       expect(chain.update).toHaveBeenCalledWith(
         expect.objectContaining({ description: 'Descripción actualizada' })
@@ -376,7 +378,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await updateCourt('court-abc', 'Cancha', null)
+      await updateResource('court-abc', 'Cancha', null)
 
       expect(chain.eq).toHaveBeenCalledWith('id', 'court-abc')
     })
@@ -386,34 +388,34 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(updateCourt('court-1', 'Cancha', null)).rejects.toThrow(
+      await expect(updateResource('court-1', 'Cancha', null)).rejects.toThrow(
         'Error al actualizar cancha'
       )
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
 
-    it('consulta la tabla courts', async () => {
+    it('consulta la tabla resources', async () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await updateCourt('court-1', 'Cancha', null)
+      await updateResource('court-1', 'Cancha', null)
 
       expect(mockFrom).toHaveBeenCalledTimes(1)
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
   })
 
   // -----------------------------------------------------------------------
-  // toggleCourtActive
+  // toggleResourceActive
   // -----------------------------------------------------------------------
-  describe('toggleCourtActive', () => {
+  describe('toggleResourceActive', () => {
     it('desactiva una cancha cuando isActive es true (true -> false)', async () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await toggleCourtActive('court-1', true)
+      await toggleResourceActive('court-1', true)
 
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
       expect(chain.update).toHaveBeenCalledWith({ is_active: false })
       expect(chain.eq).toHaveBeenCalledWith('id', 'court-1')
     })
@@ -422,7 +424,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await toggleCourtActive('court-1', false)
+      await toggleResourceActive('court-1', false)
 
       expect(chain.update).toHaveBeenCalledWith({ is_active: true })
     })
@@ -431,7 +433,7 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await toggleCourtActive('court-xyz', true)
+      await toggleResourceActive('court-xyz', true)
 
       expect(chain.eq).toHaveBeenCalledWith('id', 'court-xyz')
     })
@@ -441,20 +443,20 @@ describe('courts service', () => {
       const chain = createThenableChain({ data: null, error })
       mockFrom.mockReturnValue(chain)
 
-      await expect(toggleCourtActive('court-1', true)).rejects.toThrow(
+      await expect(toggleResourceActive('court-1', true)).rejects.toThrow(
         'Error al cambiar estado de cancha'
       )
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
 
-    it('consulta la tabla courts', async () => {
+    it('consulta la tabla resources', async () => {
       const chain = createThenableChain({ data: null, error: null })
       mockFrom.mockReturnValue(chain)
 
-      await toggleCourtActive('court-1', true)
+      await toggleResourceActive('court-1', true)
 
       expect(mockFrom).toHaveBeenCalledTimes(1)
-      expect(mockFrom).toHaveBeenCalledWith('courts')
+      expect(mockFrom).toHaveBeenCalledWith('resources')
     })
   })
 })

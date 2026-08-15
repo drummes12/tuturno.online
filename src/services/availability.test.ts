@@ -18,15 +18,15 @@ describe('fetchAvailability', () => {
   it('happy path: retorna los slots de disponibilidad desde el RPC', async () => {
     const slots = [
       {
-        court_id: 'court-1',
-        court_name: 'Cancha A',
+        resource_id: 'court-1',
+        resource_name: 'Cancha A',
         starts_at: '2025-01-15T13:00:00Z',
         ends_at: '2025-01-15T14:00:00Z',
         status: 'available'
       },
       {
-        court_id: 'court-1',
-        court_name: 'Cancha A',
+        resource_id: 'court-1',
+        resource_name: 'Cancha A',
         starts_at: '2025-01-15T14:00:00Z',
         ends_at: '2025-01-15T15:00:00Z',
         status: 'reserved'
@@ -38,8 +38,8 @@ describe('fetchAvailability', () => {
 
     expect(result).toEqual(slots)
     expect(mockRpc).toHaveBeenCalledTimes(1)
-    expect(mockRpc).toHaveBeenCalledWith('get_availability', {
-      p_court_id: 'court-1',
+    expect(mockRpc).toHaveBeenCalledWith('get_resource_availability', {
+      p_resource_id: 'court-1',
       p_date: '2025-01-15'
     })
   })
@@ -59,8 +59,8 @@ describe('fetchAvailability', () => {
     await expect(fetchAvailability('court-1', '2025-01-15')).rejects.toEqual(
       supabaseError
     )
-    expect(mockRpc).toHaveBeenCalledWith('get_availability', {
-      p_court_id: 'court-1',
+    expect(mockRpc).toHaveBeenCalledWith('get_resource_availability', {
+      p_resource_id: 'court-1',
       p_date: '2025-01-15'
     })
   })
@@ -70,8 +70,8 @@ describe('fetchAvailability', () => {
 
     await fetchAvailability('court-99', '2025-06-30')
 
-    expect(mockRpc).toHaveBeenCalledWith('get_availability', {
-      p_court_id: 'court-99',
+    expect(mockRpc).toHaveBeenCalledWith('get_resource_availability', {
+      p_resource_id: 'court-99',
       p_date: '2025-06-30'
     })
   })

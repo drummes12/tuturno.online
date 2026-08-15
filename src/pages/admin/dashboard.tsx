@@ -196,7 +196,7 @@ export function AdminDashboardPage() {
                 <div className='flex items-start justify-between gap-3 mb-3'>
                   <div className='min-w-0 flex-1'>
                     <p className='font-semibold tracking-tight'>
-                      {r.court?.name}
+                      {r.resource?.name}
                     </p>
                     <p className='text-sm text-(--color-text-muted) capitalize mt-0.5 flex items-center gap-1.5'>
                       <CalendarIcon size={14} />
@@ -240,7 +240,7 @@ export function AdminDashboardPage() {
                       label='Motivo del rechazo'
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
-                      placeholder='Ej: cancha en mantenimiento'
+                      placeholder='Ej: recurso en mantenimiento'
                       autoFocus
                     />
                     <div className='flex gap-2'>
@@ -271,7 +271,7 @@ export function AdminDashboardPage() {
                         href={
                           waLink(
                             r.client?.phone ?? r.profile?.phone,
-                            `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                            `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la recurso ${r.resource?.name ?? ''} sobre tu reserva.`
                           )!
                         }
                         target='_blank'
@@ -346,7 +346,7 @@ export function AdminDashboardPage() {
                             {formatLocal(r.starts_at, 'HH:mm')}
                           </span>
                           <span className='text-text-muted'>·</span>
-                          <span className='truncate'>{r.court?.name}</span>
+                          <span className='truncate'>{r.resource?.name}</span>
                         </p>
                         <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
                           <UserIcon size={12} />
@@ -363,7 +363,7 @@ export function AdminDashboardPage() {
                             href={
                               waLink(
                                 r.client?.phone ?? r.profile?.phone,
-                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la recurso ${r.resource?.name ?? ''} sobre tu reserva.`
                               )!
                             }
                             target='_blank'
@@ -402,7 +402,7 @@ export function AdminDashboardPage() {
                             {formatLocal(r.starts_at, 'HH:mm')}
                           </span>
                           <span className='text-text-muted'>·</span>
-                          <span className='truncate'>{r.court?.name}</span>
+                          <span className='truncate'>{r.resource?.name}</span>
                         </p>
                         <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
                           <UserIcon size={12} />
@@ -419,7 +419,7 @@ export function AdminDashboardPage() {
                             href={
                               waLink(
                                 r.client?.phone ?? r.profile?.phone,
-                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la recurso ${r.resource?.name ?? ''} sobre tu reserva.`
                               )!
                             }
                             target='_blank'

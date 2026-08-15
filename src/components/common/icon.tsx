@@ -42,8 +42,8 @@ export function ClockIcon(props: IconProps) {
   )
 }
 
-/* Court / Field — for courts */
-export function CourtIcon(props: IconProps) {
+/* Resource / space — for bookable resources */
+export function ResourceIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
       <rect x='3' y='5' width='18' height='14' rx='1' />

@@ -3,15 +3,15 @@
 -- =============================================================================
 
 -- =============================================================================
--- get_availability: devuelve los slots de una cancha para una fecha
+-- get_resource_availability: devuelve los slots de una cancha para una fecha
 -- =============================================================================
-create or replace function public.get_availability(
-  p_court_id uuid,
+create or replace function public.get_resource_availability(
+  p_resource_id uuid,
   p_date date
 )
 returns table(
-  court_id uuid,
-  court_name text,
+  resource_id uuid,
+  resource_name text,
   starts_at timestamptz,
   ends_at timestamptz,
   status text
@@ -20,7 +20,7 @@ language plpgsql
 security definer set search_path = public
 as $$
 declare
-  v_court record;
+  v_resource record;
   v_business_id uuid;
   v_timezone text;
   v_slot_minutes integer;
@@ -36,20 +36,20 @@ declare
 begin
   -- Obtener datos de la cancha y negocio
   select c.*, b.timezone, b.slot_duration_minutes, b.gap_minutes, b.max_advance_days
-  into v_court
-  from public.courts c
+  into v_resource
+  from public.resources c
   join public.businesses b on c.business_id = b.id
-  where c.id = p_court_id and c.is_active = true;
+  where c.id = p_resource_id and c.is_active = true;
 
   if not found then
     return;
   end if;
 
-  v_business_id := v_court.business_id;
-  v_timezone := v_court.timezone;
-  v_slot_minutes := v_court.slot_duration_minutes;
-  v_gap_minutes := v_court.gap_minutes;
-  v_max_advance := v_court.max_advance_days;
+  v_business_id := v_resource.business_id;
+  v_timezone := v_resource.timezone;
+  v_slot_minutes := v_resource.slot_duration_minutes;
+  v_gap_minutes := v_resource.gap_minutes;
+  v_max_advance := v_resource.max_advance_days;
 
   -- Validar que la fecha no esté demasiado en el futuro
   if p_date > (current_date + v_max_advance) then
@@ -85,8 +85,8 @@ begin
 
       return query
       select
-        p_court_id,
-        v_court.name,
+        p_resource_id,
+        v_resource.name,
         v_slot_start,
         v_slot_end,
         coalesce(
@@ -97,7 +97,7 @@ begin
             else 'reserved'
           end
           from public.reservations r
-          where r.court_id = p_court_id
+          where r.resource_id = p_resource_id
             and r.status in ('pending', 'confirmed')
             and r.starts_at = v_slot_start
           limit 1),
@@ -106,7 +106,7 @@ begin
             when exists(
               select 1 from public.availability_exceptions ae
               where ae.business_id = v_business_id
-                and (ae.court_id is null or ae.court_id = p_court_id)
+                and (ae.resource_id is null or ae.resource_id = p_resource_id)
                 and ae.starts_at <= v_slot_start
                 and ae.ends_at >= v_slot_end
             ) then 'blocked'
@@ -124,7 +124,7 @@ $$;
 -- create_reservation: crea una solicitud de reserva con hold temporal
 -- =============================================================================
 create or replace function public.create_reservation(
-  p_court_id uuid,
+  p_resource_id uuid,
   p_starts_at timestamptz,
   p_notes text default null
 )
@@ -134,7 +134,7 @@ security definer set search_path = public
 as $$
 declare
   v_user_id uuid := auth.uid();
-  v_court record;
+  v_resource record;
   v_business_id uuid;
   v_slot_minutes integer;
   v_hold_minutes integer;
@@ -158,20 +158,20 @@ begin
   -- Obtener datos de la cancha y negocio
   select c.*, b.timezone, b.slot_duration_minutes, b.hold_duration_minutes,
          b.max_advance_days, b.cancellation_limit_hours, b.name as business_name
-  into v_court
-  from public.courts c
+  into v_resource
+  from public.resources c
   join public.businesses b on c.business_id = b.id
-  where c.id = p_court_id and c.is_active = true;
+  where c.id = p_resource_id and c.is_active = true;
 
   if not found then
-    return query select null::uuid, null::text, null::timestamptz, 'Cancha no disponible'::text;
+    return query select null::uuid, null::text, null::timestamptz, 'Recurso no disponible'::text;
     return;
   end if;
 
-  v_business_id := v_court.business_id;
-  v_slot_minutes := v_court.slot_duration_minutes;
-  v_hold_minutes := v_court.hold_duration_minutes;
-  v_max_advance := v_court.max_advance_days;
+  v_business_id := v_resource.business_id;
+  v_slot_minutes := v_resource.slot_duration_minutes;
+  v_hold_minutes := v_resource.hold_duration_minutes;
+  v_max_advance := v_resource.max_advance_days;
 
   -- Calcular ends_at
   v_ends_at := p_starts_at + (v_slot_minutes || ' minutes')::interval;
@@ -189,12 +189,12 @@ begin
   end if;
 
   -- Tomar un advisory lock para esta cancha+slot (evita doble reserva)
-  perform pg_advisory_xact_lock(hashtext(p_court_id::text || p_starts_at::text));
+  perform pg_advisory_xact_lock(hashtext(p_resource_id::text || p_starts_at::text));
 
   -- Verificar que no haya reserva activa para este slot
   select * into v_existing
   from public.reservations r
-  where r.court_id = p_court_id
+  where r.resource_id = p_resource_id
     and r.starts_at = p_starts_at
     and (
       (r.status = 'pending' and r.hold_expires_at > v_now)
@@ -211,7 +211,7 @@ begin
   select * into v_exception
   from public.availability_exceptions ae
   where ae.business_id = v_business_id
-    and (ae.court_id is null or ae.court_id = p_court_id)
+    and (ae.resource_id is null or ae.resource_id = p_resource_id)
     and ae.starts_at <= p_starts_at
     and ae.ends_at >= v_ends_at
   limit 1;
@@ -226,10 +226,10 @@ begin
 
   -- Crear la reserva
   insert into public.reservations (
-    business_id, court_id, user_id, starts_at, ends_at,
+    business_id, resource_id, user_id, starts_at, ends_at,
     status, hold_expires_at, notes
   )
-  values (v_business_id, p_court_id, v_user_id, p_starts_at, v_ends_at, 'pending', v_hold_expires, p_notes)
+  values (v_business_id, p_resource_id, v_user_id, p_starts_at, v_ends_at, 'pending', v_hold_expires, p_notes)
   returning public.reservations.id into v_reservation_id;
 
   -- Registrar evento
@@ -246,8 +246,8 @@ begin
     v_user_name,
     jsonb_build_object(
       'reservation_id', v_reservation_id,
-      'business_name', v_court.business_name,
-      'court_name', v_court.name,
+      'business_name', v_resource.business_name,
+      'resource_name', v_resource.name,
       'starts_at', p_starts_at,
       'ends_at', v_ends_at
     ),
@@ -264,12 +264,12 @@ begin
        limit 1),
       ''
     ),
-    v_court.business_name,
+    v_resource.business_name,
     jsonb_build_object(
       'reservation_id', v_reservation_id,
       'client_name', v_user_name,
       'client_email', v_user_email,
-      'court_name', v_court.name,
+      'resource_name', v_resource.name,
       'starts_at', p_starts_at,
       'ends_at', v_ends_at
     ),
@@ -296,7 +296,7 @@ declare
   v_user_email text;
   v_user_name text;
   v_business_name text;
-  v_court_name text;
+  v_resource_name text;
 begin
   -- Cargar la reserva con bloqueo
   select * into v_reservation
@@ -334,10 +334,10 @@ begin
   -- Notificar al cliente
   select email into v_user_email from auth.users where id = v_reservation.user_id;
   select full_name into v_user_name from public.profiles where id = v_reservation.user_id;
-  select b.name, c.name into v_business_name, v_court_name
+  select b.name, c.name into v_business_name, v_resource_name
   from public.reservations r
   join public.businesses b on r.business_id = b.id
-  join public.courts c on r.court_id = c.id
+  join public.resources c on r.resource_id = c.id
   where r.id = p_reservation_id;
 
   perform public.enqueue_notification(
@@ -347,7 +347,7 @@ begin
     jsonb_build_object(
       'reservation_id', p_reservation_id,
       'business_name', v_business_name,
-      'court_name', v_court_name,
+      'resource_name', v_resource_name,
       'starts_at', v_reservation.starts_at,
       'ends_at', v_reservation.ends_at
     ),
@@ -373,7 +373,7 @@ declare
   v_user_email text;
   v_user_name text;
   v_business_name text;
-  v_court_name text;
+  v_resource_name text;
 begin
   select * into v_reservation
   from public.reservations
@@ -401,10 +401,10 @@ begin
   -- Notificar al cliente
   select email into v_user_email from auth.users where id = v_reservation.user_id;
   select full_name into v_user_name from public.profiles where id = v_reservation.user_id;
-  select b.name, c.name into v_business_name, v_court_name
+  select b.name, c.name into v_business_name, v_resource_name
   from public.reservations r
   join public.businesses b on r.business_id = b.id
-  join public.courts c on r.court_id = c.id
+  join public.resources c on r.resource_id = c.id
   where r.id = p_reservation_id;
 
   perform public.enqueue_notification(
@@ -414,7 +414,7 @@ begin
     jsonb_build_object(
       'reservation_id', p_reservation_id,
       'business_name', v_business_name,
-      'court_name', v_court_name,
+      'resource_name', v_resource_name,
       'starts_at', v_reservation.starts_at,
       'reason', p_reason
     ),
@@ -440,7 +440,7 @@ declare
   v_user_email text;
   v_user_name text;
   v_business_name text;
-  v_court_name text;
+  v_resource_name text;
   v_owner_email text;
 begin
   select r.*, b.cancellation_limit_hours into v_reservation
@@ -477,10 +477,10 @@ begin
   -- Notificar al cliente y al negocio
   select email into v_user_email from auth.users where id = v_user_id;
   select full_name into v_user_name from public.profiles where id = v_user_id;
-  select b.name, c.name into v_business_name, v_court_name
+  select b.name, c.name into v_business_name, v_resource_name
   from public.reservations r
   join public.businesses b on r.business_id = b.id
-  join public.courts c on r.court_id = c.id
+  join public.resources c on r.resource_id = c.id
   where r.id = p_reservation_id;
 
   perform public.enqueue_notification(
@@ -490,7 +490,7 @@ begin
     jsonb_build_object(
       'reservation_id', p_reservation_id,
       'business_name', v_business_name,
-      'court_name', v_court_name,
+      'resource_name', v_resource_name,
       'starts_at', v_reservation.starts_at
     ),
     'reservation_cancelled_client_' || p_reservation_id::text
@@ -511,7 +511,7 @@ begin
       jsonb_build_object(
         'reservation_id', p_reservation_id,
         'client_name', v_user_name,
-        'court_name', v_court_name,
+        'resource_name', v_resource_name,
         'starts_at', v_reservation.starts_at
       ),
       'reservation_cancelled_business_' || p_reservation_id::text
@@ -549,7 +549,7 @@ $$;
 -- =============================================================================
 -- Permisos: permitir que usuarios autenticados ejecuten los RPCs públicos
 -- =============================================================================
-grant execute on function public.get_availability(uuid, date) to anon, authenticated;
+grant execute on function public.get_resource_availability(uuid, date) to anon, authenticated;
 grant execute on function public.create_reservation(uuid, timestamptz, text) to authenticated;
 grant execute on function public.confirm_reservation(uuid) to authenticated;
 grant execute on function public.reject_reservation(uuid, text) to authenticated;

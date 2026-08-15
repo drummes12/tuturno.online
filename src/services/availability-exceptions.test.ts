@@ -20,7 +20,7 @@ const mockExceptions: AvailabilityException[] = [
   {
     id: 'exc-1',
     business_id: 'biz-1',
-    court_id: null,
+    resource_id: null,
     starts_at: '2025-12-25T00:00:00Z',
     ends_at: '2025-12-25T23:59:59Z',
     type: 'closed',
@@ -31,7 +31,7 @@ const mockExceptions: AvailabilityException[] = [
   {
     id: 'exc-2',
     business_id: 'biz-1',
-    court_id: 'court-1',
+    resource_id: 'court-1',
     starts_at: '2025-12-31T22:00:00Z',
     ends_at: '2026-01-01T02:00:00Z',
     type: 'closed',
@@ -91,7 +91,7 @@ describe('createAvailabilityException', () => {
     await expect(
       createAvailabilityException({
         businessId: 'biz-1',
-        courtId: null,
+        resourceId: null,
         startsAt: '2025-12-25T05:00:00Z',
         endsAt: '2025-12-26T05:00:00Z',
         reason: 'Navidad',
@@ -102,7 +102,7 @@ describe('createAvailabilityException', () => {
     expect(mockFrom).toHaveBeenCalledWith('availability_exceptions')
     expect(chain.insert).toHaveBeenCalledWith({
       business_id: 'biz-1',
-      court_id: null,
+      resource_id: null,
       starts_at: '2025-12-25T05:00:00Z',
       ends_at: '2025-12-26T05:00:00Z',
       type: 'closed',
@@ -117,14 +117,14 @@ describe('createAvailabilityException', () => {
 
     await createAvailabilityException({
       businessId: 'biz-1',
-      courtId: 'court-1',
+      resourceId: 'court-1',
       startsAt: '2025-12-31T22:00:00Z',
       endsAt: '2026-01-01T02:00:00Z'
     })
 
     expect(chain.insert).toHaveBeenCalledWith({
       business_id: 'biz-1',
-      court_id: 'court-1',
+      resource_id: 'court-1',
       starts_at: '2025-12-31T22:00:00Z',
       ends_at: '2026-01-01T02:00:00Z',
       type: 'closed',
@@ -139,7 +139,7 @@ describe('createAvailabilityException', () => {
 
     await createAvailabilityException({
       businessId: 'biz-1',
-      courtId: null,
+      resourceId: null,
       startsAt: '2025-12-25T05:00:00Z',
       endsAt: '2025-12-26T05:00:00Z',
       reason: '   '
@@ -154,7 +154,7 @@ describe('createAvailabilityException', () => {
     await expect(
       createAvailabilityException({
         businessId: 'biz-1',
-        courtId: null,
+        resourceId: null,
         startsAt: '2025-12-26T05:00:00Z',
         endsAt: '2025-12-25T05:00:00Z'
       })
@@ -171,7 +171,7 @@ describe('createAvailabilityException', () => {
     await expect(
       createAvailabilityException({
         businessId: 'biz-1',
-        courtId: null,
+        resourceId: null,
         startsAt: '2025-12-25T05:00:00Z',
         endsAt: '2025-12-26T05:00:00Z'
       })
@@ -211,7 +211,7 @@ describe('countOverlappingReservations', () => {
 
     const count = await countOverlappingReservations({
       businessId: 'biz-1',
-      courtId: null,
+      resourceId: null,
       startsAt: '2025-12-25T05:00:00Z',
       endsAt: '2025-12-26T05:00:00Z'
     })
@@ -226,23 +226,23 @@ describe('countOverlappingReservations', () => {
     expect(chain.in).toHaveBeenCalledWith('status', ['pending', 'confirmed'])
     expect(chain.lt).toHaveBeenCalledWith('starts_at', '2025-12-26T05:00:00Z')
     expect(chain.gt).toHaveBeenCalledWith('ends_at', '2025-12-25T05:00:00Z')
-    // No debe filtrar por court_id cuando es global
-    expect(chain.eq).not.toHaveBeenCalledWith('court_id', expect.anything())
+    // No debe filtrar por resource_id cuando es global
+    expect(chain.eq).not.toHaveBeenCalledWith('resource_id', expect.anything())
   })
 
-  it('filtra por court_id cuando se especifica una cancha', async () => {
+  it('filtra por resource_id cuando se especifica una cancha', async () => {
     chain = createQueryChain({ data: null, error: null, count: 1 })
     mockFrom.mockReturnValue(chain)
 
     const count = await countOverlappingReservations({
       businessId: 'biz-1',
-      courtId: 'court-1',
+      resourceId: 'court-1',
       startsAt: '2025-12-25T05:00:00Z',
       endsAt: '2025-12-26T05:00:00Z'
     })
 
     expect(count).toBe(1)
-    expect(chain.eq).toHaveBeenCalledWith('court_id', 'court-1')
+    expect(chain.eq).toHaveBeenCalledWith('resource_id', 'court-1')
   })
 
   it('retorna 0 cuando no hay reservas solapadas', async () => {
@@ -251,7 +251,7 @@ describe('countOverlappingReservations', () => {
 
     const count = await countOverlappingReservations({
       businessId: 'biz-1',
-      courtId: null,
+      resourceId: null,
       startsAt: '2025-12-25T05:00:00Z',
       endsAt: '2025-12-26T05:00:00Z'
     })
@@ -267,7 +267,7 @@ describe('countOverlappingReservations', () => {
     await expect(
       countOverlappingReservations({
         businessId: 'biz-1',
-        courtId: null,
+        resourceId: null,
         startsAt: '2025-12-25T05:00:00Z',
         endsAt: '2025-12-26T05:00:00Z'
       })

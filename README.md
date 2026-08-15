@@ -99,14 +99,15 @@ pnpm dev
 
 - Consulta de disponibilidad pública sin registro
 - Registro/login con email y contraseña
-- Solicitud de reservas con bloqueo temporal (30 min)
+- Solicitud de reservas con bloqueo temporal configurable por negocio
 - Panel administrativo mobile-first con cola de pendientes
 - Confirmar/rechazar reservas con motivo
 - Cancelación por parte del cliente (2 horas antes)
 - Notificaciones por correo (Resend)
 - Concurrencia protegida con advisory locks
 - RLS en todas las tablas
-- Cierres temporales configurables por el propietario (todo el negocio o cancha específica, con opción de día completo)
+- Recursos reservables configurables (canchas, salas, consultorios, mesas, cabinas u otros espacios)
+- Cierres temporales configurables por el propietario (todo el negocio o recurso específico, con opción de día completo)
 - Instrucciones de abono/confirmación en Markdown (máx 1000 caracteres) visibles para el cliente antes de reservar
 - Botón de WhatsApp post-reserva con mensaje prellenado y enlace fallback
 - Tutorial guiado interactivo con Driver.js para clientes (visitantes y autenticados), con botón "Guía" en el header para volver a iniciarlo

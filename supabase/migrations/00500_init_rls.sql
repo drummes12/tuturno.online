@@ -6,7 +6,7 @@
 alter table public.profiles enable row level security;
 alter table public.businesses enable row level security;
 alter table public.business_members enable row level security;
-alter table public.courts enable row level security;
+alter table public.resources enable row level security;
 alter table public.business_hours enable row level security;
 alter table public.availability_exceptions enable row level security;
 alter table public.reservations enable row level security;
@@ -82,30 +82,30 @@ create policy "Owners can delete members"
   );
 
 -- =============================================================================
--- COURTS
+-- RESOURCES
 -- =============================================================================
--- Lectura pública de canchas activas
-create policy "Anyone can read active courts"
-  on public.courts for select
+-- Lectura pública de recursos activas
+create policy "Anyone can read active resources"
+  on public.resources for select
   using (is_active = true);
 
 -- Miembros del negocio pueden leer todas (incluidas inactivas)
-create policy "Business members can read all courts"
-  on public.courts for select
+create policy "Business members can read all resources"
+  on public.resources for select
   using (public.is_business_member(business_id));
 
--- Miembros pueden crear/editar canchas
-create policy "Business members can insert courts"
-  on public.courts for insert
+-- Miembros pueden crear/editar recursos
+create policy "Business members can insert resources"
+  on public.resources for insert
   with check (public.is_business_member(business_id));
 
-create policy "Business members can update courts"
-  on public.courts for update
+create policy "Business members can update resources"
+  on public.resources for update
   using (public.is_business_member(business_id))
   with check (public.is_business_member(business_id));
 
-create policy "Business members can delete courts"
-  on public.courts for delete
+create policy "Business members can delete resources"
+  on public.resources for delete
   using (public.is_business_member(business_id));
 
 -- =============================================================================

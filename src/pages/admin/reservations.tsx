@@ -224,7 +224,7 @@ export function AdminReservationsPage() {
                       {formatLocal(r.starts_at, 'HH:mm')}
                     </span>
                     <span className='text-text-muted'>·</span>
-                    <span className='truncate'>{r.court?.name}</span>
+                    <span className='truncate'>{r.resource?.name}</span>
                   </p>
                   <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
                     <UserIcon size={12} className='shrink-0' />
@@ -269,7 +269,7 @@ export function AdminReservationsPage() {
                       label='Motivo del rechazo'
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
-                      placeholder='Ej: cancha en mantenimiento'
+                      placeholder='Ej: recurso en mantenimiento'
                       autoFocus
                     />
                     <div className='flex gap-2'>
@@ -331,7 +331,7 @@ export function AdminReservationsPage() {
                         href={
                           waLink(
                             r.client?.phone ?? r.profile?.phone,
-                            `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                            `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde el recurso ${r.resource?.name ?? ''} sobre tu reserva.`
                           )!
                         }
                         target='_blank'

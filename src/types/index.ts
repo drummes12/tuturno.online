@@ -54,6 +54,8 @@ export interface Business {
   hold_duration_minutes: number
   cancellation_limit_hours: number
   max_advance_days: number
+  resource_label_singular: string
+  resource_label_plural: string
   reservation_instructions_md: string | null
   created_at: string
   updated_at: string
@@ -86,7 +88,7 @@ export interface ClientSearchResult {
   has_account: boolean
 }
 
-export interface Court {
+export interface Resource {
   id: string
   business_id: string
   name: string
@@ -109,7 +111,7 @@ export interface BusinessHours {
 export interface AvailabilityException {
   id: string
   business_id: string
-  court_id: string | null
+  resource_id: string | null
   starts_at: string
   ends_at: string
   type: ExceptionType
@@ -121,7 +123,7 @@ export interface AvailabilityException {
 export interface Reservation {
   id: string
   business_id: string
-  court_id: string
+  resource_id: string
   user_id: string | null
   client_id: string | null
   starts_at: string
@@ -134,7 +136,7 @@ export interface Reservation {
   created_at: string
   updated_at: string
   // Relaciones opcionales
-  court?: Court
+  resource?: Resource
   profile?: Profile | null
   client?: Client | null
 }
@@ -163,10 +165,10 @@ export interface NotificationOutbox {
   sent_at: string | null
 }
 
-/** Slot de disponibilidad calculado para una cancha */
+/** Slot de disponibilidad calculado para un recurso */
 export interface AvailabilitySlot {
-  court_id: string
-  court_name: string
+  resource_id: string
+  resource_name: string
   starts_at: string
   ends_at: string
   status: 'available' | 'held' | 'reserved' | 'blocked'

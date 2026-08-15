@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, type SubmitEvent } from 'react'
 import { Link } from 'wouter'
-import { fetchCourtName } from '@/services/courts'
+import { fetchResourceName } from '@/services/resources'
 import {
   createReservation,
   createReservationAdmin
@@ -22,7 +22,7 @@ import {
 } from '@/components/common/client-selector'
 import {
   ArrowLeftIcon,
-  CourtIcon,
+  StoreIcon,
   ClockIcon,
   CalendarIcon,
   HourglassIcon,
@@ -35,14 +35,14 @@ import { es } from 'date-fns/locale'
 
 function buildWhatsAppMessage(opts: {
   businessName: string
-  courtName?: string | null
+  resourceName?: string | null
   dateLabel?: string | null
   timeLabel: string | null
   clientName: string | null
 }): string {
   return (
     `Hola ${opts.businessName}, acabo de enviar una solicitud de reserva:\n\n` +
-    (opts.courtName ? `- Lugar: ${opts.courtName}\n` : '') +
+    (opts.resourceName ? `- Lugar: ${opts.resourceName}\n` : '') +
     (opts.dateLabel ? `- Fecha: ${opts.dateLabel}\n` : '') +
     `- Hora: ${opts.timeLabel}\n` +
     `- Cliente: ${opts.clientName}\n` +
@@ -55,12 +55,12 @@ export function ReservePage() {
   const { user, profile, isAdmin } = useAuthStore()
 
   const params = new URLSearchParams(window.location.search)
-  const courtId = params.get('court')
+  const resourceId = params.get('resource')
   const dateStr = params.get('date')
   const startStr = params.get('start')
 
-  const [courtName, setCourtName] = useState<string | null>(null)
-  const [loadingCourt, setLoadingCourt] = useState(true)
+  const [resourceName, setResourceName] = useState<string | null>(null)
+  const [loadingResource, setLoadingResource] = useState(true)
   const [notes, setNotes] = useState('')
   const [fullName, setFullName] = useState(profile?.full_name ?? '')
   const [phone, setPhone] = useState(profile?.phone ?? '')
@@ -71,6 +71,7 @@ export function ReservePage() {
   const [businessContact, setBusinessContact] = useState<{
     phone: string
     name: string
+    resource_label_singular: string
     reservation_instructions_md: string | null
   } | null>(null)
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null)
@@ -102,6 +103,7 @@ export function ReservePage() {
           setBusinessContact({
             phone: data.phone,
             name: data.name,
+            resource_label_singular: data.resource_label_singular || 'Recurso',
             reservation_instructions_md: data.reservation_instructions_md
           })
         }
@@ -117,26 +119,26 @@ export function ReservePage() {
   }, [profile])
 
   useEffect(() => {
-    async function loadCourt() {
-      if (!courtId) return
+    async function loadResource() {
+      if (!resourceId) return
       try {
-        const name = await fetchCourtName(courtId)
-        setCourtName(name)
+        const name = await fetchResourceName(resourceId)
+        setResourceName(name)
       } catch {
-        setCourtName(null)
+        setResourceName(null)
       } finally {
-        setLoadingCourt(false)
+        setLoadingResource(false)
       }
     }
-    loadCourt()
-  }, [courtId])
+    loadResource()
+  }, [resourceId])
 
   if (!user) {
     return (
       <Card className='p-8 text-center max-w-md mx-auto mt-8 animate-fade-up'>
         <div className='flex flex-col items-center gap-4'>
           <div className='w-14 h-14 rounded-full bg-surface-inset flex items-center justify-center text-text-muted'>
-            <CourtIcon size={28} />
+            <StoreIcon size={28} />
           </div>
           <div>
             <p className='font-semibold text-(--color-text) mb-1'>
@@ -156,7 +158,7 @@ export function ReservePage() {
     )
   }
 
-  if (!courtId || !startStr) {
+  if (!resourceId || !startStr) {
     return (
       <Card className='p-8 text-center max-w-md mx-auto mt-8 animate-fade-up'>
         <p className='text-(--color-text-muted) mb-4'>
@@ -169,7 +171,7 @@ export function ReservePage() {
     )
   }
 
-  if (loadingCourt) {
+  if (loadingResource) {
     return (
       <div className='max-w-md mx-auto mt-8 flex flex-col gap-4'>
         <Skeleton className='h-8 w-48' />
@@ -212,7 +214,7 @@ export function ReservePage() {
         }
 
         const { error: rpcError } = await createReservationAdmin(
-          courtId!,
+          resourceId!,
           startStr!,
           {
             clientId: clientSelection.clientId,
@@ -243,7 +245,7 @@ export function ReservePage() {
       }
 
       const { error: rpcError } = await createReservation(
-        courtId!,
+        resourceId!,
         startStr!,
         notes.trim() || null
       )
@@ -259,7 +261,7 @@ export function ReservePage() {
       if (businessContact?.phone) {
         const msg = buildWhatsAppMessage({
           businessName: businessContact.name,
-          courtName: courtName,
+          resourceName: resourceName,
           dateLabel: dateLabel,
           timeLabel,
           clientName: fullName.trim()
@@ -334,7 +336,11 @@ export function ReservePage() {
   }
 
   const details = [
-    { icon: <CourtIcon size={16} />, label: 'Cancha', value: courtName },
+    {
+      icon: <StoreIcon size={16} />,
+      label: businessContact?.resource_label_singular ?? 'Recurso',
+      value: resourceName
+    },
     {
       icon: <CalendarIcon size={16} />,
       label: 'Fecha',

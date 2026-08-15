@@ -58,6 +58,13 @@ export function AdminConfigPage() {
       setError('El gap entre turnos no puede ser negativo.')
       return
     }
+    if (
+      !business.resource_label_singular.trim() ||
+      !business.resource_label_plural.trim()
+    ) {
+      setError('Define el nombre singular y plural de tus recursos.')
+      return
+    }
 
     setSaving(true)
     setSaved(false)
@@ -77,6 +84,8 @@ export function AdminConfigPage() {
         hold_duration_minutes: business.hold_duration_minutes,
         cancellation_limit_hours: business.cancellation_limit_hours,
         max_advance_days: business.max_advance_days,
+        resource_label_singular: business.resource_label_singular.trim(),
+        resource_label_plural: business.resource_label_plural.trim(),
         reservation_instructions_md: business.reservation_instructions_md
       })
     } catch (err) {
@@ -166,6 +175,38 @@ export function AdminConfigPage() {
                   }
                   required
                 />
+                <div className='grid grid-cols-2 gap-3'>
+                  <Input
+                    label='Recurso (singular)'
+                    value={business.resource_label_singular}
+                    onChange={(e) =>
+                      setBusiness({
+                        ...business,
+                        resource_label_singular: e.target.value
+                      })
+                    }
+                    placeholder='Ej: Sala'
+                    maxLength={40}
+                    required
+                  />
+                  <Input
+                    label='Recursos (plural)'
+                    value={business.resource_label_plural}
+                    onChange={(e) =>
+                      setBusiness({
+                        ...business,
+                        resource_label_plural: e.target.value
+                      })
+                    }
+                    placeholder='Ej: Salas'
+                    maxLength={40}
+                    required
+                  />
+                </div>
+                <p className='text-xs text-(--color-text-muted) -mt-2'>
+                  Define cómo quieres llamar a las unidades que tus clientes
+                  pueden reservar.
+                </p>
                 <PhoneInput
                   label='Teléfono'
                   value={business.phone ?? ''}

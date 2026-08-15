@@ -7,7 +7,7 @@ import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
 import {
-  CourtIcon,
+  StoreIcon,
   MailIcon,
   UserIcon,
   ArrowLeftIcon
@@ -92,7 +92,7 @@ export function RegisterPage() {
         {/* Brand mark */}
         <div className='flex flex-col items-center gap-3 mb-8'>
           <div className='flex items-center justify-center w-14 h-14 rounded-2xl bg-pitch-800 text-flood-400 shadow-(--shadow-pitch)'>
-            <CourtIcon size={28} strokeWidth={2.5} />
+            <StoreIcon size={28} strokeWidth={2.5} />
           </div>
         </div>
 

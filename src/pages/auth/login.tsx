@@ -5,7 +5,7 @@ import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
-import { CourtIcon, MailIcon, ArrowLeftIcon } from '@/components/common/icon'
+import { StoreIcon, MailIcon, ArrowLeftIcon } from '@/components/common/icon'
 
 export function LoginPage() {
   const [, navigate] = useLocation()
@@ -40,7 +40,7 @@ export function LoginPage() {
         {/* Brand mark */}
         <div className='flex flex-col items-center gap-3 mb-8'>
           <div className='flex items-center justify-center w-14 h-14 rounded-2xl bg-pitch-800 text-flood-400 shadow-(--shadow-pitch)'>
-            <CourtIcon size={28} strokeWidth={2.5} />
+            <StoreIcon size={28} strokeWidth={2.5} />
           </div>
         </div>
 

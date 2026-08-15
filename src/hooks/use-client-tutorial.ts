@@ -101,11 +101,11 @@ function buildTours(): TourDef[] {
           }
         },
         {
-          element: '[data-tour="availability-court-selector"]',
+          element: '[data-tour="availability-resource-selector"]',
           popover: {
-            title: 'Selecciona una cancha',
+            title: 'Selecciona una recurso',
             description:
-              'Si el negocio tiene varias canchas, elige cuál quieres reservar.',
+              'Si el negocio tiene varias recursos, elige cuál quieres reservar.',
             side: 'bottom',
             align: 'start'
           }
@@ -184,10 +184,10 @@ function buildTours(): TourDef[] {
           }
         },
         {
-          element: '[data-tour="availability-court-selector"]',
+          element: '[data-tour="availability-resource-selector"]',
           popover: {
-            title: 'Selecciona una cancha',
-            description: 'Elige la cancha que prefieras.',
+            title: 'Selecciona una recurso',
+            description: 'Elige la recurso que prefieras.',
             side: 'bottom',
             align: 'start'
           }
@@ -224,7 +224,7 @@ function buildTours(): TourDef[] {
           element: '[data-tour="reservation-summary"]',
           popover: {
             title: 'Resumen de tu reserva',
-            description: 'Revisa la cancha, fecha y hora seleccionadas.',
+            description: 'Revisa la recurso, fecha y hora seleccionadas.',
             side: 'bottom',
             align: 'center'
           }
@@ -282,7 +282,7 @@ function buildTours(): TourDef[] {
           popover: {
             title: 'Tus reservas',
             description:
-              'Cada tarjeta muestra la cancha, fecha, hora y estado de tu reserva.',
+              'Cada tarjeta muestra la recurso, fecha, hora y estado de tu reserva.',
             side: 'top',
             align: 'center'
           }

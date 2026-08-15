@@ -18,7 +18,7 @@ function makeReservation(
   return {
     id,
     business_id: 'biz-1',
-    court_id: 'court-1',
+    resource_id: 'court-1',
     user_id: 'user-1',
     client_id: null,
     starts_at: startsAt,

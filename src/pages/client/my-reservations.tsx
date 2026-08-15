@@ -34,6 +34,7 @@ export function MyReservationsPage() {
   const [error, setError] = useState<string | null>(null)
   const [businessPhone, setBusinessPhone] = useState<string | null>(null)
   const [businessName, setBusinessName] = useState<string>('')
+  const [resourceLabelSingular, setResourceLabelSingular] = useState('Recurso')
 
   const loadReservations = useCallback(async () => {
     if (!user) return
@@ -60,6 +61,7 @@ export function MyReservationsPage() {
         if (data) {
           setBusinessPhone(data.phone)
           setBusinessName(data.name)
+          setResourceLabelSingular(data.resource_label_singular || 'Recurso')
         }
       })
       .catch(() => {})
@@ -129,13 +131,13 @@ export function MyReservationsPage() {
 
   function buildReservationWhatsAppLink(r: Reservation): string | null {
     if (!businessPhone) return null
-    const courtName = r.court?.name ?? 'Cancha'
+    const resourceName = r.resource?.name ?? resourceLabelSingular
     const dateLabel = formatLocal(r.starts_at, "EEEE d 'de' MMMM")
     const timeLabel = formatLocal(r.starts_at, 'HH:mm')
     const clientName = profile?.full_name ?? ''
     const msg =
       `Hola ${businessName}, tengo una reserva pendiente:\n\n` +
-      `- Lugar: ${courtName}\n` +
+      `- Lugar: ${resourceName}\n` +
       `- Fecha: ${dateLabel}\n` +
       `- Hora: ${timeLabel}\n` +
       `- Cliente: ${clientName}\n` +
@@ -232,7 +234,7 @@ export function MyReservationsPage() {
               <div className='flex items-start justify-between gap-3 mb-2'>
                 <div className='min-w-0 flex-1'>
                   <p className='font-semibold text-(--color-text) tracking-tight'>
-                    {r.court?.name ?? 'Cancha'}
+                    {r.resource?.name ?? resourceLabelSingular}
                   </p>
                   <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
                     {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}

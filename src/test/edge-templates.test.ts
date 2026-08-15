@@ -16,7 +16,7 @@ const templates = createTemplates(APP_URL)
 
 const validPayload: TemplatePayload = {
   business_name: 'Canchas El Parque',
-  court_name: 'Cancha 1',
+  resource_name: 'Cancha 1',
   starts_at: '2025-01-15T15:00:00Z',
   recipient_name: 'Juan Pérez',
   client_name: 'Juan Pérez',

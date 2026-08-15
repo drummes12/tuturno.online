@@ -19,13 +19,13 @@ export async function fetchAvailabilityExceptions(
 
 /**
  * Crea un cierre temporal.
- * - `courtId = null` aplica a todo el negocio.
- * - `courtId` con valor aplica solo a esa cancha.
+ * - `resourceId = null` aplica a todo el negocio.
+ * - `resourceId` con valor aplica solo a ese recurso.
  * - `type` siempre 'closed' en esta versión.
  */
 export async function createAvailabilityException(opts: {
   businessId: string
-  courtId: string | null
+  resourceId: string | null
   startsAt: string // ISO UTC
   endsAt: string // ISO UTC
   reason?: string | null
@@ -37,7 +37,7 @@ export async function createAvailabilityException(opts: {
 
   const { error } = await supabase.from('availability_exceptions').insert({
     business_id: opts.businessId,
-    court_id: opts.courtId,
+    resource_id: opts.resourceId,
     starts_at: opts.startsAt,
     ends_at: opts.endsAt,
     type: 'closed',
@@ -60,14 +60,14 @@ export async function deleteAvailabilityException(id: string): Promise<void> {
 
 /**
  * Cuenta las reservas pending/confirmed que se solapan con un intervalo.
- * Si courtId es null, cuenta en todas las canchas del negocio.
- * Si courtId tiene valor, cuenta solo en esa cancha.
+ * Si resourceId es null, cuenta en todos los recursos del negocio.
+ * Si resourceId tiene valor, cuenta solo en ese recurso.
  *
  * Devuelve el número de reservas afectadas para mostrar una advertencia.
  */
 export async function countOverlappingReservations(opts: {
   businessId: string
-  courtId: string | null
+  resourceId: string | null
   startsAt: string // ISO UTC
   endsAt: string // ISO UTC
 }): Promise<number> {
@@ -79,8 +79,8 @@ export async function countOverlappingReservations(opts: {
     .lt('starts_at', opts.endsAt)
     .gt('ends_at', opts.startsAt)
 
-  if (opts.courtId) {
-    query = query.eq('court_id', opts.courtId)
+  if (opts.resourceId) {
+    query = query.eq('resource_id', opts.resourceId)
   }
 
   const { count, error } = await query

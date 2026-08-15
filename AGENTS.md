@@ -65,7 +65,7 @@
 - El frontend determina `isAdmin` consultando si el usuario tiene un registro en `business_members` (vía `fetchBusinessId`)
 - **owner**: puede añadir/eliminar miembros del negocio (RLS lo restringe)
 - **manager**: puede administrar canchas, horarios, reservas, pero NO añadir miembros
-- Ambos roles tienen acceso completo al panel admin (confirmar/rechazar/cancelar reservas, editar canchas, horarios, configuración)
+- Ambos roles tienen acceso al panel admin (confirmar/rechazar/cancelar reservas ambos, editar canchas, horarios, configuración solo owner)
 - Un cliente normal (sin membership) solo puede ver disponibilidad y crear/cancelar sus propias reservas
 
 ### Cómo habilitar un admin en producción

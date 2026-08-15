@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { rpc, query, isDbAvailable, closePool } from '@/test/db'
+import { rpc, query, isResourcesSchemaAvailable, closePool } from '@/test/db'
 
-const DB_AVAILABLE = await isDbAvailable()
+const DB_AVAILABLE = await isResourcesSchemaAvailable()
 
 let BUSINESS_ID = ''
-let ACTIVE_COURT_ID = ''
-let SECOND_COURT_ID = ''
+let ACTIVE_RESOURCE_ID = ''
+let SECOND_RESOURCE_ID = ''
 
 beforeAll(async () => {
   if (!DB_AVAILABLE) {
@@ -18,10 +18,10 @@ beforeAll(async () => {
   BUSINESS_ID = bizResult.rows[0]?.id as string
 
   const courtResult = await query(
-    'select id from public.courts where is_active = true order by sort_order limit 2'
+    'select id from public.resources where is_active = true order by sort_order limit 2'
   )
-  ACTIVE_COURT_ID = courtResult.rows[0]?.id as string
-  SECOND_COURT_ID = courtResult.rows[1]?.id as string
+  ACTIVE_RESOURCE_ID = courtResult.rows[0]?.id as string
+  SECOND_RESOURCE_ID = courtResult.rows[1]?.id as string
 })
 
 afterAll(async () => {
@@ -58,22 +58,22 @@ function nextMondayWithinAdvanceLimit(): {
 }
 
 describe.skipIf(!DB_AVAILABLE)(
-  'availability_exceptions — get_availability',
+  'availability_exceptions — get_resource_availability',
   () => {
     it('excepción global marca slots como blocked', async () => {
-      if (!ACTIVE_COURT_ID) return
+      if (!ACTIVE_RESOURCE_ID) return
 
       const { dateStr, startUtc, endUtc } = nextMondayWithinAdvanceLimit()
 
       await query(
-        `insert into public.availability_exceptions (business_id, court_id, starts_at, ends_at, type, reason)
+        `insert into public.availability_exceptions (business_id, resource_id, starts_at, ends_at, type, reason)
          values ($1, null, $2, $3, 'closed', 'Test global')`,
         [BUSINESS_ID, startUtc, endUtc]
       )
 
       try {
-        const result = await rpc('get_availability', {
-          p_court_id: ACTIVE_COURT_ID,
+        const result = await rpc('get_resource_availability', {
+          p_resource_id: ACTIVE_RESOURCE_ID,
           p_date: dateStr
         })
 
@@ -90,21 +90,21 @@ describe.skipIf(!DB_AVAILABLE)(
     })
 
     it('excepción de una cancha no bloquea otra', async () => {
-      if (!ACTIVE_COURT_ID || !SECOND_COURT_ID) return
+      if (!ACTIVE_RESOURCE_ID || !SECOND_RESOURCE_ID) return
 
       const { dateStr, startUtc, endUtc } = nextMondayWithinAdvanceLimit()
 
       // Excepción solo para la primera cancha
       await query(
-        `insert into public.availability_exceptions (business_id, court_id, starts_at, ends_at, type, reason)
+        `insert into public.availability_exceptions (business_id, resource_id, starts_at, ends_at, type, reason)
          values ($1, $2, $3, $4, 'closed', 'Test court-specific')`,
-        [BUSINESS_ID, ACTIVE_COURT_ID, startUtc, endUtc]
+        [BUSINESS_ID, ACTIVE_RESOURCE_ID, startUtc, endUtc]
       )
 
       try {
         // La cancha bloqueada debe tener slots blocked
-        const blockedResult = await rpc('get_availability', {
-          p_court_id: ACTIVE_COURT_ID,
+        const blockedResult = await rpc('get_resource_availability', {
+          p_resource_id: ACTIVE_RESOURCE_ID,
           p_date: dateStr
         })
         const blockedSlots = blockedResult.rows.filter(
@@ -113,8 +113,8 @@ describe.skipIf(!DB_AVAILABLE)(
         expect(blockedSlots.length).toBeGreaterThan(0)
 
         // La segunda cancha NO debe tener slots blocked por esta excepción
-        const otherResult = await rpc('get_availability', {
-          p_court_id: SECOND_COURT_ID,
+        const otherResult = await rpc('get_resource_availability', {
+          p_resource_id: SECOND_RESOURCE_ID,
           p_date: dateStr
         })
         const availableSlots = otherResult.rows.filter(
@@ -135,19 +135,19 @@ describe.skipIf(!DB_AVAILABLE)(
   'availability_exceptions — create_reservation',
   () => {
     it('slots bloqueados por excepción no son disponibles', async () => {
-      if (!ACTIVE_COURT_ID) return
+      if (!ACTIVE_RESOURCE_ID) return
 
       const { dateStr, startUtc, endUtc } = nextMondayWithinAdvanceLimit()
 
       await query(
-        `insert into public.availability_exceptions (business_id, court_id, starts_at, ends_at, type, reason)
+        `insert into public.availability_exceptions (business_id, resource_id, starts_at, ends_at, type, reason)
          values ($1, null, $2, $3, 'closed', 'Test reject')`,
         [BUSINESS_ID, startUtc, endUtc]
       )
 
       try {
-        const result = await rpc('get_availability', {
-          p_court_id: ACTIVE_COURT_ID,
+        const result = await rpc('get_resource_availability', {
+          p_resource_id: ACTIVE_RESOURCE_ID,
           p_date: dateStr
         })
 

@@ -3,4 +3,4 @@
 -- =============================================================================
 
 alter publication supabase_realtime add table public.reservations;
-alter publication supabase_realtime add table public.courts;
+alter publication supabase_realtime add table public.resources;

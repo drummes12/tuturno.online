@@ -8,7 +8,7 @@
 
 export interface TemplatePayload {
   business_name?: string
-  court_name?: string
+  resource_name?: string
   starts_at?: string
   recipient_name?: string | null
   client_name?: string
@@ -131,7 +131,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
     reservation_created_client: (p) => {
       const details = [
         detailRow('Negocio', p.business_name ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {
@@ -155,7 +155,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
       const details = [
         detailRow('Cliente', p.client_name ?? ''),
         detailRow('Email', p.client_email ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {
@@ -178,7 +178,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
       const details = [
         detailRow('Cliente', p.client_name ?? ''),
         detailRow('Email', p.client_email ?? 'No registrado'),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {
@@ -197,7 +197,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
     reservation_confirmed: (p) => {
       const details = [
         detailRow('Negocio', p.business_name ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {
@@ -219,7 +219,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
     reservation_rejected: (p) => {
       const details = [
         detailRow('Negocio', p.business_name ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       const reasonRow = p.reason ? detailRow('Motivo', p.reason) : ''
@@ -240,7 +240,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
     reservation_cancelled_client: (p) => {
       const details = [
         detailRow('Negocio', p.business_name ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {
@@ -259,7 +259,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
     reservation_cancelled_business: (p) => {
       const details = [
         detailRow('Cliente', p.client_name ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {
@@ -281,7 +281,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
     reservation_cancelled_by_business: (p) => {
       const details = [
         detailRow('Negocio', p.business_name ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       const reasonRow = p.reason ? detailRow('Motivo', p.reason) : ''
@@ -302,7 +302,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
     reservation_expired: (p) => {
       const details = [
         detailRow('Negocio', p.business_name ?? ''),
-        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Espacio', p.resource_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {

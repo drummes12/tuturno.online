@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase'
 import type { Reservation, ReservationStatus } from '@/types'
 
 const RESERVATION_SELECT =
-  '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
+  '*, resource:resources(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
 
 export async function fetchPendingReservations(): Promise<Reservation[]> {
   const { data, error } = await supabase
@@ -73,7 +73,7 @@ export async function fetchUserReservations(
 
   const { data, error } = await supabase
     .from('reservations')
-    .select('*, court:courts(*), client:clients(*)')
+    .select('*, resource:resources(*), client:clients(*)')
     .or(orFilter)
     .order('starts_at', { ascending: false })
   if (error) throw error
@@ -113,21 +113,21 @@ export async function cancelReservationByClient(reservationId: string): Promise<
 }
 
 export async function createReservation(
-  courtId: string,
+  resourceId: string,
   startsAt: string,
   notes: string | null
 ): Promise<{ error: string | null }> {
   const { data, error } = await supabase.rpc('create_reservation', {
-    p_court_id: courtId,
+    p_resource_id: resourceId,
     p_starts_at: startsAt,
-    p_notes: notes,
+    p_notes: notes
   })
   if (error) throw error
   return { error: data?.error ?? null }
 }
 
 export async function createReservationAdmin(
-  courtId: string,
+  resourceId: string,
   startsAt: string,
   options: {
     clientId?: string | null
@@ -138,7 +138,7 @@ export async function createReservationAdmin(
   }
 ): Promise<{ error: string | null }> {
   const { data, error } = await supabase.rpc('create_reservation_admin', {
-    p_court_id: courtId,
+    p_resource_id: resourceId,
     p_starts_at: startsAt,
     p_client_id: options.clientId ?? null,
     p_client_name: options.clientName ?? null,
