@@ -49,12 +49,13 @@ describe('fetchBusinessHours', () => {
     chain = createQueryChain({ data: mockHours, error: null })
     mockFrom.mockReturnValue(chain)
 
-    const result = await fetchBusinessHours()
+    const result = await fetchBusinessHours('biz-1')
 
     expect(result).toEqual(mockHours)
     expect(result).toHaveLength(2)
     expect(mockFrom).toHaveBeenCalledWith('business_hours')
     expect(chain.select).toHaveBeenCalledWith('*')
+    expect(chain.eq).toHaveBeenCalledWith('business_id', 'biz-1')
     expect(chain.order).toHaveBeenCalledWith('day_of_week, open_time')
   })
 
@@ -62,7 +63,7 @@ describe('fetchBusinessHours', () => {
     chain = createQueryChain({ data: [], error: null })
     mockFrom.mockReturnValue(chain)
 
-    const result = await fetchBusinessHours()
+    const result = await fetchBusinessHours('biz-1')
 
     expect(result).toEqual([])
   })
@@ -72,7 +73,7 @@ describe('fetchBusinessHours', () => {
     chain = createQueryChain({ data: null, error: supabaseError })
     mockFrom.mockReturnValue(chain)
 
-    await expect(fetchBusinessHours()).rejects.toEqual(supabaseError)
+    await expect(fetchBusinessHours('biz-1')).rejects.toEqual(supabaseError)
     expect(mockFrom).toHaveBeenCalledWith('business_hours')
   })
 })

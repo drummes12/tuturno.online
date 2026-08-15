@@ -44,11 +44,20 @@ describe('fetchProfile', () => {
     expect(mockFrom).toHaveBeenCalledWith('profiles')
     expect(chain.select).toHaveBeenCalledWith('*')
     expect(chain.eq).toHaveBeenCalledWith('id', 'user-1')
-    expect(chain.single).toHaveBeenCalled()
+    expect(chain.maybeSingle).toHaveBeenCalled()
+  })
+
+  it('retorna null cuando el perfil no existe (maybeSingle)', async () => {
+    chain = createQueryChain({ data: null, error: null })
+    mockFrom.mockReturnValue(chain)
+
+    const result = await fetchProfile('user-1')
+
+    expect(result).toBeNull()
   })
 
   it('error path: lanza cuando supabase retorna error', async () => {
-    const supabaseError = { message: 'No encontrado', code: 'PGRST116' }
+    const supabaseError = { message: 'Permiso denegado', code: '42501' }
     chain = createQueryChain({ data: null, error: supabaseError })
     mockFrom.mockReturnValue(chain)
 

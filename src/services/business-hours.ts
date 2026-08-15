@@ -1,10 +1,13 @@
 import { supabase } from '@/lib/supabase'
 import type { BusinessHours } from '@/types'
 
-export async function fetchBusinessHours(): Promise<BusinessHours[]> {
+export async function fetchBusinessHours(
+  businessId: string
+): Promise<BusinessHours[]> {
   const { data, error } = await supabase
     .from('business_hours')
     .select('*')
+    .eq('business_id', businessId)
     .order('day_of_week, open_time')
   if (error) throw error
   return data as BusinessHours[]

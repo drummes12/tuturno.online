@@ -82,16 +82,17 @@ export function AdminHoursPage() {
   const [saved, setSaved] = useState(false)
 
   const load = useCallback(async () => {
+    if (!businessId) return
     setLoading(true)
     try {
-      const data = await fetchBusinessHours()
+      const data = await fetchBusinessHours(businessId)
       setFranjas(data.map((h) => ({ ...h })))
     } catch (err) {
       setError('Error al cargar los horarios: ' + (err as Error).message)
       setFranjas([])
     }
     setLoading(false)
-  }, [])
+  }, [businessId])
 
   useEffect(() => {
     load()
