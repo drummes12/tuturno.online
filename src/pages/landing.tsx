@@ -8,7 +8,8 @@ import {
   StoreIcon,
   ArrowRightIcon,
   LogInIcon,
-  SparklesIcon
+  SparklesIcon,
+  CheckIcon
 } from '@/components/common/icon'
 
 const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/
@@ -36,46 +37,78 @@ export function LandingPage() {
   return (
     <div className='flex flex-col items-center min-h-dvh px-4 py-8'>
       <div className='w-full max-w-lg flex flex-col gap-8'>
-        {/* Hero */}
-        <div className='flex flex-col items-center text-center gap-4 animate-fade-up'>
+        {/* Hero — answer-first format for GEO */}
+        <section className='flex flex-col items-center text-center gap-4 animate-fade-up'>
           <div className='flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-white shadow-(--shadow-pitch)'>
             <CalendarIcon size={32} />
           </div>
           <div>
             <h1 className='text-3xl sm:text-4xl font-bold text-(--color-text) tracking-tight text-balance'>
-              TuTurno
+              TuTurno — Reservas online para tu negocio
             </h1>
-            <p className='text-base sm:text-lg text-(--color-text-muted) mt-2 text-pretty'>
-              Organiza las reservas de tu espacio en minutos. Canchas, salas,
-              consultorios, mesas y más.
+            <p className='hero-description text-base sm:text-lg text-(--color-text-muted) mt-2 text-pretty'>
+              Plataforma de reservas en tiempo real para canchas, salas,
+              consultorios, mesas y más. Tus clientes ven la disponibilidad y
+              solicitan su turno en segundos, sin llamarte.
             </p>
           </div>
-        </div>
+        </section>
 
-        {/* Features */}
-        <div
+        {/* Features — with technical terms for GEO */}
+        <section
           className='grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-up'
           style={{ animationDelay: '60ms' }}
         >
           <FeatureCard
             icon={<ClockIcon size={20} />}
             title='Disponibilidad en tiempo real'
-            desc='Tus clientes ven los turnos libres sin llamarte.'
+            desc='Tus clientes ven los turnos libres sin llamarte. Actualización instantánea al confirmar o cancelar.'
           />
           <FeatureCard
             icon={<StoreIcon size={20} />}
-            title='Cualquier espacio'
-            desc='Canchas, salas, consultorios o mesas — tú eliges.'
+            title='Cualquier espacio reservable'
+            desc='Canchas de fútbol, pádel o tenis. Salas de reuniones. Consultorios. Mesas. Tú eliges cómo llamarlos.'
           />
           <FeatureCard
             icon={<CalendarIcon size={20} />}
             title='Confirmación manual'
-            desc='Tú decides quién entra y gestionas las solicitudes.'
+            desc='Tú decides quién entra. Aprueba, rechaza o cancela reservas desde el panel de administración.'
           />
-        </div>
+        </section>
+
+        {/* Benefits list — for AI extraction */}
+        <section
+          className='flex flex-col gap-2 animate-fade-up'
+          style={{ animationDelay: '90ms' }}
+        >
+          <h2 className='text-sm font-semibold text-(--color-text-muted) uppercase tracking-wide'>
+            Todo lo que incluye
+          </h2>
+          <ul className='flex flex-col gap-1.5'>
+            {[
+              'Notificaciones automáticas por correo electrónico',
+              'Gestión de cierres y excepciones de horarios',
+              'Botón de contacto directo por WhatsApp',
+              'Múltiples espacios con calendario independiente',
+              'Panel de administración mobile-first',
+              'Enlace público personalizado para tu negocio'
+            ].map((benefit) => (
+              <li
+                key={benefit}
+                className='flex items-start gap-2 text-sm text-(--color-text)'
+              >
+                <CheckIcon
+                  size={16}
+                  className='text-pitch-600 shrink-0 mt-0.5'
+                />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* Demo CTA */}
-        <div
+        <section
           className='flex flex-col gap-3 animate-fade-up'
           style={{ animationDelay: '120ms' }}
         >
@@ -86,9 +119,9 @@ export function LandingPage() {
             </Button>
           </Link>
           <p className='text-center text-xs text-(--color-text-muted)'>
-            Recorre la experiencia sin crear reservas reales.
+            Recorre la experiencia completa sin crear reservas reales.
           </p>
-        </div>
+        </section>
 
         {/* Divider */}
         <div
@@ -114,7 +147,7 @@ export function LandingPage() {
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             error={error}
-            hint='Te lo compartió el negocio. Ej: cancha-futbol-5'
+            hint='Te lo compartió el negocio. Ej: canchas-el-parque'
             icon={<ArrowRightIcon size={18} />}
           />
           <Button type='submit' size='md' variant='secondary'>
@@ -123,10 +156,42 @@ export function LandingPage() {
           </Button>
         </form>
 
+        {/* FAQ — for GEO/AI citation (+40% visibility with FAQPage schema) */}
+        <section
+          className='flex flex-col gap-4 animate-fade-up'
+          style={{ animationDelay: '240ms' }}
+        >
+          <h2 className='text-lg font-bold tracking-tight'>
+            Preguntas frecuentes
+          </h2>
+          <div className='flex flex-col gap-3'>
+            <FAQItem
+              question='¿Qué es TuTurno?'
+              answer='TuTurno es una plataforma de reservas online para negocios que gestionan espacios reservables como canchas deportivas, salas de reuniones, consultorios, mesas de restaurante y más. Permite a los clientes ver la disponibilidad en tiempo real y solicitar su turno en segundos.'
+            />
+            <FAQItem
+              question='¿Cómo funciona?'
+              answer='El negocio configura sus espacios, horarios y reglas de reserva. Los clientes acceden a la página pública, ven los turnos disponibles en un calendario visual y solicitan el que prefieran. El negocio recibe la solicitud y puede confirmarla o rechazarla manualmente. Las notificaciones se envían automáticamente por correo.'
+            />
+            <FAQItem
+              question='¿Qué tipos de negocios pueden usarlo?'
+              answer='Cualquier negocio que gestione espacios reservables: canchas de fútbol, pádel o tenis; salas de reuniones o eventos; consultorios médicos o de terapia; mesas de restaurante; estudios de grabación; y cualquier espacio que requiera gestión de turnos por horario.'
+            />
+            <FAQItem
+              question='¿Los clientes necesitan registrarse?'
+              answer='Los clientes pueden ver la disponibilidad sin registrarse. Para crear una reserva, pueden registrarse o el negocio puede crear la reserva por ellos. Cuando un invitado se registra posteriormente, sus datos se vinculan automáticamente.'
+            />
+            <FAQItem
+              question='¿Funciona en el celular?'
+              answer='Sí, TuTurno está diseñado mobile-first. Tanto la página pública como el panel de administración funcionan perfectamente en dispositivos móviles, con navegación adaptada al pulgar.'
+            />
+          </div>
+        </section>
+
         {/* Owner login */}
         <div
           className='flex flex-col items-center gap-2 animate-fade-up'
-          style={{ animationDelay: '240ms' }}
+          style={{ animationDelay: '280ms' }}
         >
           <p className='text-sm text-(--color-text-muted)'>
             ¿Administras un negocio?
@@ -162,5 +227,21 @@ function FeatureCard({
         {desc}
       </p>
     </div>
+  )
+}
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  return (
+    <details className='group rounded-xl border border-border bg-surface-elevated overflow-hidden'>
+      <summary className='flex items-center justify-between gap-3 p-4 cursor-pointer text-sm font-medium text-(--color-text) list-none [&::-webkit-details-marker]:hidden'>
+        <span>{question}</span>
+        <span className='text-text-muted shrink-0 transition-transform group-open:rotate-90'>
+          <ArrowRightIcon size={16} />
+        </span>
+      </summary>
+      <p className='faq-answer px-4 pb-4 text-sm text-(--color-text-muted) leading-relaxed'>
+        {answer}
+      </p>
+    </details>
   )
 }

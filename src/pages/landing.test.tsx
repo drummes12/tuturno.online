@@ -31,7 +31,8 @@ beforeEach(() => {
 describe('LandingPage', () => {
   it('muestra el branding TuTurno', () => {
     render(<LandingPage />)
-    expect(screen.getByText('TuTurno')).toBeInTheDocument()
+    const h1 = screen.getByRole('heading', { level: 1 })
+    expect(h1.textContent).toMatch(/TuTurno/)
   })
 
   it('muestra el botón de demostración que enlaza a /b/demo', () => {
