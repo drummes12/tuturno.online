@@ -5,12 +5,18 @@ import {
   fetchUserReservations,
   cancelReservationByClient
 } from '@/services/reservations'
+import { fetchBusinessContact } from '@/services/business'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { StatusBadge } from '@/components/common/badge'
 import { Alert } from '@/components/common/alert'
 import { ReservationSkeleton } from '@/components/common/skeleton'
-import { CalendarPlusIcon, InboxIcon } from '@/components/common/icon'
+import {
+  CalendarPlusIcon,
+  InboxIcon,
+  WhatsAppIcon
+} from '@/components/common/icon'
+import { waLink } from '@/lib/whatsapp'
 import type { Reservation } from '@/types'
 import { parseISO, isAfter, subHours } from 'date-fns'
 import { formatLocal } from '@/lib/time'
@@ -20,12 +26,14 @@ import { sortReservationsByPriority } from '@/lib/sort'
 type Filter = 'upcoming' | 'pending' | 'confirmed' | 'past'
 
 export function MyReservationsPage() {
-  const { user } = useAuthStore()
+  const { user, profile } = useAuthStore()
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('upcoming')
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [businessPhone, setBusinessPhone] = useState<string | null>(null)
+  const [businessName, setBusinessName] = useState<string>('')
 
   const loadReservations = useCallback(async () => {
     if (!user) return
@@ -44,6 +52,18 @@ export function MyReservationsPage() {
   useEffect(() => {
     loadReservations()
   }, [loadReservations])
+
+  // Cargar teléfono del negocio para el botón de WhatsApp
+  useEffect(() => {
+    fetchBusinessContact()
+      .then((data) => {
+        if (data) {
+          setBusinessPhone(data.phone)
+          setBusinessName(data.name)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   // Realtime: recargar cuando el admin confirme/rechace/cancele
   useReservationsRealtime(
@@ -105,6 +125,23 @@ export function MyReservationsPage() {
     } finally {
       setCancellingId(null)
     }
+  }
+
+  function buildReservationWhatsAppLink(r: Reservation): string | null {
+    if (!businessPhone) return null
+    const courtName = r.court?.name ?? 'Cancha'
+    const dateLabel = formatLocal(r.starts_at, "EEEE d 'de' MMMM")
+    const timeLabel = formatLocal(r.starts_at, 'HH:mm')
+    const clientName = profile?.full_name ?? ''
+    const msg =
+      `Hola ${businessName}, tengo una reserva pendiente:\n\n` +
+      `- Lugar: ${courtName}\n` +
+      `- Fecha: ${dateLabel}\n` +
+      `- Hora: ${timeLabel}\n` +
+      `- Cliente: ${clientName}\n` +
+      `_Quisiera validar la confirmación._\n` +
+      `¡Gracias!`
+    return waLink(businessPhone, msg)
   }
 
   const filters: { key: Filter; label: string }[] = [
@@ -215,7 +252,18 @@ export function MyReservationsPage() {
               )}
 
               {canCancel(r) && (
-                <div className='mt-3 pt-3 border-t border-border'>
+                <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
+                  {r.status === 'pending' && businessPhone && (
+                    <a
+                      href={buildReservationWhatsAppLink(r) ?? '#'}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
+                    >
+                      <WhatsAppIcon size={18} />
+                      Confirmar por WhatsApp
+                    </a>
+                  )}
                   <Button
                     variant='danger'
                     size='sm'

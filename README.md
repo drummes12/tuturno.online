@@ -58,6 +58,7 @@ supabase/migrations/02000_reservation_rpcs_clients.sql
 supabase/migrations/02100_clients_rls_search.sql
 supabase/migrations/02200_expire_notifications_clients.sql
 supabase/migrations/02300_normalize_phones_e164.sql
+supabase/migrations/02400_reservation_instructions.sql
 ```
 
 ### 3. Correos con Resend

@@ -32,6 +32,7 @@ const mockBusiness: Business = {
   hold_duration_minutes: 15,
   cancellation_limit_hours: 24,
   max_advance_days: 30,
+  reservation_instructions_md: '## Abono\n1. Paga 50%\n2. Envía comprobante',
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z'
 }
@@ -86,7 +87,8 @@ describe('fetchBusinessContact', () => {
       neighborhood: 'El Poblado',
       city: 'Medellín',
       state: 'Antioquia',
-      country: 'Colombia'
+      country: 'Colombia',
+      reservation_instructions_md: '## Abono\n1. Paga 50%'
     }
     chain = createQueryChain({ data: contact, error: null })
     mockFrom.mockReturnValue(chain)
@@ -96,7 +98,7 @@ describe('fetchBusinessContact', () => {
     expect(result).toEqual(contact)
     expect(mockFrom).toHaveBeenCalledWith('businesses')
     expect(chain.select).toHaveBeenCalledWith(
-      'phone, name, street, neighborhood, city, state, country'
+      'phone, name, street, neighborhood, city, state, country, reservation_instructions_md'
     )
     expect(chain.limit).toHaveBeenCalledWith(1)
     expect(chain.single).toHaveBeenCalled()

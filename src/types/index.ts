@@ -54,6 +54,7 @@ export interface Business {
   hold_duration_minutes: number
   cancellation_limit_hours: number
   max_advance_days: number
+  reservation_instructions_md: string | null
   created_at: string
   updated_at: string
 }

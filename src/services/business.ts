@@ -19,10 +19,13 @@ export async function fetchBusinessContact(): Promise<{
   city: string | null
   state: string | null
   country: string | null
+  reservation_instructions_md: string | null
 } | null> {
   const { data } = await supabase
     .from('businesses')
-    .select('phone, name, street, neighborhood, city, state, country')
+    .select(
+      'phone, name, street, neighborhood, city, state, country, reservation_instructions_md'
+    )
     .limit(1)
     .single()
   return data as {
@@ -33,6 +36,7 @@ export async function fetchBusinessContact(): Promise<{
     city: string | null
     state: string | null
     country: string | null
+    reservation_instructions_md: string | null
   } | null
 }
 
@@ -53,6 +57,7 @@ export async function updateBusiness(
       | 'hold_duration_minutes'
       | 'cancellation_limit_hours'
       | 'max_advance_days'
+      | 'reservation_instructions_md'
     >
   >
 ): Promise<void> {

@@ -7,6 +7,7 @@ import {
 } from '@/services/reservations'
 import { updateProfile } from '@/services/profiles'
 import { fetchBusinessId } from '@/services/profiles'
+import { fetchBusinessContact } from '@/services/business'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -14,6 +15,7 @@ import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
 import { Skeleton } from '@/components/common/skeleton'
+import { MarkdownContent } from '@/components/common/markdown-content'
 import {
   ClientSelector,
   type ClientSelection
@@ -24,10 +26,30 @@ import {
   ClockIcon,
   CalendarIcon,
   HourglassIcon,
-  CheckIcon
+  CheckIcon,
+  WhatsAppIcon
 } from '@/components/common/icon'
+import { waLink } from '@/lib/whatsapp'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
+
+function buildWhatsAppMessage(opts: {
+  businessName: string
+  courtName?: string | null
+  dateLabel?: string | null
+  timeLabel: string | null
+  clientName: string | null
+}): string {
+  return (
+    `Hola ${opts.businessName}, acabo de enviar una solicitud de reserva:\n\n` +
+    (opts.courtName ? `- Lugar: ${opts.courtName}\n` : '') +
+    (opts.dateLabel ? `- Fecha: ${opts.dateLabel}\n` : '') +
+    `- Hora: ${opts.timeLabel}\n` +
+    `- Cliente: ${opts.clientName}\n` +
+    `_Quisiera validar la confirmación._\n` +
+    `¡Gracias!`
+  )
+}
 
 export function ReservePage() {
   const { user, profile, isAdmin } = useAuthStore()
@@ -46,6 +68,12 @@ export function ReservePage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [businessId, setBusinessId] = useState<string | null>(null)
+  const [businessContact, setBusinessContact] = useState<{
+    phone: string
+    name: string
+    reservation_instructions_md: string | null
+  } | null>(null)
+  const [whatsappLink, setWhatsappLink] = useState<string | null>(null)
   const [clientSelection, setClientSelection] = useState<ClientSelection>({
     clientId: null,
     name: '',
@@ -65,6 +93,21 @@ export function ReservePage() {
         .catch(() => {})
     }
   }, [isAdmin, user])
+
+  // Cargar info del negocio (nombre, teléfono, instrucciones)
+  useEffect(() => {
+    fetchBusinessContact()
+      .then((data) => {
+        if (data) {
+          setBusinessContact({
+            phone: data.phone,
+            name: data.name,
+            reservation_instructions_md: data.reservation_instructions_md
+          })
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (profile) {
@@ -212,6 +255,26 @@ export function ReservePage() {
         return
       }
 
+      // Construir enlace de WhatsApp con datos de la reserva
+      if (businessContact?.phone) {
+        const msg = buildWhatsAppMessage({
+          businessName: businessContact.name,
+          courtName: courtName,
+          dateLabel: dateLabel,
+          timeLabel,
+          clientName: fullName.trim()
+        })
+        const link = waLink(businessContact.phone, msg)
+        if (link) {
+          // Intentar abrir en nueva pestaña
+          const win = window.open(link, '_blank', 'noopener,noreferrer')
+          // Si el navegador bloqueó el popup, guardar el enlace para mostrar fallback
+          if (!win) {
+            setWhatsappLink(link)
+          }
+        }
+      }
+
       setSuccess(true)
     } catch (err) {
       setSubmitting(false)
@@ -243,6 +306,17 @@ export function ReservePage() {
             </div>
           </div>
           <div className='flex flex-col gap-2 mt-6'>
+            {!isAdmin && whatsappLink && (
+              <a
+                href={whatsappLink}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='flex items-center justify-center gap-2 w-full rounded-xl bg-green-600 text-white font-medium py-3 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
+              >
+                <WhatsAppIcon size={20} />
+                Abrir WhatsApp
+              </a>
+            )}
             <Link href={isAdmin ? '/admin/reservas' : '/mis-reservas'}>
               <Button className='w-full'>
                 {isAdmin ? 'Ver reservas' : 'Ver mis reservas'}
@@ -350,11 +424,29 @@ export function ReservePage() {
           {error && <Alert variant='error'>{error}</Alert>}
 
           {!isAdmin && (
-            <Alert variant='warning'>
-              <strong>Importante:</strong> Esta es una solicitud. El negocio
-              debe confirmarla. El turno queda reservado temporalmente por 30
-              minutos.
-            </Alert>
+            <>
+              {/* Instrucciones del negocio en Markdown */}
+              {businessContact?.reservation_instructions_md &&
+              businessContact.reservation_instructions_md.trim() !== '' ? (
+                <Card className='p-4 bg-(--color-primary)/5 border-(--color-primary)/20'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <CheckIcon size={16} className='text-(--color-primary)' />
+                    <h3 className='text-sm font-semibold text-(--color-text)'>
+                      Pasos para confirmar tu reserva
+                    </h3>
+                  </div>
+                  <MarkdownContent
+                    content={businessContact.reservation_instructions_md}
+                  />
+                </Card>
+              ) : (
+                <Alert variant='warning'>
+                  <strong>Importante:</strong> Esta es una solicitud. El negocio
+                  debe confirmarla. El turno queda reservado temporalmente por
+                  30 minutos.
+                </Alert>
+              )}
+            </>
           )}
 
           <Button

@@ -15,7 +15,8 @@ import {
   StoreIcon,
   MapPinIcon,
   ExternalLinkIcon,
-  TimerIcon
+  TimerIcon,
+  CheckIcon
 } from '@/components/common/icon'
 import type { Business } from '@/types'
 
@@ -75,7 +76,8 @@ export function AdminConfigPage() {
         gap_minutes: business.gap_minutes,
         hold_duration_minutes: business.hold_duration_minutes,
         cancellation_limit_hours: business.cancellation_limit_hours,
-        max_advance_days: business.max_advance_days
+        max_advance_days: business.max_advance_days,
+        reservation_instructions_md: business.reservation_instructions_md
       })
     } catch (err) {
       setSaving(false)
@@ -487,10 +489,67 @@ export function AdminConfigPage() {
               </div>
             </Card>
           </div>
+
+          {/* Instrucciones de reserva (Markdown) */}
+          <Card
+            className='order-5 p-5 animate-fade-up md:col-span-2'
+            style={{ animationDelay: '100ms' }}
+          >
+            <div className='flex items-center gap-2 mb-4'>
+              <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+                <CheckIcon size={18} />
+              </div>
+              <h2 className='font-semibold text-sm tracking-tight'>
+                Confirmación y abono
+              </h2>
+            </div>
+            <p className='text-sm text-(--color-text-muted) mb-3'>
+              Instrucciones que el cliente verá antes de enviar su solicitud.
+              Soporta listas, negrita, enlaces y emojis. Máximo 1000 caracteres.
+            </p>
+            <div className='flex flex-col gap-2'>
+              <textarea
+                id='reservation-instructions'
+                value={business.reservation_instructions_md ?? ''}
+                onChange={(e) =>
+                  setBusiness({
+                    ...business,
+                    reservation_instructions_md: e.target.value.slice(0, 1000)
+                  })
+                }
+                maxLength={1000}
+                disabled={!canEdit}
+                placeholder={
+                  '## Para confirmar tu reserva\n\n1. Realiza el abono del 50% al negocio.\n2. Envía el comprobante por WhatsApp.\n3. Espera la confirmación del negocio.'
+                }
+                rows={8}
+                className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y font-mono disabled:opacity-60'
+                aria-describedby='reservation-instructions-hint'
+              />
+              <div className='flex items-center justify-between'>
+                <p
+                  id='reservation-instructions-hint'
+                  className='text-xs text-(--color-text-muted)'
+                >
+                  Ej: pasos de abono, contacto, tiempo de confirmación.
+                </p>
+                <span
+                  className={`text-xs nums tabular-nums ${
+                    (business.reservation_instructions_md ?? '').length >= 950
+                      ? 'text-(--color-danger) font-medium'
+                      : 'text-(--color-text-muted)'
+                  }`}
+                >
+                  {(business.reservation_instructions_md ?? '').length}/1000
+                </span>
+              </div>
+            </div>
+          </Card>
+
           {/* Info read-only */}
           <Card
-            className='order-5 p-4 animate-fade-up md:col-span-2'
-            style={{ animationDelay: '100ms' }}
+            className='order-6 p-4 animate-fade-up md:col-span-2'
+            style={{ animationDelay: '120ms' }}
           >
             <div className='flex flex-col gap-2 text-sm'>
               <div className='flex items-center gap-2'>
