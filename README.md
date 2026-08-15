@@ -77,16 +77,26 @@ supabase functions deploy send-notifications
 
 Configura un cron en Supabase Dashboard para ejecutar la función cada 5 minutos.
 
-### 4. Admin inicial
+### 4. Crear una nueva organización (onboarding)
 
-1. Regístrate desde la app (`/registro`)
-2. En el SQL Editor, vincula tu usuario como owner del negocio:
+El onboarding de nuevas organizaciones es controlado por el operador de la plataforma.
 
-```sql
-insert into public.business_members (business_id, user_id, role)
-select b.id, '<tu-user-id-uuid>', 'owner'
-from public.businesses b where b.slug = 'cancha-futbol-5';
-```
+1. El usuario se registra desde la app (`/registro`)
+2. Obtén su `user_id` desde el SQL Editor:
+   ```sql
+   select id, email from auth.users where email = 'owner@email.com';
+   ```
+3. Ejecuta el script de onboarding desde el SQL Editor de Supabase:
+   - Abre `supabase/snippets/onboard-business.sql`
+   - Edita las variables `business_name`, `business_slug` y `owner_user_id`
+   - Pégalo en el SQL Editor y ejecútalo
+4. El usuario ya puede acceder a:
+   - Página pública: `https://tuturno.online/b/{slug}`
+   - Panel admin: `https://tuturno.online/admin`
+
+El script es idempotente y reserva el slug `demo` (no se puede usar para negocios reales).
+
+Para añadir managers adicionales a una organización existente, ver `AGENTS.md`.
 
 ### 5. Desarrollo
 

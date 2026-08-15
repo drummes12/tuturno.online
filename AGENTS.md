@@ -68,20 +68,37 @@
 - Ambos roles tienen acceso al panel admin (confirmar/rechazar/cancelar reservas ambos, editar canchas, horarios, configuración solo owner)
 - Un cliente normal (sin membership) solo puede ver disponibilidad y crear/cancelar sus propias reservas
 
-### Cómo habilitar un admin en producción
-1. El usuario se registra normalmente desde la app
-2. Un owner existente lo añade como miembro desde el panel (cuando se implemente) o manualmente:
+### Cómo crear una nueva organización en producción
+1. El usuario se registra normalmente desde la app (`https://tuturno.online/registro`)
+2. El operador obtiene su `user_id` desde el SQL Editor:
+   ```sql
+   select id, email from auth.users where email = 'owner@email.com';
+   ```
+3. El operador ejecuta el script `supabase/snippets/onboard-business.sql` desde el SQL Editor de Supabase, editando las variables `business_name`, `business_slug` y `owner_user_id`
+4. El usuario ya puede entrar a `https://tuturno.online/b/{slug}` y a `/admin`
+
+### Cómo añadir un manager a una organización existente
+1. El nuevo manager se registra desde la app
+2. Un owner existente lo añade desde el panel (cuando se implemente) o manualmente:
    ```sql
    insert into public.business_members (business_id, user_id, role)
-   values ('<business-uuid>', '<user-uuid>', 'manager');
+   select b.id, '<manager_user_id>'::uuid, 'manager'
+   from public.businesses b where b.slug = '<slug>'
+   on conflict (business_id, user_id) do update set role = 'manager';
    ```
 3. Para promover a owner:
    ```sql
    insert into public.business_members (business_id, user_id, role)
-   values ('<business-uuid>', '<user-uuid>', 'owner')
+   select b.id, '<user_id>'::uuid, 'owner'
+   from public.businesses b where b.slug = '<slug>'
    on conflict (business_id, user_id) do update set role = 'owner';
    ```
-4. El primer owner debe insertarse manualmente en la BD después del registro
+
+### URLs
+- Landing: `https://tuturno.online/`
+- Demo: `https://tuturno.online/b/demo`
+- Negocio real: `https://tuturno.online/b/{slug}`
+- Admin: `https://tuturno.online/admin`
 
 ## Testing
 - **Stack:** Vitest + @testing-library/react + jsdom + pg (para tests de BD)
