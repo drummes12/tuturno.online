@@ -48,7 +48,7 @@ export function BusinessSelector() {
           <select
             value={activeBusinessId ?? ''}
             onChange={(e) => setActiveBusinessId(e.target.value || null)}
-            className='appearance-none bg-white/10 border border-white/15 rounded-lg pl-7 pr-6 py-1.5 text-sm font-medium text-white max-w-35 sm:max-w-50 truncate cursor-pointer hover:bg-white/15 focus:outline-none focus:border-white/40 transition-colors touch-target'
+            className='appearance-none bg-white/10 border border-white/15 rounded-lg pl-7 pr-6 w-11 h-11 sm:w-auto sm:max-w-50 sm:h-auto sm:py-1.5 text-sm font-medium text-transparent sm:text-white truncate cursor-pointer hover:bg-white/15 focus:outline-none focus:border-white/40 transition-colors'
             aria-label='Seleccionar negocio'
           >
             {memberships.map((m) => (
@@ -64,7 +64,7 @@ export function BusinessSelector() {
           </select>
           <StoreIcon
             size={14}
-            className='absolute left-2 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none'
+            className='absolute left-2.5 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none'
           />
           {/* Chevron */}
           <svg
@@ -96,7 +96,7 @@ export function BusinessSelector() {
       {active && (
         <button
           onClick={copyLink}
-          className='inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-xs font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 transition-[background-color,border-color,transform,color] touch-target'
+          className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-xs font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 transition-[background-color,border-color,transform,color] touch-target'
           aria-label='Copiar enlace público del negocio'
           title={publicUrl ?? 'Copiar enlace'}
         >

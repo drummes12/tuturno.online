@@ -97,7 +97,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 onClick={startTour}
                 disabled={isStarting}
                 data-tour='tutorial-trigger'
-                className='inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 active:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
+                className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 active:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
                 aria-label='Iniciar guía del tutorial'
                 aria-busy={isStarting}
                 title='Guía interactiva'
@@ -110,7 +110,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             {user ? (
               <button
                 onClick={() => signOut()}
-                className='flex items-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
               >
                 <LogOutIcon size={16} />
                 <span className='hidden sm:inline'>Salir</span>
