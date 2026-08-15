@@ -52,6 +52,12 @@ supabase/migrations/01400_business_location.sql
 supabase/migrations/01500_remove_legacy_location_fields.sql
 supabase/migrations/01600_expired_reservation_notifications.sql
 supabase/migrations/01700_reservation_notification_routing.sql
+supabase/migrations/01800_clients_table.sql
+supabase/migrations/01900_client_linking_trigger.sql
+supabase/migrations/02000_reservation_rpcs_clients.sql
+supabase/migrations/02100_clients_rls_search.sql
+supabase/migrations/02200_expire_notifications_clients.sql
+supabase/migrations/02300_normalize_phones_e164.sql
 ```
 
 ### 3. Correos con Resend

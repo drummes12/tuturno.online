@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useEffect, useCallback, type SubmitEvent } from 'react'
 import { Link } from 'wouter'
 import { fetchCourtName } from '@/services/courts'
 import {
@@ -6,6 +6,7 @@ import {
   createReservationAdmin
 } from '@/services/reservations'
 import { updateProfile } from '@/services/profiles'
+import { fetchBusinessId } from '@/services/profiles'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -13,6 +14,10 @@ import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
 import { Skeleton } from '@/components/common/skeleton'
+import {
+  ClientSelector,
+  type ClientSelection
+} from '@/components/common/client-selector'
 import {
   ArrowLeftIcon,
   CourtIcon,
@@ -40,6 +45,26 @@ export function ReservePage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [businessId, setBusinessId] = useState<string | null>(null)
+  const [clientSelection, setClientSelection] = useState<ClientSelection>({
+    clientId: null,
+    name: '',
+    phone: null,
+    email: null,
+    hasAccount: false
+  })
+
+  const handleClientChange = useCallback((selection: ClientSelection) => {
+    setClientSelection(selection)
+  }, [])
+
+  useEffect(() => {
+    if (isAdmin && user) {
+      fetchBusinessId(user.id)
+        .then(setBusinessId)
+        .catch(() => {})
+    }
+  }, [isAdmin, user])
 
   useEffect(() => {
     if (profile) {
@@ -129,20 +154,30 @@ export function ReservePage() {
     }
   })()
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     setError(null)
     setSubmitting(true)
 
     try {
       if (isAdmin) {
-        // Admin: crear reserva directamente confirmada
+        // Admin: validar que haya un cliente seleccionado o creado
+        if (!clientSelection.clientId && !clientSelection.name.trim()) {
+          setError('Selecciona o crea un cliente para la reserva.')
+          setSubmitting(false)
+          return
+        }
+
         const { error: rpcError } = await createReservationAdmin(
           courtId!,
           startStr!,
-          fullName.trim() || null,
-          phone.trim() || null,
-          notes.trim() || null
+          {
+            clientId: clientSelection.clientId,
+            clientName: clientSelection.name || null,
+            clientPhone: clientSelection.phone,
+            clientEmail: clientSelection.email,
+            notes: notes.trim() || null
+          }
         )
 
         setSubmitting(false)
@@ -278,23 +313,14 @@ export function ReservePage() {
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
           {isAdmin ? (
-            <>
-              <Input
-                label='Nombre del cliente'
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder='Ej: Juan Pérez'
-                hint='Opcional. Nombre de la persona que reserva.'
+            businessId ? (
+              <ClientSelector
+                businessId={businessId}
+                onChange={handleClientChange}
               />
-              <PhoneInput
-                label='Teléfono del cliente'
-                value={phone}
-                onChange={setPhone}
-                placeholder='300 123 4567'
-                hint='Opcional. Si coincide con un usuario registrado, se vincula a su cuenta.'
-                optional
-              />
-            </>
+            ) : (
+              <Skeleton className='h-32 rounded-xl' />
+            )
           ) : (
             <>
               <Input

@@ -228,9 +228,24 @@ export function AdminReservationsPage() {
                   </p>
                   <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
                     <UserIcon size={12} className='shrink-0' />
-                    <span className='truncate'>{r.profile?.full_name}</span>
-                    <span>·</span>
-                    <span className='nums'>{r.profile?.phone}</span>
+                    <span className='truncate'>
+                      {r.client?.name ??
+                        r.profile?.full_name ??
+                        'Cliente sin nombre'}
+                    </span>
+                    {!r.client?.user_id && !r.profile && (
+                      <span className='text-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0'>
+                        Invitado
+                      </span>
+                    )}
+                    {(r.client?.phone || r.profile?.phone) && (
+                      <>
+                        <span>·</span>
+                        <span className='nums'>
+                          {r.client?.phone ?? r.profile?.phone}
+                        </span>
+                      </>
+                    )}
                   </p>
                   {r.notes && (
                     <p className='text-xs italic text-(--color-text-muted) mt-1.5 border-l-2 border-border pl-2'>
@@ -311,18 +326,18 @@ export function AdminReservationsPage() {
                 ) : (
                   <div className='flex items-center gap-2 flex-wrap'>
                     {/* WhatsApp — acción de contacto, sutil pero visible */}
-                    {waLink(r.profile?.phone) && (
+                    {waLink(r.client?.phone ?? r.profile?.phone) && (
                       <a
                         href={
                           waLink(
-                            r.profile?.phone,
-                            `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                            r.client?.phone ?? r.profile?.phone,
+                            `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
                           )!
                         }
                         target='_blank'
                         rel='noopener noreferrer'
                         className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                        aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                        aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
                       >
                         <WhatsAppIcon size={16} />
                         <span className='hidden sm:inline'>WhatsApp</span>

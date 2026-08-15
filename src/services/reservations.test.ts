@@ -24,7 +24,7 @@ import {
 } from '@/services/reservations'
 
 const RESERVATION_SELECT =
-  '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*)'
+  '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
 
 const sampleReservation = (
   overrides: Partial<Reservation> = {}
@@ -33,6 +33,7 @@ const sampleReservation = (
   business_id: 'biz-1',
   court_id: 'court-1',
   user_id: 'user-1',
+  client_id: null,
   starts_at: '2025-01-01T10:00:00Z',
   ends_at: '2025-01-01T11:00:00Z',
   status: 'pending',
@@ -177,28 +178,69 @@ describe('fetchReservationsByDate', () => {
 })
 
 describe('fetchUserReservations', () => {
-  it('filtra por user_id y ordena desc, con select de court', async () => {
+  it('filtra por user_id y client_ids vinculados, ordena desc', async () => {
     const data = [
       sampleReservation({ id: 'r2', starts_at: '2025-01-02T10:00:00Z' }),
       sampleReservation({ id: 'r1', starts_at: '2025-01-01T10:00:00Z' })
     ]
-    const chain = createQueryChain({ data, error: null })
-    mockFrom.mockReturnValue(chain)
+
+    // Primera llamada: clients (devuelve 1 client vinculado)
+    const clientsChain = createQueryChain({
+      data: [{ id: 'client-1' }, { id: 'client-2' }],
+      error: null
+    })
+    // Segunda llamada: reservations
+    const reservationsChain = createQueryChain({ data, error: null })
+    mockFrom.mockReturnValueOnce(clientsChain)
+    mockFrom.mockReturnValueOnce(reservationsChain)
 
     const userId = 'user-123'
     const result = await fetchUserReservations(userId)
 
     expect(result).toEqual(data)
-    expect(mockFrom).toHaveBeenCalledWith('reservations')
-    expect(chain.select).toHaveBeenCalledWith('*, court:courts(*)')
-    expect(chain.eq).toHaveBeenCalledWith('user_id', userId)
-    expect(chain.order).toHaveBeenCalledWith('starts_at', { ascending: false })
+    expect(mockFrom).toHaveBeenNthCalledWith(1, 'clients')
+    expect(clientsChain.select).toHaveBeenCalledWith('id')
+    expect(clientsChain.eq).toHaveBeenCalledWith('user_id', userId)
+    expect(mockFrom).toHaveBeenNthCalledWith(2, 'reservations')
+    expect(reservationsChain.select).toHaveBeenCalledWith(
+      '*, court:courts(*), client:clients(*)'
+    )
+    expect(reservationsChain.or).toHaveBeenCalledWith(
+      `user_id.eq.${userId},client_id.in.(client-1,client-2)`
+    )
+    expect(reservationsChain.order).toHaveBeenCalledWith('starts_at', {
+      ascending: false
+    })
   })
 
-  it('lanza el error cuando supabase retorna error', async () => {
+  it('cuando el usuario no tiene clients vinculados, filtra solo por user_id', async () => {
+    const data = [sampleReservation({ id: 'r1' })]
+
+    const clientsChain = createQueryChain({ data: [], error: null })
+    const reservationsChain = createQueryChain({ data, error: null })
+    mockFrom.mockReturnValueOnce(clientsChain)
+    mockFrom.mockReturnValueOnce(reservationsChain)
+
+    const result = await fetchUserReservations('user-123')
+
+    expect(result).toEqual(data)
+    expect(reservationsChain.or).toHaveBeenCalledWith('user_id.eq.user-123')
+  })
+
+  it('lanza el error cuando el query de clients falla', async () => {
+    const dbError = { message: 'permission denied', code: '42501' }
+    const clientsChain = createQueryChain({ data: null, error: dbError })
+    mockFrom.mockReturnValueOnce(clientsChain)
+
+    await expect(fetchUserReservations('user-123')).rejects.toEqual(dbError)
+  })
+
+  it('lanza el error cuando el query de reservations falla', async () => {
     const dbError = { message: 'row not found', code: 'PGRST116' }
-    const chain = createQueryChain({ data: null, error: dbError })
-    mockFrom.mockReturnValue(chain)
+    const clientsChain = createQueryChain({ data: [], error: null })
+    const reservationsChain = createQueryChain({ data: null, error: dbError })
+    mockFrom.mockReturnValueOnce(clientsChain)
+    mockFrom.mockReturnValueOnce(reservationsChain)
 
     await expect(fetchUserReservations('user-123')).rejects.toEqual(dbError)
   })
@@ -335,43 +377,55 @@ describe('createReservation', () => {
 })
 
 describe('createReservationAdmin', () => {
-  it('llama al RPC create_reservation_admin con todos los parámetros', async () => {
+  it('llama al RPC create_reservation_admin con cliente existente (client_id)', async () => {
     mockRpc.mockResolvedValue({ data: {}, error: null })
 
     const result = await createReservationAdmin(
       'court-1',
       '2025-01-01T10:00:00Z',
-      'Juan Pérez',
-      '+57 300 123 4567',
-      'reserva administrativa'
+      {
+        clientId: 'client-1',
+        clientName: 'Juan Pérez',
+        clientPhone: '+57 300 123 4567',
+        clientEmail: 'juan@email.com',
+        notes: 'reserva administrativa'
+      }
     )
 
     expect(mockRpc).toHaveBeenCalledWith('create_reservation_admin', {
       p_court_id: 'court-1',
       p_starts_at: '2025-01-01T10:00:00Z',
+      p_client_id: 'client-1',
       p_client_name: 'Juan Pérez',
       p_client_phone: '+57 300 123 4567',
+      p_client_email: 'juan@email.com',
       p_notes: 'reserva administrativa'
     })
     expect(result).toEqual({ error: null })
   })
 
-  it('acepta valores null para client_name, client_phone y notes', async () => {
+  it('llama al RPC con guest info cuando no hay client_id', async () => {
     mockRpc.mockResolvedValue({ data: {}, error: null })
 
     const result = await createReservationAdmin(
       'court-1',
       '2025-01-01T10:00:00Z',
-      null,
-      null,
-      null
+      {
+        clientId: null,
+        clientName: 'Juan Pérez',
+        clientPhone: '3001234567',
+        clientEmail: 'juan@email.com',
+        notes: null
+      }
     )
 
     expect(mockRpc).toHaveBeenCalledWith('create_reservation_admin', {
       p_court_id: 'court-1',
       p_starts_at: '2025-01-01T10:00:00Z',
-      p_client_name: null,
-      p_client_phone: null,
+      p_client_id: null,
+      p_client_name: 'Juan Pérez',
+      p_client_phone: '3001234567',
+      p_client_email: 'juan@email.com',
       p_notes: null
     })
     expect(result).toEqual({ error: null })
@@ -386,9 +440,12 @@ describe('createReservationAdmin', () => {
     const result = await createReservationAdmin(
       'court-1',
       '2025-01-01T10:00:00Z',
-      'Juan',
-      '3001234567',
-      null
+      {
+        clientId: null,
+        clientName: 'Juan',
+        clientPhone: '3001234567',
+        notes: null
+      }
     )
 
     expect(result).toEqual({ error: 'court inactive' })
@@ -399,13 +456,12 @@ describe('createReservationAdmin', () => {
     mockRpc.mockResolvedValue({ data: null, error: rpcError })
 
     await expect(
-      createReservationAdmin(
-        'court-1',
-        '2025-01-01T10:00:00Z',
-        'Juan',
-        '300',
-        null
-      )
+      createReservationAdmin('court-1', '2025-01-01T10:00:00Z', {
+        clientId: null,
+        clientName: 'Juan',
+        clientPhone: '300',
+        notes: null
+      })
     ).rejects.toEqual(rpcError)
   })
 })

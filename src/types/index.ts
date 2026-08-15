@@ -65,6 +65,26 @@ export interface BusinessMember {
   joined_at: string
 }
 
+export interface Client {
+  id: string
+  business_id: string
+  name: string
+  phone: string | null
+  email: string | null
+  user_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ClientSearchResult {
+  id: string | null
+  name: string
+  phone: string | null
+  email: string | null
+  user_id: string | null
+  has_account: boolean
+}
+
 export interface Court {
   id: string
   business_id: string
@@ -101,7 +121,8 @@ export interface Reservation {
   id: string
   business_id: string
   court_id: string
-  user_id: string
+  user_id: string | null
+  client_id: string | null
   starts_at: string
   ends_at: string
   status: ReservationStatus
@@ -113,7 +134,8 @@ export interface Reservation {
   updated_at: string
   // Relaciones opcionales
   court?: Court
-  profile?: Profile
+  profile?: Profile | null
+  client?: Client | null
 }
 
 export interface ReservationEvent {

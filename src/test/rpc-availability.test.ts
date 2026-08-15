@@ -1,21 +1,32 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { rpc, isDbAvailable, closePool } from '@/test/db'
+import { rpc, query, isDbAvailable, closePool } from '@/test/db'
 
 const DB_AVAILABLE = await isDbAvailable()
+
+// IDs dinámicos — se buscan antes de los tests
+let ACTIVE_COURT_ID = ''
+let SLOT_DURATION_MINUTES = 60
+const INACTIVE_COURT_ID = '00000000-0000-0000-0000-000000000000'
 
 beforeAll(async () => {
   if (!DB_AVAILABLE) {
     console.warn('Supabase local no está corriendo — tests de BD saltados')
+    return
+  }
+
+  // Buscar la primera cancha activa con su slot_duration
+  const courtResult = await query(
+    'select c.id, b.slot_duration_minutes from public.courts c join public.businesses b on c.business_id = b.id where c.is_active = true order by c.sort_order limit 1'
+  )
+  if (courtResult.rows.length > 0) {
+    ACTIVE_COURT_ID = courtResult.rows[0].id as string
+    SLOT_DURATION_MINUTES = courtResult.rows[0].slot_duration_minutes as number
   }
 })
 
 afterAll(async () => {
   await closePool()
 })
-
-// IDs de canchas que ya existen en la BD local
-const ACTIVE_COURT_ID = '13078c93-41fd-46f6-83d1-993d7fe269f9' // Cancha 1 (activa)
-const INACTIVE_COURT_ID = '28f5bc8b-4c25-422b-a1c3-833301304269' // Cancha 2 (inactiva)
 
 describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
   it('retorna slots para una cancha activa en un día con horario', async () => {
@@ -118,8 +129,7 @@ describe.skipIf(!DB_AVAILABLE)('get_availability RPC', () => {
       const duration =
         new Date(slot.ends_at).getTime() - new Date(slot.starts_at).getTime()
       const durationMin = duration / (1000 * 60)
-      // slot_duration_minutes = 55
-      expect(durationMin).toBe(55)
+      expect(durationMin).toBe(SLOT_DURATION_MINUTES)
     }
   })
 

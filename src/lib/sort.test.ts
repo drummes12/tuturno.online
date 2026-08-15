@@ -20,6 +20,7 @@ function makeReservation(
     business_id: 'biz-1',
     court_id: 'court-1',
     user_id: 'user-1',
+    client_id: null,
     starts_at: startsAt,
     ends_at: startsAt,
     status,
@@ -28,7 +29,7 @@ function makeReservation(
     decision_reason: null,
     decided_by: null,
     created_at: '2025-01-01T00:00:00Z',
-    updated_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z'
   }
 }
 

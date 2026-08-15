@@ -17,6 +17,7 @@ export function createQueryChain(result: { data: any; error: any }) {
     delete: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     neq: vi.fn().mockReturnThis(),
+    or: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
     lte: vi.fn().mockReturnThis(),
     not: vi.fn().mockReturnThis(),

@@ -213,7 +213,9 @@ export function AdminDashboardPage() {
                       className='text-graphite-400 shrink-0'
                     />
                     <span className='text-(--color-text-muted)'>Cliente:</span>
-                    <span className='font-medium'>{r.profile?.full_name}</span>
+                    <span className='font-medium'>
+                      {r.client?.name ?? r.profile?.full_name ?? 'Cliente'}
+                    </span>
                   </p>
                   <p className='flex items-center gap-2'>
                     <PhoneIcon
@@ -221,7 +223,9 @@ export function AdminDashboardPage() {
                       className='text-graphite-400 shrink-0'
                     />
                     <span className='text-(--color-text-muted)'>Teléfono:</span>
-                    <span className='font-medium nums'>{r.profile?.phone}</span>
+                    <span className='font-medium nums'>
+                      {r.client?.phone ?? r.profile?.phone}
+                    </span>
                   </p>
                   {r.notes && (
                     <p className='italic text-(--color-text-muted) border-l-2 border-border pl-2 mt-1'>
@@ -262,18 +266,18 @@ export function AdminDashboardPage() {
                   </div>
                 ) : (
                   <div className='flex items-center gap-2 flex-wrap'>
-                    {waLink(r.profile?.phone) && (
+                    {waLink(r.client?.phone ?? r.profile?.phone) && (
                       <a
                         href={
                           waLink(
-                            r.profile?.phone,
-                            `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                            r.client?.phone ?? r.profile?.phone,
+                            `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
                           )!
                         }
                         target='_blank'
                         rel='noopener noreferrer'
                         className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                        aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                        aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
                       >
                         <WhatsAppIcon size={16} />
                         <span className='hidden sm:inline'>WhatsApp</span>
@@ -347,23 +351,25 @@ export function AdminDashboardPage() {
                         <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
                           <UserIcon size={12} />
                           <span className='truncate'>
-                            {r.profile?.full_name}
+                            {r.client?.name ??
+                              r.profile?.full_name ??
+                              'Cliente'}
                           </span>
                         </p>
                       </div>
                       <div className='flex flex-col items-end gap-1'>
-                        {waLink(r.profile?.phone) && (
+                        {waLink(r.client?.phone ?? r.profile?.phone) && (
                           <a
                             href={
                               waLink(
-                                r.profile?.phone,
-                                `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                                r.client?.phone ?? r.profile?.phone,
+                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
                               )!
                             }
                             target='_blank'
                             rel='noopener noreferrer'
                             className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                            aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                            aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
                           >
                             <WhatsAppIcon size={16} />
                             <span className='hidden sm:inline'>WhatsApp</span>
@@ -401,23 +407,25 @@ export function AdminDashboardPage() {
                         <p className='text-xs text-(--color-text-muted) truncate mt-0.5 flex items-center gap-1'>
                           <UserIcon size={12} />
                           <span className='truncate'>
-                            {r.profile?.full_name}
+                            {r.client?.name ??
+                              r.profile?.full_name ??
+                              'Cliente'}
                           </span>
                         </p>
                       </div>
                       <div className='flex flex-col items-end gap-1'>
-                        {waLink(r.profile?.phone) && (
+                        {waLink(r.client?.phone ?? r.profile?.phone) && (
                           <a
                             href={
                               waLink(
-                                r.profile?.phone,
-                                `Hola ${r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
+                                r.client?.phone ?? r.profile?.phone,
+                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la cancha ${r.court?.name ?? ''} sobre tu reserva.`
                               )!
                             }
                             target='_blank'
                             rel='noopener noreferrer'
                             className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                            aria-label={`WhatsApp a ${r.profile?.full_name ?? 'cliente'}`}
+                            aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
                           >
                             <WhatsAppIcon size={16} />
                             <span className='hidden sm:inline'>WhatsApp</span>

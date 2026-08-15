@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/supabase'
 import type { Reservation, ReservationStatus } from '@/types'
 
-const RESERVATION_SELECT = '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*)'
+const RESERVATION_SELECT =
+  '*, court:courts(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
 
 export async function fetchPendingReservations(): Promise<Reservation[]> {
   const { data, error } = await supabase
@@ -46,11 +47,34 @@ export async function fetchReservationsByDate(
   return data as Reservation[]
 }
 
-export async function fetchUserReservations(userId: string): Promise<Reservation[]> {
+export async function fetchUserReservations(
+  userId: string
+): Promise<Reservation[]> {
+  // Un usuario puede tener reservas de dos formas:
+  // 1. user_id directo en reservations (reservas creadas por él mismo)
+  // 2. client_id vinculado a un client cuyo user_id es este usuario
+  //    (reservas creadas por el negocio cuando aún no tenía cuenta)
+  //
+  // PostgREST no soporta filtros anidados por FK dentro de .or(),
+  // así que primero obtenemos los client_ids del usuario y luego
+  // filtramos con or(user_id.eq.xxx, client_id.in.(...))
+
+  const { data: userClients, error: clientsError } = await supabase
+    .from('clients')
+    .select('id')
+    .eq('user_id', userId)
+  if (clientsError) throw clientsError
+
+  const clientIds = (userClients ?? []).map((c) => c.id)
+  const orFilter =
+    clientIds.length > 0
+      ? `user_id.eq.${userId},client_id.in.(${clientIds.join(',')})`
+      : `user_id.eq.${userId}`
+
   const { data, error } = await supabase
     .from('reservations')
-    .select('*, court:courts(*)')
-    .eq('user_id', userId)
+    .select('*, court:courts(*), client:clients(*)')
+    .or(orFilter)
     .order('starts_at', { ascending: false })
   if (error) throw error
   return data as Reservation[]
@@ -105,16 +129,22 @@ export async function createReservation(
 export async function createReservationAdmin(
   courtId: string,
   startsAt: string,
-  clientName: string | null,
-  clientPhone: string | null,
-  notes: string | null
+  options: {
+    clientId?: string | null
+    clientName?: string | null
+    clientPhone?: string | null
+    clientEmail?: string | null
+    notes?: string | null
+  }
 ): Promise<{ error: string | null }> {
   const { data, error } = await supabase.rpc('create_reservation_admin', {
     p_court_id: courtId,
     p_starts_at: startsAt,
-    p_client_name: clientName,
-    p_client_phone: clientPhone,
-    p_notes: notes,
+    p_client_id: options.clientId ?? null,
+    p_client_name: options.clientName ?? null,
+    p_client_phone: options.clientPhone ?? null,
+    p_client_email: options.clientEmail ?? null,
+    p_notes: options.notes ?? null
   })
   if (error) throw error
   return { error: data?.error ?? null }

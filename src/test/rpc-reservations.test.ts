@@ -3,9 +3,33 @@ import { query, isDbAvailable, closePool, withTransaction } from '@/test/db'
 
 const DB_AVAILABLE = await isDbAvailable()
 
+// IDs dinámicos — se buscan antes de los tests para que funcionen
+// sin importar si la BD local fue reseteada
+let ACTIVE_COURT_ID = ''
+let REAL_USER_ID = ''
+
 beforeAll(async () => {
   if (!DB_AVAILABLE) {
     console.warn('Supabase local no está corriendo — tests de BD saltados')
+    return
+  }
+
+  // Buscar la primera cancha activa
+  const courtResult = await query(
+    'select id from public.courts where is_active = true order by sort_order limit 1'
+  )
+  if (courtResult.rows.length > 0) {
+    ACTIVE_COURT_ID = courtResult.rows[0].id as string
+  }
+
+  // Buscar el primer business member (owner)
+  const userResult = await query(
+    `select bm.user_id from public.business_members bm
+     join auth.users au on au.id = bm.user_id
+     where bm.role = 'owner' limit 1`
+  )
+  if (userResult.rows.length > 0) {
+    REAL_USER_ID = userResult.rows[0].user_id as string
   }
 })
 
@@ -13,11 +37,8 @@ afterAll(async () => {
   await closePool()
 })
 
-const ACTIVE_COURT_ID = '13078c93-41fd-46f6-83d1-993d7fe269f9'
-const INACTIVE_COURT_ID = '28f5bc8b-4c25-422b-a1c3-833301304269'
-
-// Usuario real de la BD local
-const REAL_USER_ID = 'c85a7ca3-28c3-4823-811b-b782bd20fe82'
+// UUID inexistente para simular cancha no disponible
+const INACTIVE_COURT_ID = '00000000-0000-0000-0000-000000000000'
 
 /**
  * Setea el JWT claim para que auth.uid() funcione dentro de los RPCs.
