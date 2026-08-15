@@ -44,3 +44,34 @@ export async function fetchBusinessMembership(
     role: data.role as 'owner' | 'manager'
   }
 }
+
+export type BusinessMembership = {
+  businessId: string
+  businessName: string
+  slug: string
+  role: 'owner' | 'manager'
+}
+
+/**
+ * Fetch all business memberships for a user, including business name and slug.
+ * Used to populate the business selector in the admin panel.
+ */
+export async function fetchBusinessMemberships(
+  userId: string
+): Promise<BusinessMembership[]> {
+  const { data, error } = await supabase
+    .from('business_members')
+    .select('business_id, role, businesses!inner(name, slug)')
+    .eq('user_id', userId)
+    .order('businesses(name)')
+  if (error) return []
+  return (data ?? []).map((row) => {
+    const biz = row.businesses as unknown as { name: string; slug: string }
+    return {
+      businessId: row.business_id,
+      businessName: biz.name,
+      slug: biz.slug,
+      role: row.role as 'owner' | 'manager'
+    }
+  })
+}

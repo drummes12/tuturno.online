@@ -15,6 +15,7 @@ import {
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
+import { BusinessSelector } from '@/components/common/business-selector'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { extractSlugFromPath } from '@/lib/slug'
 
@@ -90,7 +91,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             />
             <span>TuTurno</span>
           </Link>
-          <div className='flex items-center gap-1'>
+          <div className='flex items-center gap-1 sm:gap-2'>
             {showTutorialButton && (
               <button
                 onClick={startTour}
@@ -105,6 +106,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <span>{isStarting ? 'Abriendo…' : 'Guía'}</span>
               </button>
             )}
+            {isAdmin && <BusinessSelector />}
             {user ? (
               <button
                 onClick={() => signOut()}

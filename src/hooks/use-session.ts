@@ -1,7 +1,11 @@
 import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth'
-import { fetchProfile, fetchBusinessMembership } from '@/services/profiles'
+import {
+  fetchProfile,
+  fetchBusinessMemberships,
+  type BusinessMembership
+} from '@/services/profiles'
 import type { Profile } from '@/types'
 
 /**
@@ -19,6 +23,7 @@ export function useSession() {
     setProfile,
     setIsAdmin,
     setIsOwner,
+    setMemberships,
     setLoading
   } = useAuthStore()
 
@@ -35,7 +40,8 @@ export function useSession() {
           data.session.user.id,
           setProfile,
           setIsAdmin,
-          setIsOwner
+          setIsOwner,
+          setMemberships
         )
       }
 
@@ -66,12 +72,14 @@ export function useSession() {
           newSession.user.id,
           setProfile,
           setIsAdmin,
-          setIsOwner
+          setIsOwner,
+          setMemberships
         )
       } else {
         setProfile(null)
         setIsAdmin(false)
         setIsOwner(false)
+        setMemberships([])
       }
 
       setLoading(false)
@@ -81,7 +89,14 @@ export function useSession() {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [setSession, setProfile, setIsAdmin, setIsOwner, setLoading])
+  }, [
+    setSession,
+    setProfile,
+    setIsAdmin,
+    setIsOwner,
+    setMemberships,
+    setLoading
+  ])
 
   return { session, profile, isAdmin, isOwner, loading }
 }
@@ -90,12 +105,14 @@ async function loadProfileAndRole(
   userId: string,
   setProfile: (p: Profile | null) => void,
   setIsAdmin: (v: boolean) => void,
-  setIsOwner: (v: boolean) => void
+  setIsOwner: (v: boolean) => void,
+  setMemberships: (m: BusinessMembership[]) => void
 ) {
   const profileData = await fetchProfile(userId)
   setProfile(profileData)
 
-  const membership = await fetchBusinessMembership(userId)
-  setIsAdmin(!!membership)
-  setIsOwner(membership?.role === 'owner')
+  const memberships = await fetchBusinessMemberships(userId)
+  setMemberships(memberships)
+  setIsAdmin(memberships.length > 0)
+  setIsOwner(memberships.some((m) => m.role === 'owner'))
 }

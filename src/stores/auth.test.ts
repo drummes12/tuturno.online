@@ -18,8 +18,11 @@ beforeEach(() => {
     user: null,
     profile: null,
     isAdmin: false,
+    isOwner: false,
     loading: true,
-    error: null
+    error: null,
+    memberships: [],
+    activeBusinessId: null
   })
 })
 
@@ -93,5 +96,60 @@ describe('useAuthStore', () => {
     expect(state.user).toBeNull()
     expect(state.profile).toBeNull()
     expect(state.isAdmin).toBe(false)
+    expect(state.memberships).toEqual([])
+    expect(state.activeBusinessId).toBeNull()
+  })
+
+  it('setMemberships establece memberships y el primer business como activo', () => {
+    const memberships = [
+      {
+        businessId: 'biz-1',
+        businessName: 'Negocio 1',
+        slug: 'negocio-1',
+        role: 'owner' as const
+      },
+      {
+        businessId: 'biz-2',
+        businessName: 'Negocio 2',
+        slug: 'negocio-2',
+        role: 'manager' as const
+      }
+    ]
+    useAuthStore.getState().setMemberships(memberships)
+    const state = useAuthStore.getState()
+    expect(state.memberships).toEqual(memberships)
+    expect(state.activeBusinessId).toBe('biz-1')
+  })
+
+  it('setMemberships con array vacío limpia el activeBusinessId', () => {
+    useAuthStore.getState().setMemberships([
+      {
+        businessId: 'biz-1',
+        businessName: 'Negocio 1',
+        slug: 'negocio-1',
+        role: 'owner' as const
+      }
+    ])
+    useAuthStore.getState().setMemberships([])
+    expect(useAuthStore.getState().activeBusinessId).toBeNull()
+  })
+
+  it('setActiveBusinessId cambia el negocio activo', () => {
+    useAuthStore.getState().setMemberships([
+      {
+        businessId: 'biz-1',
+        businessName: 'Negocio 1',
+        slug: 'negocio-1',
+        role: 'owner' as const
+      },
+      {
+        businessId: 'biz-2',
+        businessName: 'Negocio 2',
+        slug: 'negocio-2',
+        role: 'owner' as const
+      }
+    ])
+    useAuthStore.getState().setActiveBusinessId('biz-2')
+    expect(useAuthStore.getState().activeBusinessId).toBe('biz-2')
   })
 })

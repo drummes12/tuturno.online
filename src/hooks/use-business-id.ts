@@ -1,22 +1,10 @@
-import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/stores/auth'
-import { fetchBusinessId } from '@/services/profiles'
 
 /**
- * Hook para obtener el business_id del admin actual.
+ * Hook para obtener el business_id activo del admin actual.
+ * Usa el negocio seleccionado desde el store (selector de negocio).
  */
 export function useBusinessId() {
-  const { user } = useAuthStore()
-  const [businessId, setBusinessId] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function load() {
-      if (!user) return
-      const id = await fetchBusinessId(user.id)
-      setBusinessId(id)
-    }
-    load()
-  }, [user])
-
-  return businessId
+  const { activeBusinessId } = useAuthStore()
+  return activeBusinessId
 }

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { signOut as signOutService } from '@/services/auth'
 import type { Profile } from '@/types'
+import type { BusinessMembership } from '@/services/profiles'
 
 interface AuthState {
   session: Session | null
@@ -11,12 +12,16 @@ interface AuthState {
   isOwner: boolean
   loading: boolean
   error: string | null
+  memberships: BusinessMembership[]
+  activeBusinessId: string | null
   setSession: (session: Session | null) => void
   setProfile: (profile: Profile | null) => void
   setIsAdmin: (isAdmin: boolean) => void
   setIsOwner: (isOwner: boolean) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
+  setMemberships: (memberships: BusinessMembership[]) => void
+  setActiveBusinessId: (businessId: string | null) => void
   signOut: () => Promise<void>
 }
 
@@ -28,12 +33,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   isOwner: false,
   loading: true,
   error: null,
+  memberships: [],
+  activeBusinessId: null,
   setSession: (session) => set({ session, user: session?.user ?? null }),
   setProfile: (profile) => set({ profile }),
   setIsAdmin: (isAdmin) => set({ isAdmin }),
   setIsOwner: (isOwner) => set({ isOwner }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
+  setMemberships: (memberships) =>
+    set({
+      memberships,
+      activeBusinessId:
+        memberships.length > 0 ? memberships[0].businessId : null
+    }),
+  setActiveBusinessId: (businessId) => set({ activeBusinessId: businessId }),
   signOut: async () => {
     await signOutService()
     set({
@@ -41,7 +55,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: null,
       profile: null,
       isAdmin: false,
-      isOwner: false
+      isOwner: false,
+      memberships: [],
+      activeBusinessId: null
     })
   }
 }))
