@@ -254,7 +254,7 @@ function buildTours(): TourDef[] {
           popover: {
             title: 'Enviar solicitud',
             description:
-              'Tu reserva quedará pendiente hasta que el negocio la confirme. Tienes 30 minutos para completar este paso.',
+              'Tu solicitud quedará pendiente hasta que el negocio la confirme. El tiempo durante el que el turno se mantiene reservado temporalmente lo configura cada negocio.',
             side: 'top',
             align: 'center'
           }
