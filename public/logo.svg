@@ -2,11 +2,6 @@
   <!-- Logo mark: clock in rounded square -->
   <rect x="40" y="40" width="240" height="240" rx="56" fill="#0a5226"/>
 
-  <!-- Pitch line decoration -->
-  <rect x="72" y="72" width="176" height="176" rx="16" stroke="#0a7d3b" stroke-width="2" opacity="0.5"/>
-  <line x1="160" y1="72" x2="160" y2="248" stroke="#0a7d3b" stroke-width="2" opacity="0.4"/>
-  <circle cx="160" cy="160" r="24" stroke="#0a7d3b" stroke-width="2" opacity="0.4"/>
-
   <!-- Clock face -->
   <circle cx="160" cy="160" r="72" fill="#f8faf7"/>
   <circle cx="160" cy="160" r="66" fill="none" stroke="#e2e8e0" stroke-width="3"/>

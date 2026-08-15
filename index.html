@@ -3,14 +3,20 @@
 
 <head>
   <meta charset="UTF-8" />
+  <!-- Favicons: .ico for legacy, .png for Google, SVG for modern browsers -->
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a7d3b" />
+  <meta name="theme-color" content="#0a5226" />
 <!-- Primary Meta Tags -->
 <title>TuTurno — Reservas online para canchas, salas y consultorios</title>
 <meta name="title" content="TuTurno — Reservas online para canchas, salas y consultorios" />
   <meta name="description"
-    content="Plataforma de reservas online para negocios de espacios. Canchas, salas, consultorios, mesas y más. Tus clientes ven disponibilidad en tiempo real y solicitan su turno en segundos." />
+    content="Plataforma de reservas online para canchas, salas, consultorios y más. Tus clientes ven disponibilidad en tiempo real y solicitan su turno en segundos." />
   <meta name="keywords"
     content="reservas online, turnos online, reservar cancha, reservar sala, reservar consultorio, sistema de reservas, agenda online, TuTurno, reservas deportivas, reservas en tiempo real" />
   <meta name="author" content="TuTurno" />
@@ -23,16 +29,22 @@
   <meta property="og:title" content="TuTurno — Reservas online para tu negocio" />
   <meta property="og:description"
     content="Plataforma de reservas online para canchas, salas, consultorios y más. Disponibilidad en tiempo real, confirmación manual y notificaciones automáticas." />
-  <meta property="og:image" content="https://tuturno.online/logo.svg" />
+  <meta property="og:image" content="https://tuturno.online/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt"
+    content="TuTurno — Reservas online para tu negocio. Canchas, salas, consultorios y más." />
   <meta property="og:site_name" content="TuTurno" />
   <meta property="og:locale" content="es_CO" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@TuTurnoApp" />
   <meta name="twitter:title" content="TuTurno — Reservas online para tu negocio" />
   <meta name="twitter:description"
     content="Plataforma de reservas online para canchas, salas, consultorios y más. Disponibilidad en tiempo real." />
-  <meta name="twitter:image" content="https://tuturno.online/logo.svg" />
+  <meta name="twitter:image" content="https://tuturno.online/og-image.png" />
+  <meta name="twitter:image:alt" content="TuTurno — Reservas online para tu negocio" />
 
   <!-- JSON-LD: Organization -->
   <script type="application/ld+json">
@@ -41,7 +53,7 @@
     "@type": "Organization",
     "name": "TuTurno",
     "url": "https://tuturno.online",
-    "logo": "https://tuturno.online/logo.svg",
+    "logo": "https://tuturno.online/android-chrome-512x512.png",
     "description": "Plataforma de reservas online para negocios de espacios. Canchas, salas, consultorios, mesas y más.",
     "sameAs": [
       "https://github.com/tuturno"
@@ -96,7 +108,7 @@
       "name": "TuTurno",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://tuturno.online/logo.svg"
+        "url": "https://tuturno.online/android-chrome-512x512.png"
       }
     },
     "speakable": {
@@ -166,7 +178,17 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Static H1 fallback for crawlers/auditors that don't execute JS. React replaces this on hydration. -->
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">TuTurno — Reservas online para
+      canchas, salas y consultorios</h1>
+  </div>
+  <noscript>
+    <h1>TuTurno — Reservas online para canchas, salas y consultorios</h1>
+    <p>Plataforma de reservas online para negocios de espacios. Tus clientes ven disponibilidad en tiempo real y solicitan
+      su turno en segundos.</p>
+    <p>Para usar TuTurno, habilita JavaScript en tu navegador.</p>
+  </noscript>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

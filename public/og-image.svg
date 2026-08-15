@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <!-- Background: deep green gradient (generic, no pitch lines) -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0a5226"/>
+      <stop offset="1" stop-color="#063819"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle dot-grid decoration (generic, not sport-specific) -->
+  <g fill="#0a7d3b" opacity="0.12">
+    <circle cx="100" cy="80" r="3"/>
+    <circle cx="160" cy="80" r="3"/>
+    <circle cx="220" cy="80" r="3"/>
+    <circle cx="100" cy="140" r="3"/>
+    <circle cx="160" cy="140" r="3"/>
+    <circle cx="220" cy="140" r="3"/>
+    <circle cx="980" cy="490" r="3"/>
+    <circle cx="1040" cy="490" r="3"/>
+    <circle cx="1100" cy="490" r="3"/>
+    <circle cx="980" cy="550" r="3"/>
+    <circle cx="1040" cy="550" r="3"/>
+    <circle cx="1100" cy="550" r="3"/>
+  </g>
+
+  <!-- Logo mark: clock in rounded square -->
+  <rect x="80" y="180" width="180" height="180" rx="40" fill="#0a7d3b"/>
+  <circle cx="170" cy="270" r="60" fill="#f8faf7"/>
+  <circle cx="170" cy="270" r="55" fill="none" stroke="#e2e8e0" stroke-width="3"/>
+  <rect x="167" y="222" width="6" height="14" rx="2" fill="#2c342f"/>
+  <rect x="216" y="267" width="14" height="6" rx="2" fill="#2c342f"/>
+  <rect x="167" y="304" width="6" height="14" rx="2" fill="#2c342f"/>
+  <rect x="110" y="267" width="14" height="6" rx="2" fill="#2c342f"/>
+  <line x1="170" y1="270" x2="140" y2="240" stroke="#0a5226" stroke-width="7" stroke-linecap="round"/>
+  <line x1="170" y1="270" x2="205" y2="248" stroke="#0a7d3b" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="170" cy="270" r="9" fill="#facc15"/>
+  <circle cx="170" cy="270" r="4.5" fill="#0a5226"/>
+
+  <!-- Wordmark: TuTurno -->
+  <text x="300" y="260" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="#f8faf7" letter-spacing="-2">
+    Tu<tspan fill="#4ade80">Turno</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <text x="300" y="310" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="28" font-weight="500" fill="#a3b8a8">
+    Reservas online para tu negocio
+  </text>
+
+  <!-- Feature pills: sized to fit text with padding -->
+  <g font-family="Inter, system-ui, -apple-system, sans-serif" font-size="20" font-weight="600">
+    <!-- Pill 1: Tiempo real -->
+    <rect x="80" y="400" width="200" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
+    <text x="180" y="431" fill="#f8faf7" text-anchor="middle">Tiempo real</text>
+
+    <!-- Pill 2: Confirmación manual -->
+    <rect x="300" y="400" width="280" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
+    <text x="440" y="431" fill="#f8faf7" text-anchor="middle">Confirmación manual</text>
+
+    <!-- Pill 3: Multi-espacio -->
+    <rect x="600" y="400" width="220" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
+    <text x="710" y="431" fill="#f8faf7" text-anchor="middle">Multi-espacio</text>
+
+    <!-- Pill 4: Notificaciones -->
+    <rect x="840" y="400" width="260" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
+    <text x="970" y="431" fill="#f8faf7" text-anchor="middle">Notificaciones auto.</text>
+  </g>
+
+  <!-- URL -->
+  <text x="600" y="560" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="24" font-weight="500" fill="#5a8a6e" text-anchor="middle">
+    tuturno.online
+  </text>
+</svg>

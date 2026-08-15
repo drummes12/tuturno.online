@@ -2,11 +2,6 @@
   <!-- Background: rounded square with pitch green -->
   <rect width="512" height="512" rx="112" fill="#0a5226"/>
 
-  <!-- Subtle pitch lines decoration -->
-  <rect x="56" y="56" width="400" height="400" rx="24" stroke="#0a7d3b" stroke-width="3" opacity="0.5"/>
-  <line x1="256" y1="56" x2="256" y2="456" stroke="#0a7d3b" stroke-width="3" opacity="0.4"/>
-  <circle cx="256" cy="256" r="48" stroke="#0a7d3b" stroke-width="3" opacity="0.4"/>
-
   <!-- Clock circle — white/chalk -->
   <circle cx="256" cy="256" r="140" fill="#f8faf7" stroke="#f8faf7" stroke-width="0"/>
 
