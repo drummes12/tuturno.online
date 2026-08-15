@@ -9,7 +9,11 @@ import { vi } from 'vitest'
  *   const chain = createQueryChain({ data: [...], error: null })
  *   mockSupabase.from.mockReturnValue(chain)
  */
-export function createQueryChain(result: { data: any; error: any }) {
+export function createQueryChain(result: {
+  data: any
+  error: any
+  count?: number | null
+}) {
   const chain: any = {
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
@@ -19,7 +23,10 @@ export function createQueryChain(result: { data: any; error: any }) {
     neq: vi.fn().mockReturnThis(),
     or: vi.fn().mockReturnThis(),
     gte: vi.fn().mockReturnThis(),
+    gt: vi.fn().mockReturnThis(),
+    lt: vi.fn().mockReturnThis(),
     lte: vi.fn().mockReturnThis(),
+    in: vi.fn().mockReturnThis(),
     not: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
@@ -30,7 +37,13 @@ export function createQueryChain(result: { data: any; error: any }) {
   chain.select = vi.fn(() => chain)
   // Permite `await chain` (sin .single()/.maybeSingle()) resolviendo al resultado,
   // tal como lo hace el cliente real de Supabase al finalizar una query.
-  chain.then = (resolve: (value: any) => any) => resolve(result)
+  // Incluye count cuando se pide con { count: 'exact', head: true }
+  chain.then = (resolve: (value: any) => any) =>
+    resolve({
+      data: result.data,
+      error: result.error,
+      count: result.count ?? null
+    })
   return chain
 }
 

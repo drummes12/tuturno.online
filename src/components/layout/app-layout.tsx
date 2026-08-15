@@ -9,7 +9,8 @@ import {
   ScheduleIcon,
   SettingsIcon,
   LogOutIcon,
-  LogInIcon
+  LogInIcon,
+  LockIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
@@ -34,6 +35,11 @@ const adminNav: NavItem[] = [
     label: 'Horarios',
     href: '/admin/horarios',
     icon: <ScheduleIcon size={22} />
+  },
+  {
+    label: 'Cierres',
+    href: '/admin/excepciones',
+    icon: <LockIcon size={22} />
   },
   {
     label: 'Configuración',

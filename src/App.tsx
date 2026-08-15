@@ -20,6 +20,7 @@ import { AdminReservationsPage } from '@/pages/admin/reservations'
 import { AdminCourtsPage } from '@/pages/admin/courts'
 import { AdminHoursPage } from '@/pages/admin/hours'
 import { AdminConfigPage } from '@/pages/admin/config'
+import { AdminExceptionsPage } from '@/pages/admin/exceptions'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -129,6 +130,11 @@ export default function App() {
         <Route path='/admin/configuracion'>
           <AdminRoute>
             <AdminConfigPage />
+          </AdminRoute>
+        </Route>
+        <Route path='/admin/excepciones'>
+          <AdminRoute>
+            <AdminExceptionsPage />
           </AdminRoute>
         </Route>
 

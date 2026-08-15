@@ -106,6 +106,9 @@ pnpm dev
 - Notificaciones por correo (Resend)
 - Concurrencia protegida con advisory locks
 - RLS en todas las tablas
+- Cierres temporales configurables por el propietario (todo el negocio o cancha específica, con opción de día completo)
+- Instrucciones de abono/confirmación en Markdown (máx 1000 caracteres) visibles para el cliente antes de reservar
+- Botón de WhatsApp post-reserva con mensaje prellenado y enlace fallback
 
 ## Licencia
 
