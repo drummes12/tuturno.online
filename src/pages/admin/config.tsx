@@ -86,6 +86,7 @@ export function AdminConfigPage() {
         state: business.state,
         country: business.country,
         phone: business.phone,
+        whatsapp_link: business.whatsapp_link,
         slot_duration_minutes: business.slot_duration_minutes,
         gap_minutes: business.gap_minutes,
         hold_duration_minutes: business.hold_duration_minutes,
@@ -219,8 +220,20 @@ export function AdminConfigPage() {
                   label='Teléfono'
                   value={business.phone ?? ''}
                   onChange={(val) => setBusiness({ ...business, phone: val })}
-                  hint='Número de contacto. Se usa en el botón flotante de WhatsApp.'
+                  hint='Número de contacto. Se usa en el botón flotante de WhatsApp si no hay un link personalizado.'
                   optional
+                />
+                <Input
+                  label='Link de WhatsApp (opcional)'
+                  value={business.whatsapp_link ?? ''}
+                  onChange={(e) =>
+                    setBusiness({
+                      ...business,
+                      whatsapp_link: e.target.value || null
+                    })
+                  }
+                  placeholder='Ej: https://wa.me/573001234567 o @usuario'
+                  hint='Si prefieres que te contacten por un usuario o link específico en vez del teléfono, escríbelo aquí. Acepta URLs de wa.me, whatsapp.com o un @usuario.'
                 />
               </div>
             </Card>

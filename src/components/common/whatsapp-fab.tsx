@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { WhatsAppIcon } from '@/components/common/icon'
-import { waLink } from '@/lib/whatsapp'
+import { resolveWhatsAppLink } from '@/lib/whatsapp'
 import { fetchBusinessContactById } from '@/services/business'
 import { getSlugFromUrl } from '@/lib/slug'
 import { useTenant } from '@/hooks/use-tenant'
@@ -12,8 +12,8 @@ type WhatsAppFabProps = {
 
 /**
  * Botón flotante de WhatsApp para usuarios.
- * Carga el teléfono del negocio y muestra un FAB en la esquina inferior derecha.
- * Se oculta en páginas de auth y si no hay phone configurado.
+ * Carga el teléfono o link de WhatsApp del negocio y muestra un FAB.
+ * Se oculta en páginas de auth y si no hay contacto configurado.
  */
 export function WhatsAppFab({ businessId }: WhatsAppFabProps = {}) {
   const slug = getSlugFromUrl() ?? undefined
@@ -21,6 +21,7 @@ export function WhatsAppFab({ businessId }: WhatsAppFabProps = {}) {
   const resolvedBusinessId = businessId ?? tenantBusiness?.id ?? null
 
   const [phone, setPhone] = useState<string | null>(null)
+  const [whatsappLink, setWhatsappLink] = useState<string | null>(null)
   const [businessName, setBusinessName] = useState<string>('')
 
   useEffect(() => {
@@ -29,13 +30,15 @@ export function WhatsAppFab({ businessId }: WhatsAppFabProps = {}) {
       const data = await fetchBusinessContactById(resolvedBusinessId!)
       if (data) {
         setPhone(data.phone)
+        setWhatsappLink(data.whatsapp_link)
         setBusinessName(data.name)
       }
     }
     loadBusiness()
   }, [resolvedBusinessId])
 
-  const link = waLink(
+  const link = resolveWhatsAppLink(
+    whatsappLink,
     phone,
     `Hola, tengo una duda sobre las reservas en ${businessName}.`
   )

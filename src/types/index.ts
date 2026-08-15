@@ -49,6 +49,7 @@ export interface Business {
   state: string | null
   country: string | null
   phone: string | null
+  whatsapp_link: string | null
   slot_duration_minutes: number
   gap_minutes: number
   hold_duration_minutes: number

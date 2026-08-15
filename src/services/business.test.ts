@@ -28,6 +28,7 @@ const mockBusiness: Business = {
   state: 'Antioquia',
   country: 'Colombia',
   phone: '+57 300 000 0000',
+  whatsapp_link: null,
   slot_duration_minutes: 60,
   gap_minutes: 10,
   hold_duration_minutes: 15,
@@ -110,6 +111,7 @@ describe('fetchBusinessContactById', () => {
     const contact = {
       id: 'biz-1',
       phone: '+57 300 000 0000',
+      whatsapp_link: null,
       name: 'Canchas El Parque',
       slug: 'canchas-el-parque',
       street: 'Calle 123 #45-67',

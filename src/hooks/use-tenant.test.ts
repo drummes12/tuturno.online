@@ -22,6 +22,7 @@ const mockBusiness: Business = {
   state: null,
   country: null,
   phone: '+57 300 000 0000',
+  whatsapp_link: null,
   slot_duration_minutes: 60,
   gap_minutes: 10,
   hold_duration_minutes: 15,

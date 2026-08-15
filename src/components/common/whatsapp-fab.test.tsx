@@ -57,6 +57,7 @@ describe('WhatsAppFab', () => {
       resource_label_singular: 'Cancha',
       resource_label_plural: 'Canchas',
       reservation_instructions_md: null,
+      whatsapp_link: null,
       is_demo: false
     })
     render(<WhatsAppFab businessId='biz-1' />)
@@ -79,6 +80,7 @@ describe('WhatsAppFab', () => {
       resource_label_singular: 'Cancha',
       resource_label_plural: 'Canchas',
       reservation_instructions_md: null,
+      whatsapp_link: null,
       is_demo: false
     })
     render(<WhatsAppFab businessId='biz-1' />)
@@ -104,6 +106,7 @@ describe('WhatsAppFab', () => {
       resource_label_singular: 'Cancha',
       resource_label_plural: 'Canchas',
       reservation_instructions_md: null,
+      whatsapp_link: null,
       is_demo: false
     })
     render(<WhatsAppFab businessId='biz-1' />)
@@ -128,6 +131,7 @@ describe('WhatsAppFab', () => {
       resource_label_singular: 'Cancha',
       resource_label_plural: 'Canchas',
       reservation_instructions_md: null,
+      whatsapp_link: null,
       is_demo: false
     })
     render(<WhatsAppFab businessId='biz-1' />)
@@ -152,6 +156,7 @@ describe('WhatsAppFab', () => {
       resource_label_singular: 'Cancha',
       resource_label_plural: 'Canchas',
       reservation_instructions_md: null,
+      whatsapp_link: null,
       is_demo: false
     })
     render(<WhatsAppFab businessId='biz-1' />)
@@ -161,5 +166,80 @@ describe('WhatsAppFab', () => {
       expect(link.getAttribute('aria-label')).toContain('Cancha Premium')
       expect(link.getAttribute('aria-label')).toContain('WhatsApp')
     })
+  })
+
+  it('usa whatsapp_link cuando está configurado (prioridad sobre phone)', async () => {
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
+      phone: '3001234567',
+      whatsapp_link: 'https://wa.me/573009876543',
+      name: 'Test',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
+    })
+    render(<WhatsAppFab businessId='biz-1' />)
+    await vi.waitFor(() => {
+      const link = screen.getByRole('link')
+      const href = link.getAttribute('href')!
+      expect(href).toContain('wa.me/573009876543')
+      expect(href).not.toContain('wa.me/3001234567')
+    })
+  })
+
+  it('usa phone cuando whatsapp_link es null', async () => {
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
+      phone: '+57 300 123 4567',
+      whatsapp_link: null,
+      name: 'Test',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
+    })
+    render(<WhatsAppFab businessId='biz-1' />)
+    await vi.waitFor(() => {
+      const link = screen.getByRole('link')
+      const href = link.getAttribute('href')!
+      expect(href).toContain('wa.me/573001234567')
+    })
+  })
+
+  it('no renderiza nada cuando no hay phone ni whatsapp_link', async () => {
+    mockFetchBusinessContactById.mockResolvedValue({
+      id: 'biz-1',
+      phone: null,
+      whatsapp_link: null,
+      name: 'Test',
+      slug: 'test',
+      street: null,
+      neighborhood: null,
+      city: null,
+      state: null,
+      country: null,
+      resource_label_singular: 'Cancha',
+      resource_label_plural: 'Canchas',
+      reservation_instructions_md: null,
+      is_demo: false
+    })
+    const { container } = render(<WhatsAppFab businessId='biz-1' />)
+    await vi.waitFor(() => {
+      expect(mockFetchBusinessContactById).toHaveBeenCalled()
+    })
+    expect(container.querySelector('a')).toBeNull()
   })
 })

@@ -4,6 +4,7 @@ import type { Business } from '@/types'
 export type BusinessContact = {
   id: string
   phone: string
+  whatsapp_link: string | null
   name: string
   slug: string
   street: string | null
@@ -43,7 +44,7 @@ export async function fetchBusinessContactById(
   const { data, error } = await supabase
     .from('businesses')
     .select(
-      'id, phone, name, slug, street, neighborhood, city, state, country, resource_label_singular, resource_label_plural, reservation_instructions_md, is_demo'
+      'id, phone, whatsapp_link, name, slug, street, neighborhood, city, state, country, resource_label_singular, resource_label_plural, reservation_instructions_md, is_demo'
     )
     .eq('id', businessId)
     .maybeSingle()
@@ -78,6 +79,7 @@ export async function updateBusiness(
       | 'resource_label_singular'
       | 'resource_label_plural'
       | 'phone'
+      | 'whatsapp_link'
       | 'slot_duration_minutes'
       | 'gap_minutes'
       | 'hold_duration_minutes'
