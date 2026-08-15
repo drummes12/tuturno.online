@@ -143,7 +143,10 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
             <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${p.recipient_name ?? ''}</strong>,</p>
             <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Tu solicitud de reserva está <strong style="color:#b45309;">pendiente de confirmación</strong>. Te avisaremos en cuanto el negocio la revise.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
-          cta: { href: link(appUrl, '/mis-reservas'), label: 'Ver mis reservas' }
+          cta: {
+            href: link(appUrl, '/mis-reservas'),
+            label: 'Ver mis reservas'
+          }
         })
       }
     },
@@ -163,7 +166,30 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
           bodyHtml: `
             <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Tienes una nueva solicitud esperando confirmación.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
-          cta: { href: link(appUrl, '/admin/reservas'), label: 'Confirmar o rechazar' }
+          cta: {
+            href: link(appUrl, '/admin/reservas'),
+            label: 'Confirmar o rechazar'
+          }
+        })
+      }
+    },
+
+    reservation_created_by_business: (p) => {
+      const details = [
+        detailRow('Cliente', p.client_name ?? ''),
+        detailRow('Email', p.client_email ?? 'No registrado'),
+        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
+      ].join('')
+      return {
+        subject: `Reserva creada por el negocio — ${p.client_name ?? 'Cliente'}`,
+        html: emailWrapper(appUrl, {
+          preheader: 'Se creó una reserva confirmada desde el panel',
+          heading: 'Reserva creada por el negocio',
+          bodyHtml: `
+            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Se creó una reserva <strong style="color:#0a7d3b;">confirmada</strong> desde el panel del negocio.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
+          cta: { href: link(appUrl, '/admin/reservas'), label: 'Ver reserva' }
         })
       }
     },
@@ -182,7 +208,10 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
           bodyHtml: `
             <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${p.recipient_name ?? ''}</strong>, tu reserva fue confirmada.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
-          cta: { href: link(appUrl, '/mis-reservas'), label: 'Ver mis reservas' }
+          cta: {
+            href: link(appUrl, '/mis-reservas'),
+            label: 'Ver mis reservas'
+          }
         })
       }
     },
@@ -215,12 +244,12 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')
       return {
-        subject: `Reserva cancelada — ${p.business_name}`,
+        subject: `Cancelaste tu reserva — ${p.business_name}`,
         html: emailWrapper(appUrl, {
-          preheader: 'Tu reserva fue cancelada',
-          heading: 'Reserva cancelada',
+          preheader: 'Tu cancelación fue registrada',
+          heading: 'Reserva cancelada por ti',
           bodyHtml: `
-            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Tu reserva fue cancelada.</p>
+            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Registramos la cancelación de tu reserva.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
           cta: { href: link(appUrl, '/'), label: 'Reservar otro turno' }
         })
@@ -241,13 +270,38 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
           bodyHtml: `
             <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">El cliente canceló su reserva.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
-          cta: { href: link(appUrl, '/admin/reservas'), label: 'Ver panel de reservas' }
+          cta: {
+            href: link(appUrl, '/admin/reservas'),
+            label: 'Ver panel de reservas'
+          }
+        })
+      }
+    },
+
+    reservation_cancelled_by_business: (p) => {
+      const details = [
+        detailRow('Negocio', p.business_name ?? ''),
+        detailRow('Cancha', p.court_name ?? ''),
+        detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
+      ].join('')
+      const reasonRow = p.reason ? detailRow('Motivo', p.reason) : ''
+      return {
+        subject: `El negocio canceló tu reserva — ${p.business_name}`,
+        html: emailWrapper(appUrl, {
+          preheader: 'El negocio canceló tu reserva',
+          heading: 'Reserva cancelada por el negocio',
+          bodyHtml: `
+            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${p.recipient_name ?? ''}</strong>, el negocio canceló tu reserva.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}${reasonRow}</table>
+            <p style="margin:16px 0 0;font-size:15px;color:#374151;line-height:1.6;">Puedes solicitar otro turno cuando quieras.</p>`,
+          cta: { href: link(appUrl, '/'), label: 'Buscar otro turno' }
         })
       }
     },
 
     reservation_expired: (p) => {
       const details = [
+        detailRow('Negocio', p.business_name ?? ''),
         detailRow('Cancha', p.court_name ?? ''),
         detailRow('Fecha y hora', formatDate(p.starts_at ?? ''))
       ].join('')

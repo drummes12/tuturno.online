@@ -79,6 +79,24 @@ describe('Email templates', () => {
     })
   })
 
+  describe('reservation_created_by_business', () => {
+    it('identifica que la reserva fue creada por el negocio', () => {
+      const { subject, html } =
+        templates.reservation_created_by_business(validPayload)
+      expect(subject).toContain('creada por el negocio')
+      expect(html).toContain('Reserva creada por el negocio')
+      expect(html).toContain('confirmada')
+      expect(html).not.toContain('esperando confirmación')
+    })
+
+    it('incluye la información del cliente y la reserva', () => {
+      const { html } = templates.reservation_created_by_business(validPayload)
+      expect(html).toContain('Juan Pérez')
+      expect(html).toContain('juan@example.com')
+      expect(html).toContain('Cancha 1')
+    })
+  })
+
   describe('reservation_confirmed', () => {
     it('genera subject de confirmación', () => {
       const { subject } = templates.reservation_confirmed(validPayload)
@@ -133,9 +151,12 @@ describe('Email templates', () => {
   })
 
   describe('reservation_cancelled_client', () => {
-    it('genera subject de cancelación', () => {
-      const { subject } = templates.reservation_cancelled_client(validPayload)
-      expect(subject).toContain('cancelada')
+    it('identifica que el cliente canceló su propia reserva', () => {
+      const { subject, html } =
+        templates.reservation_cancelled_client(validPayload)
+      expect(subject).toContain('Cancelaste tu reserva')
+      expect(html).toContain('Reserva cancelada por ti')
+      expect(html).not.toContain('cancelada por el negocio')
     })
 
     it('incluye un botón CTA hacia la home', () => {
@@ -157,6 +178,23 @@ describe('Email templates', () => {
     })
   })
 
+  describe('reservation_cancelled_by_business', () => {
+    it('identifica correctamente al negocio como quien canceló', () => {
+      const { subject, html } =
+        templates.reservation_cancelled_by_business(validPayload)
+      expect(subject).toContain('El negocio canceló tu reserva')
+      expect(html).toContain('Reserva cancelada por el negocio')
+      expect(html).toContain('el negocio canceló tu reserva')
+      expect(html).not.toContain('canceló su reserva')
+    })
+
+    it('incluye el motivo de cancelación', () => {
+      const { html } = templates.reservation_cancelled_by_business(validPayload)
+      expect(html).toContain('Cancha en mantenimiento')
+      expect(html).toContain('Motivo')
+    })
+  })
+
   describe('reservation_expired', () => {
     it('genera subject de expiración', () => {
       const { subject } = templates.reservation_expired(validPayload)
@@ -168,11 +206,10 @@ describe('Email templates', () => {
       expect(html).toContain('no la confirmó a tiempo')
     })
 
-    it('no incluye business_name en los detalles (solo cancha)', () => {
+    it('incluye negocio y cancha en los detalles', () => {
       const { html } = templates.reservation_expired(validPayload)
+      expect(html).toContain('Canchas El Parque')
       expect(html).toContain('Cancha 1')
-      // El template de expired no lista el negocio en los detalles
-      expect(html).not.toContain('>Negocio<')
     })
 
     it('incluye un botón CTA hacia la home', () => {
@@ -184,8 +221,8 @@ describe('Email templates', () => {
   describe('todas las plantillas', () => {
     const templateNames = Object.keys(templates)
 
-    it('hay 7 plantillas definidas', () => {
-      expect(templateNames).toHaveLength(7)
+    it('hay 9 plantillas definidas', () => {
+      expect(templateNames).toHaveLength(9)
     })
 
     it('cada plantilla retorna { subject, html }', () => {

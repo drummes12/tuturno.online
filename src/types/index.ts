@@ -21,10 +21,12 @@ export type NotificationStatus = 'pending' | 'sent' | 'failed'
 export type NotificationType =
   | 'reservation_created_client'
   | 'reservation_created_business'
+  | 'reservation_created_by_business'
   | 'reservation_confirmed'
   | 'reservation_rejected'
   | 'reservation_cancelled_client'
   | 'reservation_cancelled_business'
+  | 'reservation_cancelled_by_business'
   | 'reservation_expired'
 
 export interface Profile {

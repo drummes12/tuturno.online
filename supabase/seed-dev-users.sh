@@ -3,9 +3,9 @@
 # Seed: crea usuarios de prueba en Supabase local
 # =============================================================================
 # Crea 3 usuarios después de un `supabase db reset`:
-#   1. owner@canchas.dev    — owner del negocio (admin completo)
-#   2. admin@canchas.dev    — manager del negocio (admin)
-#   3. cliente@canchas.dev  — cliente normal (sin acceso admin)
+#   1. owner@tuturno.dev    — owner del negocio (admin completo)
+#   2. admin@tuturno.dev    — manager del negocio (admin)
+#   3. cliente@tuturno.dev  — cliente normal (sin acceso admin)
 #
 # TODOS con contraseña: 123456
 #
@@ -121,9 +121,9 @@ create_user() {
   printf '%s' "$user_id"
 }
 
-OWNER_ID=$(create_user "owner@canchas.dev" "123456" "Owner Demo" "+57 300 000 0001")
-ADMIN_ID=$(create_user "admin@canchas.dev" "123456" "Admin Demo" "+57 300 000 0002")
-CLIENT_ID=$(create_user "cliente@canchas.dev" "123456" "Cliente Demo" "+57 300 111 2222")
+OWNER_ID=$(create_user "owner@tuturno.dev" "123456" "Owner Demo" "+57 300 000 0001")
+ADMIN_ID=$(create_user "admin@tuturno.dev" "123456" "Admin Demo" "+57 300 000 0002")
+CLIENT_ID=$(create_user "cliente@tuturno.dev" "123456" "Cliente Demo" "+57 300 111 2222")
 
 # -----------------------------------------------------------------------------
 # 3. Vincular owner y admin al negocio
@@ -143,7 +143,7 @@ psql "$DB_URL" -c "
   select b.id, '$OWNER_ID', 'owner'
   from public.businesses b where b.slug = '$BUSINESS_SLUG'
   on conflict (business_id, user_id) do update set role = 'owner';
-" 2>/dev/null && info "  ✓ owner@canchas.dev → role: owner" || warn "  No se pudo vincular owner"
+" 2>/dev/null && info "  ✓ owner@tuturno.dev → role: owner" || warn "  No se pudo vincular owner"
 
 # Insertar admin (manager)
 if [ -n "$ADMIN_ID" ]; then
@@ -152,7 +152,7 @@ if [ -n "$ADMIN_ID" ]; then
     select b.id, '$ADMIN_ID', 'manager'
     from public.businesses b where b.slug = '$BUSINESS_SLUG'
     on conflict (business_id, user_id) do update set role = 'manager';
-  " 2>/dev/null && info "  ✓ admin@canchas.dev → role: manager" || warn "  No se pudo vincular admin"
+  " 2>/dev/null && info "  ✓ admin@tuturno.dev → role: manager" || warn "  No se pudo vincular admin"
 fi
 
 # -----------------------------------------------------------------------------
@@ -164,9 +164,9 @@ cat >&2 <<'SUMMARY'
   Usuarios de prueba creados
 ═══════════════════════════════════════════════════════════════
 
-  owner@canchas.dev    (password: 123456)  → Admin (owner)
-  admin@canchas.dev    (password: 123456)  → Admin (manager)
-  cliente@canchas.dev  (password: 123456)  → Cliente
+  owner@tuturno.dev    (password: 123456)  → Admin (owner)
+  admin@tuturno.dev    (password: 123456)  → Admin (manager)
+  cliente@tuturno.dev  (password: 123456)  → Cliente
 
   Negocio: cancha-futbol-5
 
