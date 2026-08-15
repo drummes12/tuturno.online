@@ -215,6 +215,7 @@ export function AvailabilityPage() {
         <div
           className='flex gap-2 overflow-x-auto py-4 px-4 snap-x snap-mandatory animate-fade-up'
           style={{ animationDelay: '60ms' }}
+          data-tour='availability-date-picker'
         >
           {Array.from({ length: 14 }, (_, i) => {
             const d = new Date()
@@ -252,6 +253,7 @@ export function AvailabilityPage() {
         <div
           className='flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
           style={{ animationDelay: '120ms' }}
+          data-tour='availability-court-selector'
         >
           {courts.map((court) => {
             const isSelected = court.id === selectedCourt
@@ -329,6 +331,17 @@ export function AvailabilityPage() {
                   {group.slots.map((slot, index) => {
                     const time = format(parseISO(slot.starts_at), 'HH:mm')
                     const isAvailable = slot.status === 'available'
+                    // Marcar el primer slot disponible para el tutorial
+                    const isFirstAvailable =
+                      isAvailable &&
+                      !slotGroups
+                        .slice(0, groupIndex)
+                        .some((g) =>
+                          g.slots.some((s) => s.status === 'available')
+                        ) &&
+                      !group.slots
+                        .slice(0, index)
+                        .some((s) => s.status === 'available')
 
                     const statusConfig = {
                       available: {
@@ -359,6 +372,9 @@ export function AvailabilityPage() {
                         href={`/reservar?court=${slot.court_id}&date=${selectedDate}&start=${encodeURIComponent(slot.starts_at)}`}
                       >
                         <button
+                          data-tour={
+                            isFirstAvailable ? 'availability-slot' : undefined
+                          }
                           style={
                             {
                               '--index': groupIndex * 10 + index

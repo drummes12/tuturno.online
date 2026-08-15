@@ -366,7 +366,11 @@ export function ReservePage() {
         </p>
       </div>
 
-      <Card className='p-5 animate-fade-up' elevated>
+      <Card
+        className='p-5 animate-fade-up'
+        elevated
+        data-tour='reservation-summary'
+      >
         <dl className='flex flex-col gap-3 text-sm'>
           {details.map((d) => (
             <div key={d.label} className='flex justify-between items-center'>
@@ -397,20 +401,22 @@ export function ReservePage() {
             )
           ) : (
             <>
-              <Input
-                label='Nombre completo'
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                autoComplete='name'
-              />
-              <PhoneInput
-                label='Teléfono'
-                value={phone}
-                onChange={setPhone}
-                required
-                hint='El negocio lo usará para contactarte.'
-              />
+              <div data-tour='reservation-contact'>
+                <Input
+                  label='Nombre completo'
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  autoComplete='name'
+                />
+                <PhoneInput
+                  label='Teléfono'
+                  value={phone}
+                  onChange={setPhone}
+                  required
+                  hint='El negocio lo usará para contactarte.'
+                />
+              </div>
             </>
           )}
           <Input
@@ -428,7 +434,10 @@ export function ReservePage() {
               {/* Instrucciones del negocio en Markdown */}
               {businessContact?.reservation_instructions_md &&
               businessContact.reservation_instructions_md.trim() !== '' ? (
-                <Card className='p-4 bg-(--color-primary)/5 border-(--color-primary)/20'>
+                <Card
+                  className='p-4 bg-(--color-primary)/5 border-(--color-primary)/20'
+                  data-tour='reservation-instructions'
+                >
                   <div className='flex items-center gap-2 mb-2'>
                     <CheckIcon size={16} className='text-(--color-primary)' />
                     <h3 className='text-sm font-semibold text-(--color-text)'>
@@ -440,7 +449,7 @@ export function ReservePage() {
                   />
                 </Card>
               ) : (
-                <Alert variant='warning'>
+                <Alert variant='warning' data-tour='reservation-instructions'>
                   <strong>Importante:</strong> Esta es una solicitud. El negocio
                   debe confirmarla. El turno queda reservado temporalmente por
                   30 minutos.
@@ -449,14 +458,16 @@ export function ReservePage() {
             </>
           )}
 
-          <Button
-            type='submit'
-            loading={submitting}
-            size='lg'
-            className='w-full'
-          >
-            {isAdmin ? 'Crear reserva confirmada' : 'Enviar solicitud'}
-          </Button>
+          <div data-tour='reservation-submit'>
+            <Button
+              type='submit'
+              loading={submitting}
+              size='lg'
+              className='w-full'
+            >
+              {isAdmin ? 'Crear reserva confirmada' : 'Enviar solicitud'}
+            </Button>
+          </div>
         </form>
       </Card>
     </div>

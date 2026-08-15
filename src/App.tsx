@@ -25,11 +25,8 @@ import { AdminExceptionsPage } from '@/pages/admin/exceptions'
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
   if (!user) {
-    return (
-      <Redirect
-        to={`/login?next=${encodeURIComponent(window.location.pathname)}`}
-      />
-    )
+    const fullPath = window.location.pathname + window.location.search
+    return <Redirect to={`/login?next=${encodeURIComponent(fullPath)}`} />
   }
   return <>{children}</>
 }

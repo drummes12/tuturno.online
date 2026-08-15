@@ -109,6 +109,7 @@ pnpm dev
 - Cierres temporales configurables por el propietario (todo el negocio o cancha específica, con opción de día completo)
 - Instrucciones de abono/confirmación en Markdown (máx 1000 caracteres) visibles para el cliente antes de reservar
 - Botón de WhatsApp post-reserva con mensaje prellenado y enlace fallback
+- Tutorial guiado interactivo con Driver.js para clientes (visitantes y autenticados), con botón "Guía" en el header para volver a iniciarlo
 
 ## Licencia
 

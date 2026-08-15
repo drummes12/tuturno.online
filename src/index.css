@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'driver.js/dist/driver.css';
 
 /* ─────────────────────────────────────────────────────────────
    Design tokens — TuTurno
@@ -295,4 +296,125 @@ body {
 
 .tuturno-phone-input .PhoneInputInput::placeholder {
   color: var(--color-text-muted);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Tutorial guiado — Driver.js overrides
+   Coherente con la identidad TuTurno (pitch green, Geist)
+   ───────────────────────────────────────────────────────────── */
+.tuturno-tutorial-popover {
+  --driver-popover-color: var(--color-text);
+  width: min(340px, calc(100vw - 24px));
+  min-width: 0;
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-sans);
+}
+
+.tuturno-tutorial-popover .driver-popover-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.tuturno-tutorial-popover .driver-popover-description {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.tuturno-tutorial-popover .driver-popover-progress-text {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-right: 8px;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-pitch-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuturno-tutorial-popover .driver-popover-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tuturno-tutorial-popover .driver-popover-navigation-btns {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tuturno-tutorial-popover .driver-popover-navigation-btns button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-height: 44px;
+  min-width: 0;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+}
+
+.tuturno-tutorial-popover .driver-popover-close-btn,
+.tuturno-tutorial-popover .driver-popover-close-btn:hover,
+.tuturno-tutorial-popover .driver-popover-close-btn:focus {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-md);
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.tuturno-tutorial-popover .driver-popover-close-btn:hover {
+  background: var(--color-surface-inset);
+  color: var(--color-text);
+}
+
+.tuturno-tutorial-popover .driver-popover-close-btn:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.tuturno-tutorial-popover .driver-popover-next-btn {
+  background: var(--color-pitch-700);
+  color: white;
+}
+
+.tuturno-tutorial-popover .driver-popover-prev-btn {
+  background: var(--color-surface-inset);
+  color: var(--color-text);
+}
+
+.tuturno-tutorial-popover .driver-popover-next-btn:hover {
+  background: var(--color-pitch-800);
+}
+
+.tuturno-tutorial-popover .driver-popover-prev-btn:hover {
+  background: var(--color-graphite-100);
+}
+
+/* Respetar prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .tuturno-tutorial-popover,
+  .driver-popover {
+    transition: none !important;
+    animation: none !important;
+  }
 }

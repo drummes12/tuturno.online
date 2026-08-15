@@ -10,10 +10,12 @@ import {
   SettingsIcon,
   LogOutIcon,
   LogInIcon,
-  LockIcon
+  LockIcon,
+  HelpIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
+import { useClientTutorial } from '@/hooks/use-client-tutorial'
 
 interface NavItem {
   label: string
@@ -52,8 +54,12 @@ const adminNav: NavItem[] = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, isAdmin, signOut } = useAuthStore()
   const [location] = useLocation()
+  const { startTour, isStarting } = useClientTutorial()
 
   const nav = isAdmin ? adminNav : clientNav
+
+  // El tutorial solo aplica a clientes (visitantes o autenticados sin rol admin)
+  const showTutorialButton = !isAdmin
 
   return (
     <div className='min-h-dvh flex flex-col bg-surface overflow-clip'>
@@ -71,23 +77,40 @@ export function AppLayout({ children }: { children: ReactNode }) {
             />
             <span>TuTurno</span>
           </Link>
-          {user ? (
-            <button
-              onClick={() => signOut()}
-              className='flex items-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 -mr-2 rounded-lg'
-            >
-              <LogOutIcon size={16} />
-              <span className='hidden sm:inline'>Salir</span>
-            </button>
-          ) : (
-            <Link
-              href='/login'
-              className='flex items-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 -mr-2 rounded-lg'
-            >
-              <LogInIcon size={16} />
-              <span>Ingresar</span>
-            </Link>
-          )}
+          <div className='flex items-center gap-1'>
+            {showTutorialButton && (
+              <button
+                onClick={startTour}
+                disabled={isStarting}
+                data-tour='tutorial-trigger'
+                className='inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 active:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
+                aria-label='Iniciar guía del tutorial'
+                aria-busy={isStarting}
+                title='Guía interactiva'
+              >
+                <HelpIcon size={16} />
+                <span>{isStarting ? 'Abriendo…' : 'Guía'}</span>
+              </button>
+            )}
+            {user ? (
+              <button
+                onClick={() => signOut()}
+                className='flex items-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+              >
+                <LogOutIcon size={16} />
+                <span className='hidden sm:inline'>Salir</span>
+              </button>
+            ) : (
+              <Link
+                href='/login'
+                data-tour='auth-entry'
+                className='flex items-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+              >
+                <LogInIcon size={16} />
+                <span>Ingresar</span>
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
@@ -101,6 +124,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  data-tour={
+                    item.href === '/mis-reservas'
+                      ? 'client-nav-reservations'
+                      : undefined
+                  }
                   className={`flex-1 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 ease-spring ${
                     active
                       ? 'border-primary! text-primary!'

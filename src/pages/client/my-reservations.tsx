@@ -164,6 +164,7 @@ export function MyReservationsPage() {
       <div
         className='scrollbar-none flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
         style={{ animationDelay: '60ms' }}
+        data-tour='reservations-filters'
       >
         {filters.map((f) => (
           <button
@@ -226,6 +227,7 @@ export function MyReservationsPage() {
               key={r.id}
               className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
               style={{ '--index': index } as React.CSSProperties}
+              data-tour={index === 0 ? 'reservation-card' : undefined}
             >
               <div className='flex items-start justify-between gap-3 mb-2'>
                 <div className='min-w-0 flex-1'>
@@ -258,6 +260,9 @@ export function MyReservationsPage() {
                       href={buildReservationWhatsAppLink(r) ?? '#'}
                       target='_blank'
                       rel='noopener noreferrer'
+                      data-tour={
+                        index === 0 ? 'reservation-whatsapp' : undefined
+                      }
                       className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
                     >
                       <WhatsAppIcon size={18} />
@@ -269,6 +274,7 @@ export function MyReservationsPage() {
                     size='sm'
                     loading={cancellingId === r.id}
                     onClick={() => handleCancel(r.id)}
+                    data-tour={index === 0 ? 'reservation-cancel' : undefined}
                   >
                     Cancelar reserva
                   </Button>

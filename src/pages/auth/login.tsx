@@ -53,39 +53,45 @@ export function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-            <Input
-              label='Email'
-              type='email'
-              name='email'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder='tu@email.com'
-              required
-              autoComplete='email'
-              autoFocus
-              icon={<MailIcon size={18} />}
-            />
-            <Input
-              label='Contraseña'
-              type='password'
-              name='password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder='••••••••'
-              required
-              autoComplete='current-password'
-            />
+            <div data-tour='login-email'>
+              <Input
+                label='Email'
+                type='email'
+                name='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder='tu@email.com'
+                required
+                autoComplete='email'
+                autoFocus
+                icon={<MailIcon size={18} />}
+              />
+            </div>
+            <div data-tour='login-password'>
+              <Input
+                label='Contraseña'
+                type='password'
+                name='password'
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder='••••••••'
+                required
+                autoComplete='current-password'
+              />
+            </div>
 
             {error && <Alert variant='error'>{error}</Alert>}
 
-            <Button
-              type='submit'
-              loading={loading}
-              size='lg'
-              className='w-full'
-            >
-              Ingresar
-            </Button>
+            <div data-tour='login-submit'>
+              <Button
+                type='submit'
+                loading={loading}
+                size='lg'
+                className='w-full'
+              >
+                Ingresar
+              </Button>
+            </div>
           </form>
 
           <div className='mt-6 flex flex-col gap-2.5 text-sm text-center'>
@@ -95,7 +101,7 @@ export function LoginPage() {
             >
               ¿Olvidaste tu contraseña?
             </Link>
-            <p className='text-(--color-text-muted)'>
+            <p className='text-(--color-text-muted)' data-tour='register-link'>
               ¿No tienes cuenta?{' '}
               <Link
                 href='/registro'
