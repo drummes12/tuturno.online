@@ -68,14 +68,19 @@
 - Ambos roles tienen acceso al panel admin (confirmar/rechazar/cancelar reservas ambos, editar canchas, horarios, configuración solo owner)
 - Un cliente normal (sin membership) solo puede ver disponibilidad y crear/cancelar sus propias reservas
 
+### Operador de plataforma
+- `platform_admins` lista a los operadores; solo se siembra con service_role (`supabase/snippets/seed-platform-admin.sql`)
+- `is_platform_admin()` se usa en RLS; `assert_platform_admin()` se usa dentro de cada RPC sensible y además exige `aal2` (MFA) cuando la llamada viene por HTTP
+- Toda aprobación, rechazo o cambio de rol queda en `platform_audit_log`
+- El panel vive en `/plataforma` y se envuelve con `MfaGate`; el guard del frontend es cosmético, el límite real es el RPC
+
 ### Cómo crear una nueva organización en producción
-1. El usuario se registra normalmente desde la app (`https://tuturno.online/registro`)
-2. El operador obtiene su `user_id` desde el SQL Editor:
-   ```sql
-   select id, email from auth.users where email = 'owner@email.com';
-   ```
-3. El operador ejecuta el script `supabase/snippets/onboard-business.sql` desde el SQL Editor de Supabase, editando las variables `business_name`, `business_slug` y `owner_user_id`
+1. El usuario se registra desde la app (`https://tuturno.online/registro`) y envía su solicitud en `/crear-negocio`
+2. Se crea una fila en `business_signup_requests` y se encola el aviso al operador (el correo es solo la alerta; la fuente de verdad es la tabla)
+3. El operador aprueba desde `/plataforma`: `approve_business_signup` crea el negocio, vincula al owner y notifica
 4. El usuario ya puede entrar a `https://tuturno.online/b/{slug}` y a `/admin`
+
+Los snippets `onboard-business.sql` / `promote-user.sql` quedan como plan B si el panel no está disponible.
 
 ### Cómo añadir un manager a una organización existente
 1. El nuevo manager se registra desde la app

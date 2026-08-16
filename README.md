@@ -59,6 +59,8 @@ supabase/migrations/02100_clients_rls_search.sql
 supabase/migrations/02200_expire_notifications_clients.sql
 supabase/migrations/02300_normalize_phones_e164.sql
 supabase/migrations/02400_reservation_instructions.sql
+supabase/migrations/02500_whatsapp_link.sql
+supabase/migrations/02600_platform_onboarding.sql
 ```
 
 ### 3. Correos con Resend
@@ -81,22 +83,29 @@ Configura un cron en Supabase Dashboard para ejecutar la función cada 5 minutos
 
 El onboarding de nuevas organizaciones es controlado por el operador de la plataforma.
 
-1. El usuario se registra desde la app (`/registro`)
-2. Obtén su `user_id` desde el SQL Editor:
-   ```sql
-   select id, email from auth.users where email = 'owner@email.com';
-   ```
-3. Ejecuta el script de onboarding desde el SQL Editor de Supabase:
-   - Abre `supabase/snippets/onboard-business.sql`
-   - Edita las variables `business_name`, `business_slug` y `owner_user_id`
-   - Pégalo en el SQL Editor y ejecútalo
-4. El usuario ya puede acceder a:
+Alta única del operador (una sola vez, desde el SQL Editor con service_role):
+
+1. Regístrate en la app y activa MFA (TOTP) al entrar a `/plataforma`
+2. Ejecuta `supabase/snippets/seed-platform-admin.sql` con tu email
+
+No hay ninguna ruta desde la app para insertar en `platform_admins`, y todos los
+RPCs de plataforma exigen membresía en esa tabla **más** un JWT con `aal2`.
+
+Flujo de alta de un negocio:
+
+1. El usuario se registra desde la app (`/registro`) y envía su solicitud en `/crear-negocio`
+2. La solicitud queda en `business_signup_requests` y se encola un correo de aviso al operador
+3. El operador abre `/plataforma`, revisa la solicitud, corrige el slug si hace falta y aprueba
+4. `approve_business_signup` crea el negocio, vincula al owner, avisa por correo y deja registro en `platform_audit_log`
+5. El owner ya puede acceder a:
    - Página pública: `https://tuturno.online/b/{slug}`
    - Panel admin: `https://tuturno.online/admin`
 
-El script es idempotente y reserva el slug `demo` (no se puede usar para negocios reales).
+El slug se valida en el servidor (formato, unicidad y `reserved_slugs`), así que
+`demo` y las rutas de la app no se pueden tomar desde ningún camino de escritura.
 
-Para añadir managers adicionales a una organización existente, ver `AGENTS.md`.
+Los snippets `onboard-business.sql` y `promote-user.sql` quedan solo como plan B
+si el panel no está disponible; el camino normal es el panel.
 
 ### 5. Desarrollo
 

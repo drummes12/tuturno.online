@@ -121,6 +121,12 @@ export function LandingPage() {
           <p className='text-center text-xs text-(--color-text-muted)'>
             Recorre la experiencia completa sin crear reservas reales.
           </p>
+          <Link href='/crear-negocio'>
+            <Button size='md' variant='secondary' className='w-full'>
+              <StoreIcon size={18} />
+              Quiero TuTurno para mi negocio
+            </Button>
+          </Link>
         </section>
 
         {/* Divider */}

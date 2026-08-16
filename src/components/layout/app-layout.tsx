@@ -48,7 +48,7 @@ const adminNav: NavItem[] = [
 ]
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { user, isAdmin, signOut } = useAuthStore()
+  const { user, isAdmin, isPlatformAdmin, signOut } = useAuthStore()
   const [location] = useLocation()
   const { startTour, isStarting } = useClientTutorial()
 
@@ -105,6 +105,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <HelpIcon size={16} />
                 <span>{isStarting ? 'Abriendo…' : 'Guía'}</span>
               </button>
+            )}
+            {isPlatformAdmin && (
+              <Link
+                href='/plataforma'
+                className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
+                aria-label='Panel de plataforma'
+                title='Panel de plataforma'
+              >
+                <LockIcon size={16} />
+                <span className='hidden sm:inline'>Plataforma</span>
+              </Link>
             )}
             {isAdmin && <BusinessSelector />}
             {user ? (

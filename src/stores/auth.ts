@@ -10,6 +10,7 @@ interface AuthState {
   profile: Profile | null
   isAdmin: boolean
   isOwner: boolean
+  isPlatformAdmin: boolean
   loading: boolean
   error: string | null
   memberships: BusinessMembership[]
@@ -18,6 +19,7 @@ interface AuthState {
   setProfile: (profile: Profile | null) => void
   setIsAdmin: (isAdmin: boolean) => void
   setIsOwner: (isOwner: boolean) => void
+  setIsPlatformAdmin: (isPlatformAdmin: boolean) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   setMemberships: (memberships: BusinessMembership[]) => void
@@ -31,6 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   profile: null,
   isAdmin: false,
   isOwner: false,
+  isPlatformAdmin: false,
   loading: true,
   error: null,
   memberships: [],
@@ -39,6 +42,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setProfile: (profile) => set({ profile }),
   setIsAdmin: (isAdmin) => set({ isAdmin }),
   setIsOwner: (isOwner) => set({ isOwner }),
+  setIsPlatformAdmin: (isPlatformAdmin) => set({ isPlatformAdmin }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
   setMemberships: (memberships) =>
@@ -56,6 +60,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       profile: null,
       isAdmin: false,
       isOwner: false,
+      isPlatformAdmin: false,
       memberships: [],
       activeBusinessId: null
     })

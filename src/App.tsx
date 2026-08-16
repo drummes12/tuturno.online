@@ -25,6 +25,11 @@ import { AdminHoursPage } from '@/pages/admin/hours'
 import { AdminConfigPage } from '@/pages/admin/config'
 import { AdminExceptionsPage } from '@/pages/admin/exceptions'
 
+// Onboarding y plataforma
+import { CreateBusinessPage } from '@/pages/business/create-business'
+import { PlatformDashboardPage } from '@/pages/platform/dashboard'
+import { MfaGate } from '@/components/platform/mfa-gate'
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
   if (!user) {
@@ -44,6 +49,22 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
     return <Redirect to='/' />
   }
   return <>{children}</>
+}
+
+/**
+ * Panel de operador de la plataforma.
+ * El guard es cosmético: los RPCs revalidan operador + MFA en el servidor.
+ */
+function PlatformRoute({ children }: { children: React.ReactNode }) {
+  const { user, isPlatformAdmin } = useAuthStore()
+  if (!user) {
+    const fullPath = window.location.pathname + window.location.search
+    return <Redirect to={`/login?next=${encodeURIComponent(fullPath)}`} />
+  }
+  if (!isPlatformAdmin) {
+    return <Redirect to='/' />
+  }
+  return <MfaGate>{children}</MfaGate>
 }
 
 /**
@@ -106,6 +127,20 @@ export default function App() {
               <MyReservationsPage slug={params.slug} />
             </ProtectedRoute>
           )}
+        </Route>
+
+        {/* Onboarding de negocios */}
+        <Route path='/crear-negocio'>
+          <ProtectedRoute>
+            <CreateBusinessPage />
+          </ProtectedRoute>
+        </Route>
+
+        {/* Panel de plataforma (operador) */}
+        <Route path='/plataforma'>
+          <PlatformRoute>
+            <PlatformDashboardPage />
+          </PlatformRoute>
         </Route>
 
         {/* Admin */}
