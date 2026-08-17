@@ -26,70 +26,55 @@ beforeEach(() => {
 })
 
 describe('fetchBusinessMembers', () => {
-  it('happy path: retorna miembros con email resuelto', async () => {
-    const memberRows = [
-      {
-        business_id: 'biz-1',
-        user_id: 'user-1',
-        role: 'owner',
-        joined_at: '2025-01-01T00:00:00Z',
-        profiles: { full_name: 'Juan Pérez' }
-      },
-      {
-        business_id: 'biz-1',
-        user_id: 'user-2',
-        role: 'manager',
-        joined_at: '2025-02-01T00:00:00Z',
-        profiles: { full_name: 'Ana López' }
-      }
-    ]
-    chain = createQueryChain({ data: memberRows, error: null })
-    mockFrom.mockReturnValue(chain)
-
-    // Mock del segundo call (resolve_member_emails RPC)
+  it('happy path: retorna miembros con email y nombre', async () => {
     mockRpc.mockResolvedValue({
       data: [
-        { uid: 'user-1', mail: 'juan@test.com' },
-        { uid: 'user-2', mail: 'ana@test.com' }
-      ],
-      error: null
-    })
-
-    const result = await fetchBusinessMembers('biz-1')
-
-    expect(result).toHaveLength(2)
-    expect(result[0].email).toBe('juan@test.com')
-    expect(result[0].full_name).toBe('Juan Pérez')
-    expect(result[0].role).toBe('owner')
-    expect(result[1].email).toBe('ana@test.com')
-    expect(result[1].role).toBe('manager')
-  })
-
-  it('propaga errores de la consulta', async () => {
-    chain = createQueryChain({ data: null, error: { message: 'RLS denied' } })
-    mockFrom.mockReturnValue(chain)
-
-    await expect(fetchBusinessMembers('biz-1')).rejects.toThrow('RLS denied')
-  })
-
-  it('maneja email no disponible gracefully', async () => {
-    chain = createQueryChain({
-      data: [
         {
-          business_id: 'biz-1',
-          user_id: 'user-1',
+          uid: 'user-1',
           role: 'owner',
           joined_at: '2025-01-01T00:00:00Z',
-          profiles: { full_name: 'Juan' }
+          mail: 'juan@test.com',
+          full_name: 'Juan Pérez'
+        },
+        {
+          uid: 'user-2',
+          role: 'manager',
+          joined_at: '2025-02-01T00:00:00Z',
+          mail: 'ana@test.com',
+          full_name: 'Ana López'
         }
       ],
       error: null
     })
-    mockFrom.mockReturnValue(chain)
+
+    const result = await fetchBusinessMembers('biz-1')
+
+    expect(mockRpc).toHaveBeenCalledWith('resolve_member_details', {
+      p_business_id: 'biz-1'
+    })
+    expect(result).toHaveLength(2)
+    expect(result[0].email).toBe('juan@test.com')
+    expect(result[0].full_name).toBe('Juan Pérez')
+    expect(result[0].role).toBe('owner')
+    expect(result[0].business_id).toBe('biz-1')
+    expect(result[1].email).toBe('ana@test.com')
+    expect(result[1].role).toBe('manager')
+  })
+
+  it('propaga errores de la RPC', async () => {
+    mockRpc.mockResolvedValue({
+      data: null,
+      error: { message: 'Sin permisos.' }
+    })
+
+    await expect(fetchBusinessMembers('biz-1')).rejects.toThrow('Sin permisos')
+  })
+
+  it('maneja lista vacía', async () => {
     mockRpc.mockResolvedValue({ data: [], error: null })
 
     const result = await fetchBusinessMembers('biz-1')
-    expect(result[0].email).toBe('(email no disponible)')
+    expect(result).toEqual([])
   })
 })
 
@@ -152,8 +137,8 @@ describe('findUserByEmailForInvite', () => {
     mockRpc.mockResolvedValue({
       data: [
         {
-          user_id: 'user-3',
-          email: 'persona@test.com',
+          uid: 'user-3',
+          mail: 'persona@test.com',
           full_name: 'Persona Test'
         }
       ],

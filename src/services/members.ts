@@ -11,65 +11,37 @@ export type BusinessMember = {
 }
 
 /**
- * Lista los miembros del negocio activo, incluyendo email y nombre
- * desde auth.users y profiles. Solo owners pueden ver todos los
- * miembros (RLS lo impone); los managers ven solo su propia fila.
+ * Lista los miembros del negocio activo, incluyendo email y nombre.
+ * Usa una RPC SECURITY DEFINER (resolve_member_details) que lee
+ * business_members + auth.users + profiles sin que RLS de profiles
+ * filtre filas (la policy de profiles solo permite leer perfiles
+ * propios o de usuarios que reservaron, no de otros miembros).
  */
 export async function fetchBusinessMembers(
   businessId: string
 ): Promise<BusinessMember[]> {
-  const { data, error } = await supabase
-    .from('business_members')
-    .select('business_id, user_id, role, joined_at, profiles!inner(full_name)')
-    .eq('business_id', businessId)
-    .order('joined_at', { ascending: true })
+  const { data, error } = await supabase.rpc('resolve_member_details', {
+    p_business_id: businessId
+  })
 
   if (error) throw error
 
-  // auth.users no es accesible vía RLS desde el cliente para usuarios
-  // arbitrarios, pero los business members pueden leer perfiles de
-  // usuarios que reservan en su negocio (policy en 00500). Para el email,
-  // usamos una RPC que lo resuelve server-side.
-  const rows = (data ?? []) as unknown as Array<{
-    business_id: string
-    user_id: string
+  const rows = (data ?? []) as Array<{
+    uid: string
     role: BusinessRole
     joined_at: string
-    profiles:
-      | { full_name: string | null }
-      | { full_name: string | null }[]
-      | null
+    mail: string
+    full_name: string | null
   }>
 
-  // Resolver emails en lote vía la función helper
-  const userIds = rows.map((r) => r.user_id)
-  let emailMap: Record<string, string> = {}
-  if (userIds.length > 0) {
-    const { data: emailRows, error: emailError } = await supabase.rpc(
-      'resolve_member_emails',
-      { p_user_ids: userIds }
-    )
-    if (!emailError && emailRows) {
-      emailMap = Object.fromEntries(
-        (emailRows as Array<{ uid: string; mail: string }>).map((r) => [
-          r.uid,
-          r.mail
-        ])
-      )
-    }
-  }
-
-  return rows.map((r) => {
-    const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles
-    return {
-      business_id: r.business_id,
-      user_id: r.user_id,
-      role: r.role,
-      joined_at: r.joined_at,
-      email: emailMap[r.user_id] ?? '(email no disponible)',
-      full_name: profile?.full_name ?? null
-    }
-  })
+  return rows.map((r) => ({
+    business_id: businessId,
+    user_id: r.uid,
+    role: r.role,
+    joined_at: r.joined_at,
+    email: r.mail,
+    full_name: r.full_name
+  }))
 }
 
 /**
@@ -121,9 +93,14 @@ export async function findUserByEmailForInvite(email: string): Promise<{
   })
   if (error) throw error
   const rows = data as Array<{
-    user_id: string
-    email: string
+    uid: string
+    mail: string
     full_name: string | null
   }>
-  return rows[0] ?? null
+  if (!rows[0]) return null
+  return {
+    user_id: rows[0].uid,
+    email: rows[0].mail,
+    full_name: rows[0].full_name || null
+  }
 }

@@ -7,45 +7,51 @@
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
--- 1. resolve_member_emails: dado un array de user_ids, devuelve sus emails.
---    Necesario porque auth.users no es accesible vía RLS desde el cliente
---    para usuarios arbitrarios. SECURITY DEFINER para leer auth.users.
---    Valida que el llamante sea miembro de al menos un negocio en común
---    con los user_ids consultados, para no exponer emails arbitrarios.
+-- 1. resolve_member_details: lista los miembros de un negocio con email y
+--    nombre. Necesario porque:
+--    - auth.users no es accesible vía RLS desde el cliente
+--    - profiles solo es legible para perfiles propios o de usuarios que
+--      reservaron en el negocio (no de otros miembros)
+--    SECURITY DEFINER resuelve ambos sin que RLS filtre filas.
+--    Valida que el llamante sea miembro del negocio consultado.
 -- -----------------------------------------------------------------------------
-create or replace function public.resolve_member_emails(p_user_ids uuid[])
-returns table(uid uuid, mail text)
+create or replace function public.resolve_member_details(p_business_id uuid)
+returns table(
+  uid uuid,
+  role business_role,
+  joined_at timestamptz,
+  mail text,
+  full_name text
+)
 language plpgsql
 security definer set search_path = public, auth
 as $$
 begin
-  -- El llamante debe ser miembro de algún negocio. Si no lo es, no tiene
-  -- razón para ver emails de nadie.
+  -- El llamante debe ser miembro del negocio consultado.
   if not exists (
-    select 1 from public.business_members bm where bm.user_id = auth.uid()
+    select 1 from public.business_members bm
+    where bm.business_id = p_business_id
+      and bm.user_id = auth.uid()
   ) then
     raise exception 'Sin permisos.' using errcode = '42501';
   end if;
 
   return query
-  select au.id as uid, au.email::text as mail
-  from auth.users au
-  where au.id = any(p_user_ids)
-    -- Solo devolver emails de usuarios que son miembros de algún negocio
-    -- del que el llamante también es miembro. Esto evita que un owner
-    -- del negocio A vea emails de miembros del negocio B.
-    and exists (
-      select 1 from public.business_members bm_c
-      join public.business_members bm_t
-        on bm_t.business_id = bm_c.business_id
-      where bm_c.user_id = auth.uid()
-        and bm_t.user_id = au.id
-    );
+  select bm.user_id as uid,
+         bm.role as role,
+         bm.joined_at as joined_at,
+         au.email::text as mail,
+         coalesce(p.full_name, '')::text as full_name
+  from public.business_members bm
+  join auth.users au on au.id = bm.user_id
+  left join public.profiles p on p.id = bm.user_id
+  where bm.business_id = p_business_id
+  order by bm.joined_at asc;
 end;
 $$;
 
-revoke all on function public.resolve_member_emails(uuid[]) from public;
-grant execute on function public.resolve_member_emails(uuid[]) to authenticated;
+revoke all on function public.resolve_member_details(uuid) from public;
+grant execute on function public.resolve_member_details(uuid) to authenticated;
 
 -- -----------------------------------------------------------------------------
 -- 2. find_user_for_invite: busca un usuario por email para invitarlo como
@@ -56,7 +62,7 @@ grant execute on function public.resolve_member_emails(uuid[]) to authenticated;
 --    añadir al usuario la hace la RLS de business_members al insertar.
 -- -----------------------------------------------------------------------------
 create or replace function public.find_user_for_invite(p_email text)
-returns table(user_id uuid, email text, full_name text)
+returns table(uid uuid, mail text, full_name text)
 language plpgsql
 security definer set search_path = public, auth
 as $$
@@ -73,9 +79,9 @@ begin
   end if;
 
   return query
-  select au.id as user_id,
-         au.email::text as email,
-         p.full_name::text as full_name
+  select au.id as uid,
+         au.email::text as mail,
+         coalesce(p.full_name, '')::text as full_name
   from auth.users au
   left join public.profiles p on p.id = au.id
   where lower(au.email) = p_email
