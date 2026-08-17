@@ -26,7 +26,6 @@ const DB_AVAILABLE = await isDbAvailable()
 let PLATFORM_ADMIN_ID = ''
 let NORMAL_USER_ID = ''
 let DEMO_BUSINESS_ID = ''
-let DEMO_RESOURCE_ID = ''
 
 beforeAll(async () => {
   if (!DB_AVAILABLE) {
@@ -70,13 +69,6 @@ beforeAll(async () => {
   )
   if (demoResult.rows.length > 0) {
     DEMO_BUSINESS_ID = demoResult.rows[0].id as string
-    const resourceResult = await query(
-      `select id from public.resources where business_id = $1 and is_active = true limit 1`,
-      [DEMO_BUSINESS_ID]
-    )
-    if (resourceResult.rows.length > 0) {
-      DEMO_RESOURCE_ID = resourceResult.rows[0].id as string
-    }
   }
 })
 
