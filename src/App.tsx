@@ -24,6 +24,7 @@ import { AdminResourcesPage } from '@/pages/admin/resources'
 import { AdminHoursPage } from '@/pages/admin/hours'
 import { AdminConfigPage } from '@/pages/admin/config'
 import { AdminExceptionsPage } from '@/pages/admin/exceptions'
+import { AdminTeamPage } from '@/pages/admin/team'
 
 // Onboarding y plataforma
 import { CreateBusinessPage } from '@/pages/business/create-business'
@@ -172,6 +173,11 @@ export default function App() {
         <Route path='/admin/excepciones'>
           <AdminRoute>
             <AdminExceptionsPage />
+          </AdminRoute>
+        </Route>
+        <Route path='/admin/equipo'>
+          <AdminRoute>
+            <AdminTeamPage />
           </AdminRoute>
         </Route>
 

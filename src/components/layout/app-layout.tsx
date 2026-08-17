@@ -11,7 +11,8 @@ import {
   LogOutIcon,
   LogInIcon,
   LockIcon,
-  HelpIcon
+  HelpIcon,
+  UsersIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
@@ -39,6 +40,11 @@ const adminNav: NavItem[] = [
     label: 'Cierres',
     href: '/admin/excepciones',
     icon: <LockIcon size={22} />
+  },
+  {
+    label: 'Equipo',
+    href: '/admin/equipo',
+    icon: <UsersIcon size={22} />
   },
   {
     label: 'Configuración',
