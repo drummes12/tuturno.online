@@ -49,8 +49,8 @@ describe('fetchBusinessMembers', () => {
     // Mock del segundo call (resolve_member_emails RPC)
     mockRpc.mockResolvedValue({
       data: [
-        { user_id: 'user-1', email: 'juan@test.com' },
-        { user_id: 'user-2', email: 'ana@test.com' }
+        { uid: 'user-1', mail: 'juan@test.com' },
+        { uid: 'user-2', mail: 'ana@test.com' }
       ],
       error: null
     })

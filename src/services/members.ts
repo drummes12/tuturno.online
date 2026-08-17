@@ -51,9 +51,9 @@ export async function fetchBusinessMembers(
     )
     if (!emailError && emailRows) {
       emailMap = Object.fromEntries(
-        (emailRows as Array<{ user_id: string; email: string }>).map((r) => [
-          r.user_id,
-          r.email
+        (emailRows as Array<{ uid: string; mail: string }>).map((r) => [
+          r.uid,
+          r.mail
         ])
       )
     }
