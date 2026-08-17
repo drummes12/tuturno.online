@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { signOut as signOutService } from '@/services/auth'
+import { fetchBusinessMemberships } from '@/services/profiles'
+import { fetchIsPlatformAdmin } from '@/services/platform'
 import type { Profile } from '@/types'
 import type { BusinessMembership } from '@/services/profiles'
 
@@ -10,6 +12,7 @@ interface AuthState {
   profile: Profile | null
   isAdmin: boolean
   isOwner: boolean
+  isPlatformAdmin: boolean
   loading: boolean
   error: string | null
   memberships: BusinessMembership[]
@@ -18,10 +21,12 @@ interface AuthState {
   setProfile: (profile: Profile | null) => void
   setIsAdmin: (isAdmin: boolean) => void
   setIsOwner: (isOwner: boolean) => void
+  setIsPlatformAdmin: (isPlatformAdmin: boolean) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   setMemberships: (memberships: BusinessMembership[]) => void
   setActiveBusinessId: (businessId: string | null) => void
+  refreshMemberships: (userId: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -31,6 +36,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   profile: null,
   isAdmin: false,
   isOwner: false,
+  isPlatformAdmin: false,
   loading: true,
   error: null,
   memberships: [],
@@ -39,6 +45,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   setProfile: (profile) => set({ profile }),
   setIsAdmin: (isAdmin) => set({ isAdmin }),
   setIsOwner: (isOwner) => set({ isOwner }),
+  setIsPlatformAdmin: (isPlatformAdmin) => set({ isPlatformAdmin }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
   setMemberships: (memberships) =>
@@ -48,6 +55,20 @@ export const useAuthStore = create<AuthState>((set) => ({
         memberships.length > 0 ? memberships[0].businessId : null
     }),
   setActiveBusinessId: (businessId) => set({ activeBusinessId: businessId }),
+  refreshMemberships: async (userId) => {
+    const [memberships, isPlatformAdmin] = await Promise.all([
+      fetchBusinessMemberships(userId),
+      fetchIsPlatformAdmin()
+    ])
+    set({
+      memberships,
+      isAdmin: memberships.length > 0,
+      isOwner: memberships.some((m) => m.role === 'owner'),
+      isPlatformAdmin,
+      activeBusinessId:
+        memberships.length > 0 ? memberships[0].businessId : null
+    })
+  },
   signOut: async () => {
     await signOutService()
     set({
@@ -56,6 +77,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       profile: null,
       isAdmin: false,
       isOwner: false,
+      isPlatformAdmin: false,
       memberships: [],
       activeBusinessId: null
     })

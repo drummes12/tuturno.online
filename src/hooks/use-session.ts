@@ -6,6 +6,7 @@ import {
   fetchBusinessMemberships,
   type BusinessMembership
 } from '@/services/profiles'
+import { fetchIsPlatformAdmin } from '@/services/platform'
 import type { Profile } from '@/types'
 
 /**
@@ -23,6 +24,7 @@ export function useSession() {
     setProfile,
     setIsAdmin,
     setIsOwner,
+    setIsPlatformAdmin,
     setMemberships,
     setLoading
   } = useAuthStore()
@@ -41,6 +43,7 @@ export function useSession() {
           setProfile,
           setIsAdmin,
           setIsOwner,
+          setIsPlatformAdmin,
           setMemberships
         )
       }
@@ -73,12 +76,14 @@ export function useSession() {
           setProfile,
           setIsAdmin,
           setIsOwner,
+          setIsPlatformAdmin,
           setMemberships
         )
       } else {
         setProfile(null)
         setIsAdmin(false)
         setIsOwner(false)
+        setIsPlatformAdmin(false)
         setMemberships([])
       }
 
@@ -94,6 +99,7 @@ export function useSession() {
     setProfile,
     setIsAdmin,
     setIsOwner,
+    setIsPlatformAdmin,
     setMemberships,
     setLoading
   ])
@@ -106,6 +112,7 @@ async function loadProfileAndRole(
   setProfile: (p: Profile | null) => void,
   setIsAdmin: (v: boolean) => void,
   setIsOwner: (v: boolean) => void,
+  setIsPlatformAdmin: (v: boolean) => void,
   setMemberships: (m: BusinessMembership[]) => void
 ) {
   const profileData = await fetchProfile(userId)
@@ -115,4 +122,5 @@ async function loadProfileAndRole(
   setMemberships(memberships)
   setIsAdmin(memberships.length > 0)
   setIsOwner(memberships.some((m) => m.role === 'owner'))
+  setIsPlatformAdmin(await fetchIsPlatformAdmin())
 }

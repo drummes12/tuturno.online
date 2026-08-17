@@ -218,11 +218,72 @@ describe('Email templates', () => {
     })
   })
 
+  describe('business_signup_requested', () => {
+    it('lleva al operador al panel de plataforma con los datos del negocio', () => {
+      const { subject, html } = templates.business_signup_requested({
+        ...validPayload,
+        desired_slug: 'canchas-el-parque',
+        city: 'Medellín',
+        business_type: 'Canchas sintéticas'
+      })
+      expect(subject).toContain('Nueva solicitud de negocio')
+      expect(html).toContain('/b/canchas-el-parque')
+      expect(html).toContain('Medellín')
+      expect(html).toContain(`${APP_URL}/plataforma`)
+    })
+
+    it('escapa HTML en los campos controlados por el solicitante', () => {
+      const { html } = templates.business_signup_requested({
+        ...validPayload,
+        business_name: '<script>alert(1)</script>',
+        desired_slug: 'x',
+        city: '<b>Bogotá</b>',
+        business_type: 'Cancha',
+        contact_phone: '+57 300',
+        notes: '<img src=x onerror=alert(1)>'
+      })
+      expect(html).not.toContain('<script>alert(1)</script>')
+      expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
+      expect(html).not.toContain('<b>Bogotá</b>')
+      expect(html).toContain('&lt;b&gt;Bogotá&lt;/b&gt;')
+      expect(html).not.toContain('<img src=x onerror=alert(1)>')
+      expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;')
+    })
+  })
+
+  describe('business_approved', () => {
+    it('incluye la página pública y el enlace al panel', () => {
+      const { subject, html } = templates.business_approved({
+        ...validPayload,
+        slug: 'canchas-el-parque'
+      })
+      expect(subject).toContain('Canchas El Parque')
+      expect(html).toContain(`${APP_URL}/b/canchas-el-parque`)
+      expect(html).toContain(`${APP_URL}/admin`)
+    })
+  })
+
+  describe('business_rejected', () => {
+    it('muestra el motivo y ofrece enviar otra solicitud', () => {
+      const { html } = templates.business_rejected(validPayload)
+      expect(html).toContain('Cancha en mantenimiento')
+      expect(html).toContain(`${APP_URL}/crear-negocio`)
+    })
+
+    it('omite el motivo cuando no se envía', () => {
+      const { html } = templates.business_rejected({
+        ...validPayload,
+        reason: undefined
+      })
+      expect(html).not.toContain('Motivo')
+    })
+  })
+
   describe('todas las plantillas', () => {
     const templateNames = Object.keys(templates)
 
-    it('hay 9 plantillas definidas', () => {
-      expect(templateNames).toHaveLength(9)
+    it('hay 12 plantillas definidas', () => {
+      expect(templateNames).toHaveLength(12)
     })
 
     it('cada plantilla retorna { subject, html }', () => {
@@ -279,6 +340,19 @@ describe('Email templates', () => {
         // El botón CTA usa bgcolor="#0a7d3b" (pitch-700)
         expect(html).toContain('#0a7d3b')
         expect(html).toContain('target="_blank"')
+      }
+    })
+
+    it('escapa recipient_name en el body para evitar XSS', () => {
+      const xssPayload = {
+        ...validPayload,
+        recipient_name: '<script>alert("xss")</script>'
+      }
+      for (const name of templateNames) {
+        const { html } = templates[name](xssPayload)
+        // El nombre del destinatario nunca debe renderizarse como markup crudo
+        if (html.includes('recipient_name')) continue
+        expect(html).not.toContain('<script>alert("xss")</script>')
       }
     })
   })

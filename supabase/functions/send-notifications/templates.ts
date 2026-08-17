@@ -14,6 +14,12 @@ export interface TemplatePayload {
   client_name?: string
   client_email?: string
   reason?: string
+  desired_slug?: string
+  slug?: string
+  city?: string
+  business_type?: string
+  contact_phone?: string
+  notes?: string
 }
 
 export type TemplateResult = { subject: string; html: string }
@@ -30,12 +36,22 @@ function formatDate(iso: string): string {
   })
 }
 
+/** Escapa caracteres HTML para evitar XSS en campos controlados por el usuario. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 /** Fila de detalle para la lista de datos de la reserva. */
 function detailRow(label: string, value: string): string {
   return `
     <tr>
-      <td style="padding:6px 0;color:#6b7280;font-size:14px;width:40%;vertical-align:top;">${label}</td>
-      <td style="padding:6px 0;color:#1a1a1a;font-size:14px;font-weight:600;vertical-align:top;">${value}</td>
+      <td style="padding:6px 0;color:#6b7280;font-size:14px;width:40%;vertical-align:top;">${escapeHtml(label)}</td>
+      <td style="padding:6px 0;color:#1a1a1a;font-size:14px;font-weight:600;vertical-align:top;">${escapeHtml(value)}</td>
     </tr>`
 }
 
@@ -140,7 +156,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
           preheader: 'Tu solicitud está pendiente de confirmación',
           heading: 'Solicitud recibida',
           bodyHtml: `
-            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${p.recipient_name ?? ''}</strong>,</p>
+            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>,</p>
             <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Tu solicitud de reserva está <strong style="color:#b45309;">pendiente de confirmación</strong>. Te avisaremos en cuanto el negocio la revise.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
           cta: {
@@ -161,7 +177,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
       return {
         subject: `Nueva solicitud de reserva — ${p.client_name}`,
         html: emailWrapper(appUrl, {
-          preheader: `Nueva solicitud de ${p.client_name}`,
+          preheader: `Nueva solicitud de ${escapeHtml(p.client_name ?? '')}`,
           heading: 'Nueva solicitud de reserva',
           bodyHtml: `
             <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Tienes una nueva solicitud esperando confirmación.</p>
@@ -206,7 +222,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
           preheader: '¡Tu reserva fue confirmada!',
           heading: '¡Reserva confirmada!',
           bodyHtml: `
-            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${p.recipient_name ?? ''}</strong>, tu reserva fue confirmada.</p>
+            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>, tu reserva fue confirmada.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
           cta: {
             href: link(appUrl, '/mis-reservas'),
@@ -229,7 +245,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
           preheader: 'Tu solicitud fue rechazada',
           heading: 'Reserva rechazada',
           bodyHtml: `
-            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${p.recipient_name ?? ''}</strong>, tu solicitud fue rechazada por el negocio.</p>
+            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>, tu solicitud fue rechazada por el negocio.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}${reasonRow}</table>
             <p style="margin:16px 0 0;font-size:15px;color:#374151;line-height:1.6;">Puedes solicitar otro turno cuando quieras.</p>`,
           cta: { href: link(appUrl, '/'), label: 'Buscar otro turno' }
@@ -265,7 +281,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
       return {
         subject: `Reserva cancelada por el cliente — ${p.client_name}`,
         html: emailWrapper(appUrl, {
-          preheader: `${p.client_name} canceló su reserva`,
+          preheader: `${escapeHtml(p.client_name ?? '')} canceló su reserva`,
           heading: 'Reserva cancelada por el cliente',
           bodyHtml: `
             <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">El cliente canceló su reserva.</p>
@@ -291,7 +307,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
           preheader: 'El negocio canceló tu reserva',
           heading: 'Reserva cancelada por el negocio',
           bodyHtml: `
-            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${p.recipient_name ?? ''}</strong>, el negocio canceló tu reserva.</p>
+            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>, el negocio canceló tu reserva.</p>
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}${reasonRow}</table>
             <p style="margin:16px 0 0;font-size:15px;color:#374151;line-height:1.6;">Puedes solicitar otro turno cuando quieras.</p>`,
           cta: { href: link(appUrl, '/'), label: 'Buscar otro turno' }
@@ -315,6 +331,67 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>
             <p style="margin:16px 0 0;font-size:15px;color:#374151;line-height:1.6;">Puedes solicitar un nuevo turno cuando quieras.</p>`,
           cta: { href: link(appUrl, '/'), label: 'Buscar otro turno' }
+        })
+      }
+    },
+
+    business_signup_requested: (p) => {
+      const details = [
+        detailRow('Negocio', p.business_name ?? ''),
+        detailRow('Enlace solicitado', `/b/${p.desired_slug ?? ''}`),
+        p.business_type ? detailRow('Tipo', p.business_type) : '',
+        p.city ? detailRow('Ciudad', p.city) : '',
+        p.contact_phone ? detailRow('Teléfono', p.contact_phone) : '',
+        p.notes ? detailRow('Notas', p.notes) : ''
+      ].join('')
+      return {
+        subject: `Nueva solicitud de negocio — ${p.business_name}`,
+        html: emailWrapper(appUrl, {
+          preheader: `${escapeHtml(p.business_name ?? '')} quiere activar su cuenta`,
+          heading: 'Nueva solicitud de negocio',
+          bodyHtml: `
+            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Revisa la solicitud en el panel de plataforma y apruébala o recházala desde ahí.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
+          cta: { href: link(appUrl, '/plataforma'), label: 'Revisar solicitud' }
+        })
+      }
+    },
+
+    business_approved: (p) => {
+      const details = [
+        detailRow('Negocio', p.business_name ?? ''),
+        detailRow('Página pública', link(appUrl, `/b/${p.slug ?? ''}`))
+      ].join('')
+      return {
+        subject: `Tu negocio ya está activo — ${p.business_name}`,
+        html: emailWrapper(appUrl, {
+          preheader: 'Ya puedes configurar tus espacios y horarios',
+          heading: '¡Tu negocio ya está activo!',
+          bodyHtml: `
+            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>,</p>
+            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Creamos tu negocio en TuTurno. El siguiente paso es cargar tus espacios y tus horarios para empezar a recibir reservas.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${details}</table>`,
+          cta: { href: link(appUrl, '/admin'), label: 'Configurar mi negocio' }
+        })
+      }
+    },
+
+    business_rejected: (p) => {
+      const reasonRow = p.reason ? detailRow('Motivo', p.reason) : ''
+      return {
+        subject: `Sobre tu solicitud — ${p.business_name}`,
+        html: emailWrapper(appUrl, {
+          preheader: 'No pudimos activar tu negocio por ahora',
+          heading: 'No pudimos activar tu negocio',
+          bodyHtml: `
+            <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>,</p>
+            <p style="margin:0 0 20px;font-size:15px;color:#374151;line-height:1.6;">Revisamos tu solicitud para <strong>${escapeHtml(p.business_name ?? '')}</strong> y por ahora no podemos activarla.</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${reasonRow}</table>
+            <p style="margin:16px 0 0;font-size:15px;color:#374151;line-height:1.6;">Si crees que fue un error, responde este correo y lo revisamos contigo.</p>`,
+          cta: {
+            href: link(appUrl, '/crear-negocio'),
+            label: 'Enviar otra solicitud'
+          }
         })
       }
     }

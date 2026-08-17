@@ -28,6 +28,15 @@ export type NotificationType =
   | 'reservation_cancelled_business'
   | 'reservation_cancelled_by_business'
   | 'reservation_expired'
+  | 'business_signup_requested'
+  | 'business_approved'
+  | 'business_rejected'
+
+export type SignupRequestStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled'
 
 export interface Profile {
   id: string
@@ -166,6 +175,58 @@ export interface NotificationOutbox {
   idempotency_key: string
   created_at: string
   sent_at: string | null
+}
+
+export interface SignupRequest {
+  id: string
+  user_id: string
+  business_name: string
+  desired_slug: string
+  business_type: string | null
+  contact_phone: string | null
+  city: string | null
+  notes: string | null
+  status: SignupRequestStatus
+  rejection_reason: string | null
+  business_id: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SlugAvailability {
+  available: boolean
+  reason: 'invalid_format' | 'reserved' | 'taken' | null
+}
+
+export interface PlatformBusinessOverview {
+  business_id: string
+  name: string
+  slug: string
+  is_demo: boolean
+  member_count: number
+  resource_count: number
+  reservation_count: number
+  last_reservation_at: string | null
+  created_at: string
+}
+
+export interface PlatformUser {
+  user_id: string
+  email: string
+  full_name: string | null
+  created_at: string
+}
+
+export interface PlatformAuditEntry {
+  id: string
+  actor_id: string | null
+  action: string
+  target_type: string
+  target_id: string | null
+  payload: Record<string, unknown>
+  created_at: string
 }
 
 /** Slot de disponibilidad calculado para un recurso */

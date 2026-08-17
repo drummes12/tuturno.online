@@ -5,12 +5,22 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string | null
   hint?: string
   icon?: ReactNode
+  wrapperClassName?: string
 }
 
-export function Input({ label, error, hint, icon, className = '', id, ...props }: InputProps) {
+export function Input({
+  label,
+  error,
+  hint,
+  icon,
+  className = '',
+  wrapperClassName = '',
+  id,
+  ...props
+}: InputProps) {
   const inputId = id ?? props.name ?? label.toLowerCase().replace(/\s+/g, '-')
   return (
-    <div className='flex flex-col gap-1.5'>
+    <div className={`flex flex-col gap-1.5 ${wrapperClassName}`}>
       <label
         htmlFor={inputId}
         className='text-sm font-medium text-(--color-text) tracking-tight'
