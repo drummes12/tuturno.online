@@ -273,6 +273,7 @@ export function AdminHoursPage() {
           return (
             <Card
               key={dayIdx}
+              data-tour={dayIdx === 1 ? 'admin-hours-day' : undefined}
               className={`p-0 overflow-hidden animate-fade-up ${hasOverlap ? 'border-red-300' : ''}`}
               style={{ animationDelay: `${dayIdx * 20}ms` }}
             >
@@ -312,6 +313,7 @@ export function AdminHoursPage() {
                 {isActive && canEdit && (
                   <button
                     onClick={() => addFranja(dayIdx)}
+                    data-tour={dayIdx === 1 ? 'admin-hours-add' : undefined}
                     className='ml-auto flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-50 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
                     aria-label={`Agregar franja a ${dayName}`}
                   >
@@ -466,6 +468,7 @@ export function AdminHoursPage() {
             onClick={handleSave}
             disabled={hasOverlaps || !canEdit}
             size='lg'
+            data-tour='admin-hours-save'
           >
             Guardar horarios
           </Button>

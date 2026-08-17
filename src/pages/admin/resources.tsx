@@ -150,7 +150,7 @@ export function AdminResourcesPage() {
           </p>
         </div>
         {!showForm && canEdit && (
-          <Button size='sm' onClick={startNew}>
+          <Button size='sm' onClick={startNew} data-tour='admin-resource-new'>
             <PlusIcon size={16} />
             <span className='hidden sm:inline'>Nuevo recurso</span>
             <span className='sm:hidden'>Nuevo</span>
@@ -243,6 +243,7 @@ export function AdminResourcesPage() {
           {resources.map((resource, index) => (
             <Card
               key={resource.id}
+              data-tour={index === 0 ? 'admin-resource-card' : undefined}
               className={`p-4 animate-stagger ${!resource.is_active ? 'opacity-60' : ''}`}
               style={{ '--index': index } as React.CSSProperties}
             >
@@ -268,6 +269,9 @@ export function AdminResourcesPage() {
                   {canEdit && (
                     <button
                       onClick={() => toggleActive(resource)}
+                      data-tour={
+                        index === 0 ? 'admin-resource-toggle' : undefined
+                      }
                       className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${resource.is_active ? 'bg-primary' : 'bg-graphite-300'}`}
                       aria-label={`${resource.is_active ? 'Desactivar' : 'Activar'} ${resource.name}`}
                       aria-pressed={resource.is_active}

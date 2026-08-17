@@ -352,7 +352,7 @@ export function AdminConfigPage() {
               </div>
               <div className='flex flex-col gap-4'>
                 {/* Duración del turno — selector visual */}
-                <div>
+                <div data-tour='admin-config-slot'>
                   <label className='block text-sm font-medium mb-2'>
                     Duración del turno
                   </label>
@@ -401,7 +401,7 @@ export function AdminConfigPage() {
                 </div>
 
                 {/* Gap entre turnos */}
-                <div>
+                <div data-tour='admin-config-gap'>
                   <label className='text-sm font-medium mb-2 flex items-center gap-1.5'>
                     <TimerIcon size={14} className='text-text-muted' />
                     Gap entre turnos
@@ -509,19 +509,21 @@ export function AdminConfigPage() {
                 </h2>
               </div>
               <div className='flex flex-col gap-4'>
-                <Input
-                  label='Hold temporal (minutos)'
-                  type='number'
-                  min={5}
-                  value={String(business.hold_duration_minutes)}
-                  onChange={(e) =>
-                    setBusiness({
-                      ...business,
-                      hold_duration_minutes: parseInt(e.target.value) || 30
-                    })
-                  }
-                  hint='Tiempo que un turno queda retenido mientras el negocio decide confirmar.'
-                />
+                <div data-tour='admin-config-hold'>
+                  <Input
+                    label='Hold temporal (minutos)'
+                    type='number'
+                    min={5}
+                    value={String(business.hold_duration_minutes)}
+                    onChange={(e) =>
+                      setBusiness({
+                        ...business,
+                        hold_duration_minutes: parseInt(e.target.value) || 30
+                      })
+                    }
+                    hint='Tiempo que un turno queda retenido mientras el negocio decide confirmar.'
+                  />
+                </div>
                 <Input
                   label='Anticipación mínima para reservar (minutos)'
                   type='number'
@@ -585,6 +587,7 @@ export function AdminConfigPage() {
             <div className='flex flex-col gap-2'>
               <textarea
                 id='reservation-instructions'
+                data-tour='admin-config-instructions'
                 value={business.reservation_instructions_md ?? ''}
                 onChange={(e) =>
                   setBusiness({
@@ -647,6 +650,7 @@ export function AdminConfigPage() {
               disabled={!canEdit}
               size='lg'
               className='w-full'
+              data-tour='admin-config-save'
             >
               Guardar cambios
             </Button>

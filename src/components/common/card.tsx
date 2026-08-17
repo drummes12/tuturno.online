@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, HTMLAttributes, ReactNode } from 'react'
 
-interface CardProps {
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
   className?: string
   elevated?: boolean
@@ -13,7 +13,8 @@ export function Card({
   className = '',
   elevated = false,
   bordered = true,
-  style
+  style,
+  ...props
 }: CardProps) {
   return (
     <div
@@ -23,6 +24,7 @@ export function Card({
       } ${
         elevated ? 'shadow-(--shadow-md)' : 'shadow-(--shadow-xs)'
       } transition-shadow duration-300 ease-spring ${className}`}
+      {...props}
     >
       {children}
     </div>

@@ -18,6 +18,7 @@ import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
 import { BusinessSelector } from '@/components/common/business-selector'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
+import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { extractSlugFromPath } from '@/lib/slug'
 
 interface NavItem {
@@ -56,7 +57,13 @@ const adminNav: NavItem[] = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const { user, isAdmin, isPlatformAdmin, signOut } = useAuthStore()
   const [location] = useLocation()
-  const { startTour, isStarting } = useClientTutorial()
+  const clientTutorial = useClientTutorial()
+  const adminTutorial = useAdminTutorial()
+
+  const startTour = isAdmin ? adminTutorial.startTour : clientTutorial.startTour
+  const isStarting = isAdmin
+    ? adminTutorial.isStarting
+    : clientTutorial.isStarting
 
   // Build tenant-aware client nav
   const slug = extractSlugFromPath(location)
@@ -78,8 +85,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   const nav = isAdmin ? adminNav : clientNav
 
-  // El tutorial solo aplica a clientes (visitantes o autenticados sin rol admin)
-  const showTutorialButton = !isAdmin && !!tenantBase
+  // El tutorial del cliente aplica a visitantes/autenticados sin rol admin
+  // en rutas tenant. El tutorial del admin aplica en cualquier ruta /admin.
+  const showTutorialButton =
+    (isAdmin && location.startsWith('/admin')) || (!isAdmin && !!tenantBase)
 
   return (
     <div className='min-h-dvh flex flex-col bg-surface overflow-clip'>
@@ -109,7 +118,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 title='Guía interactiva'
               >
                 <HelpIcon size={16} />
-                <span>{isStarting ? 'Abriendo…' : 'Guía'}</span>
+                <span className='hidden sm:inline'>
+                  {isStarting ? 'Abriendo…' : 'Guía'}
+                </span>
               </button>
             )}
             {isPlatformAdmin && (
@@ -159,7 +170,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   data-tour={
                     item.href === '/mis-reservas'
                       ? 'client-nav-reservations'
-                      : undefined
+                      : item.href === '/admin/recursos'
+                        ? 'admin-nav-resources'
+                        : item.href === '/admin/horarios'
+                          ? 'admin-nav-hours'
+                          : item.href === '/admin/configuracion'
+                            ? 'admin-nav-config'
+                            : undefined
                   }
                   className={`flex-1 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 ease-spring ${
                     active
@@ -198,7 +215,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <span className={active ? 'text-primary' : ''}>
                     {item.icon}
                   </span>
-                  <span className='truncate max-w-full'>{item.label}</span>
+                  <span className='truncate max-w-full hidden sm:inline'>
+                    {item.label}
+                  </span>
                 </Link>
               )
             })}

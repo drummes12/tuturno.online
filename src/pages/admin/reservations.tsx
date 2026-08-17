@@ -150,6 +150,7 @@ export function AdminReservationsPage() {
       {/* Date picker — styled */}
       <div
         className='flex items-center gap-2 animate-fade-up'
+        data-tour='admin-reservations-date'
         style={{ animationDelay: '60ms' }}
       >
         <div className='relative flex-1'>
@@ -169,6 +170,7 @@ export function AdminReservationsPage() {
       {/* Filter chips */}
       <div
         className='scrollbar-none flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        data-tour='admin-reservations-filters'
         style={{ animationDelay: '60ms' }}
       >
         {statusFilters.map((f) => (
@@ -214,6 +216,7 @@ export function AdminReservationsPage() {
           {sortedReservations.map((r, index) => (
             <Card
               key={r.id}
+              data-tour={index === 0 ? 'admin-reservations-card' : undefined}
               className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
               style={{ '--index': index } as React.CSSProperties}
             >
@@ -371,6 +374,7 @@ export function AdminReservationsPage() {
                         <Button
                           variant='danger'
                           size='sm'
+                          data-tour='admin-reservations-cancel'
                           onClick={() => setCancellingId(r.id)}
                         >
                           <XIcon size={16} />

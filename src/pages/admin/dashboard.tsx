@@ -165,7 +165,7 @@ export function AdminDashboardPage() {
       )}
 
       {/* Pending queue — priority */}
-      <section>
+      <section data-tour='admin-pending-section'>
         <div className='flex items-center gap-2 mb-3'>
           <ClockIcon size={18} className='text-text-muted' />
           <h2 className='text-lg font-semibold tracking-tight'>
@@ -190,6 +190,7 @@ export function AdminDashboardPage() {
               <Card
                 key={r.id}
                 elevated
+                data-tour={index === 0 ? 'admin-pending-card' : undefined}
                 className={`p-4 border-l-4 border-l-yellow-400 animate-stagger`}
                 style={{ '--index': index } as React.CSSProperties}
               >
@@ -287,6 +288,7 @@ export function AdminDashboardPage() {
                       <Button
                         variant='success'
                         size='sm'
+                        data-tour='admin-confirm-btn'
                         loading={actingId === r.id}
                         onClick={() => handleConfirm(r.id)}
                       >
@@ -296,6 +298,7 @@ export function AdminDashboardPage() {
                       <Button
                         variant='danger'
                         size='sm'
+                        data-tour='admin-reject-btn'
                         onClick={() => setRejectingId(r.id)}
                       >
                         <XIcon size={16} />
@@ -311,7 +314,7 @@ export function AdminDashboardPage() {
       </section>
 
       {/* Today's schedule — separadas en próximas y pasadas */}
-      <section>
+      <section data-tour='admin-today-section'>
         <div className='flex items-center gap-2 mb-3'>
           <CalendarIcon size={18} className='text-text-muted' />
           <h2 className='text-lg font-semibold tracking-tight'>

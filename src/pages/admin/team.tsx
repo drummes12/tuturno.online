@@ -75,26 +75,39 @@ export function AdminTeamPage() {
 
       {!canEdit && <ReadOnlyNotice />}
 
-      {canEdit && <InviteMemberForm businessId={businessId!} onDone={load} />}
+      {canEdit && (
+        <div data-tour='admin-team-invite'>
+          <InviteMemberForm businessId={businessId!} onDone={load} />
+        </div>
+      )}
 
-      <section className='flex flex-col gap-3'>
+      <section className='flex flex-col gap-3' data-tour='admin-team-members'>
         <h2 className='text-lg font-semibold tracking-tight'>
           Miembros ({members.length})
         </h2>
-        {members.map((member) => (
-          <MemberCard
-            key={member.user_id}
-            member={member}
-            isSelf={member.user_id === user?.id}
-            canRemove={canEdit}
-            isOnlyOwner={
-              member.role === 'owner' &&
-              members.filter((m) => m.role === 'owner').length === 1
-            }
-            onRemove={load}
-            onError={setError}
-          />
-        ))}
+        {(() => {
+          const ownerCount = members.filter((m) => m.role === 'owner').length
+          let firstRemovableMarked = false
+          return members.map((member) => {
+            const isOnlyOwner = member.role === 'owner' && ownerCount === 1
+            const isSelf = member.user_id === user?.id
+            const isRemovable = canEdit && !isOnlyOwner && !isSelf
+            const isFirstRemovable = isRemovable && !firstRemovableMarked
+            if (isFirstRemovable) firstRemovableMarked = true
+            return (
+              <MemberCard
+                key={member.user_id}
+                member={member}
+                isSelf={isSelf}
+                canRemove={canEdit}
+                isOnlyOwner={isOnlyOwner}
+                isFirstRemovable={isFirstRemovable}
+                onRemove={load}
+                onError={setError}
+              />
+            )
+          })
+        })()}
       </section>
     </div>
   )
@@ -229,7 +242,8 @@ function MemberCard({
   canRemove,
   isOnlyOwner,
   onRemove,
-  onError
+  onError,
+  isFirstRemovable
 }: {
   member: BusinessMember
   isSelf: boolean
@@ -237,6 +251,7 @@ function MemberCard({
   isOnlyOwner: boolean
   onRemove: () => Promise<void>
   onError: (message: string | null) => void
+  isFirstRemovable?: boolean
 }) {
   const [working, setWorking] = useState(false)
   const [confirming, setConfirming] = useState(false)
@@ -296,6 +311,7 @@ function MemberCard({
               <Button
                 variant='danger'
                 size='sm'
+                data-tour={isFirstRemovable ? 'admin-team-remove' : undefined}
                 onClick={() => setConfirming(true)}
                 disabled={working}
               >
