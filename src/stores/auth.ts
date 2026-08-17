@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { Session, User } from '@supabase/supabase-js'
 import { signOut as signOutService } from '@/services/auth'
+import { fetchBusinessMemberships } from '@/services/profiles'
+import { fetchIsPlatformAdmin } from '@/services/platform'
 import type { Profile } from '@/types'
 import type { BusinessMembership } from '@/services/profiles'
 
@@ -24,6 +26,7 @@ interface AuthState {
   setError: (error: string | null) => void
   setMemberships: (memberships: BusinessMembership[]) => void
   setActiveBusinessId: (businessId: string | null) => void
+  refreshMemberships: (userId: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -52,6 +55,20 @@ export const useAuthStore = create<AuthState>((set) => ({
         memberships.length > 0 ? memberships[0].businessId : null
     }),
   setActiveBusinessId: (businessId) => set({ activeBusinessId: businessId }),
+  refreshMemberships: async (userId) => {
+    const [memberships, isPlatformAdmin] = await Promise.all([
+      fetchBusinessMemberships(userId),
+      fetchIsPlatformAdmin()
+    ])
+    set({
+      memberships,
+      isAdmin: memberships.length > 0,
+      isOwner: memberships.some((m) => m.role === 'owner'),
+      isPlatformAdmin,
+      activeBusinessId:
+        memberships.length > 0 ? memberships[0].businessId : null
+    })
+  },
   signOut: async () => {
     await signOutService()
     set({

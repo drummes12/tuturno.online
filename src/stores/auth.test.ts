@@ -1,11 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { mockSignOut } = vi.hoisted(() => ({
-  mockSignOut: vi.fn()
-}))
+const { mockSignOut, mockFetchBusinessMemberships, mockFetchIsPlatformAdmin } =
+  vi.hoisted(() => ({
+    mockSignOut: vi.fn(),
+    mockFetchBusinessMemberships: vi.fn(),
+    mockFetchIsPlatformAdmin: vi.fn()
+  }))
 
 vi.mock('@/services/auth', () => ({
   signOut: mockSignOut
+}))
+
+vi.mock('@/services/profiles', () => ({
+  fetchBusinessMemberships: mockFetchBusinessMemberships
+}))
+
+vi.mock('@/services/platform', () => ({
+  fetchIsPlatformAdmin: mockFetchIsPlatformAdmin
 }))
 
 import { useAuthStore } from '@/stores/auth'
@@ -19,6 +30,7 @@ beforeEach(() => {
     profile: null,
     isAdmin: false,
     isOwner: false,
+    isPlatformAdmin: false,
     loading: true,
     error: null,
     memberships: [],
@@ -151,5 +163,61 @@ describe('useAuthStore', () => {
     ])
     useAuthStore.getState().setActiveBusinessId('biz-2')
     expect(useAuthStore.getState().activeBusinessId).toBe('biz-2')
+  })
+
+  describe('refreshMemberships', () => {
+    it('carga memberships, isAdmin, isOwner, isPlatformAdmin y activeBusinessId', async () => {
+      const memberships = [
+        {
+          businessId: 'biz-1',
+          businessName: 'Negocio 1',
+          slug: 'negocio-1',
+          role: 'owner' as const
+        }
+      ]
+      mockFetchBusinessMemberships.mockResolvedValue(memberships)
+      mockFetchIsPlatformAdmin.mockResolvedValue(true)
+
+      await useAuthStore.getState().refreshMemberships('user-1')
+
+      expect(mockFetchBusinessMemberships).toHaveBeenCalledWith('user-1')
+      expect(mockFetchIsPlatformAdmin).toHaveBeenCalledTimes(1)
+      const state = useAuthStore.getState()
+      expect(state.memberships).toEqual(memberships)
+      expect(state.isAdmin).toBe(true)
+      expect(state.isOwner).toBe(true)
+      expect(state.isPlatformAdmin).toBe(true)
+      expect(state.activeBusinessId).toBe('biz-1')
+    })
+
+    it('marca isAdmin=false cuando no hay memberships', async () => {
+      mockFetchBusinessMemberships.mockResolvedValue([])
+      mockFetchIsPlatformAdmin.mockResolvedValue(false)
+
+      await useAuthStore.getState().refreshMemberships('user-1')
+
+      const state = useAuthStore.getState()
+      expect(state.isAdmin).toBe(false)
+      expect(state.isOwner).toBe(false)
+      expect(state.activeBusinessId).toBeNull()
+    })
+
+    it('marca isOwner=false cuando solo es manager', async () => {
+      mockFetchBusinessMemberships.mockResolvedValue([
+        {
+          businessId: 'biz-1',
+          businessName: 'Negocio 1',
+          slug: 'negocio-1',
+          role: 'manager' as const
+        }
+      ])
+      mockFetchIsPlatformAdmin.mockResolvedValue(false)
+
+      await useAuthStore.getState().refreshMemberships('user-1')
+
+      const state = useAuthStore.getState()
+      expect(state.isAdmin).toBe(true)
+      expect(state.isOwner).toBe(false)
+    })
   })
 })

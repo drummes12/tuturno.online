@@ -291,7 +291,7 @@ function PendingRequestCard({
           label='Motivo del rechazo'
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          className='flex-1'
+          wrapperClassName='flex-1'
         />
         <Button
           variant='danger'
@@ -369,7 +369,7 @@ function PromoteMemberSection({
             type='email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className='flex-1'
+            wrapperClassName='flex-1'
           />
           <Button
             variant='secondary'

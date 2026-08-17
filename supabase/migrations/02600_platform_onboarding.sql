@@ -54,7 +54,10 @@ $$;
 
 -- Valida al llamante de cualquier RPC de plataforma.
 -- Cuando la llamada llega por PostgREST exige aal2 (segundo factor verificado);
--- desde el SQL Editor no hay claims de JWT y la validación de MFA no aplica.
+-- desde el SQL Editor (session_user = 'postgres') no hay claims de JWT y la
+-- validación de MFA no aplica. Cualquier otra sesión sin JWT claims se rechaza
+-- (fail-closed) para evitar que un SECURITY DEFINER, cron o conexión directa
+-- bypass la verificación.
 create or replace function public.assert_platform_admin()
 returns uuid
 language plpgsql
@@ -76,10 +79,34 @@ begin
     if coalesce(v_claims::jsonb ->> 'aal', 'aal1') <> 'aal2' then
       raise exception 'Requiere verificación en dos pasos (MFA).' using errcode = '42501';
     end if;
+  else
+    -- Sin JWT claims: solo se permite desde el SQL Editor (sesión de postgres).
+    -- session_user refleja el usuario de login real (no se ve afectado por
+    -- SECURITY DEFINER, que solo cambia current_user).
+    if session_user <> 'postgres' then
+      raise exception 'Requiere sesión iniciada.' using errcode = '42501';
+    end if;
   end if;
 
   return v_uid;
 end;
+$$;
+
+-- Como is_platform_admin() pero además exige aal2 (MFA verificada).
+-- Se usa en las policies de SELECT de business_signup_requests y
+-- platform_audit_log para que un operador con contraseña robada (sin
+-- segundo factor) no pueda leer datos de solicitantes ni la bitácora.
+create or replace function public.is_platform_admin_mfa()
+returns boolean
+language sql
+security definer set search_path = public
+stable
+as $$
+  select public.is_platform_admin()
+     and coalesce(
+       nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'aal',
+       'aal1'
+     ) = 'aal2';
 $$;
 
 -- =============================================================================
@@ -103,7 +130,7 @@ alter table public.platform_audit_log enable row level security;
 drop policy if exists "Platform admins can read the audit log" on public.platform_audit_log;
 create policy "Platform admins can read the audit log"
   on public.platform_audit_log for select
-  using (public.is_platform_admin());
+  using (public.is_platform_admin_mfa());
 
 grant select on public.platform_audit_log to authenticated;
 
@@ -267,12 +294,12 @@ create trigger trg_signup_requests_updated
 
 alter table public.business_signup_requests enable row level security;
 
--- Lectura: el solicitante ve la suya, el operador ve todas.
+-- Lectura: el solicitante ve la suya, el operador ve todas (con MFA).
 -- No hay policies de escritura: todo pasa por los RPCs de abajo.
 drop policy if exists "Requesters and platform admins can read requests" on public.business_signup_requests;
 create policy "Requesters and platform admins can read requests"
   on public.business_signup_requests for select
-  using (user_id = auth.uid() or public.is_platform_admin());
+  using (user_id = auth.uid() or public.is_platform_admin_mfa());
 
 grant select on public.business_signup_requests to authenticated;
 
@@ -295,6 +322,10 @@ declare
   v_uid uuid := auth.uid();
   v_slug text := lower(btrim(coalesce(p_desired_slug, '')));
   v_name text := btrim(coalesce(p_business_name, ''));
+  v_business_type text := nullif(btrim(coalesce(p_business_type, '')), '');
+  v_contact_phone text := nullif(btrim(coalesce(p_contact_phone, '')), '');
+  v_city text := nullif(btrim(coalesce(p_city, '')), '');
+  v_notes text := nullif(btrim(coalesce(p_notes, '')), '');
   v_available boolean;
   v_reason text;
   v_request_id uuid;
@@ -325,14 +356,13 @@ begin
   insert into public.business_signup_requests (
     user_id, business_name, desired_slug, business_type, contact_phone, city, notes
   ) values (
-    v_uid, v_name, v_slug, nullif(btrim(coalesce(p_business_type, '')), ''),
-    nullif(btrim(coalesce(p_contact_phone, '')), ''),
-    nullif(btrim(coalesce(p_city, '')), ''),
-    nullif(btrim(coalesce(p_notes, '')), '')
+    v_uid, v_name, v_slug, v_business_type, v_contact_phone, v_city, v_notes
   )
   returning id into v_request_id;
 
   -- Aviso a cada operador. El correo es solo la alerta: la fuente de verdad es la tabla.
+  -- El payload usa los valores normalizados (trim + nullif) para que el correo
+  -- coincida con lo que se almacenó en la fila.
   for v_admin in
     select pa.user_id, au.email, p.full_name
     from public.platform_admins pa
@@ -347,10 +377,10 @@ begin
       jsonb_build_object(
         'business_name', v_name,
         'desired_slug', v_slug,
-        'city', p_city,
-        'business_type', p_business_type,
-        'contact_phone', p_contact_phone,
-        'notes', p_notes
+        'city', v_city,
+        'business_type', v_business_type,
+        'contact_phone', v_contact_phone,
+        'notes', v_notes
       ),
       'signup_requested_' || v_request_id::text || '_' || v_admin.user_id::text
     );
@@ -479,6 +509,17 @@ begin
   end if;
 
   v_slug := coalesce(nullif(lower(btrim(coalesce(p_slug_override, ''))), ''), v_request.desired_slug);
+
+  -- Validar etiquetas antes de llegar al INSERT (la tabla businesses tiene
+  -- un check constraint de 2-40 caracteres; sin esto el operador vería un
+  -- mensaje crudo de violación de constraint).
+  if char_length(btrim(coalesce(p_label_singular, ''))) not between 2 and 40 then
+    raise exception 'La etiqueta singular debe tener entre 2 y 40 caracteres.';
+  end if;
+
+  if char_length(btrim(coalesce(p_label_plural, ''))) not between 2 and 40 then
+    raise exception 'La etiqueta plural debe tener entre 2 y 40 caracteres.';
+  end if;
 
   v_business_id := public.create_business_with_owner(
     v_request.business_name,
@@ -739,6 +780,7 @@ revoke all on function public.platform_business_overview() from public;
 revoke all on function public.log_platform_action(uuid, text, text, uuid, jsonb) from public;
 
 grant execute on function public.is_platform_admin() to authenticated;
+grant execute on function public.is_platform_admin_mfa() to authenticated;
 grant execute on function public.create_business_with_owner(text, text, uuid, text, text, text, text, text, integer) to authenticated;
 grant execute on function public.approve_business_signup(uuid, text, text, text) to authenticated;
 grant execute on function public.reject_business_signup(uuid, text) to authenticated;

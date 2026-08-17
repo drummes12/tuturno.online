@@ -26,7 +26,7 @@ const SLUG_MESSAGES: Record<string, string> = {
 }
 
 export function CreateBusinessPage() {
-  const { user, memberships } = useAuthStore()
+  const { user, memberships, refreshMemberships } = useAuthStore()
 
   const [request, setRequest] = useState<SignupRequest | null>(null)
   const [loading, setLoading] = useState(true)
@@ -64,8 +64,12 @@ export function CreateBusinessPage() {
   useEffect(() => {
     if (!slug) {
       setSlugStatus(null)
+      setCheckingSlug(false)
       return
     }
+    // Limpia el veredicto anterior mientras se resuelve el debounce para que
+    // el botón de envío no quede habilitado con un resultado stale.
+    setSlugStatus(null)
     setCheckingSlug(true)
     const timer = setTimeout(async () => {
       try {
@@ -146,6 +150,16 @@ export function CreateBusinessPage() {
   }
 
   if (request && request.status === 'approved') {
+    // La aprobación ocurre en el lado del operador; el cliente no recibe un
+    // evento de auth, así que memberships puede estar stale. Refrescamos para
+    // que el enlace al panel y a la página pública funcionen.
+    if (
+      user &&
+      !memberships.some((m) => m.businessId === request.business_id)
+    ) {
+      void refreshMemberships(user.id)
+    }
+
     const membership = memberships.find(
       (m) => m.businessId === request.business_id
     )

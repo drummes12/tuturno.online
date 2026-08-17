@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react'
-import { supabase } from '@/lib/supabase'
+import {
+  createMfaChallenge,
+  enrollTotpFactor,
+  getAuthenticatorAssuranceLevel,
+  listMfaFactors,
+  unenrollMfaFactor,
+  verifyMfaChallenge,
+  type MfaEnrollment
+} from '@/services/mfa'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -8,8 +16,6 @@ import { Spinner } from '@/components/common/spinner'
 import { LockIcon } from '@/components/common/icon'
 
 type GateState = 'loading' | 'ready' | 'challenge' | 'enroll'
-
-type EnrollData = { factorId: string; qrCode: string; secret: string }
 
 /**
  * Exige un segundo factor verificado (TOTP) antes de mostrar su contenido.
@@ -20,7 +26,7 @@ type EnrollData = { factorId: string; qrCode: string; secret: string }
  */
 export function MfaGate({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GateState>('loading')
-  const [enrollData, setEnrollData] = useState<EnrollData | null>(null)
+  const [enrollData, setEnrollData] = useState<MfaEnrollment | null>(null)
   const [factorId, setFactorId] = useState<string | null>(null)
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -28,29 +34,27 @@ export function MfaGate({ children }: { children: ReactNode }) {
 
   const evaluate = useCallback(async () => {
     setError(null)
-    const { data, error: aalError } =
-      await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-    if (aalError) {
-      setError(aalError.message)
+    try {
+      const { currentLevel } = await getAuthenticatorAssuranceLevel()
+      if (currentLevel === 'aal2') {
+        setState('ready')
+        return
+      }
+
+      const factors = await listMfaFactors()
+      const verified = factors.find((f) => f.status === 'verified')
+
+      if (verified) {
+        setFactorId(verified.id)
+        setState('challenge')
+        return
+      }
+
       setState('enroll')
-      return
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al verificar MFA')
+      setState('enroll')
     }
-
-    if (data?.currentLevel === 'aal2') {
-      setState('ready')
-      return
-    }
-
-    const { data: factors } = await supabase.auth.mfa.listFactors()
-    const verified = factors?.totp?.find((f) => f.status === 'verified')
-
-    if (verified) {
-      setFactorId(verified.id)
-      setState('challenge')
-      return
-    }
-
-    setState('enroll')
   }, [])
 
   useEffect(() => {
@@ -62,24 +66,18 @@ export function MfaGate({ children }: { children: ReactNode }) {
     setSubmitting(true)
     try {
       // Limpia intentos previos sin verificar para no acumular factores huérfanos.
-      const { data: factors } = await supabase.auth.mfa.listFactors()
-      for (const factor of factors?.totp ?? []) {
+      const factors = await listMfaFactors()
+      for (const factor of factors) {
         if (factor.status !== 'verified') {
-          await supabase.auth.mfa.unenroll({ factorId: factor.id })
+          await unenrollMfaFactor(factor.id)
         }
       }
 
-      const { data, error: enrollError } = await supabase.auth.mfa.enroll({
-        factorType: 'totp',
-        friendlyName: `TuTurno plataforma ${new Date().toISOString().slice(0, 10)}`
-      })
-      if (enrollError) throw enrollError
-      setEnrollData({
-        factorId: data.id,
-        qrCode: data.totp.qr_code,
-        secret: data.totp.secret
-      })
-      setFactorId(data.id)
+      const enrollment = await enrollTotpFactor(
+        `TuTurno plataforma ${new Date().toISOString().slice(0, 10)}`
+      )
+      setEnrollData(enrollment)
+      setFactorId(enrollment.factorId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo iniciar el enrolamiento')
     } finally {
@@ -93,16 +91,8 @@ export function MfaGate({ children }: { children: ReactNode }) {
     setError(null)
     setSubmitting(true)
     try {
-      const { data: challenge, error: challengeError } =
-        await supabase.auth.mfa.challenge({ factorId })
-      if (challengeError) throw challengeError
-
-      const { error: verifyError } = await supabase.auth.mfa.verify({
-        factorId,
-        challengeId: challenge.id,
-        code: code.trim()
-      })
-      if (verifyError) throw verifyError
+      const challengeId = await createMfaChallenge(factorId)
+      await verifyMfaChallenge(factorId, challengeId, code.trim())
 
       setCode('')
       setEnrollData(null)
