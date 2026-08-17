@@ -794,6 +794,7 @@ revoke all on function public.platform_find_user_by_email(text) from public;
 revoke all on function public.platform_business_overview() from public;
 revoke all on function public.log_platform_action(uuid, text, text, uuid, jsonb) from public;
 
+grant execute on function public.assert_platform_admin() to authenticated;
 grant execute on function public.is_platform_admin() to authenticated;
 grant execute on function public.is_platform_admin_mfa() to authenticated;
 grant execute on function public.create_business_with_owner(text, text, uuid, text, text, text, text, text, integer) to authenticated;

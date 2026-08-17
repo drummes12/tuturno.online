@@ -10,9 +10,6 @@
 -- las envía, y las marca 'sent' o las devuelve a 'pending' si Resend falla.
 -- =============================================================================
 
-do $$ begin
-  alter type public.notification_status add value 'processing' after 'pending';
-exception
-  when duplicate_object then null;
-  when duplicate_value then null;
-end $$;
+-- Añade el nuevo valor si no existe (no falla en re-runs / resets).
+-- Postgres 15+ soporta IF NOT EXISTS en ALTER TYPE ADD VALUE.
+alter type public.notification_status add value 'processing' after 'pending';

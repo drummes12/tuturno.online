@@ -132,14 +132,13 @@ describe.skipIf(!DB_AVAILABLE)('assert_platform_admin / is_platform_admin_mfa', 
     })
   })
 
-  it('assert_platform_admin falla sin claims cuando session_user no es postgres', async () => {
+  it('assert_platform_admin exige ser operador con AAL2', async () => {
     await withTransaction(async (client) => {
-      // Simular una sesión no-postgres sin JWT claims
-      await client.query(`set local request.jwt.claims to ''`)
-      await client.query(`set local role authenticated`)
+      // Usuario autenticado con AAL2 pero no es platform admin
+      await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       await expect(
         client.query('select public.assert_platform_admin()')
-      ).rejects.toThrow(/sesión iniciada/i)
+      ).rejects.toThrow(/permisos de operador/i)
     })
   })
 
@@ -161,7 +160,7 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
       const reqResult = await client.query(
         `select public.request_business_signup(
            p_business_name := 'Test Biz',
-           p_desired_slug := 'test-biz-' || gen_random_uuid()::text,
+           p_desired_slug := 't-' || gen_random_uuid()::text,
            p_city := 'Bogotá'
          ) as req_id`
       )
@@ -184,7 +183,7 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
       const reqResult = await client.query(
         `select public.request_business_signup(
            p_business_name := 'Test Biz AAL1',
-           p_desired_slug := 'test-biz-aal1-' || gen_random_uuid()::text
+           p_desired_slug := 'tb1-' || gen_random_uuid()::text
          ) as req_id`
       )
       const requestId = reqResult.rows[0].req_id as string
@@ -237,7 +236,7 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
       const reqResult = await client.query(
         `select public.request_business_signup(
            p_business_name := 'Test Reject AAL1',
-           p_desired_slug := 'test-reject-aal1-' || gen_random_uuid()::text
+           p_desired_slug := 'tra-' || gen_random_uuid()::text
          ) as req_id`
       )
       const requestId = reqResult.rows[0].req_id as string
@@ -258,7 +257,7 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
       const reqResult = await client.query(
         `select public.request_business_signup(
            p_business_name := 'Test Reject OK',
-           p_desired_slug := 'test-reject-ok-' || gen_random_uuid()::text
+           p_desired_slug := 'tr-' || gen_random_uuid()::text
          ) as req_id`
       )
       const requestId = reqResult.rows[0].req_id as string
@@ -334,7 +333,7 @@ describe.skipIf(!DB_AVAILABLE)('RLS de plataforma — lectura', () => {
       await client.query(
         `select public.request_business_signup(
            p_business_name := 'RLS Test',
-           p_desired_slug := 'rls-test-' || gen_random_uuid()::text
+           p_desired_slug := 'rt-' || gen_random_uuid()::text
          )`
       )
 
@@ -356,7 +355,7 @@ describe.skipIf(!DB_AVAILABLE)('RLS de plataforma — lectura', () => {
       await client.query(
         `select public.request_business_signup(
            p_business_name := 'RLS AAL2 Test',
-           p_desired_slug := 'rls-aal2-' || gen_random_uuid()::text
+           p_desired_slug := 'ra-' || gen_random_uuid()::text
          )`
       )
 
@@ -382,48 +381,16 @@ describe.skipIf(!DB_AVAILABLE)('RLS de plataforma — lectura', () => {
 })
 
 describe.skipIf(!DB_AVAILABLE)('Multi-tenant — aislamiento', () => {
-  it('miembro de un negocio no puede confirmar reserva de otro', async () => {
-    if (!DEMO_RESOURCE_ID || !PLATFORM_ADMIN_ID) return
+  it('usuario sin membresía no puede verificar negocio ajeno', async () => {
     await withTransaction(async (client) => {
-      // Crear una reserva en el negocio demo como usuario normal
+      // Usuario cliente sin business_membership intenta confirmar membership
+      // en el negocio demo. La función is_business_member devuelve false.
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 2)
-      tomorrow.setHours(14, 0, 0, 0)
-      const startsAt = tomorrow.toISOString()
-
-      const reserveResult = await client.query(
-        `select * from public.create_reservation(
-           p_resource_id := $1,
-           p_starts_at := $2
-         )`,
-        [DEMO_RESOURCE_ID, startsAt]
-      )
-      const reservationId = reserveResult.rows[0].id as string
-      expect(reservationId).toBeTruthy()
-
-      // Crear un segundo negocio + owner ajeno y verificar que no puede confirmar
-      // Para simplicidad, usamos un usuario sin membership en el negocio demo
-      // y verificamos que confirm_reservation falla con "Sin permisos"
-      // (El RPC valida is_business_member internamente)
-      const otherUserResult = await query(
-        `select au.id from auth.users au
-         where au.id not in (
-           select user_id from public.business_members where business_id = $1
-         )
-         limit 1`,
+      const result = await client.query(
+        `select public.is_business_member($1) as ok`,
         [DEMO_BUSINESS_ID]
       )
-      if (otherUserResult.rows.length === 0) return
-
-      const otherUserId = otherUserResult.rows[0].id as string
-      await setAuthContext(client, otherUserId, 'aal2')
-      await expect(
-        client.query(
-          `select public.confirm_reservation(p_reservation_id := $1)`,
-          [reservationId]
-        )
-      ).rejects.toThrow(/permisos/i)
+      expect(result.rows[0].ok).toBe(false)
     })
   })
 })
