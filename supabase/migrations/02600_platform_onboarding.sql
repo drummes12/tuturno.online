@@ -353,12 +353,20 @@ begin
     raise exception 'Ya tienes una solicitud en revisión.';
   end if;
 
-  insert into public.business_signup_requests (
-    user_id, business_name, desired_slug, business_type, contact_phone, city, notes
-  ) values (
-    v_uid, v_name, v_slug, v_business_type, v_contact_phone, v_city, v_notes
-  )
-  returning id into v_request_id;
+  -- Sub-bloque con handler: dos llamadas simultáneas del mismo usuario
+  -- pueden pasar el check EXISTS y pegar contra el unique index. Capturamos
+  -- para devolver el mensaje amigable en vez del crudo unique_violation.
+  begin
+    insert into public.business_signup_requests (
+      user_id, business_name, desired_slug, business_type, contact_phone, city, notes
+    ) values (
+      v_uid, v_name, v_slug, v_business_type, v_contact_phone, v_city, v_notes
+    )
+    returning id into v_request_id;
+  exception
+    when unique_violation then
+      raise exception 'Ya tienes una solicitud en revisión.' using errcode = '23505';
+  end;
 
   -- Aviso a cada operador. El correo es solo la alerta: la fuente de verdad es la tabla.
   -- El payload usa los valores normalizados (trim + nullif) para que el correo
@@ -438,6 +446,17 @@ begin
     raise exception 'El usuario % no existe. Pídele que se registre primero.', p_owner_user_id;
   end if;
 
+  -- Validar etiquetas antes del INSERT: la tabla businesses tiene un check
+  -- constraint de 2-40 caracteres; sin esto el llamante vería un mensaje
+  -- crudo de violación de constraint.
+  if char_length(btrim(coalesce(p_label_singular, ''))) not between 2 and 40 then
+    raise exception 'La etiqueta singular debe tener entre 2 y 40 caracteres.';
+  end if;
+
+  if char_length(btrim(coalesce(p_label_plural, ''))) not between 2 and 40 then
+    raise exception 'La etiqueta plural debe tener entre 2 y 40 caracteres.';
+  end if;
+
   select available, reason into v_available, v_reason
   from public.check_slug_availability(v_slug);
 
@@ -509,17 +528,6 @@ begin
   end if;
 
   v_slug := coalesce(nullif(lower(btrim(coalesce(p_slug_override, ''))), ''), v_request.desired_slug);
-
-  -- Validar etiquetas antes de llegar al INSERT (la tabla businesses tiene
-  -- un check constraint de 2-40 caracteres; sin esto el operador vería un
-  -- mensaje crudo de violación de constraint).
-  if char_length(btrim(coalesce(p_label_singular, ''))) not between 2 and 40 then
-    raise exception 'La etiqueta singular debe tener entre 2 y 40 caracteres.';
-  end if;
-
-  if char_length(btrim(coalesce(p_label_plural, ''))) not between 2 and 40 then
-    raise exception 'La etiqueta plural debe tener entre 2 y 40 caracteres.';
-  end if;
 
   v_business_id := public.create_business_with_owner(
     v_request.business_name,
@@ -741,6 +749,13 @@ begin
      ) then
     return old;
   end if;
+
+  -- Serializa operaciones concurrentes sobre el mismo negocio: dos
+  -- transacciones que degraden/borren a los dos owners restantes verían
+  -- count=2 cada una sin este lock y dejarían el negocio sin owner.
+  -- El lock sobre la fila del negocio fuerza que la segunda espere a que
+  -- la primera commit (o rollback) antes de contar.
+  perform 1 from public.businesses where id = old.business_id for update;
 
   if old.role = 'owner'
      and (tg_op = 'DELETE' or new.role <> 'owner')

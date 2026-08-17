@@ -53,14 +53,19 @@ export default {
       })
     }
 
-    // Obtener notificaciones pendientes
+    // Claim atómico: cambia las filas a 'processing' antes de enviarlas,
+    // evitando que dos ejecuciones solapadas (cron + manual) tomen las
+    // mismas filas y envíen correos duplicados. Si Resend falla, se
+    // devuelven a 'pending'; si la Edge Function crashea, quedan en
+    // 'processing' y se recuperan manualmente o vía un job de limpieza.
     const { data: pending, error } = await supabase
       .from('notification_outbox')
-      .select('*')
+      .update({ status: 'processing' })
       .eq('status', 'pending')
       .lt('attempts', MAX_ATTEMPTS)
       .order('created_at', { ascending: true })
       .limit(50)
+      .select('*')
 
     if (error) {
       return new Response(JSON.stringify({ error: error.message }), {

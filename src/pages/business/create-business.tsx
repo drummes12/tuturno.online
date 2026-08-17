@@ -59,6 +59,21 @@ export function CreateBusinessPage() {
     load()
   }, [load])
 
+  // La aprobación ocurre en el lado del operador; el cliente no recibe un
+  // evento de auth, así que memberships puede estar stale. Cuando la página
+  // detecta una solicitud aprobada sin la membresía correspondiente en el
+  // store, refresca para que "Ir al panel" y "Ver página pública" funcionen.
+  useEffect(() => {
+    if (
+      request?.status === 'approved' &&
+      request.business_id &&
+      user &&
+      !memberships.some((m) => m.businessId === request.business_id)
+    ) {
+      void refreshMemberships(user.id)
+    }
+  }, [request, user, memberships, refreshMemberships])
+
   // Verificación de disponibilidad con debounce: el servidor es la autoridad,
   // el formulario solo adelanta el resultado.
   useEffect(() => {
@@ -150,16 +165,6 @@ export function CreateBusinessPage() {
   }
 
   if (request && request.status === 'approved') {
-    // La aprobación ocurre en el lado del operador; el cliente no recibe un
-    // evento de auth, así que memberships puede estar stale. Refrescamos para
-    // que el enlace al panel y a la página pública funcionen.
-    if (
-      user &&
-      !memberships.some((m) => m.businessId === request.business_id)
-    ) {
-      void refreshMemberships(user.id)
-    }
-
     const membership = memberships.find(
       (m) => m.businessId === request.business_id
     )
@@ -206,7 +211,9 @@ export function CreateBusinessPage() {
           <div className='mb-4'>
             <Alert variant='warning'>
               Tu solicitud anterior fue rechazada
-              {request.rejection_reason ? `: ${request.rejection_reason}` : '.'}{' '}
+              {request.rejection_reason
+                ? `: ${request.rejection_reason}`
+                : '.'}{' '}
               Puedes enviar una nueva.
             </Alert>
           </div>
