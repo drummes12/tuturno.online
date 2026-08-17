@@ -28,7 +28,7 @@ begin
   end if;
 
   return query
-  select au.id as user_id, au.email as email
+  select au.id as user_id, au.email::text as email
   from auth.users au
   where au.id = any(p_user_ids)
     -- Solo devolver emails de usuarios que son miembros de algún negocio
@@ -74,8 +74,8 @@ begin
 
   return query
   select au.id as user_id,
-         au.email as email,
-         p.full_name as full_name
+         au.email::text as email,
+         p.full_name::text as full_name
   from auth.users au
   left join public.profiles p on p.id = au.id
   where lower(au.email) = p_email
