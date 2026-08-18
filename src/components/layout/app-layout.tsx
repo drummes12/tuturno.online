@@ -107,6 +107,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <span>TuTurno</span>
           </Link>
           <div className='flex items-center gap-1 sm:gap-2'>
+            {isAdmin && <BusinessSelector />}
+            {isPlatformAdmin && (
+              <Link
+                href='/plataforma'
+                className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
+                aria-label='Panel de plataforma'
+                title='Panel de plataforma'
+              >
+                <LockIcon size={16} />
+                <span className='hidden sm:inline'>Plataforma</span>
+              </Link>
+            )}
             {showTutorialButton && (
               <button
                 onClick={startTour}
@@ -123,18 +135,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </span>
               </button>
             )}
-            {isPlatformAdmin && (
-              <Link
-                href='/plataforma'
-                className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
-                aria-label='Panel de plataforma'
-                title='Panel de plataforma'
-              >
-                <LockIcon size={16} />
-                <span className='hidden sm:inline'>Plataforma</span>
-              </Link>
-            )}
-            {isAdmin && <BusinessSelector />}
             {user ? (
               <>
                 {!isAdmin && (
