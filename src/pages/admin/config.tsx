@@ -10,6 +10,8 @@ import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { useCanEdit } from '@/hooks/use-can-edit'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
+import { resolveWhatsAppLink } from '@/lib/whatsapp'
+import { ShareCard } from '@/components/admin/share-card'
 import {
   ClockIcon,
   CalendarIcon,
@@ -17,7 +19,8 @@ import {
   MapPinIcon,
   ExternalLinkIcon,
   TimerIcon,
-  CheckIcon
+  CheckIcon,
+  WhatsAppIcon
 } from '@/components/common/icon'
 import type { Business } from '@/types'
 
@@ -235,6 +238,30 @@ export function AdminConfigPage() {
                   placeholder='Ej: https://wa.me/573001234567 o @usuario'
                   hint='Si prefieres que te contacten por un usuario o link específico en vez del teléfono, escríbelo aquí. Acepta URLs de wa.me, whatsapp.com o un @usuario.'
                 />
+
+                {/* Botón de prueba de WhatsApp — abre el mismo link que vería el cliente */}
+                {(() => {
+                  const testLink = resolveWhatsAppLink(
+                    business.whatsapp_link,
+                    business.phone,
+                    `Hola, tengo una duda sobre las reservas en ${business.name}.`
+                  )
+                  if (!testLink) return null
+                  return (
+                    <a
+                      href={testLink}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-800 hover:bg-green-100 hover:border-green-300 transition-colors touch-target w-full sm:w-auto'
+                      aria-label='Probar link de WhatsApp en nueva pestaña'
+                      title='Abre el mismo link que vería tu cliente al tocar el botón flotante'
+                    >
+                      <WhatsAppIcon size={16} />
+                      <span>Probar en WhatsApp</span>
+                      <ExternalLinkIcon size={14} className='opacity-60' />
+                    </a>
+                  )
+                })()}
               </div>
             </Card>
 
@@ -657,6 +684,9 @@ export function AdminConfigPage() {
           </Card>
         </div>
       </form>
+
+      {/* Compartir página de reservas — QR + copiar link */}
+      <ShareCard slug={business.slug} businessName={business.name} />
     </div>
   )
 }
