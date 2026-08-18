@@ -237,3 +237,27 @@ export interface AvailabilitySlot {
   ends_at: string
   status: 'available' | 'held' | 'reserved' | 'blocked'
 }
+
+// =============================================================================
+// Privacidad y consentimiento
+// =============================================================================
+
+export type ConsentPurpose = 'terms_and_privacy' | 'marketing_email'
+
+export type ConsentStatus = 'accepted' | 'withdrawn'
+
+export interface MarketingConsent {
+  business_id: string
+  business_name: string
+  status: ConsentStatus
+  accepted_at: string | null
+  withdrawn_at: string | null
+  policy_version: string
+}
+
+/**
+ * Versión vigente de los documentos legales.
+ * Se usa como evidencia del texto que aceptó cada usuario.
+ * Incrementar al cambiar el contenido de /privacidad o /terminos.
+ */
+export const CURRENT_POLICY_VERSION = '2026-12-08-v1'

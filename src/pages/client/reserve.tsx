@@ -8,6 +8,7 @@ import {
 import { updateProfile } from '@/services/profiles'
 import { fetchBusinessId } from '@/services/profiles'
 import { fetchBusinessContactById } from '@/services/business'
+import { setMarketingConsent } from '@/services/privacy'
 import { useTenant } from '@/hooks/use-tenant'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
@@ -71,6 +72,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
     reservation_instructions_md: string | null
   } | null>(null)
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null)
+  const [marketingOptIn, setMarketingOptIn] = useState(false)
   const [clientSelection, setClientSelection] = useState<ClientSelection>({
     clientId: null,
     name: '',
@@ -287,6 +289,17 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         return
       }
 
+      // Registrar el consentimiento de marketing (opt-in o no).
+      // Se hace tras la reserva exitosa: la reserva no depende de esto.
+      // Solo aplica para clientes autenticados, no para admins.
+      if (businessId) {
+        try {
+          await setMarketingConsent(businessId, marketingOptIn, 'reservation')
+        } catch {
+          // No bloquear la reserva por un fallo de consentimiento.
+        }
+      }
+
       // Construir enlace de WhatsApp con datos de la reserva
       if (businessContact) {
         const msg = buildClientReservationMessage({
@@ -473,6 +486,24 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
             placeholder='Ej: llegaremos 10 min antes'
             hint='Información adicional para el negocio.'
           />
+
+          {/* Opt-in de marketing por email del negocio — opcional, no preseleccionado */}
+          {!isAdmin && businessContact && (
+            <label className='flex items-start gap-3 text-sm text-(--color-text) cursor-pointer select-none p-3 rounded-lg border border-border bg-surface-elevated'>
+              <input
+                type='checkbox'
+                checked={marketingOptIn}
+                onChange={(e) => setMarketingOptIn(e.target.checked)}
+                className='mt-0.5 h-4 w-4 rounded border-border text-(--color-primary) focus:ring-(--color-primary) cursor-pointer'
+              />
+              <span className='leading-relaxed'>
+                Acepto recibir novedades y promociones de{' '}
+                <strong>{businessContact.name}</strong> por correo electrónico.
+                Es opcional: puedo rechazarlo y aun así reservar. Puedo darme de
+                baja en cualquier momento desde mi perfil.
+              </span>
+            </label>
+          )}
 
           {error && <Alert variant='error'>{error}</Alert>}
 

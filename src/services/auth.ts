@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase'
+import { recordRegistrationConsent } from '@/services/privacy'
+import { CURRENT_POLICY_VERSION } from '@/types'
 
 export async function signInWithEmail(email: string, password: string) {
   const { error } = await supabase.auth.signInWithPassword({
@@ -6,6 +8,15 @@ export async function signInWithEmail(email: string, password: string) {
     password
   })
   if (error) throw error
+
+  // Fallback idempotente: si el usuario se registró cuando el email
+  // confirmation estaba activo, su consentimiento de registro no se
+  // pudo persistir. Lo registramos ahora en el primer login.
+  try {
+    await recordRegistrationConsent(CURRENT_POLICY_VERSION, 'signin_fallback')
+  } catch {
+    // No bloquear el login por un fallo de consentimiento.
+  }
 }
 
 export async function signUpWithEmail(
@@ -22,6 +33,18 @@ export async function signUpWithEmail(
     }
   })
   if (error) throw error
+
+  // Registrar la aceptación obligatoria de Términos y Política.
+  // Solo funciona si signUp devolvió sesión (email confirmation
+  // desactivada). Si no, se registrará en el primer signIn.
+  if (data.session) {
+    try {
+      await recordRegistrationConsent(CURRENT_POLICY_VERSION, 'registration')
+    } catch {
+      // No propagar: el registro ya ocurrió.
+    }
+  }
+
   return { user: data.user, session: data.session }
 }
 

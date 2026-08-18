@@ -21,6 +21,11 @@ vi.mock('@/lib/supabase', () => ({
   supabase: { from: mockFrom, rpc: mockRpc, auth: mockAuth }
 }))
 
+// Mock del servicio de privacidad para no acoplar los tests de auth
+vi.mock('@/services/privacy', () => ({
+  recordRegistrationConsent: vi.fn().mockResolvedValue(undefined)
+}))
+
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -66,6 +71,30 @@ describe('signInWithEmail', () => {
       password: 'wrongpass'
     })
   })
+
+  it('intenta registrar el consentimiento de registro tras login (fallback)', async () => {
+    mockAuth.signInWithPassword.mockResolvedValue({ data: {}, error: null })
+    const { recordRegistrationConsent } = await import('@/services/privacy')
+
+    await signInWithEmail('user@example.com', 'pass')
+
+    expect(recordRegistrationConsent).toHaveBeenCalledWith(
+      expect.any(String),
+      'signin_fallback'
+    )
+  })
+
+  it('no lanza aunque el consentimiento falle tras login', async () => {
+    mockAuth.signInWithPassword.mockResolvedValue({ data: {}, error: null })
+    const { recordRegistrationConsent } = await import('@/services/privacy')
+    ;(
+      recordRegistrationConsent as ReturnType<typeof vi.fn>
+    ).mockRejectedValueOnce(new Error('rpc error'))
+
+    await expect(
+      signInWithEmail('user@example.com', 'pass')
+    ).resolves.toBeUndefined()
+  })
 })
 
 describe('signUpWithEmail', () => {
@@ -107,6 +136,44 @@ describe('signUpWithEmail', () => {
     const result = await signUpWithEmail('a@b.io', 'pass', 'Name', '300')
 
     expect(result).toEqual({ user: { id: 'user-1' }, session: null })
+
+    // Sin sesión, no se llama al RPC de consentimiento (se hará en el primer login)
+    const { recordRegistrationConsent } = await import('@/services/privacy')
+    expect(recordRegistrationConsent).not.toHaveBeenCalled()
+  })
+
+  it('registra el consentimiento de registro cuando signUp devuelve sesión', async () => {
+    const mockUser = { id: 'user-1', email: 'a@b.io' }
+    const mockSession = { access_token: 'tok' }
+    mockAuth.signUp.mockResolvedValue({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    })
+    const { recordRegistrationConsent } = await import('@/services/privacy')
+
+    await signUpWithEmail('a@b.io', 'pass', 'Name', '300')
+
+    expect(recordRegistrationConsent).toHaveBeenCalledWith(
+      expect.any(String),
+      'registration'
+    )
+  })
+
+  it('no lanza aunque el consentimiento falle tras signUp con sesión', async () => {
+    const mockUser = { id: 'user-1', email: 'a@b.io' }
+    const mockSession = { access_token: 'tok' }
+    mockAuth.signUp.mockResolvedValue({
+      data: { user: mockUser, session: mockSession },
+      error: null
+    })
+    const { recordRegistrationConsent } = await import('@/services/privacy')
+    ;(
+      recordRegistrationConsent as ReturnType<typeof vi.fn>
+    ).mockRejectedValueOnce(new Error('rpc error'))
+
+    await expect(
+      signUpWithEmail('a@b.io', 'pass', 'Name', '300')
+    ).resolves.toEqual({ user: mockUser, session: mockSession })
   })
 
   it('normaliza email y recorta full_name y phone en options.data', async () => {

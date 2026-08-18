@@ -61,7 +61,27 @@ supabase/migrations/02300_normalize_phones_e164.sql
 supabase/migrations/02400_reservation_instructions.sql
 supabase/migrations/02500_whatsapp_link.sql
 supabase/migrations/02600_platform_onboarding.sql
+supabase/migrations/02700_notification_processing_state.sql
+supabase/migrations/02800_security_hardening.sql
+supabase/migrations/02900_member_management.sql
+supabase/migrations/03000_privacy_consents.sql
+supabase/migrations/03100_search_clients_tenant_only.sql
 ```
+
+### Privacidad y consentimiento
+
+TuTurno incluye una capa mínima de privacidad y consentimiento (fase 1):
+
+- **Páginas legales públicas:** `/privacidad` y `/terminos`.
+- **Aceptación obligatoria en el registro:** checkbox no preseleccionado que bloquea el registro si no se acepta. Se registra en `privacy_consents` con versión y timestamp.
+- **Marketing por email separado por negocio:** opt-in opcional en el flujo de reserva, no preseleccionado. La reserva funciona aunque se rechace.
+- **Baja sencilla:** desde `/preferencias` el usuario puede darse de baja o reactivar el marketing por negocio.
+- **Clientes existentes y guests:** quedan sin autorización de marketing hasta que exista un opt-in explícito.
+- **Aislamiento de búsqueda:** `search_clients` solo busca dentro de los clientes del negocio; ya no enumera usuarios globales.
+
+**Antes de production**, reemplaza los placeholders `[ ]` en `/privacidad` y `/terminos` con los datos reales del responsable (nombre, identificación, domicilio, correo de privacidad). Revisa el texto final con un abogado colombiano.
+
+La versión vigente de los documentos se define en `CURRENT_POLICY_VERSION` (`src/types/index.ts`). Increméntala al cambiar el contenido de las políticas.
 
 ### 3. Correos con Resend
 

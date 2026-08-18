@@ -16,6 +16,7 @@ import { LandingPage } from '@/pages/landing'
 import { AvailabilityPage } from '@/pages/client/availability'
 import { ReservePage } from '@/pages/client/reserve'
 import { MyReservationsPage } from '@/pages/client/my-reservations'
+import { PrivacyPreferencesPage } from '@/pages/client/privacy-preferences'
 
 // Admin pages
 import { AdminDashboardPage } from '@/pages/admin/dashboard'
@@ -30,6 +31,10 @@ import { AdminTeamPage } from '@/pages/admin/team'
 import { CreateBusinessPage } from '@/pages/business/create-business'
 import { PlatformDashboardPage } from '@/pages/platform/dashboard'
 import { MfaGate } from '@/components/platform/mfa-gate'
+
+// Páginas legales
+import { PrivacyPage } from '@/pages/legal/privacy'
+import { TermsPage } from '@/pages/legal/terms'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -101,6 +106,10 @@ export default function App() {
         {/* Landing */}
         <Route path='/' component={LandingPage} />
 
+        {/* Páginas legales — públicas */}
+        <Route path='/privacidad' component={PrivacyPage} />
+        <Route path='/terminos' component={TermsPage} />
+
         {/* Auth — solo accesibles sin sesión */}
         <Route path='/login'>
           <GuestRoute>
@@ -134,6 +143,13 @@ export default function App() {
         <Route path='/crear-negocio'>
           <ProtectedRoute>
             <CreateBusinessPage />
+          </ProtectedRoute>
+        </Route>
+
+        {/* Preferencias de privacidad del cliente */}
+        <Route path='/preferencias'>
+          <ProtectedRoute>
+            <PrivacyPreferencesPage />
           </ProtectedRoute>
         </Route>
 

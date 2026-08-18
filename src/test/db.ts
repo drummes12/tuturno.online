@@ -113,6 +113,25 @@ export async function isResourcesSchemaAvailable(): Promise<boolean> {
 }
 
 /**
+ * Verifica que el esquema de privacidad (migración 03000) esté aplicado.
+ */
+export async function isPrivacySchemaAvailable(): Promise<boolean> {
+  try {
+    const result = await query<{
+      consents: string | null
+      rpc: string | null
+    }>(`
+      select
+        to_regclass('public.privacy_consents')::text as consents,
+        to_regprocedure('public.record_registration_consent(text,text)')::text as rpc
+    `)
+    return Boolean(result.rows[0]?.consents && result.rows[0]?.rpc)
+  } catch {
+    return false
+  }
+}
+
+/**
  * Cierra el pool al final de todos los tests.
  */
 export async function closePool(): Promise<void> {

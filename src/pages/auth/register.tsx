@@ -19,6 +19,7 @@ export function RegisterPage() {
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -29,6 +30,13 @@ export function RegisterPage() {
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.')
+      return
+    }
+
+    if (!acceptedTerms) {
+      setError(
+        'Debes aceptar los Términos y la Política de Datos para registrarte.'
+      )
       return
     }
 
@@ -145,6 +153,37 @@ export function RegisterPage() {
               required
               autoComplete='new-password'
             />
+
+            {/* Consentimiento obligatorio de Términos y Política */}
+            <label className='flex items-start gap-3 text-sm text-(--color-text) cursor-pointer select-none'>
+              <input
+                type='checkbox'
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className='mt-0.5 h-4 w-4 rounded border-border text-(--color-primary) focus:ring-(--color-primary) cursor-pointer'
+                required
+              />
+              <span className='leading-relaxed'>
+                He leído y acepto los{' '}
+                <Link
+                  href='/terminos'
+                  target='_blank'
+                  className='text-(--color-primary) font-medium hover:underline'
+                >
+                  Términos
+                </Link>{' '}
+                y la{' '}
+                <Link
+                  href='/privacidad'
+                  target='_blank'
+                  className='text-(--color-primary) font-medium hover:underline'
+                >
+                  Política de Tratamiento de Datos Personales
+                </Link>
+                . Esta aceptación es necesaria para crear la cuenta y gestionar
+                reservas.
+              </span>
+            </label>
 
             {error && <Alert variant='error'>{error}</Alert>}
 

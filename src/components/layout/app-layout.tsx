@@ -136,13 +136,26 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
             {isAdmin && <BusinessSelector />}
             {user ? (
-              <button
-                onClick={() => signOut()}
-                className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
-              >
-                <LogOutIcon size={16} />
-                <span className='hidden sm:inline'>Salir</span>
-              </button>
+              <>
+                {!isAdmin && (
+                  <Link
+                    href='/preferencias'
+                    className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                    aria-label='Preferencias de privacidad'
+                    title='Preferencias de privacidad'
+                  >
+                    <LockIcon size={16} />
+                    <span className='hidden sm:inline'>Privacidad</span>
+                  </Link>
+                )}
+                <button
+                  onClick={() => signOut()}
+                  className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                >
+                  <LogOutIcon size={16} />
+                  <span className='hidden sm:inline'>Salir</span>
+                </button>
+              </>
             ) : (
               <Link
                 href='/login'
@@ -232,6 +245,25 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {/* FAB de ubicación — disponible en la página pública tenant */}
         {location.startsWith('/b/') && <GoogleMapsFab />}
       </div>
+
+      {/* Footer — enlaces legales públicos */}
+      <footer className='border-t border-border bg-surface-elevated mt-auto'>
+        <div className='mx-auto max-w-5xl px-4 py-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-(--color-text-muted)'>
+          <span>© {new Date().getFullYear()} TuTurno</span>
+          <Link
+            href='/privacidad'
+            className='hover:text-(--color-text) transition-colors'
+          >
+            Política de datos
+          </Link>
+          <Link
+            href='/terminos'
+            className='hover:text-(--color-text) transition-colors'
+          >
+            Términos
+          </Link>
+        </div>
+      </footer>
     </div>
   )
 }
