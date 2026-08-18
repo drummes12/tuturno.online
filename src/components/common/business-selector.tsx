@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { useAuthStore } from '@/stores/auth'
-import { StoreIcon, LinkIcon, CheckIcon } from '@/components/common/icon'
+import { StoreIcon, CalendarPlusIcon } from '@/components/common/icon'
 
 /**
  * Selector de negocio para usuarios con múltiples memberships.
@@ -12,31 +11,11 @@ import { StoreIcon, LinkIcon, CheckIcon } from '@/components/common/icon'
  */
 export function BusinessSelector() {
   const { memberships, activeBusinessId, setActiveBusinessId } = useAuthStore()
-  const [copied, setCopied] = useState(false)
 
   if (memberships.length === 0) return null
 
   const active = memberships.find((m) => m.businessId === activeBusinessId)
   const publicUrl = active ? `${window.location.origin}/b/${active.slug}` : null
-
-  async function copyLink() {
-    if (!publicUrl) return
-    try {
-      await navigator.clipboard.writeText(publicUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Fallback: seleccionar y copiar
-      const input = document.createElement('input')
-      input.value = publicUrl
-      document.body.appendChild(input)
-      input.select()
-      document.execCommand('copy')
-      document.body.removeChild(input)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
 
   const hasMultiple = memberships.length > 1
 
@@ -92,26 +71,17 @@ export function BusinessSelector() {
         </span>
       )}
 
-      {/* Botón copiar enlace público */}
+      {/* Botón crear reserva — abre la página pública en nueva pestaña */}
       {active && (
-        <button
-          onClick={copyLink}
-          className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-xs font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 transition-[background-color,border-color,transform,color] touch-target'
-          aria-label='Copiar enlace público del negocio'
-          title={publicUrl ?? 'Copiar enlace'}
+        <a
+          href={publicUrl ?? '#'}
+          className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 transition-[background-color,border-color,transform,color] touch-target'
+          aria-label='Crear reserva a nombre de un cliente'
+          title='Crear reserva a nombre de un cliente'
         >
-          {copied ? (
-            <>
-              <CheckIcon size={14} className='text-pitch-300' />
-              <span className='hidden sm:inline'>¡Copiado!</span>
-            </>
-          ) : (
-            <>
-              <LinkIcon size={14} />
-              <span className='hidden sm:inline'>Copiar enlace</span>
-            </>
-          )}
-        </button>
+          <CalendarPlusIcon size={14} />
+          <span className='hidden sm:inline'>Nueva reserva</span>
+        </a>
       )}
     </div>
   )
