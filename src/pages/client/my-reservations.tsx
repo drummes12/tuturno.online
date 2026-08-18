@@ -17,7 +17,7 @@ import {
   InboxIcon,
   WhatsAppIcon
 } from '@/components/common/icon'
-import { waLink } from '@/lib/whatsapp'
+import { resolveWhatsAppLink, buildClientPendingMessage } from '@/lib/whatsapp'
 import type { Reservation } from '@/types'
 import { parseISO, isAfter, subHours } from 'date-fns'
 import { formatLocal } from '@/lib/time'
@@ -40,6 +40,9 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [businessPhone, setBusinessPhone] = useState<string | null>(null)
+  const [businessWhatsappLink, setBusinessWhatsappLink] = useState<
+    string | null
+  >(null)
   const [businessName, setBusinessName] = useState<string>('')
   const [resourceLabelSingular, setResourceLabelSingular] = useState('Recurso')
 
@@ -68,6 +71,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
       .then((data) => {
         if (data) {
           setBusinessPhone(data.phone)
+          setBusinessWhatsappLink(data.whatsapp_link)
           setBusinessName(data.name)
           setResourceLabelSingular(data.resource_label_singular || 'Recurso')
         }
@@ -138,20 +142,15 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   }
 
   function buildReservationWhatsAppLink(r: Reservation): string | null {
-    if (!businessPhone) return null
-    const resourceName = r.resource?.name ?? resourceLabelSingular
-    const dateLabel = formatLocal(r.starts_at, "EEEE d 'de' MMMM")
-    const timeLabel = formatLocal(r.starts_at, 'HH:mm')
-    const clientName = profile?.full_name ?? ''
-    const msg =
-      `Hola ${businessName}, tengo una reserva pendiente:\n\n` +
-      `- Lugar: ${resourceName}\n` +
-      `- Fecha: ${dateLabel}\n` +
-      `- Hora: ${timeLabel}\n` +
-      `- Cliente: ${clientName}\n` +
-      `_Quisiera validar la confirmación._\n` +
-      `¡Gracias!`
-    return waLink(businessPhone, msg)
+    const msg = buildClientPendingMessage({
+      businessName,
+      resourceName: r.resource?.name ?? resourceLabelSingular,
+      resourceLabel: resourceLabelSingular,
+      dateLabel: formatLocal(r.starts_at, "EEEE d 'de' MMMM"),
+      timeLabel: formatLocal(r.starts_at, 'HH:mm'),
+      clientName: profile?.full_name ?? ''
+    })
+    return resolveWhatsAppLink(businessWhatsappLink, businessPhone, msg)
   }
 
   const filters: { key: Filter; label: string }[] = [
@@ -265,20 +264,21 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
 
               {canCancel(r) && (
                 <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
-                  {r.status === 'pending' && businessPhone && (
-                    <a
-                      href={buildReservationWhatsAppLink(r) ?? '#'}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      data-tour={
-                        index === 0 ? 'reservation-whatsapp' : undefined
-                      }
-                      className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
-                    >
-                      <WhatsAppIcon size={18} />
-                      Confirmar por WhatsApp
-                    </a>
-                  )}
+                  {r.status === 'pending' &&
+                    buildReservationWhatsAppLink(r) && (
+                      <a
+                        href={buildReservationWhatsAppLink(r)!}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        data-tour={
+                          index === 0 ? 'reservation-whatsapp' : undefined
+                        }
+                        className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
+                      >
+                        <WhatsAppIcon size={18} />
+                        Confirmar por WhatsApp
+                      </a>
+                    )}
                   <Button
                     variant='danger'
                     size='sm'

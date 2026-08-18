@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { WhatsAppIcon } from '@/components/common/icon'
-import { resolveWhatsAppLink } from '@/lib/whatsapp'
+import { resolveWhatsAppLink, buildGeneralInquiryMessage } from '@/lib/whatsapp'
 import { fetchBusinessContactById } from '@/services/business'
 import { getSlugFromUrl } from '@/lib/slug'
 import { useTenant } from '@/hooks/use-tenant'
@@ -40,7 +40,7 @@ export function WhatsAppFab({ businessId }: WhatsAppFabProps = {}) {
   const link = resolveWhatsAppLink(
     whatsappLink,
     phone,
-    `Hola, tengo una duda sobre las reservas en ${businessName}.`
+    buildGeneralInquiryMessage(businessName)
   )
 
   if (!link) return null

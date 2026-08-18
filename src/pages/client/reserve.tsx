@@ -32,27 +32,12 @@ import {
   WhatsAppIcon,
   InfoIcon
 } from '@/components/common/icon'
-import { waLink } from '@/lib/whatsapp'
+import {
+  resolveWhatsAppLink,
+  buildClientReservationMessage
+} from '@/lib/whatsapp'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-
-function buildWhatsAppMessage(opts: {
-  businessName: string
-  resourceName?: string | null
-  dateLabel?: string | null
-  timeLabel: string | null
-  clientName: string | null
-}): string {
-  return (
-    `Hola ${opts.businessName}, acabo de enviar una solicitud de reserva:\n\n` +
-    (opts.resourceName ? `- Lugar: ${opts.resourceName}\n` : '') +
-    (opts.dateLabel ? `- Fecha: ${opts.dateLabel}\n` : '') +
-    `- Hora: ${opts.timeLabel}\n` +
-    `- Cliente: ${opts.clientName}\n` +
-    `_Quisiera validar la confirmación._\n` +
-    `¡Gracias!`
-  )
-}
 
 type ReservePageProps = {
   slug?: string
@@ -80,6 +65,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   const [adminBusinessId, setAdminBusinessId] = useState<string | null>(null)
   const [businessContact, setBusinessContact] = useState<{
     phone: string
+    whatsapp_link: string | null
     name: string
     resource_label_singular: string
     reservation_instructions_md: string | null
@@ -113,6 +99,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         if (data) {
           setBusinessContact({
             phone: data.phone,
+            whatsapp_link: data.whatsapp_link,
             name: data.name,
             resource_label_singular: data.resource_label_singular || 'Recurso',
             reservation_instructions_md: data.reservation_instructions_md
@@ -301,19 +288,22 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
       }
 
       // Construir enlace de WhatsApp con datos de la reserva
-      if (businessContact?.phone) {
-        const msg = buildWhatsAppMessage({
+      if (businessContact) {
+        const msg = buildClientReservationMessage({
           businessName: businessContact.name,
           resourceName: resourceName,
+          resourceLabel: businessContact.resource_label_singular,
           dateLabel: dateLabel,
           timeLabel,
           clientName: fullName.trim()
         })
-        const link = waLink(businessContact.phone, msg)
+        const link = resolveWhatsAppLink(
+          businessContact.whatsapp_link,
+          businessContact.phone,
+          msg
+        )
         if (link) {
-          // Intentar abrir en nueva pestaña
           const win = window.open(link, '_blank', 'noopener,noreferrer')
-          // Si el navegador bloqueó el popup, guardar el enlace para mostrar fallback
           if (!win) {
             setWhatsappLink(link)
           }

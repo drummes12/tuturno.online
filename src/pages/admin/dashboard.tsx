@@ -18,7 +18,10 @@ import {
 import type { Reservation } from '@/types'
 import { format } from 'date-fns'
 import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
-import { waLink } from '@/lib/whatsapp'
+import {
+  resolveWhatsAppLink,
+  buildBusinessContactMessage
+} from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 import { sortReservationsByPriority } from '@/lib/sort'
@@ -38,6 +41,18 @@ export function AdminDashboardPage() {
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [error, setError] = useState<string | null>(null)
+
+  function buildReservationWhatsAppLink(r: Reservation): string | null {
+    const phone = r.client?.phone ?? r.profile?.phone
+    if (!phone) return null
+    const msg = buildBusinessContactMessage({
+      clientName: r.client?.name ?? r.profile?.full_name ?? '',
+      resourceName: r.resource?.name ?? null,
+      dateLabel: formatLocal(r.starts_at, "EEEE d 'de' MMMM"),
+      timeLabel: formatLocal(r.starts_at, 'HH:mm')
+    })
+    return resolveWhatsAppLink(null, phone, msg)
+  }
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -267,14 +282,9 @@ export function AdminDashboardPage() {
                   </div>
                 ) : (
                   <div className='flex items-center gap-2 flex-wrap'>
-                    {waLink(r.client?.phone ?? r.profile?.phone) && (
+                    {buildReservationWhatsAppLink(r) && (
                       <a
-                        href={
-                          waLink(
-                            r.client?.phone ?? r.profile?.phone,
-                            `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la recurso ${r.resource?.name ?? ''} sobre tu reserva.`
-                          )!
-                        }
+                        href={buildReservationWhatsAppLink(r)!}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
@@ -361,14 +371,9 @@ export function AdminDashboardPage() {
                         </p>
                       </div>
                       <div className='flex flex-col items-end gap-1'>
-                        {waLink(r.client?.phone ?? r.profile?.phone) && (
+                        {buildReservationWhatsAppLink(r) && (
                           <a
-                            href={
-                              waLink(
-                                r.client?.phone ?? r.profile?.phone,
-                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la recurso ${r.resource?.name ?? ''} sobre tu reserva.`
-                              )!
-                            }
+                            href={buildReservationWhatsAppLink(r)!}
                             target='_blank'
                             rel='noopener noreferrer'
                             className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
@@ -417,14 +422,9 @@ export function AdminDashboardPage() {
                         </p>
                       </div>
                       <div className='flex flex-col items-end gap-1'>
-                        {waLink(r.client?.phone ?? r.profile?.phone) && (
+                        {buildReservationWhatsAppLink(r) && (
                           <a
-                            href={
-                              waLink(
-                                r.client?.phone ?? r.profile?.phone,
-                                `Hola ${r.client?.name ?? r.profile?.full_name ?? ''}, te contacto desde la recurso ${r.resource?.name ?? ''} sobre tu reserva.`
-                              )!
-                            }
+                            href={buildReservationWhatsAppLink(r)!}
                             target='_blank'
                             rel='noopener noreferrer'
                             className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'

@@ -10,7 +10,7 @@ import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { useCanEdit } from '@/hooks/use-can-edit'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
-import { resolveWhatsAppLink } from '@/lib/whatsapp'
+import { resolveWhatsAppLink, buildGeneralInquiryMessage } from '@/lib/whatsapp'
 import { ShareCard } from '@/components/admin/share-card'
 import {
   ClockIcon,
@@ -244,7 +244,7 @@ export function AdminConfigPage() {
                   const testLink = resolveWhatsAppLink(
                     business.whatsapp_link,
                     business.phone,
-                    `Hola, tengo una duda sobre las reservas en ${business.name}.`
+                    buildGeneralInquiryMessage(business.name)
                   )
                   if (!testLink) return null
                   return (
