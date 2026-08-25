@@ -12,6 +12,14 @@ export type ReservationStatus =
   | 'expired'
   | 'completed'
 
+export type ReservationFilter =
+  | 'all'
+  | 'pending'
+  | 'confirmed'
+  | 'rejected'
+  | 'cancelled'
+  | 'completed'
+
 export type BusinessRole = 'owner' | 'manager'
 
 export type ExceptionType = 'closed' | 'blocked'

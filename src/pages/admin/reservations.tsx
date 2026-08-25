@@ -13,7 +13,7 @@ import {
   InboxIcon,
   WhatsAppIcon
 } from '@/components/common/icon'
-import type { Reservation, ReservationStatus } from '@/types'
+import type { Reservation, ReservationFilter } from '@/types'
 import { format } from 'date-fns'
 import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
 import {
@@ -30,12 +30,12 @@ import {
   cancelReservationByBusiness
 } from '@/services/reservations'
 
-const statusFilters: { key: ReservationStatus | 'all'; label: string }[] = [
+const statusFilters: { key: ReservationFilter; label: string }[] = [
   { key: 'all', label: 'Todas' },
   { key: 'pending', label: 'Pendientes' },
   { key: 'confirmed', label: 'Confirmadas' },
   { key: 'rejected', label: 'Rechazadas' },
-  { key: 'cancelled_by_client', label: 'Canceladas' },
+  { key: 'cancelled', label: 'Canceladas' },
   { key: 'completed', label: 'Completadas' }
 ]
 
@@ -48,7 +48,7 @@ export function AdminReservationsPage() {
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [filter, setFilter] = useState<ReservationStatus | 'all'>('all')
+  const [filter, setFilter] = useState<ReservationFilter>('all')
   const [selectedDate, setSelectedDate] = useState(
     format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
   )
@@ -159,6 +159,10 @@ export function AdminReservationsPage() {
         <h1 className='text-2xl font-bold tracking-tight'>Reservas</h1>
         <p className='text-sm text-(--color-text-muted) mt-0.5'>
           Filtra por fecha y estado para gestionar.
+        </p>
+        <p className='text-xs text-(--color-text-muted) mt-1'>
+          Cada reserva aparece una sola vez. Al terminar el turno, pasa a
+          Completadas.
         </p>
       </div>
 

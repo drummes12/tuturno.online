@@ -49,6 +49,7 @@
 5. Deployar la Edge Function `send-notifications`
 6. Los crons se configuran automáticamente con las migraciones:
    - `expire-pending-reservations` (cada 5 min) — migración 01000
+   - `complete-past-reservations` (cada 5 min) — migración 03200
    - `send-notifications` (cada 2 min) — migración 01300, invoca la Edge Function vía pg_net
 
 ## Convenciones

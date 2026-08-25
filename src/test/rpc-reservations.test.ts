@@ -309,6 +309,51 @@ describe.skipIf(!DB_AVAILABLE)('cancel_reservation_by_client RPC', () => {
       expect(statusResult.rows[0].status).toBe('cancelled_by_client')
     })
   })
+
+  it('cancela una reserva guest vinculada al perfil del cliente', async () => {
+    if (!ACTIVE_RESOURCE_ID || !REAL_USER_ID) return
+
+    await withTransaction(async (client) => {
+      await setAuthContext(client, REAL_USER_ID)
+      const resourceResult = await client.query(
+        'select business_id from public.resources where id = $1',
+        [ACTIVE_RESOURCE_ID]
+      )
+      if (resourceResult.rows.length === 0) return
+
+      const clientResult = await client.query(
+        `insert into public.clients (business_id, name, user_id)
+         values ($1, 'Cliente vinculado', $2)
+         returning id`,
+        [resourceResult.rows[0].business_id, REAL_USER_ID]
+      )
+      const reservationResult = await client.query(
+        `insert into public.reservations (
+          business_id, resource_id, user_id, client_id,
+          starts_at, ends_at, status, hold_expires_at
+        ) values ($1, $2, null, $3, now() + interval '1 day',
+          now() + interval '1 day 1 hour', 'pending', now() + interval '30 minutes')
+        returning id`,
+        [
+          resourceResult.rows[0].business_id,
+          ACTIVE_RESOURCE_ID,
+          clientResult.rows[0].id
+        ]
+      )
+      const reservationId = reservationResult.rows[0].id
+
+      await client.query(
+        'select public.cancel_reservation_by_client(p_reservation_id := $1)',
+        [reservationId]
+      )
+
+      const statusResult = await client.query(
+        'select status from public.reservations where id = $1',
+        [reservationId]
+      )
+      expect(statusResult.rows[0].status).toBe('cancelled_by_client')
+    })
+  })
 })
 
 describe.skipIf(!DB_AVAILABLE)('cancel_reservation_by_business RPC', () => {
@@ -431,6 +476,40 @@ describe.skipIf(!DB_AVAILABLE)('expire_pending_reservations RPC', () => {
         [reservationId]
       )
       expect(statusResult.rows[0].status).toBe('confirmed')
+    })
+  })
+})
+
+describe.skipIf(!DB_AVAILABLE)('complete_past_reservations RPC', () => {
+  it('marca como completadas las reservas confirmadas cuyo turno terminó', async () => {
+    if (!ACTIVE_RESOURCE_ID || !REAL_USER_ID) return
+
+    await withTransaction(async (client) => {
+      const resourceResult = await client.query(
+        'select business_id from public.resources where id = $1',
+        [ACTIVE_RESOURCE_ID]
+      )
+      if (resourceResult.rows.length === 0) return
+
+      const result = await client.query(
+        `insert into public.reservations (
+          business_id, resource_id, user_id, starts_at, ends_at, status
+        ) values ($1, $2, $3, now() - interval '2 hours', now() - interval '1 hour', 'confirmed')
+        returning id`,
+        [resourceResult.rows[0].business_id, ACTIVE_RESOURCE_ID, REAL_USER_ID]
+      )
+      const reservationId = result.rows[0].id
+
+      const completionResult = await client.query(
+        'select public.complete_past_reservations() as count'
+      )
+      expect(Number(completionResult.rows[0].count)).toBeGreaterThanOrEqual(1)
+
+      const statusResult = await client.query(
+        'select status from public.reservations where id = $1',
+        [reservationId]
+      )
+      expect(statusResult.rows[0].status).toBe('completed')
     })
   })
 })

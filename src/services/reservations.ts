@@ -1,5 +1,9 @@
 import { supabase } from '@/lib/supabase'
-import type { Reservation, ReservationStatus } from '@/types'
+import {
+  filterReservations,
+  uniqueReservations
+} from '@/lib/reservation-status'
+import type { Reservation, ReservationFilter } from '@/types'
 
 const RESERVATION_SELECT =
   '*, resource:resources(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
@@ -11,7 +15,7 @@ export async function fetchPendingReservations(): Promise<Reservation[]> {
     .eq('status', 'pending')
     .order('starts_at', { ascending: true })
   if (error) throw error
-  return data as Reservation[]
+  return uniqueReservations((data ?? []) as Reservation[])
 }
 
 export async function fetchTodayReservations(start: string, end: string): Promise<Reservation[]> {
@@ -23,28 +27,23 @@ export async function fetchTodayReservations(start: string, end: string): Promis
     .neq('status', 'pending')
     .order('starts_at', { ascending: true })
   if (error) throw error
-  return data as Reservation[]
+  return uniqueReservations((data ?? []) as Reservation[])
 }
 
 export async function fetchReservationsByDate(
   start: string,
   end: string,
-  status?: ReservationStatus | 'all'
+  filter: ReservationFilter = 'all'
 ): Promise<Reservation[]> {
-  let query = supabase
+  const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
     .gte('starts_at', start)
     .lte('starts_at', end)
     .order('starts_at', { ascending: true })
 
-  if (status && status !== 'all') {
-    query = query.eq('status', status)
-  }
-
-  const { data, error } = await query
   if (error) throw error
-  return data as Reservation[]
+  return filterReservations((data ?? []) as Reservation[], filter)
 }
 
 export async function fetchUserReservations(
@@ -77,7 +76,7 @@ export async function fetchUserReservations(
     .or(orFilter)
     .order('starts_at', { ascending: false })
   if (error) throw error
-  return data as Reservation[]
+  return uniqueReservations((data ?? []) as Reservation[])
 }
 
 // RPC calls

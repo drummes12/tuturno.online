@@ -83,12 +83,14 @@ describe('fetchTodayReservations', () => {
       sampleReservation({
         id: 'r1',
         status: 'confirmed',
-        starts_at: '2025-01-01T08:00:00Z'
+        starts_at: '2099-01-01T08:00:00Z',
+        ends_at: '2099-01-01T09:00:00Z'
       }),
       sampleReservation({
         id: 'r2',
         status: 'cancelled_by_client',
-        starts_at: '2025-01-01T12:00:00Z'
+        starts_at: '2099-01-01T12:00:00Z',
+        ends_at: '2099-01-01T13:00:00Z'
       })
     ]
     const chain = createQueryChain({ data, error: null })
@@ -128,7 +130,7 @@ describe('fetchReservationsByDate', () => {
     const end = '2025-01-02T00:00:00Z'
     const result = await fetchReservationsByDate(start, end)
 
-    expect(result).toEqual(data)
+    expect(result).toEqual([{ ...data[0], status: 'completed' }])
     expect(mockFrom).toHaveBeenCalledWith('reservations')
     expect(chain.select).toHaveBeenCalledWith(RESERVATION_SELECT)
     expect(chain.gte).toHaveBeenCalledWith('starts_at', start)
@@ -138,8 +140,15 @@ describe('fetchReservationsByDate', () => {
     expect(chain.eq).not.toHaveBeenCalled()
   })
 
-  it('con status: aplica filtro eq de status', async () => {
-    const data = [sampleReservation({ id: 'r1', status: 'confirmed' })]
+  it('con status: filtra después de consolidar los datos', async () => {
+    const data = [
+      sampleReservation({
+        id: 'r1',
+        status: 'confirmed',
+        starts_at: '2099-01-01T10:00:00Z',
+        ends_at: '2099-01-01T11:00:00Z'
+      })
+    ]
     const chain = createQueryChain({ data, error: null })
     mockFrom.mockReturnValue(chain)
 
@@ -148,11 +157,11 @@ describe('fetchReservationsByDate', () => {
     const result = await fetchReservationsByDate(start, end, 'confirmed')
 
     expect(result).toEqual(data)
-    expect(chain.eq).toHaveBeenCalledWith('status', 'confirmed')
+    expect(chain.eq).not.toHaveBeenCalledWith('status', 'confirmed')
   })
 
   it('con status "all": no aplica filtro eq de status', async () => {
-    const data = [sampleReservation({ id: 'r1', status: 'confirmed' })]
+    const data = [sampleReservation({ id: 'r1', status: 'pending' })]
     const chain = createQueryChain({ data, error: null })
     mockFrom.mockReturnValue(chain)
 
