@@ -24,6 +24,7 @@ import {
 } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
+import { useSwipeTabs } from '@/hooks/use-swipe-tabs'
 import { sortReservationsByPriority } from '@/lib/sort'
 import {
   fetchReservationsByDate,
@@ -60,6 +61,15 @@ export function AdminReservationsPage() {
   const [selectedDate, setSelectedDate] = useState(
     format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
   )
+  const handleFilterSwipe = useCallback((index: number) => {
+    const nextFilter = statusFilters[index]
+    if (nextFilter) setFilter(nextFilter.key)
+  }, [])
+  const swipeHandlers = useSwipeTabs({
+    activeIndex: statusFilters.findIndex((item) => item.key === filter),
+    tabCount: statusFilters.length,
+    onIndexChange: handleFilterSwipe
+  })
 
   function buildReservationWhatsAppLink(r: Reservation): string | null {
     const phone = r.client?.phone ?? r.profile?.phone
@@ -196,7 +206,7 @@ export function AdminReservationsPage() {
 
       {/* Filter chips */}
       <div
-        className='scrollbar-none flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
         data-tour='admin-reservations-filters'
         style={{ animationDelay: '60ms' }}
       >
@@ -221,200 +231,205 @@ export function AdminReservationsPage() {
         </Alert>
       )}
 
-      {loading ? (
-        <div className='flex flex-col gap-3'>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <ReservationSkeleton key={i} />
-          ))}
-        </div>
-      ) : sortedReservations.length === 0 ? (
-        <Card className='p-8 text-center animate-fade-up'>
-          <div className='flex flex-col items-center gap-3'>
-            <div className='w-12 h-12 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
-              <InboxIcon size={24} />
-            </div>
-            <p className='text-text-muted text-sm'>
-              No hay reservas para este filtro.
-            </p>
+      <div {...swipeHandlers} className='swipe-track touch-pan-y'>
+        {loading ? (
+          <div className='flex flex-col gap-3'>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <ReservationSkeleton key={i} />
+            ))}
           </div>
-        </Card>
-      ) : (
-        <div className='flex flex-col gap-2.5'>
-          {sortedReservations.map((r, index) => (
-            <Card
-              key={r.id}
-              data-tour={index === 0 ? 'admin-reservations-card' : undefined}
-              className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
-              style={{ '--index': index } as React.CSSProperties}
-            >
-              <button
-                type='button'
-                onClick={() => setSelectedReservation(r)}
-                className='w-full cursor-pointer rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
-                aria-label={`Ver detalles de la reserva de ${r.client?.name ?? r.profile?.full_name ?? 'cliente'} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
+        ) : sortedReservations.length === 0 ? (
+          <Card className='p-8 text-center animate-fade-up'>
+            <div className='flex flex-col items-center gap-3'>
+              <div className='w-12 h-12 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
+                <InboxIcon size={24} />
+              </div>
+              <p className='text-text-muted text-sm'>
+                No hay reservas para este filtro.
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <div className='flex flex-col gap-2.5'>
+            {sortedReservations.map((r, index) => (
+              <Card
+                key={r.id}
+                data-tour={index === 0 ? 'admin-reservations-card' : undefined}
+                className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
+                style={{ '--index': index } as React.CSSProperties}
               >
-                <div className='flex flex-col'>
-                  <div className='flex items-start gap-2 justify-between'>
-                    <p className='font-medium text-sm flex items-center gap-1.5'>
-                      <span className='nums font-bold text-primary'>
-                        {formatLocal(r.starts_at, 'HH:mm')}
-                      </span>
-                      <span className='text-text-muted'>·</span>
-                      <span className='truncate'>{r.resource?.name}</span>
-                    </p>
-                    <div className='flex shrink-0 items-center gap-1'>
-                      <StatusBadge status={r.status} />
-                      <ChevronRightIcon size={18} className='text-text-muted' />
-                    </div>
-                  </div>
-                  <div>
-                    <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
-                      <UserIcon size={12} className='shrink-0' />
-                      <span className='truncate'>
-                        {r.client?.name ??
-                          r.profile?.full_name ??
-                          'Cliente sin nombre'}
-                      </span>
-                      {!r.client?.user_id && !r.profile && (
-                        <span className='text-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0'>
-                          Invitado
+                <button
+                  type='button'
+                  onClick={() => setSelectedReservation(r)}
+                  className='w-full cursor-pointer rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
+                  aria-label={`Ver detalles de la reserva de ${r.client?.name ?? r.profile?.full_name ?? 'cliente'} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
+                >
+                  <div className='flex flex-col'>
+                    <div className='flex items-start gap-2 justify-between'>
+                      <p className='font-medium text-sm flex items-center gap-1.5'>
+                        <span className='nums font-bold text-primary'>
+                          {formatLocal(r.starts_at, 'HH:mm')}
                         </span>
+                        <span className='text-text-muted'>·</span>
+                        <span className='truncate'>{r.resource?.name}</span>
+                      </p>
+                      <div className='flex shrink-0 items-center gap-1'>
+                        <StatusBadge status={r.status} />
+                        <ChevronRightIcon
+                          size={18}
+                          className='text-text-muted'
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
+                        <UserIcon size={12} className='shrink-0' />
+                        <span className='truncate'>
+                          {r.client?.name ??
+                            r.profile?.full_name ??
+                            'Cliente sin nombre'}
+                        </span>
+                        {!r.client?.user_id && !r.profile && (
+                          <span className='text-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0'>
+                            Invitado
+                          </span>
+                        )}
+                      </p>
+                      {r.notes && (
+                        <p className='text-xs italic text-(--color-text-muted) mt-1.5 border-l-2 border-border pl-2'>
+                          {r.notes}
+                        </p>
                       )}
-                    </p>
-                    {r.notes && (
-                      <p className='text-xs italic text-(--color-text-muted) mt-1.5 border-l-2 border-border pl-2'>
-                        {r.notes}
-                      </p>
-                    )}
-                    {r.decision_reason && (
-                      <p className='text-xs text-(--color-text-muted) mt-1.5'>
-                        Motivo: {r.decision_reason}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </button>
-
-              {/* Action bar — WhatsApp siempre disponible + acciones por estado */}
-              <div className='mt-3 pt-3 border-t border-border'>
-                {rejectingId === r.id ? (
-                  <div className='flex flex-col gap-2.5 animate-fade-up'>
-                    <Input
-                      label='Motivo del rechazo'
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      placeholder='Ej: recurso en mantenimiento'
-                      autoFocus
-                    />
-                    <div className='flex gap-2'>
-                      <Button
-                        variant='danger'
-                        size='sm'
-                        loading={actingId === r.id}
-                        onClick={() => handleReject(r.id)}
-                      >
-                        Confirmar rechazo
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={() => {
-                          setRejectingId(null)
-                          setRejectReason('')
-                        }}
-                      >
-                        Cancelar
-                      </Button>
+                      {r.decision_reason && (
+                        <p className='text-xs text-(--color-text-muted) mt-1.5'>
+                          Motivo: {r.decision_reason}
+                        </p>
+                      )}
                     </div>
                   </div>
-                ) : cancellingId === r.id ? (
-                  <div className='flex flex-col gap-2.5 animate-fade-up'>
-                    <Input
-                      label='Motivo de cancelación'
-                      value={cancelReason}
-                      onChange={(e) => setCancelReason(e.target.value)}
-                      placeholder='Ej: el cliente no llegó'
-                      autoFocus
-                    />
-                    <div className='flex gap-2'>
-                      <Button
-                        variant='danger'
-                        size='sm'
-                        loading={actingId === r.id}
-                        onClick={() => handleCancelByBusiness(r.id)}
-                      >
-                        Confirmar cancelación
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={() => {
-                          setCancellingId(null)
-                          setCancelReason('')
-                        }}
-                      >
-                        Cerrar
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className='flex items-center gap-2 flex-wrap'>
-                    {/* WhatsApp — acción de contacto, sutil pero visible */}
-                    {buildReservationWhatsAppLink(r) && (
-                      <a
-                        href={buildReservationWhatsAppLink(r)!}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                        aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
-                      >
-                        <WhatsAppIcon size={16} />
-                        <span className='hidden sm:inline'>WhatsApp</span>
-                      </a>
-                    )}
+                </button>
 
-                    {/* Spacer empuja las acciones a la derecha en desktop */}
-                    <div className='flex gap-2 ml-auto'>
-                      {r.status === 'pending' && (
-                        <>
-                          <Button
-                            variant='success'
-                            size='sm'
-                            loading={actingId === r.id}
-                            onClick={() => handleConfirm(r.id)}
-                          >
-                            <CheckIcon size={16} />
-                            Confirmar
-                          </Button>
-                          <Button
-                            variant='danger'
-                            size='sm'
-                            onClick={() => setRejectingId(r.id)}
-                          >
-                            <XIcon size={16} />
-                            Rechazar
-                          </Button>
-                        </>
-                      )}
-                      {r.status === 'confirmed' && (
+                {/* Action bar — WhatsApp siempre disponible + acciones por estado */}
+                <div className='mt-3 pt-3 border-t border-border'>
+                  {rejectingId === r.id ? (
+                    <div className='flex flex-col gap-2.5 animate-fade-up'>
+                      <Input
+                        label='Motivo del rechazo'
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        placeholder='Ej: recurso en mantenimiento'
+                        autoFocus
+                      />
+                      <div className='flex gap-2'>
                         <Button
                           variant='danger'
                           size='sm'
-                          data-tour='admin-reservations-cancel'
-                          onClick={() => setCancellingId(r.id)}
+                          loading={actingId === r.id}
+                          onClick={() => handleReject(r.id)}
                         >
-                          <XIcon size={16} />
-                          Cancelar reserva
+                          Confirmar rechazo
                         </Button>
-                      )}
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => {
+                            setRejectingId(null)
+                            setRejectReason('')
+                          }}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+                  ) : cancellingId === r.id ? (
+                    <div className='flex flex-col gap-2.5 animate-fade-up'>
+                      <Input
+                        label='Motivo de cancelación'
+                        value={cancelReason}
+                        onChange={(e) => setCancelReason(e.target.value)}
+                        placeholder='Ej: el cliente no llegó'
+                        autoFocus
+                      />
+                      <div className='flex gap-2'>
+                        <Button
+                          variant='danger'
+                          size='sm'
+                          loading={actingId === r.id}
+                          onClick={() => handleCancelByBusiness(r.id)}
+                        >
+                          Confirmar cancelación
+                        </Button>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => {
+                            setCancellingId(null)
+                            setCancelReason('')
+                          }}
+                        >
+                          Cerrar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className='flex items-center gap-2 flex-wrap'>
+                      {/* WhatsApp — acción de contacto, sutil pero visible */}
+                      {buildReservationWhatsAppLink(r) && (
+                        <a
+                          href={buildReservationWhatsAppLink(r)!}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                          aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
+                        >
+                          <WhatsAppIcon size={16} />
+                          <span className='hidden sm:inline'>WhatsApp</span>
+                        </a>
+                      )}
+
+                      {/* Spacer empuja las acciones a la derecha en desktop */}
+                      <div className='flex gap-2 ml-auto'>
+                        {r.status === 'pending' && (
+                          <>
+                            <Button
+                              variant='success'
+                              size='sm'
+                              loading={actingId === r.id}
+                              onClick={() => handleConfirm(r.id)}
+                            >
+                              <CheckIcon size={16} />
+                              Confirmar
+                            </Button>
+                            <Button
+                              variant='danger'
+                              size='sm'
+                              onClick={() => setRejectingId(r.id)}
+                            >
+                              <XIcon size={16} />
+                              Rechazar
+                            </Button>
+                          </>
+                        )}
+                        {r.status === 'confirmed' && (
+                          <Button
+                            variant='danger'
+                            size='sm'
+                            data-tour='admin-reservations-cancel'
+                            onClick={() => setCancellingId(r.id)}
+                          >
+                            <XIcon size={16} />
+                            Cancelar reserva
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
       {selectedReservation && (
         <ReservationDetailsSheet
           reservation={selectedReservation}

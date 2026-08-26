@@ -24,9 +24,17 @@ import type { Reservation } from '@/types'
 import { parseISO, isAfter, subHours } from 'date-fns'
 import { formatLocal } from '@/lib/time'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
+import { useSwipeTabs } from '@/hooks/use-swipe-tabs'
 import { sortReservationsByPriority } from '@/lib/sort'
 
 type Filter = 'upcoming' | 'pending' | 'confirmed' | 'past'
+
+const filters: { key: Filter; label: string }[] = [
+  { key: 'upcoming', label: 'Próximas' },
+  { key: 'pending', label: 'Pendientes' },
+  { key: 'confirmed', label: 'Confirmadas' },
+  { key: 'past', label: 'Pasadas' }
+]
 
 type MyReservationsPageProps = {
   slug?: string
@@ -161,12 +169,15 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
     return resolveWhatsAppLink(businessWhatsappLink, businessPhone, msg)
   }
 
-  const filters: { key: Filter; label: string }[] = [
-    { key: 'upcoming', label: 'Próximas' },
-    { key: 'pending', label: 'Pendientes' },
-    { key: 'confirmed', label: 'Confirmadas' },
-    { key: 'past', label: 'Pasadas' }
-  ]
+  const handleFilterSwipe = useCallback((index: number) => {
+    const nextFilter = filters[index]
+    if (nextFilter) setFilter(nextFilter.key)
+  }, [])
+  const swipeHandlers = useSwipeTabs({
+    activeIndex: filters.findIndex((item) => item.key === filter),
+    tabCount: filters.length,
+    onIndexChange: handleFilterSwipe
+  })
 
   return (
     <div className='flex flex-col gap-5'>
@@ -179,7 +190,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
 
       {/* Filter chips */}
       <div
-        className='scrollbar-none flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
         style={{ animationDelay: '60ms' }}
         data-tour='reservations-filters'
       >
@@ -204,121 +215,123 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
         </Alert>
       )}
 
-      {loading ? (
-        <div className='flex flex-col gap-3'>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <ReservationSkeleton key={i} />
-          ))}
-        </div>
-      ) : sorted.length === 0 ? (
-        <Card className='p-8 text-center animate-fade-up'>
-          <div className='flex flex-col items-center gap-4'>
-            <div className='w-14 h-14 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
-              <InboxIcon size={28} />
-            </div>
-            <div>
-              <p className='font-medium text-(--color-text) mb-1'>
-                No tienes reservas aquí
-              </p>
-              <p className='text-sm text-text-muted'>
-                {filter === 'upcoming' &&
-                  'Busca un turno disponible y solicita tu reserva.'}
-                {filter === 'pending' &&
-                  'No tienes reservas esperando confirmación.'}
-                {filter === 'confirmed' && 'No tienes reservas confirmadas.'}
-                {filter === 'past' && 'No hay historial de reservas pasadas.'}
-              </p>
-            </div>
-            <Link href={slug ? `/b/${slug}` : '/'}>
-              <Button variant='secondary'>
-                <CalendarPlusIcon size={18} />
-                Ver disponibilidad
-              </Button>
-            </Link>
+      <div {...swipeHandlers} className='swipe-track touch-pan-y'>
+        {loading ? (
+          <div className='flex flex-col gap-3'>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <ReservationSkeleton key={i} />
+            ))}
           </div>
-        </Card>
-      ) : (
-        <div className='flex flex-col gap-3'>
-          {sorted.map((r, index) => (
-            <Card
-              key={r.id}
-              className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
-              style={{ '--index': index } as React.CSSProperties}
-              data-tour={index === 0 ? 'reservation-card' : undefined}
-            >
-              <button
-                type='button'
-                onClick={() => setSelectedReservation(r)}
-                className='w-full cursor-pointer rounded-xl p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
-                aria-label={`Ver detalles de tu reserva de ${r.resource?.name ?? resourceLabelSingular} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
-              >
-                <div className='flex items-start justify-between gap-3'>
-                  <div className='min-w-0 flex-1'>
-                    <p className='font-semibold text-(--color-text) tracking-tight'>
-                      {r.resource?.name ?? resourceLabelSingular}
-                    </p>
-                    <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
-                      {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
-                    </p>
-                  </div>
-                  <div className='flex shrink-0 items-center gap-1'>
-                    <StatusBadge status={r.status} />
-                    <ChevronRightIcon size={18} className='text-text-muted' />
-                  </div>
-                </div>
-
-                {r.notes && (
-                  <p className='text-sm text-(--color-text-muted) mt-2 italic border-l-2 border-border pl-3'>
-                    {r.notes}
-                  </p>
-                )}
-
-                {r.decision_reason && (
-                  <p className='text-sm text-(--color-text-muted) mt-2'>
-                    Motivo: {r.decision_reason}
-                  </p>
-                )}
-              </button>
-
-              {canCancel(r) && (
-                <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
-                  {r.status === 'pending' &&
-                    buildReservationWhatsAppLink(r) && (
-                      <a
-                        href={buildReservationWhatsAppLink(r)!}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        data-tour={
-                          index === 0 ? 'reservation-whatsapp' : undefined
-                        }
-                        className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
-                      >
-                        <WhatsAppIcon size={18} />
-                        Confirmar por WhatsApp
-                      </a>
-                    )}
-                  <Button
-                    variant='danger'
-                    size='sm'
-                    loading={cancellingId === r.id}
-                    onClick={() => handleCancel(r.id)}
-                    data-tour={index === 0 ? 'reservation-cancel' : undefined}
-                  >
-                    Cancelar reserva
-                  </Button>
-                </div>
-              )}
-
-              {r.status === 'confirmed' && !canCancel(r) && (
-                <p className='text-xs text-text-muted mt-2 pt-2 border-t border-border'>
-                  La cancelación directa está disponible hasta 2 horas antes del
-                  turno.
+        ) : sorted.length === 0 ? (
+          <Card className='p-8 text-center animate-fade-up'>
+            <div className='flex flex-col items-center gap-4'>
+              <div className='w-14 h-14 rounded-2xl bg-surface-inset flex items-center justify-center text-text-muted'>
+                <InboxIcon size={28} />
+              </div>
+              <div>
+                <p className='font-medium text-(--color-text) mb-1'>
+                  No tienes reservas aquí
                 </p>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
+                <p className='text-sm text-text-muted'>
+                  {filter === 'upcoming' &&
+                    'Busca un turno disponible y solicita tu reserva.'}
+                  {filter === 'pending' &&
+                    'No tienes reservas esperando confirmación.'}
+                  {filter === 'confirmed' && 'No tienes reservas confirmadas.'}
+                  {filter === 'past' && 'No hay historial de reservas pasadas.'}
+                </p>
+              </div>
+              <Link href={slug ? `/b/${slug}` : '/'}>
+                <Button variant='secondary'>
+                  <CalendarPlusIcon size={18} />
+                  Ver disponibilidad
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        ) : (
+          <div className='flex flex-col gap-3'>
+            {sorted.map((r, index) => (
+              <Card
+                key={r.id}
+                className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
+                style={{ '--index': index } as React.CSSProperties}
+                data-tour={index === 0 ? 'reservation-card' : undefined}
+              >
+                <button
+                  type='button'
+                  onClick={() => setSelectedReservation(r)}
+                  className='w-full cursor-pointer rounded-xl p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
+                  aria-label={`Ver detalles de tu reserva de ${r.resource?.name ?? resourceLabelSingular} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
+                >
+                  <div className='flex items-start justify-between gap-3'>
+                    <div className='min-w-0 flex-1'>
+                      <p className='font-semibold text-(--color-text) tracking-tight'>
+                        {r.resource?.name ?? resourceLabelSingular}
+                      </p>
+                      <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
+                        {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
+                      </p>
+                    </div>
+                    <div className='flex shrink-0 items-center gap-1'>
+                      <StatusBadge status={r.status} />
+                      <ChevronRightIcon size={18} className='text-text-muted' />
+                    </div>
+                  </div>
+
+                  {r.notes && (
+                    <p className='text-sm text-(--color-text-muted) mt-2 italic border-l-2 border-border pl-3'>
+                      {r.notes}
+                    </p>
+                  )}
+
+                  {r.decision_reason && (
+                    <p className='text-sm text-(--color-text-muted) mt-2'>
+                      Motivo: {r.decision_reason}
+                    </p>
+                  )}
+                </button>
+
+                {canCancel(r) && (
+                  <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
+                    {r.status === 'pending' &&
+                      buildReservationWhatsAppLink(r) && (
+                        <a
+                          href={buildReservationWhatsAppLink(r)!}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          data-tour={
+                            index === 0 ? 'reservation-whatsapp' : undefined
+                          }
+                          className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
+                        >
+                          <WhatsAppIcon size={18} />
+                          Confirmar por WhatsApp
+                        </a>
+                      )}
+                    <Button
+                      variant='danger'
+                      size='sm'
+                      loading={cancellingId === r.id}
+                      onClick={() => handleCancel(r.id)}
+                      data-tour={index === 0 ? 'reservation-cancel' : undefined}
+                    >
+                      Cancelar reserva
+                    </Button>
+                  </div>
+                )}
+
+                {r.status === 'confirmed' && !canCancel(r) && (
+                  <p className='text-xs text-text-muted mt-2 pt-2 border-t border-border'>
+                    La cancelación directa está disponible hasta 2 horas antes
+                    del turno.
+                  </p>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
       {selectedReservation && (
         <ReservationDetailsSheet
           reservation={selectedReservation}

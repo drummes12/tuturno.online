@@ -152,6 +152,17 @@ body {
   display: none;
 }
 
+.swipe-track {
+  --swipe-offset: 0px;
+  transform: translate3d(var(--swipe-offset), 0, 0);
+  transition: transform 0.2s var(--ease-out-quart);
+  will-change: transform;
+}
+
+.swipe-track[data-swipe-active='true'] {
+  transition: none;
+}
+
 /* Utility: text balance for headings */
 .text-balance {
   text-wrap: balance;
