@@ -172,7 +172,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Desktop nav — horizontal, below header */}
       {user && nav.length > 0 && (
-        <nav className='hidden md:block border-b overflow-x-auto border-border bg-surface-elevated'>
+        <nav
+          aria-label={
+            isAdmin ? 'Navegación de administración' : 'Navegación del negocio'
+          }
+          className='hidden md:block border-b overflow-x-auto border-border bg-surface-elevated'
+        >
           <div className='mx-auto max-w-5xl px-4 flex items-center gap-1'>
             {nav.map((item) => {
               const active = location === item.href
@@ -180,6 +185,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? 'page' : undefined}
                   data-tour={
                     item.href === '/mis-reservas'
                       ? 'client-nav-reservations'
@@ -213,24 +219,28 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Bottom nav — mobile, thumb zone, with icons */}
       {user && nav.length > 0 && (
-        <nav className='fixed bottom-0 left-0 right-0 z-40 bg-surface-elevated/95 backdrop-blur-lg border-t border-border md:hidden'>
-          <div className='flex items-center justify-around px-1 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
+        <nav
+          aria-label={
+            isAdmin ? 'Navegación de administración' : 'Navegación del negocio'
+          }
+          className='fixed bottom-0 left-0 right-0 z-40 bg-surface-elevated/95 backdrop-blur-lg border-t border-border md:hidden'
+        >
+          <div className='scrollbar-none flex snap-x snap-mandatory items-center gap-1 overflow-x-auto px-1 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
             {nav.map((item) => {
               const active = location === item.href
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex-1 flex flex-col items-center gap-1 px-2 py-1.5 text-[10px] font-medium rounded-lg touch-target transition-colors ${
+                  aria-current={active ? 'page' : undefined}
+                  className={`flex min-w-21 shrink-0 snap-start flex-col items-center gap-1 px-2 py-1.5 text-[10px] font-medium rounded-lg touch-target transition-colors ${
                     active ? 'text-primary' : 'text-text-muted'
                   }`}
                 >
                   <span className={active ? 'text-primary' : ''}>
                     {item.icon}
                   </span>
-                  <span className='truncate max-w-full hidden sm:inline'>
-                    {item.label}
-                  </span>
+                  <span className='max-w-full truncate'>{item.label}</span>
                 </Link>
               )
             })}

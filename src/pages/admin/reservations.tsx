@@ -5,13 +5,15 @@ import { Input } from '@/components/common/input'
 import { StatusBadge } from '@/components/common/badge'
 import { Alert } from '@/components/common/alert'
 import { ReservationSkeleton } from '@/components/common/skeleton'
+import { ReservationDetailsSheet } from '@/components/common/reservation-details-sheet'
 import {
   CheckIcon,
   XIcon,
   UserIcon,
   CalendarIcon,
   InboxIcon,
-  WhatsAppIcon
+  WhatsAppIcon,
+  ChevronRightIcon
 } from '@/components/common/icon'
 import type { Reservation, ReservationFilter } from '@/types'
 import { format } from 'date-fns'
@@ -48,6 +50,12 @@ export function AdminReservationsPage() {
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [cancelReason, setCancelReason] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null)
+  const closeReservationDetails = useCallback(
+    () => setSelectedReservation(null),
+    []
+  )
   const [filter, setFilter] = useState<ReservationFilter>('all')
   const [selectedDate, setSelectedDate] = useState(
     format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
@@ -239,49 +247,53 @@ export function AdminReservationsPage() {
               className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
               style={{ '--index': index } as React.CSSProperties}
             >
-              <div className='flex items-start justify-between gap-2'>
-                <div className='min-w-0 flex-1'>
-                  <p className='font-medium text-sm flex items-center gap-1.5'>
-                    <span className='nums font-bold text-primary'>
-                      {formatLocal(r.starts_at, 'HH:mm')}
-                    </span>
-                    <span className='text-text-muted'>·</span>
-                    <span className='truncate'>{r.resource?.name}</span>
-                  </p>
-                  <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
-                    <UserIcon size={12} className='shrink-0' />
-                    <span className='truncate'>
-                      {r.client?.name ??
-                        r.profile?.full_name ??
-                        'Cliente sin nombre'}
-                    </span>
-                    {!r.client?.user_id && !r.profile && (
-                      <span className='text-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0'>
-                        Invitado
+              <button
+                type='button'
+                onClick={() => setSelectedReservation(r)}
+                className='w-full cursor-pointer rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
+                aria-label={`Ver detalles de la reserva de ${r.client?.name ?? r.profile?.full_name ?? 'cliente'} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
+              >
+                <div className='flex flex-col'>
+                  <div className='flex items-start gap-2 justify-between'>
+                    <p className='font-medium text-sm flex items-center gap-1.5'>
+                      <span className='nums font-bold text-primary'>
+                        {formatLocal(r.starts_at, 'HH:mm')}
                       </span>
-                    )}
-                    {(r.client?.phone || r.profile?.phone) && (
-                      <>
-                        <span>·</span>
-                        <span className='nums'>
-                          {r.client?.phone ?? r.profile?.phone}
+                      <span className='text-text-muted'>·</span>
+                      <span className='truncate'>{r.resource?.name}</span>
+                    </p>
+                    <div className='flex shrink-0 items-center gap-1'>
+                      <StatusBadge status={r.status} />
+                      <ChevronRightIcon size={18} className='text-text-muted' />
+                    </div>
+                  </div>
+                  <div>
+                    <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
+                      <UserIcon size={12} className='shrink-0' />
+                      <span className='truncate'>
+                        {r.client?.name ??
+                          r.profile?.full_name ??
+                          'Cliente sin nombre'}
+                      </span>
+                      {!r.client?.user_id && !r.profile && (
+                        <span className='text-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0'>
+                          Invitado
                         </span>
-                      </>
+                      )}
+                    </p>
+                    {r.notes && (
+                      <p className='text-xs italic text-(--color-text-muted) mt-1.5 border-l-2 border-border pl-2'>
+                        {r.notes}
+                      </p>
                     )}
-                  </p>
-                  {r.notes && (
-                    <p className='text-xs italic text-(--color-text-muted) mt-1.5 border-l-2 border-border pl-2'>
-                      {r.notes}
-                    </p>
-                  )}
-                  {r.decision_reason && (
-                    <p className='text-xs text-(--color-text-muted) mt-1.5'>
-                      Motivo: {r.decision_reason}
-                    </p>
-                  )}
+                    {r.decision_reason && (
+                      <p className='text-xs text-(--color-text-muted) mt-1.5'>
+                        Motivo: {r.decision_reason}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <StatusBadge status={r.status} />
-              </div>
+              </button>
 
               {/* Action bar — WhatsApp siempre disponible + acciones por estado */}
               <div className='mt-3 pt-3 border-t border-border'>
@@ -402,6 +414,13 @@ export function AdminReservationsPage() {
             </Card>
           ))}
         </div>
+      )}
+      {selectedReservation && (
+        <ReservationDetailsSheet
+          reservation={selectedReservation}
+          onClose={closeReservationDetails}
+          whatsappHref={buildReservationWhatsAppLink(selectedReservation)}
+        />
       )}
     </div>
   )

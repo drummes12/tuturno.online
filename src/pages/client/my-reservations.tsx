@@ -12,10 +12,12 @@ import { Button } from '@/components/common/button'
 import { StatusBadge } from '@/components/common/badge'
 import { Alert } from '@/components/common/alert'
 import { ReservationSkeleton } from '@/components/common/skeleton'
+import { ReservationDetailsSheet } from '@/components/common/reservation-details-sheet'
 import {
   CalendarPlusIcon,
   InboxIcon,
-  WhatsAppIcon
+  WhatsAppIcon,
+  ChevronRightIcon
 } from '@/components/common/icon'
 import { resolveWhatsAppLink, buildClientPendingMessage } from '@/lib/whatsapp'
 import type { Reservation } from '@/types'
@@ -36,6 +38,12 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   const tenantBusinessId = business?.id ?? null
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedReservation, setSelectedReservation] =
+    useState<Reservation | null>(null)
+  const closeReservationDetails = useCallback(
+    () => setSelectedReservation(null),
+    []
+  )
   const [filter, setFilter] = useState<Filter>('upcoming')
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -238,29 +246,39 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
               style={{ '--index': index } as React.CSSProperties}
               data-tour={index === 0 ? 'reservation-card' : undefined}
             >
-              <div className='flex items-start justify-between gap-3 mb-2'>
-                <div className='min-w-0 flex-1'>
-                  <p className='font-semibold text-(--color-text) tracking-tight'>
-                    {r.resource?.name ?? resourceLabelSingular}
-                  </p>
-                  <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
-                    {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
-                  </p>
+              <button
+                type='button'
+                onClick={() => setSelectedReservation(r)}
+                className='w-full cursor-pointer rounded-xl p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
+                aria-label={`Ver detalles de tu reserva de ${r.resource?.name ?? resourceLabelSingular} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
+              >
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='min-w-0 flex-1'>
+                    <p className='font-semibold text-(--color-text) tracking-tight'>
+                      {r.resource?.name ?? resourceLabelSingular}
+                    </p>
+                    <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
+                      {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
+                    </p>
+                  </div>
+                  <div className='flex shrink-0 items-center gap-1'>
+                    <StatusBadge status={r.status} />
+                    <ChevronRightIcon size={18} className='text-text-muted' />
+                  </div>
                 </div>
-                <StatusBadge status={r.status} />
-              </div>
 
-              {r.notes && (
-                <p className='text-sm text-(--color-text-muted) mt-2 italic border-l-2 border-border pl-3'>
-                  {r.notes}
-                </p>
-              )}
+                {r.notes && (
+                  <p className='text-sm text-(--color-text-muted) mt-2 italic border-l-2 border-border pl-3'>
+                    {r.notes}
+                  </p>
+                )}
 
-              {r.decision_reason && (
-                <p className='text-sm text-(--color-text-muted) mt-2'>
-                  Motivo: {r.decision_reason}
-                </p>
-              )}
+                {r.decision_reason && (
+                  <p className='text-sm text-(--color-text-muted) mt-2'>
+                    Motivo: {r.decision_reason}
+                  </p>
+                )}
+              </button>
 
               {canCancel(r) && (
                 <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
@@ -300,6 +318,14 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
             </Card>
           ))}
         </div>
+      )}
+      {selectedReservation && (
+        <ReservationDetailsSheet
+          reservation={selectedReservation}
+          onClose={closeReservationDetails}
+          resourceLabel={resourceLabelSingular}
+          whatsappHref={buildReservationWhatsAppLink(selectedReservation)}
+        />
       )}
     </div>
   )
