@@ -100,4 +100,23 @@ describe('Reservation notification routing', () => {
     expect(expirationMigration).toContain('enqueue_notification')
     expect(expirationMigration).toContain("r.status = 'pending'")
   })
+
+  it('respeta la bandera email_notifications_enabled de business_members', () => {
+    const optOutMigration = readFileSync(
+      resolve(
+        process.cwd(),
+        'supabase/migrations/03400_member_email_opt_out.sql'
+      ),
+      'utf8'
+    )
+
+    expect(optOutMigration).toContain(
+      'email_notifications_enabled boolean not null default true'
+    )
+    const definition = functionDefinition(
+      optOutMigration,
+      'enqueue_business_members_notification('
+    )
+    expect(definition).toContain('bm.email_notifications_enabled = true')
+  })
 })

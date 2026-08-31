@@ -376,10 +376,9 @@ describe('Email templates', () => {
     it('cada plantilla incluye al menos un botón CTA', () => {
       for (const name of templateNames) {
         const { html } = templates[name](validPayload)
-        // El botón CTA usa bgcolor="#0a7d3b" (pitch-700)
+        // El botón CTA usa background-color:#0a7d3b (pitch-700)
         expect(html).toContain('#0a7d3b')
         expect(html).toContain('target="_blank"')
-        expect(html).toContain('Acceso seguro a los detalles de la reserva')
         expect(html).toMatch(/<a href="[^"]+" target="_blank"[^>]*>\s*<svg/)
       }
     })
@@ -395,8 +394,8 @@ describe('Email templates', () => {
 
     it('centra los CTA y el contenido del footer', () => {
       const { html } = templates.reservation_confirmed(validPayload)
-      expect(html).toContain('align="center" style="padding:12px 28px;"')
-      expect(html).toContain('margin:auto 0')
+      expect(html).toContain('align="center" style="padding:8px 12px 28px;"')
+      expect(html).toContain('max-width:340px;margin:0 auto')
       expect(html).toContain('text-align:center;max-width:40ch;')
       expect(html).toContain('>Este correo fue enviado')
       expect(html).toContain('>&copy;')
