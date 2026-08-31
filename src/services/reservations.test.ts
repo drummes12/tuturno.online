@@ -34,6 +34,7 @@ const sampleReservation = (
   resource_id: 'court-1',
   user_id: 'user-1',
   client_id: null,
+  reservation_number: 1,
   starts_at: '2025-01-01T10:00:00Z',
   ends_at: '2025-01-01T11:00:00Z',
   status: 'pending',

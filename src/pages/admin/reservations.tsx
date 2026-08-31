@@ -272,6 +272,11 @@ export function AdminReservationsPage() {
                         </span>
                         <span className='text-text-muted'>·</span>
                         <span className='truncate'>{r.resource?.name}</span>
+                        {r.reservation_number && (
+                          <span className='shrink-0 rounded-md bg-surface-inset px-1.5 py-0.5 text-xs font-semibold text-text-muted'>
+                            #{r.reservation_number}
+                          </span>
+                        )}
                       </p>
                       <div className='flex shrink-0 items-center gap-1'>
                         <StatusBadge status={r.status} />

@@ -18,6 +18,7 @@ const makeReservation = (
   resource_id: 'resource-1',
   user_id: 'user-1',
   client_id: 'client-1',
+  reservation_number: 1,
   starts_at: '2026-01-15T10:00:00Z',
   ends_at: '2026-01-15T11:00:00Z',
   status,

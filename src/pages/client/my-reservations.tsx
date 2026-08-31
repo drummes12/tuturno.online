@@ -266,9 +266,16 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                 >
                   <div className='flex items-start justify-between gap-3'>
                     <div className='min-w-0 flex-1'>
-                      <p className='font-semibold text-(--color-text) tracking-tight'>
-                        {r.resource?.name ?? resourceLabelSingular}
-                      </p>
+                      <div className='flex items-center gap-2'>
+                        <p className='font-semibold text-(--color-text) tracking-tight'>
+                          {r.resource?.name ?? resourceLabelSingular}
+                        </p>
+                        {r.reservation_number && (
+                          <span className='shrink-0 rounded-md bg-surface-inset px-1.5 py-0.5 text-xs font-semibold text-text-muted'>
+                            #{r.reservation_number}
+                          </span>
+                        )}
+                      </div>
                       <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
                         {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
                       </p>

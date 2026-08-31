@@ -21,6 +21,7 @@ function makeReservation(
     resource_id: 'court-1',
     user_id: 'user-1',
     client_id: null,
+    reservation_number: 1,
     starts_at: startsAt,
     ends_at: startsAt,
     status,

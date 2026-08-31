@@ -146,6 +146,7 @@ export interface Reservation {
   resource_id: string
   user_id: string | null
   client_id: string | null
+  reservation_number: number
   starts_at: string
   ends_at: string
   status: ReservationStatus

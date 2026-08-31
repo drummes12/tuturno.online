@@ -5,8 +5,8 @@
 // clientes de correo es hostear los SVGs como archivos estáticos y
 // referenciarlos por URL HTTPS.
 //
-// Los SVGs se generan con generate-email-icons.ts y viven en
-// public/email-icons/. Cada icono tiene variantes de color horneadas
+// Los SVGs se generan manualmente y viven en public/email-icons/.
+// Cada icono tiene variantes de color horneadas
 // (ej: calendar-green.svg, calendar-white.svg).
 
 /** URL base de los iconos — se settea desde templates.ts con el appUrl. */

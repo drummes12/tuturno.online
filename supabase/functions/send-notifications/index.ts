@@ -29,6 +29,7 @@ type ReservationLookup = {
   business_id: string
   decided_by: string | null
   user_id: string | null
+  reservation_number: number | null
 }
 
 type BusinessContactLookup = {
@@ -154,6 +155,8 @@ export default {
         (CLIENT_RESERVATION_TEMPLATES.has(row.type) ||
           row.type === 'reservation_created_by_business')
       ) {
+        // Seleccionar reservation_number por separado para no romper si la
+        // migración 03500 aún no se ha aplicado (la columna no existe).
         const reservationResult = await supabase
           .from('reservations')
           .select('business_id, decided_by, user_id')
@@ -162,6 +165,20 @@ export default {
         const reservation = reservationResult.data as ReservationLookup | null
 
         if (reservation?.business_id) {
+          // Intentar leer reservation_number por separado (post-migración 03500).
+          // Si la columna no existe, el select falla silenciosamente y se omite.
+          const numberResult = await supabase
+            .from('reservations')
+            .select('reservation_number')
+            .eq('id', reservationId)
+            .maybeSingle()
+          const numberData = numberResult.data as {
+            reservation_number?: number
+          } | null
+          if (numberData?.reservation_number) {
+            payload.reservation_number = numberData.reservation_number
+          }
+
           if (CLIENT_RESERVATION_TEMPLATES.has(row.type)) {
             const businessResult = await supabase
               .from('businesses')

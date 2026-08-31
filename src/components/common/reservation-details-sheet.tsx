@@ -150,6 +150,11 @@ export function ReservationDetailsSheet({
             >
               {resourceName}
             </h2>
+            {reservation.reservation_number && (
+              <p className='mt-1 text-sm font-medium text-text-muted'>
+                Reserva #{reservation.reservation_number}
+              </p>
+            )}
             <p
               id='reservation-details-description'
               className='mt-1 text-sm text-text-muted'

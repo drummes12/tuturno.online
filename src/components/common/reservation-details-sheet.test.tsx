@@ -10,6 +10,7 @@ const reservation: Reservation = {
   resource_id: 'resource-1',
   user_id: 'user-1',
   client_id: 'client-1',
+  reservation_number: 1,
   starts_at: '2026-08-26T15:00:00Z',
   ends_at: '2026-08-26T16:30:00Z',
   status: 'confirmed',
