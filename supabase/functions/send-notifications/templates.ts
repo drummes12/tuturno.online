@@ -14,6 +14,7 @@ import {
   circleCheckIcon,
   clockIcon,
   externalLinkIcon,
+  iconImg,
   layoutGridIcon,
   mailIcon,
   mapPinIcon,
@@ -21,6 +22,7 @@ import {
   noteIcon,
   phoneIcon,
   plusIcon,
+  setIconBaseUrl,
   userCircleIcon,
   whatsappIcon,
   xIcon
@@ -35,6 +37,7 @@ import {
 export interface TemplatePayload {
   business_name?: string
   resource_name?: string
+  reservation_number?: number
   starts_at?: string
   recipient_name?: string | null
   client_name?: string
@@ -164,34 +167,44 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;')
 }
 
+/** Mapea un hex de color al sufijo del archivo SVG hosted. */
+function colorSuffix(hex: string): string {
+  switch (hex) {
+    case '#087333': return 'green'
+    case '#0a7d3b': return 'green'
+    case '#9a5b00': return 'amber'
+    case '#b91c1c': return 'red'
+    case '#525f56': return 'gray'
+    case '#ffffff': return 'white'
+    default: return 'green'
+  }
+}
+
 function iconMarkup(icon: DetailIcon, size = 26): string {
   const iconSize = size >= 36 ? 22 : 16
-  const iconHtml = icon.icon.replace(
-    'width="24" height="24"',
-    `width="${iconSize}" height="${iconSize}"`
-  )
-  return `<table role="presentation" cellpadding="0" cellspacing="0" style="border-radius:8px;background-color:${icon.background};color:${icon.color};border-collapse:separate;line-height:0;"><tr><td width="${size}" height="${size}" align="center" valign="middle" style="width:${size}px;height:${size}px;text-align:center;vertical-align:middle;padding:0;line-height:0;">${iconHtml}</td></tr></table>`
+  const img = iconImg(icon.icon, colorSuffix(icon.color), iconSize)
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="border-radius:8px;background-color:${icon.background};border-collapse:separate;line-height:0;"><tr><td width="${size}" height="${size}" align="center" valign="middle" style="width:${size}px;height:${size}px;text-align:center;vertical-align:middle;padding:0;line-height:0;">${img}</td></tr></table>`
 }
 
 /** Ajusta un icono inline para acompañar texto: tamaño y alineamiento vertical óptico. */
-function inlineIcon(svg: string, size = 16, marginRight = 6): string {
-  return svg
-    .replace('width="24" height="24"', `width="${size}" height="${size}"`)
-    .replace(
-      '<svg ',
-      `<svg style="display:inline-block;vertical-align:text-bottom;margin-right:${marginRight}px;" `
-    )
+function inlineIcon(
+  name: string,
+  size: number,
+  marginRight: number,
+  color: string
+): string {
+  return iconImg(name, colorSuffix(color), size, marginRight, 'text-bottom')
 }
 
 /** Badge superior de notificación — siempre verde TuTurno, consistente entre todos los correos. */
 function notificationBadge(badge: { label: string; icon: string }): string {
-  return `<span style="display:inline-block;padding:6px 12px;border-radius:8px;background-color:#e7f7ec;color:#087333;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.2;">${inlineIcon(badge.icon, 14, 5)}${escapeHtml(badge.label)}</span>`
+  return `<span style="display:inline-block;padding:6px 12px;border-radius:8px;background-color:#e7f7ec;color:#087333;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.2;">${inlineIcon(badge.icon, 14, 5, '#087333')}${escapeHtml(badge.label)}</span>`
 }
 
 /** Badge de estado de la reserva — color sutil según el estado, va dentro de la card. */
 function statusBadge(status: ReservationStatus): string {
   const config = statusConfig[status]
-  return `<span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${config.background};color:${config.color};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.2;">${inlineIcon(config.icon, 12, 4)}${escapeHtml(config.label)}</span>`
+  return `<span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${config.background};color:${config.color};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.2;">${inlineIcon(config.icon, 12, 4, config.color)}${escapeHtml(config.label)}</span>`
 }
 
 /** Fila de detalle para la lista de datos de la reserva. */
@@ -242,7 +255,7 @@ function reservationCard(status: ReservationStatus, rows: string[]): string {
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
           <tr>
             <td style="vertical-align:middle;">
-              <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#0a7d3b;letter-spacing:0.2px;">${inlineIcon(calendarIcon(), 16, 6)}Detalles de la reserva</span>
+              <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#0a7d3b;letter-spacing:0.2px;">${inlineIcon(calendarIcon(), 16, 6, '#0a7d3b')}Detalles de la reserva</span>
             </td>
             <td align="right" style="vertical-align:middle;">
               ${statusBadge(status)}
@@ -268,7 +281,7 @@ function ctaButton(href: string, label: string): string {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:340px;margin:0 auto;background-color:#0a7d3b;border-radius:10px;">
             <tr>
               <td align="center" style="padding:14px 24px;border-radius:10px;">
-                <a href="${escapeHtml(href)}" target="_blank" style="display:block;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;box-sizing:border-box;">${inlineIcon(calendarIcon(), 16, 8)}${escapeHtml(label)}</a>
+                <a href="${escapeHtml(href)}" target="_blank" style="display:block;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;box-sizing:border-box;">${inlineIcon(calendarIcon(), 16, 8, '#ffffff')}${escapeHtml(label)}</a>
               </td>
             </tr>
           </table>
@@ -286,7 +299,7 @@ function whatsappContact(href: string, label: string): string {
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
             <tr>
               <td bgcolor="#25D366" style="border-radius:9px;">
-                <a href="${escapeHtml(href)}" target="_blank" style="display:inline-block;padding:9px 18px;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;">${inlineIcon(whatsappIcon(), 16, 6)}Abrir WhatsApp</a>
+                <a href="${escapeHtml(href)}" target="_blank" style="display:inline-block;padding:9px 18px;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;">${inlineIcon(whatsappIcon(), 16, 6, '#ffffff')}Abrir WhatsApp</a>
               </td>
             </tr>
           </table>
@@ -319,28 +332,18 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
       <td align="center" style="padding:24px 12px;">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e1e9e3;border-radius:16px;overflow:hidden;">
         <tr>
-          <td style="padding:0;background-color:#0a7d3b;background-image:linear-gradient(135deg,#0a7d3b 0%,#0d9c4a 100%);">
-            <!--[if !mso]><!-->
-            <div style="position:relative;overflow:hidden;">
-            <!--<![endif]-->
-
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;position:relative;z-index:2;">
-                <tr>
-                  <td style="padding:26px 28px;">
-                    <div style="font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.15;color:#ffffff;">
-                      TuTurno
-                    </div>
-                    <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;letter-spacing:0.2px;line-height:1.3;color:#d9f2e1;margin-top:4px;">
-                      Reservas que funcionan
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-            <!--[if !mso]><!-->
-              <img src="${escapeHtml(logoUrl)}" alt="" width="120" height="120" style="position:absolute;right:-32px;bottom:-40px;opacity:0.14;transform:rotate(-14deg);display:block;border:0;z-index:1;">
-            </div>
-            <!--<![endif]-->
+          <td style="padding:26px 28px;background-color:#0a7d3b;background-image:linear-gradient(135deg,#0a7d3b 0%,#0d9c4a 100%);">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+              <tr>
+                <td width="40" style="vertical-align:middle;">
+                  <img src="${escapeHtml(logoUrl)}" alt="TuTurno" width="36" height="36" style="display:block;border:0;border-radius:9px;background-color:#f8faf7;padding:3px;box-sizing:border-box;">
+                </td>
+                <td style="padding-left:10px;vertical-align:middle;">
+                  <div style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.4px;line-height:1.15;color:#ffffff;">TuTurno</div>
+                  <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;letter-spacing:0.2px;line-height:1.3;color:#d9f2e1;margin-top:2px;">Reservas que funcionan</div>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
           <tr>
@@ -383,6 +386,9 @@ function clientReservationDetails(
   extraRows = ''
 ): string {
   return reservationCard(status, [
+    p.reservation_number
+      ? detailRow('Reserva', `#${p.reservation_number}`, detailIcons.business)
+      : '',
     detailRow('Negocio', p.business_name ?? '', detailIcons.business),
     detailRow(
       'Espacio o servicio',
@@ -401,6 +407,9 @@ function businessReservationDetails(
   extraRows = ''
 ): string {
   return reservationCard(status, [
+    p.reservation_number
+      ? detailRow('Reserva', `#${p.reservation_number}`, detailIcons.business)
+      : '',
     detailRow('Cliente', p.client_name ?? '', detailIcons.client),
     p.client_email ? detailRow('Email', p.client_email, detailIcons.email) : '',
     detailRow(
@@ -427,6 +436,7 @@ function clientReservationBody(
  * del frontend.
  */
 export function createTemplates(appUrl: string): Record<string, TemplateFn> {
+  setIconBaseUrl(appUrl)
   return {
     reservation_created_client: (p) => ({
       subject: `Solicitud de reserva recibida — ${p.business_name}`,

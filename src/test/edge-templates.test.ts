@@ -379,17 +379,16 @@ describe('Email templates', () => {
         // El botón CTA usa background-color:#0a7d3b (pitch-700)
         expect(html).toContain('#0a7d3b')
         expect(html).toContain('target="_blank"')
-        expect(html).toMatch(/<a href="[^"]+" target="_blank"[^>]*>\s*<svg/)
+        expect(html).toMatch(
+          /<a href="[^"]+" target="_blank"[^>]*>\s*<img[^>]+src="[^"]*\/email-icons\//
+        )
       }
     })
 
     it('usa una card dividida con iconos para los datos', () => {
       const { html } = templates.reservation_confirmed(validPayload)
       expect(html).toContain('border:1px solid #dfe9e2')
-      expect(html).toContain('icon-tabler-building-store')
-      expect(html).toContain('icon-tabler-layout-grid')
-      expect(html).toContain('icon-tabler-calendar-event')
-      expect(html).toContain('icon-tabler-circle-check')
+      expect(html).toContain('/email-icons/')
     })
 
     it('centra los CTA y el contenido del footer', () => {
@@ -462,7 +461,7 @@ describe('Email templates', () => {
       expect(html).toContain('https://wa.me/573001234567')
       expect(html).toContain('¿Necesitas comunicarte con el negocio?')
       expect(html).toContain('Abrir WhatsApp')
-      expect(html).toContain('icon-tabler-brand-whatsapp')
+      expect(html).toContain('/email-icons/')
     })
 
     it('los emails de negocio incluyen el WhatsApp del cliente cuando hay client_whatsapp', () => {
