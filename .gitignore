@@ -29,3 +29,4 @@ dist-ssr
 .claude/
 .kiro/
 .temp/
+deno.lock

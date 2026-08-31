@@ -6,6 +6,7 @@
 import '@supabase/functions-js/edge-runtime.d.ts'
 import { withSupabase } from '@supabase/server'
 import { createTemplates, type TemplatePayload } from './templates.ts'
+import { resolveBusinessWhatsApp } from './whatsapp.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const RESEND_FROM_EMAIL =
@@ -24,10 +25,43 @@ interface OutboxRow {
   attempts: number
 }
 
+type ReservationLookup = {
+  business_id: string
+  decided_by: string | null
+  user_id: string | null
+}
+
+type BusinessContactLookup = {
+  phone: string | null
+  whatsapp_link: string | null
+}
+
+type CreatorLookup = {
+  full_name: string | null
+}
+
+type ClientContactLookup = {
+  phone: string | null
+}
+
+const BUSINESS_RESERVATION_TEMPLATES = new Set([
+  'reservation_created_business',
+  'reservation_created_by_business',
+  'reservation_cancelled_business'
+])
+
 const MAX_ATTEMPTS = 3
 
 // Plantillas de correo parametrizadas con la URL base del frontend.
 const templates = createTemplates(APP_URL)
+const CLIENT_RESERVATION_TEMPLATES = new Set([
+  'reservation_created_client',
+  'reservation_confirmed',
+  'reservation_rejected',
+  'reservation_cancelled_client',
+  'reservation_cancelled_by_business',
+  'reservation_expired'
+])
 
 // This endpoint uses 'secret' access, apiKey is required.
 // Use secret for Server-to-server, internal calls (e.g. cron).
@@ -60,7 +94,7 @@ export default {
     // 'processing' y se recuperan manualmente o vía un job de limpieza.
     const { data: pending, error } = await supabase
       .from('notification_outbox')
-      .update({ status: 'processing' })
+      .update({ status: 'processing' } as never)
       .eq('status', 'pending')
       .lt('attempts', MAX_ATTEMPTS)
       .order('created_at', { ascending: true })
@@ -110,6 +144,67 @@ export default {
         ...row.payload,
         recipient_name: row.recipient_name
       } as TemplatePayload
+      const reservationId =
+        typeof row.payload.reservation_id === 'string'
+          ? row.payload.reservation_id
+          : null
+
+      if (
+        reservationId &&
+        (CLIENT_RESERVATION_TEMPLATES.has(row.type) ||
+          row.type === 'reservation_created_by_business')
+      ) {
+        const reservationResult = await supabase
+          .from('reservations')
+          .select('business_id, decided_by, user_id')
+          .eq('id', reservationId)
+          .maybeSingle()
+        const reservation = reservationResult.data as ReservationLookup | null
+
+        if (reservation?.business_id) {
+          if (CLIENT_RESERVATION_TEMPLATES.has(row.type)) {
+            const businessResult = await supabase
+              .from('businesses')
+              .select('phone, whatsapp_link')
+              .eq('id', reservation.business_id)
+              .maybeSingle()
+            const business = businessResult.data as BusinessContactLookup | null
+            payload.business_whatsapp =
+              resolveBusinessWhatsApp(
+                business?.whatsapp_link,
+                business?.phone
+              ) ?? undefined
+          }
+
+          if (
+            BUSINESS_RESERVATION_TEMPLATES.has(row.type) &&
+            reservation.user_id
+          ) {
+            const clientResult = await supabase
+              .from('profiles')
+              .select('phone')
+              .eq('id', reservation.user_id)
+              .maybeSingle()
+            const client = clientResult.data as ClientContactLookup | null
+            payload.client_whatsapp =
+              resolveBusinessWhatsApp(null, client?.phone) ?? undefined
+          }
+
+          if (
+            row.type === 'reservation_created_by_business' &&
+            reservation.decided_by
+          ) {
+            const creatorResult = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', reservation.decided_by)
+              .maybeSingle()
+            const creator = creatorResult.data as CreatorLookup | null
+            if (creator?.full_name) payload.created_by_name = creator.full_name
+          }
+        }
+      }
+
       const { subject, html } = template(payload)
 
       try {
