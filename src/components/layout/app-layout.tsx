@@ -233,7 +233,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`flex min-w-21 shrink-0 snap-start flex-col items-center gap-1 px-2 py-1.5 text-[10px] font-medium rounded-lg touch-target transition-colors ${
+                  className={`flex-1 flex min-w-21 shrink-0 snap-start flex-col items-center gap-1 px-2 py-1.5 text-[10px] font-medium rounded-lg touch-target transition-colors ${
                     active ? 'text-primary' : 'text-text-muted'
                   }`}
                 >

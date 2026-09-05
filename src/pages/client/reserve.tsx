@@ -160,6 +160,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         resourceLabelSingular={
           businessContact?.resource_label_singular ?? 'Recurso'
         }
+        slotDurationMinutes={business?.slot_duration_minutes ?? 60}
       />
     )
   }
@@ -402,7 +403,11 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
       capitalize: true
     },
     { icon: <ClockIcon size={16} />, label: 'Hora', value: timeLabel },
-    { icon: <ClockIcon size={16} />, label: 'Duración', value: '60 minutos' }
+    {
+      icon: <ClockIcon size={16} />,
+      label: 'Duración',
+      value: `${business?.slot_duration_minutes ?? 60} minutos`
+    }
   ]
 
   return (
@@ -529,8 +534,12 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
               ) : (
                 <Alert variant='warning' data-tour='reservation-instructions'>
                   <strong>Importante:</strong> Esta es una solicitud. El negocio
-                  debe confirmarla. El turno queda reservado temporalmente por
-                  30 minutos.
+                  debe confirmarla. El turno queda reservado temporalmente por{' '}
+                  {business?.hold_duration_minutes ?? 30}{' '}
+                  {(business?.hold_duration_minutes ?? 30) === 1
+                    ? 'minuto'
+                    : 'minutos'}
+                  .
                 </Alert>
               )}
             </>
@@ -564,7 +573,8 @@ function DemoReservePreview({
   resourceName,
   loadingResource,
   businessName,
-  resourceLabelSingular
+  resourceLabelSingular,
+  slotDurationMinutes
 }: {
   slug?: string
   resourceId: string | null
@@ -574,6 +584,7 @@ function DemoReservePreview({
   loadingResource: boolean
   businessName: string
   resourceLabelSingular: string
+  slotDurationMinutes: number
 }) {
   const timeLabel = (() => {
     try {
@@ -629,7 +640,11 @@ function DemoReservePreview({
       capitalize: true
     },
     { icon: <ClockIcon size={16} />, label: 'Hora', value: timeLabel },
-    { icon: <ClockIcon size={16} />, label: 'Duración', value: '60 minutos' }
+    {
+      icon: <ClockIcon size={16} />,
+      label: 'Duración',
+      value: `${slotDurationMinutes} minutos`
+    }
   ]
 
   return (
@@ -660,8 +675,8 @@ function DemoReservePreview({
         <div className='flex-1'>
           <p className='text-sm font-semibold'>Modo demostración</p>
           <p className='text-xs mt-0.5'>
-            Las reservas no son reales. Este formulario es solo una vista
-            previa del flujo que verían tus clientes.
+            Las reservas no son reales. Este formulario es solo una vista previa
+            del flujo que verían tus clientes.
           </p>
         </div>
       </div>

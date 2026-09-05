@@ -302,7 +302,7 @@ function buildTours(): TourDef[] {
           popover: {
             title: 'Cancelar reserva',
             description:
-              'Puedes cancelar hasta 2 horas antes del turno. Las pendientes se pueden cancelar en cualquier momento.',
+              'Puedes cancelar según la política de cancelación del negocio. Las pendientes se pueden cancelar en cualquier momento.',
             side: 'top',
             align: 'center'
           }

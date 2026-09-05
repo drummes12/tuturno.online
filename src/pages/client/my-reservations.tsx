@@ -349,10 +349,12 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                   </div>
                 )}
 
-                {r.status === 'confirmed' && !canCancel(r) && (
+                {r.status === 'confirmed' && !canCancel(r) && business && (
                   <p className='text-xs text-text-muted mt-2 pt-2 border-t border-border'>
-                    La cancelación directa está disponible hasta 2 horas antes
-                    del turno.
+                    La cancelación directa está disponible hasta{' '}
+                    {cancellationLimitHours}{' '}
+                    {cancellationLimitHours === 1 ? 'hora' : 'horas'} antes del
+                    turno.
                   </p>
                 )}
               </Card>
