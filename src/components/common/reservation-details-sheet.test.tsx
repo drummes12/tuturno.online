@@ -89,6 +89,33 @@ describe('ReservationDetailsSheet', () => {
     expect(onClose).toHaveBeenCalledTimes(2)
   })
 
+  it('muestra la zona de acciones cuando se proporciona', () => {
+    render(
+      <ReservationDetailsSheet
+        reservation={reservation}
+        onClose={vi.fn()}
+        actions={<button type='button'>Cancelar reserva</button>}
+      />
+    )
+
+    expect(
+      screen.getByRole('heading', { name: 'Gestionar reserva' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Cancelar reserva' })
+    ).toBeInTheDocument()
+  })
+
+  it('omite la zona de acciones cuando no se proporciona', () => {
+    render(
+      <ReservationDetailsSheet reservation={reservation} onClose={vi.fn()} />
+    )
+
+    expect(
+      screen.queryByRole('heading', { name: 'Gestionar reserva' })
+    ).not.toBeInTheDocument()
+  })
+
   it('mueve el foco al sheet y lo devuelve al elemento anterior', async () => {
     const user = userEvent.setup()
     const trigger = document.createElement('button')

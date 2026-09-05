@@ -1,8 +1,5 @@
-import type {
-  Reservation,
-  ReservationFilter,
-  ReservationStatus
-} from '@/types'
+import { isAfter, parseISO, subHours } from 'date-fns'
+import type { Reservation, ReservationFilter, ReservationStatus } from '@/types'
 
 export function getEffectiveReservationStatus(
   reservation: Reservation,
@@ -64,6 +61,24 @@ export function uniqueReservations(
   }
 
   return [...latestBySlot.values()]
+}
+
+/**
+ * Un cliente puede cancelar solicitudes pendientes siempre, y confirmadas
+ * solo hasta `cancellationLimitHours` antes del turno (regla del negocio,
+ * validada de nuevo en el RPC cancel_reservation_by_client).
+ */
+export function canClientCancelReservation(
+  reservation: Reservation,
+  cancellationLimitHours: number
+): boolean {
+  if (reservation.status === 'pending') return true
+  if (reservation.status !== 'confirmed') return false
+  const limit = subHours(
+    parseISO(reservation.starts_at),
+    cancellationLimitHours
+  )
+  return isAfter(limit, new Date())
 }
 
 export function filterReservations(

@@ -14,6 +14,7 @@ import {
   fetchPendingReservations,
   fetchTodayReservations,
   fetchReservationsByDate,
+  fetchReservationById,
   fetchUserReservations,
   confirmReservation,
   rejectReservation,
@@ -184,6 +185,39 @@ describe('fetchReservationsByDate', () => {
     await expect(
       fetchReservationsByDate('2025-01-01T00:00:00Z', '2025-01-02T00:00:00Z')
     ).rejects.toEqual(dbError)
+  })
+})
+
+describe('fetchReservationById', () => {
+  it('retorna la reserva cuando existe y es visible para el usuario', async () => {
+    const data = sampleReservation({ id: 'r1' })
+    const chain = createQueryChain({ data, error: null })
+    mockFrom.mockReturnValue(chain)
+
+    const result = await fetchReservationById('r1')
+
+    expect(result).toEqual(data)
+    expect(mockFrom).toHaveBeenCalledWith('reservations')
+    expect(chain.select).toHaveBeenCalledWith(RESERVATION_SELECT)
+    expect(chain.eq).toHaveBeenCalledWith('id', 'r1')
+    expect(chain.maybeSingle).toHaveBeenCalled()
+  })
+
+  it('retorna null cuando la reserva no existe o no es visible', async () => {
+    const chain = createQueryChain({ data: null, error: null })
+    mockFrom.mockReturnValue(chain)
+
+    const result = await fetchReservationById('missing')
+
+    expect(result).toBeNull()
+  })
+
+  it('lanza el error cuando supabase retorna error', async () => {
+    const dbError = { message: 'permission denied', code: '42501' }
+    const chain = createQueryChain({ data: null, error: dbError })
+    mockFrom.mockReturnValue(chain)
+
+    await expect(fetchReservationById('r1')).rejects.toEqual(dbError)
   })
 })
 

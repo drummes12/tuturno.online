@@ -14,8 +14,8 @@
 - `pnpm build` — build de producción (tsc + vite)
 - `pnpm lint` — lint con oxlint
 - `pnpm preview` — previsualizar build
-- `pnpm test` — tests con Vitest (watch)
-- `pnpm test:run` — tests sin watch (CI)
+- `pnpm test` — tests con Vitest (una sola ejecución, CI)
+- `pnpm test:watch` — tests en modo watch
 - `pnpm test:coverage` — tests con cobertura
 - `bash supabase/seed-dev-users.sh` — crea 3 usuarios de prueba (owner, admin, cliente) con contraseña `123456`
 

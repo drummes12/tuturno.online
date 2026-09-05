@@ -1,14 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Card } from '@/components/common/card'
-import { Button } from '@/components/common/button'
-import { Input } from '@/components/common/input'
 import { StatusBadge } from '@/components/common/badge'
 import { Alert } from '@/components/common/alert'
 import { ReservationSkeleton } from '@/components/common/skeleton'
 import { ReservationDetailsSheet } from '@/components/common/reservation-details-sheet'
+import { ReservationActionControls } from '@/components/common/reservation-action-controls'
 import {
-  CheckIcon,
-  XIcon,
   UserIcon,
   CalendarIcon,
   InboxIcon,
@@ -28,9 +25,7 @@ import { useSwipeTabs } from '@/hooks/use-swipe-tabs'
 import { sortReservationsByPriority } from '@/lib/sort'
 import {
   fetchReservationsByDate,
-  confirmReservation,
-  rejectReservation,
-  cancelReservationByBusiness
+  fetchReservationById
 } from '@/services/reservations'
 
 const statusFilters: { key: ReservationFilter; label: string }[] = [
@@ -45,11 +40,6 @@ const statusFilters: { key: ReservationFilter; label: string }[] = [
 export function AdminReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
-  const [actingId, setActingId] = useState<string | null>(null)
-  const [rejectingId, setRejectingId] = useState<string | null>(null)
-  const [rejectReason, setRejectReason] = useState('')
-  const [cancellingId, setCancellingId] = useState<string | null>(null)
-  const [cancelReason, setCancelReason] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [selectedReservation, setSelectedReservation] =
     useState<Reservation | null>(null)
@@ -57,6 +47,11 @@ export function AdminReservationsPage() {
     () => setSelectedReservation(null),
     []
   )
+  // Deep link desde correos: /admin/reservas?reservation={id}
+  const [deepLinkId] = useState(() =>
+    new URLSearchParams(window.location.search).get('reservation')
+  )
+  const deepLinkHandled = useRef(false)
   const [filter, setFilter] = useState<ReservationFilter>('all')
   const [selectedDate, setSelectedDate] = useState(
     format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
@@ -97,69 +92,38 @@ export function AdminReservationsPage() {
     setLoading(false)
   }, [filter, selectedDate])
 
-  async function handleConfirm(id: string) {
-    setActingId(id)
-    setError(null)
-    try {
-      await confirmReservation(id)
-    } catch (err) {
-      setError(
-        'Error al confirmar: ' + (err instanceof Error ? err.message : '')
-      )
-      setActingId(null)
-      return
-    }
-    setActingId(null)
-    await load()
-  }
-
-  async function handleReject(id: string) {
-    if (!rejectReason.trim()) {
-      setError('Escribe un motivo para el rechazo.')
-      return
-    }
-    setActingId(id)
-    setError(null)
-    try {
-      await rejectReservation(id, rejectReason.trim())
-    } catch (err) {
-      setError(
-        'Error al rechazar: ' + (err instanceof Error ? err.message : '')
-      )
-      setActingId(null)
-      return
-    }
-    setActingId(null)
-    setRejectingId(null)
-    setRejectReason('')
-    await load()
-  }
-
-  async function handleCancelByBusiness(id: string) {
-    if (!cancelReason.trim()) {
-      setError('Escribe un motivo para la cancelación.')
-      return
-    }
-    setActingId(id)
-    setError(null)
-    try {
-      await cancelReservationByBusiness(id, cancelReason.trim())
-    } catch (err) {
-      setError(
-        'Error al cancelar: ' + (err instanceof Error ? err.message : '')
-      )
-      setActingId(null)
-      return
-    }
-    setActingId(null)
-    setCancellingId(null)
-    setCancelReason('')
-    await load()
-  }
+  // Tras una acción: recargar el listado y refrescar la reserva abierta
+  const handleReservationChanged = useCallback(
+    async (reservationId: string) => {
+      await load()
+      try {
+        const updated = await fetchReservationById(reservationId)
+        setSelectedReservation(updated)
+      } catch {
+        setSelectedReservation(null)
+      }
+    },
+    [load]
+  )
 
   useEffect(() => {
     load()
   }, [load])
+
+  // Deep link: abrir la reserva aunque no coincida con fecha/filtro actuales
+  useEffect(() => {
+    if (deepLinkHandled.current || !deepLinkId) return
+    deepLinkHandled.current = true
+    fetchReservationById(deepLinkId)
+      .then((reservation) => {
+        if (reservation) {
+          setSelectedReservation(reservation)
+        } else {
+          setError('No encontramos la reserva o no tienes acceso a ella.')
+        }
+      })
+      .catch(() => setError('No pudimos cargar la reserva.'))
+  }, [deepLinkId])
 
   // Realtime: recargar cuando cambien reservas
   useReservationsRealtime(load)
@@ -315,120 +279,29 @@ export function AdminReservationsPage() {
                 </button>
 
                 {/* Action bar — WhatsApp siempre disponible + acciones por estado */}
-                <div className='mt-3 pt-3 border-t border-border'>
-                  {rejectingId === r.id ? (
-                    <div className='flex flex-col gap-2.5 animate-fade-up'>
-                      <Input
-                        label='Motivo del rechazo'
-                        value={rejectReason}
-                        onChange={(e) => setRejectReason(e.target.value)}
-                        placeholder='Ej: recurso en mantenimiento'
-                        autoFocus
-                      />
-                      <div className='flex gap-2'>
-                        <Button
-                          variant='danger'
-                          size='sm'
-                          loading={actingId === r.id}
-                          onClick={() => handleReject(r.id)}
-                        >
-                          Confirmar rechazo
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => {
-                            setRejectingId(null)
-                            setRejectReason('')
-                          }}
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  ) : cancellingId === r.id ? (
-                    <div className='flex flex-col gap-2.5 animate-fade-up'>
-                      <Input
-                        label='Motivo de cancelación'
-                        value={cancelReason}
-                        onChange={(e) => setCancelReason(e.target.value)}
-                        placeholder='Ej: el cliente no llegó'
-                        autoFocus
-                      />
-                      <div className='flex gap-2'>
-                        <Button
-                          variant='danger'
-                          size='sm'
-                          loading={actingId === r.id}
-                          onClick={() => handleCancelByBusiness(r.id)}
-                        >
-                          Confirmar cancelación
-                        </Button>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => {
-                            setCancellingId(null)
-                            setCancelReason('')
-                          }}
-                        >
-                          Cerrar
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className='flex items-center gap-2 flex-wrap'>
-                      {/* WhatsApp — acción de contacto, sutil pero visible */}
-                      {buildReservationWhatsAppLink(r) && (
-                        <a
-                          href={buildReservationWhatsAppLink(r)!}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                          aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
-                        >
-                          <WhatsAppIcon size={16} />
-                          <span className='hidden sm:inline'>WhatsApp</span>
-                        </a>
-                      )}
-
-                      {/* Spacer empuja las acciones a la derecha en desktop */}
-                      <div className='flex gap-2 ml-auto'>
-                        {r.status === 'pending' && (
-                          <>
-                            <Button
-                              variant='success'
-                              size='sm'
-                              loading={actingId === r.id}
-                              onClick={() => handleConfirm(r.id)}
-                            >
-                              <CheckIcon size={16} />
-                              Confirmar
-                            </Button>
-                            <Button
-                              variant='danger'
-                              size='sm'
-                              onClick={() => setRejectingId(r.id)}
-                            >
-                              <XIcon size={16} />
-                              Rechazar
-                            </Button>
-                          </>
-                        )}
-                        {r.status === 'confirmed' && (
-                          <Button
-                            variant='danger'
-                            size='sm'
-                            data-tour='admin-reservations-cancel'
-                            onClick={() => setCancellingId(r.id)}
-                          >
-                            <XIcon size={16} />
-                            Cancelar reserva
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
+                  {/* WhatsApp — acción de contacto, sutil pero visible */}
+                  {buildReservationWhatsAppLink(r) && (
+                    <a
+                      href={buildReservationWhatsAppLink(r)!}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                      aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
+                    >
+                      <WhatsAppIcon size={16} />
+                      <span className='hidden sm:inline'>WhatsApp</span>
+                    </a>
                   )}
+
+                  <div className='flex gap-2 ml-auto'>
+                    <ReservationActionControls
+                      reservation={r}
+                      viewer='business'
+                      onChanged={handleReservationChanged}
+                      cancelTourKey='admin-reservations-cancel'
+                    />
+                  </div>
                 </div>
               </Card>
             ))}
@@ -440,6 +313,13 @@ export function AdminReservationsPage() {
           reservation={selectedReservation}
           onClose={closeReservationDetails}
           whatsappHref={buildReservationWhatsAppLink(selectedReservation)}
+          actions={
+            <ReservationActionControls
+              reservation={selectedReservation}
+              viewer='business'
+              onChanged={handleReservationChanged}
+            />
+          }
         />
       )}
     </div>

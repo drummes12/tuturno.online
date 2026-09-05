@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
 import {
   fetchUserReservations,
-  cancelReservationByClient
+  fetchReservationById
 } from '@/services/reservations'
 import { fetchBusinessContactById } from '@/services/business'
 import { useTenant } from '@/hooks/use-tenant'
@@ -13,6 +13,8 @@ import { StatusBadge } from '@/components/common/badge'
 import { Alert } from '@/components/common/alert'
 import { ReservationSkeleton } from '@/components/common/skeleton'
 import { ReservationDetailsSheet } from '@/components/common/reservation-details-sheet'
+import { ReservationActionControls } from '@/components/common/reservation-action-controls'
+import { canClientCancelReservation } from '@/lib/reservation-status'
 import {
   CalendarPlusIcon,
   InboxIcon,
@@ -21,7 +23,7 @@ import {
 } from '@/components/common/icon'
 import { resolveWhatsAppLink, buildClientPendingMessage } from '@/lib/whatsapp'
 import type { Reservation } from '@/types'
-import { parseISO, isAfter, subHours } from 'date-fns'
+import { parseISO, isAfter } from 'date-fns'
 import { formatLocal } from '@/lib/time'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 import { useSwipeTabs } from '@/hooks/use-swipe-tabs'
@@ -53,8 +55,12 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
     []
   )
   const [filter, setFilter] = useState<Filter>('upcoming')
-  const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // Deep link desde correos: /b/{slug}/mis-reservas?reservation={id}
+  const [deepLinkId] = useState(() =>
+    new URLSearchParams(window.location.search).get('reservation')
+  )
+  const deepLinkHandled = useRef(false)
   const [businessPhone, setBusinessPhone] = useState<string | null>(null)
   const [businessWhatsappLink, setBusinessWhatsappLink] = useState<
     string | null
@@ -132,30 +138,45 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   // Ordenar: 1) pendientes antiguas, 2) próximas, 3) vencidas
   const sorted = sortReservationsByPriority(filtered)
 
+  const cancellationLimitHours = business?.cancellation_limit_hours ?? 2
+
   function canCancel(r: Reservation): boolean {
-    if (!['pending', 'confirmed'].includes(r.status)) return false
-    if (r.status === 'pending') return true
-    const start = parseISO(r.starts_at)
-    const limit = subHours(start, 2)
-    return isAfter(limit, new Date())
+    return canClientCancelReservation(r, cancellationLimitHours)
   }
 
-  async function handleCancel(id: string) {
-    if (!confirm('¿Seguro que quieres cancelar esta reserva?')) return
-    setCancellingId(id)
-    setError(null)
-
-    try {
-      await cancelReservationByClient(id)
+  // Tras una acción: recargar el listado y refrescar la reserva abierta
+  const handleReservationChanged = useCallback(
+    async (reservationId: string) => {
       await loadReservations()
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'No pudimos cancelar la reserva.'
-      )
-    } finally {
-      setCancellingId(null)
+      try {
+        const updated = await fetchReservationById(reservationId)
+        setSelectedReservation(updated)
+      } catch {
+        setSelectedReservation(null)
+      }
+    },
+    [loadReservations]
+  )
+
+  // Deep link: abrir la reserva del correo aunque no esté en el filtro visible
+  useEffect(() => {
+    if (deepLinkHandled.current || !deepLinkId || loading) return
+    deepLinkHandled.current = true
+    const match = reservations.find((r) => r.id === deepLinkId)
+    if (match) {
+      setSelectedReservation(match)
+      return
     }
-  }
+    fetchReservationById(deepLinkId)
+      .then((reservation) => {
+        if (reservation) {
+          setSelectedReservation(reservation)
+        } else {
+          setError('No encontramos esa reserva o no tienes acceso a ella.')
+        }
+      })
+      .catch(() => setError('No pudimos cargar la reserva.'))
+  }, [deepLinkId, loading, reservations])
 
   function buildReservationWhatsAppLink(r: Reservation): string | null {
     const msg = buildClientPendingMessage({
@@ -316,15 +337,15 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                           Confirmar por WhatsApp
                         </a>
                       )}
-                    <Button
-                      variant='danger'
-                      size='sm'
-                      loading={cancellingId === r.id}
-                      onClick={() => handleCancel(r.id)}
-                      data-tour={index === 0 ? 'reservation-cancel' : undefined}
-                    >
-                      Cancelar reserva
-                    </Button>
+                    <ReservationActionControls
+                      reservation={r}
+                      viewer='client'
+                      cancellationLimitHours={cancellationLimitHours}
+                      onChanged={handleReservationChanged}
+                      cancelTourKey={
+                        index === 0 ? 'reservation-cancel' : undefined
+                      }
+                    />
                   </div>
                 )}
 
@@ -345,6 +366,14 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
           onClose={closeReservationDetails}
           resourceLabel={resourceLabelSingular}
           whatsappHref={buildReservationWhatsAppLink(selectedReservation)}
+          actions={
+            <ReservationActionControls
+              reservation={selectedReservation}
+              viewer='client'
+              cancellationLimitHours={cancellationLimitHours}
+              onChanged={handleReservationChanged}
+            />
+          }
         />
       )}
     </div>

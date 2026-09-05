@@ -36,7 +36,9 @@ import {
 
 export interface TemplatePayload {
   business_name?: string
+  business_slug?: string
   resource_name?: string
+  reservation_id?: string
   reservation_number?: number
   starts_at?: string
   recipient_name?: string | null
@@ -376,6 +378,40 @@ function link(appUrl: string, path: string): string {
   return `${appUrl}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
+/**
+ * Deep link al detalle de la reserva en la vista del cliente.
+ * Fallback a la lista para payloads antiguos sin slug o sin id.
+ */
+function clientReservationLink(
+  appUrl: string,
+  p: TemplatePayload
+): string {
+  if (p.reservation_id && p.business_slug) {
+    return link(
+      appUrl,
+      `/b/${encodeURIComponent(p.business_slug)}/mis-reservas?reservation=${encodeURIComponent(p.reservation_id)}`
+    )
+  }
+  return link(appUrl, '/mis-reservas')
+}
+
+/**
+ * Deep link al detalle de la reserva en el panel del negocio.
+ * Fallback a la lista para payloads antiguos sin id.
+ */
+function businessReservationLink(
+  appUrl: string,
+  p: TemplatePayload
+): string {
+  if (p.reservation_id) {
+    return link(
+      appUrl,
+      `/admin/reservas?reservation=${encodeURIComponent(p.reservation_id)}`
+    )
+  }
+  return link(appUrl, '/admin/reservas')
+}
+
 function paragraph(content: string, margin = '0 0 18px'): string {
   return `<p style="margin:${margin};font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#3c4a41;line-height:1.65;">${content}</p>`
 }
@@ -447,8 +483,8 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         description: `Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>, tu solicitud fue enviada y está esperando confirmación.`,
         bodyHtml: clientReservationBody(p, 'pending'),
         cta: {
-          href: link(appUrl, '/mis-reservas'),
-          label: 'Ver mis reservas'
+          href: clientReservationLink(appUrl, p),
+          label: 'Ver reserva'
         },
         whatsapp: p.business_whatsapp
           ? {
@@ -472,7 +508,7 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         description: 'Hay una solicitud nueva pendiente de confirmar.',
         bodyHtml: businessReservationDetails(p, 'pending'),
         cta: {
-          href: link(appUrl, '/admin/reservas'),
+          href: businessReservationLink(appUrl, p),
           label: 'Confirmar o rechazar'
         },
         whatsapp: p.client_whatsapp
@@ -502,7 +538,10 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
             ? detailRow('Creada por', p.created_by_name, detailIcons.client)
             : ''
         ),
-        cta: { href: link(appUrl, '/admin/reservas'), label: 'Ver reserva' },
+        cta: {
+          href: businessReservationLink(appUrl, p),
+          label: 'Ver reserva'
+        },
         whatsapp: p.client_whatsapp
           ? {
               href:
@@ -525,8 +564,8 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         description: `Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>, el negocio confirmó tu turno.`,
         bodyHtml: clientReservationBody(p, 'confirmed'),
         cta: {
-          href: link(appUrl, '/mis-reservas'),
-          label: 'Ver mis reservas'
+          href: clientReservationLink(appUrl, p),
+          label: 'Ver reserva'
         },
         whatsapp: p.business_whatsapp
           ? {
@@ -549,7 +588,10 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         heading: 'Tu reserva fue rechazada',
         description: `Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>, el negocio no pudo aceptar tu solicitud.`,
         bodyHtml: `${clientReservationBody(p, 'rejected', p.reason ? detailRow('Motivo', p.reason, detailIcons.reason) : '')}${paragraph('Puedes buscar otro turno cuando quieras.', '16px 0 0')}`,
-        cta: { href: link(appUrl, '/'), label: 'Buscar otro turno' },
+        cta: {
+          href: clientReservationLink(appUrl, p),
+          label: 'Ver reserva'
+        },
         whatsapp: p.business_whatsapp
           ? {
               href:
@@ -571,7 +613,10 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         heading: 'Cancelaste tu reserva',
         description: 'La cancelación de tu reserva quedó registrada.',
         bodyHtml: clientReservationBody(p, 'cancelled'),
-        cta: { href: link(appUrl, '/'), label: 'Reservar otro turno' },
+        cta: {
+          href: clientReservationLink(appUrl, p),
+          label: 'Ver reserva'
+        },
         whatsapp: p.business_whatsapp
           ? {
               href:
@@ -594,8 +639,8 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         description: 'El cliente liberó este turno.',
         bodyHtml: businessReservationDetails(p, 'cancelled'),
         cta: {
-          href: link(appUrl, '/admin/reservas'),
-          label: 'Ver panel de reservas'
+          href: businessReservationLink(appUrl, p),
+          label: 'Ver reserva'
         },
         whatsapp: p.client_whatsapp
           ? {
@@ -618,7 +663,10 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         heading: 'El negocio canceló tu reserva',
         description: `Hola <strong>${escapeHtml(p.recipient_name ?? '')}</strong>, el negocio canceló tu reserva.`,
         bodyHtml: `${clientReservationBody(p, 'cancelled', p.reason ? detailRow('Motivo', p.reason, detailIcons.reason) : '')}${paragraph('Puedes buscar otro turno cuando quieras.', '16px 0 0')}`,
-        cta: { href: link(appUrl, '/'), label: 'Buscar otro turno' },
+        cta: {
+          href: clientReservationLink(appUrl, p),
+          label: 'Ver reserva'
+        },
         whatsapp: p.business_whatsapp
           ? {
               href:
@@ -641,7 +689,10 @@ export function createTemplates(appUrl: string): Record<string, TemplateFn> {
         description:
           'La solicitud venció porque el negocio no la confirmó a tiempo.',
         bodyHtml: `${clientReservationBody(p, 'expired')}${paragraph('Puedes solicitar un nuevo turno cuando quieras.', '16px 0 0')}`,
-        cta: { href: link(appUrl, '/'), label: 'Buscar otro turno' },
+        cta: {
+          href: clientReservationLink(appUrl, p),
+          label: 'Ver reserva'
+        },
         whatsapp: p.business_whatsapp
           ? {
               href:

@@ -79,6 +79,19 @@ export async function fetchUserReservations(
   return uniqueReservations((data ?? []) as Reservation[])
 }
 
+export async function fetchReservationById(
+  reservationId: string
+): Promise<Reservation | null> {
+  const { data, error } = await supabase
+    .from('reservations')
+    .select(RESERVATION_SELECT)
+    .eq('id', reservationId)
+    .maybeSingle()
+  if (error) throw error
+  const reservations = uniqueReservations(data ? ([data] as Reservation[]) : [])
+  return reservations[0] ?? null
+}
+
 // RPC calls
 
 export async function confirmReservation(reservationId: string): Promise<void> {

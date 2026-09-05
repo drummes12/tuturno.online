@@ -17,6 +17,8 @@ const templates = createTemplates(APP_URL)
 
 const validPayload: TemplatePayload = {
   business_name: 'Estudio Centro',
+  business_slug: 'estudio-centro',
+  reservation_id: 'res-123',
   resource_name: 'Sala principal',
   starts_at: '2025-01-15T15:00:00Z',
   recipient_name: 'Juan Pérez',
@@ -55,10 +57,21 @@ describe('Email templates', () => {
       expect(html).toContain('Hola <strong></strong>')
     })
 
-    it('incluye un botón CTA hacia /mis-reservas', () => {
+    it('incluye un botón CTA hacia el detalle de la reserva', () => {
       const { html } = templates.reservation_created_client(validPayload)
+      expect(html).toContain(
+        `${APP_URL}/b/estudio-centro/mis-reservas?reservation=res-123`
+      )
+      expect(html).toContain('Ver reserva')
+    })
+
+    it('cae al listado cuando falta slug o reservation_id', () => {
+      const { html } = templates.reservation_created_client({
+        ...validPayload,
+        business_slug: undefined,
+        reservation_id: undefined
+      })
       expect(html).toContain(`${APP_URL}/mis-reservas`)
-      expect(html).toContain('Ver mis reservas')
     })
   })
 
@@ -74,9 +87,9 @@ describe('Email templates', () => {
       expect(html).toContain('juan@example.com')
     })
 
-    it('incluye un botón CTA hacia /admin/reservas', () => {
+    it('incluye un botón CTA hacia el detalle de la reserva', () => {
       const { html } = templates.reservation_created_business(validPayload)
-      expect(html).toContain(`${APP_URL}/admin/reservas`)
+      expect(html).toContain(`${APP_URL}/admin/reservas?reservation=res-123`)
       expect(html).toContain('Confirmar o rechazar')
     })
   })
@@ -122,9 +135,11 @@ describe('Email templates', () => {
       expect(html).toContain('confirmada')
     })
 
-    it('incluye un botón CTA hacia /mis-reservas', () => {
+    it('incluye un botón CTA hacia el detalle de la reserva', () => {
       const { html } = templates.reservation_confirmed(validPayload)
-      expect(html).toContain(`${APP_URL}/mis-reservas`)
+      expect(html).toContain(
+        `${APP_URL}/b/estudio-centro/mis-reservas?reservation=res-123`
+      )
     })
   })
 
@@ -156,10 +171,12 @@ describe('Email templates', () => {
       expect(html).not.toContain('Motivo')
     })
 
-    it('incluye un botón CTA hacia la home', () => {
+    it('incluye un botón CTA hacia el detalle de la reserva', () => {
       const { html } = templates.reservation_rejected(validPayload)
-      expect(html).toContain(`${APP_URL}/`)
-      expect(html).toContain('Buscar otro turno')
+      expect(html).toContain(
+        `${APP_URL}/b/estudio-centro/mis-reservas?reservation=res-123`
+      )
+      expect(html).toContain('Ver reserva')
     })
   })
 
@@ -172,9 +189,11 @@ describe('Email templates', () => {
       expect(html).not.toContain('cancelada por el negocio')
     })
 
-    it('incluye un botón CTA hacia la home', () => {
+    it('incluye un botón CTA hacia el detalle de la reserva', () => {
       const { html } = templates.reservation_cancelled_client(validPayload)
-      expect(html).toContain(`${APP_URL}/`)
+      expect(html).toContain(
+        `${APP_URL}/b/estudio-centro/mis-reservas?reservation=res-123`
+      )
     })
   })
 
@@ -185,9 +204,9 @@ describe('Email templates', () => {
       expect(subject).toContain('Juan Pérez')
     })
 
-    it('incluye un botón CTA hacia /admin/reservas', () => {
+    it('incluye un botón CTA hacia el detalle de la reserva', () => {
       const { html } = templates.reservation_cancelled_business(validPayload)
-      expect(html).toContain(`${APP_URL}/admin/reservas`)
+      expect(html).toContain(`${APP_URL}/admin/reservas?reservation=res-123`)
     })
   })
 
@@ -476,7 +495,7 @@ describe('Email templates', () => {
 
     it('el WhatsApp aparece después del CTA, no dentro del body', () => {
       const { html } = templates.reservation_confirmed(validPayload)
-      const ctaPos = html.indexOf('Ver mis reservas')
+      const ctaPos = html.indexOf('Ver reserva')
       const whatsappPos = html.indexOf('Abrir WhatsApp')
       expect(ctaPos).toBeGreaterThan(-1)
       expect(whatsappPos).toBeGreaterThan(-1)

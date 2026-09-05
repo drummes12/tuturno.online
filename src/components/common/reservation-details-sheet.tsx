@@ -21,6 +21,7 @@ type ReservationDetailsSheetProps = {
   onClose: () => void
   resourceLabel?: string
   whatsappHref?: string | null
+  actions?: ReactNode
 }
 
 type DetailRowProps = {
@@ -57,7 +58,8 @@ export function ReservationDetailsSheet({
   reservation,
   onClose,
   resourceLabel = 'Recurso',
-  whatsappHref
+  whatsappHref,
+  actions
 }: ReservationDetailsSheetProps) {
   const dialogRef = useRef<HTMLElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
@@ -132,14 +134,17 @@ export function ReservationDetailsSheet({
         aria-modal='true'
         aria-labelledby='reservation-details-title'
         aria-describedby='reservation-details-description'
-        className='w-full max-h-[min(88dvh,760px)] overflow-hidden rounded-t-2xl bg-surface-elevated shadow-(--shadow-lg) animate-sheet-up sm:max-w-2xl sm:rounded-3xl sm:animate-fade-up'
+        className='flex w-full max-h-[min(88dvh,760px)] flex-col overflow-hidden rounded-t-2xl bg-surface-elevated shadow-(--shadow-lg) animate-sheet-up sm:max-w-2xl sm:rounded-3xl sm:animate-fade-up'
         onClick={(event) => event.stopPropagation()}
       >
-        <div className='flex justify-center pt-3 sm:hidden' aria-hidden='true'>
+        <div
+          className='flex shrink-0 justify-center pt-3 sm:hidden'
+          aria-hidden='true'
+        >
           <span className='h-1.5 w-12 rounded-full bg-graphite-200' />
         </div>
 
-        <div className='flex items-start justify-between gap-4 px-5 pb-4 pt-4 sm:px-7 sm:pt-7'>
+        <div className='flex shrink-0 items-start justify-between gap-4 px-5 pb-4 pt-4 sm:px-7 sm:pt-7'>
           <div className='min-w-0'>
             <p className='text-xs font-semibold uppercase tracking-[0.14em] text-primary'>
               Detalle de reserva
@@ -173,7 +178,7 @@ export function ReservationDetailsSheet({
           </button>
         </div>
 
-        <div className='max-h-[calc(88dvh-132px)] overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:max-h-[calc(88dvh-164px)] sm:px-7 sm:pb-7'>
+        <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:px-7 sm:pb-7'>
           <div className='mb-5 flex items-center justify-between gap-3 rounded-2xl bg-surface-inset p-4'>
             <div>
               <p className='text-xs font-medium uppercase tracking-wide text-text-muted'>
@@ -204,6 +209,15 @@ export function ReservationDetailsSheet({
               <WhatsAppIcon size={18} />
               Enviar mensaje por WhatsApp
             </a>
+          )}
+
+          {actions && (
+            <section className='mb-5 rounded-2xl border border-border p-4'>
+              <h3 className='mb-3 text-sm font-semibold tracking-tight'>
+                Gestionar reserva
+              </h3>
+              {actions}
+            </section>
           )}
 
           <div className='grid gap-5 sm:grid-cols-2'>

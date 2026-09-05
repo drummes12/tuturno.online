@@ -33,6 +33,7 @@ type ReservationLookup = {
 }
 
 type BusinessContactLookup = {
+  slug: string | null
   phone: string | null
   whatsapp_link: string | null
 }
@@ -150,11 +151,7 @@ export default {
           ? row.payload.reservation_id
           : null
 
-      if (
-        reservationId &&
-        (CLIENT_RESERVATION_TEMPLATES.has(row.type) ||
-          row.type === 'reservation_created_by_business')
-      ) {
+      if (reservationId && row.type.includes('reservation')) {
         // Seleccionar reservation_number por separado para no romper si la
         // migración 03500 aún no se ha aplicado (la columna no existe).
         const reservationResult = await supabase
@@ -179,13 +176,15 @@ export default {
             payload.reservation_number = numberData.reservation_number
           }
 
+          const businessResult = await supabase
+            .from('businesses')
+            .select('slug, phone, whatsapp_link')
+            .eq('id', reservation.business_id)
+            .maybeSingle()
+          const business = businessResult.data as BusinessContactLookup | null
+          if (business?.slug) payload.business_slug = business.slug
+
           if (CLIENT_RESERVATION_TEMPLATES.has(row.type)) {
-            const businessResult = await supabase
-              .from('businesses')
-              .select('phone, whatsapp_link')
-              .eq('id', reservation.business_id)
-              .maybeSingle()
-            const business = businessResult.data as BusinessContactLookup | null
             payload.business_whatsapp =
               resolveBusinessWhatsApp(
                 business?.whatsapp_link,
