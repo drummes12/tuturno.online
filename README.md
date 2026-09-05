@@ -1,6 +1,6 @@
 # TuTurno
 
-Aplicación web para agendar espacios en un negocio (primer caso: cancha de fútbol 5). Permite consultar disponibilidad pública, solicitar turnos de 60 minutos, y al negocio confirmar o rechazar reservas manualmente.
+Aplicación web multi-tenant para agendar espacios en un negocio (canchas, salas, consultorios, mesas, cabinas u otros recursos reservables). Permite consultar disponibilidad pública, solicitar turnos con duración configurable por negocio, y al negocio confirmar, rechazar o cancelar reservas manualmente.
 
 ## Stack
 
@@ -66,6 +66,10 @@ supabase/migrations/02800_security_hardening.sql
 supabase/migrations/02900_member_management.sql
 supabase/migrations/03000_privacy_consents.sql
 supabase/migrations/03100_search_clients_tenant_only.sql
+supabase/migrations/03200_complete_past_reservations.sql
+supabase/migrations/03300_linked_client_reservations.sql
+supabase/migrations/03400_member_email_opt_out.sql
+supabase/migrations/03500_reservation_number.sql
 ```
 
 ### Privacidad y consentimiento
@@ -141,8 +145,8 @@ pnpm dev
 - Solicitud de reservas con bloqueo temporal y anticipación mínima configurables por negocio
 - Panel administrativo mobile-first con cola de pendientes
 - Confirmar/rechazar reservas con motivo
-- Cancelación por parte del cliente (2 horas antes)
-- Notificaciones por correo (Resend)
+- Cancelación por parte del cliente con límite de horas configurable por negocio
+- Notificaciones por correo (Resend) con deep links a la reserva específica
 - Concurrencia protegida con advisory locks
 - RLS en todas las tablas
 - Recursos reservables configurables (canchas, salas, consultorios, mesas, cabinas u otros espacios)
@@ -150,6 +154,15 @@ pnpm dev
 - Instrucciones de abono/confirmación en Markdown (máx 1000 caracteres) visibles para el cliente antes de reservar
 - Botón de WhatsApp post-reserva con mensaje prellenado y enlace fallback
 - Tutorial guiado interactivo con Driver.js para clientes (visitantes y autenticados), con botón "Guía" en el header para volver a iniciarlo
+- Sheet de detalles de reserva con acciones contextuales según rol y estado
+- Número de reserva secuencial por negocio para referencia humana
+- Completado automático de reservas pasadas vía cron
+- Opt-out de notificaciones por miembro de negocio
+- Onboarding de nuevas organizaciones con panel de operador y MFA
+- Gestión de equipo (owners y managers) desde el panel admin
+- Hub de negocio que agrupa configuración ocasional (horarios, cierres, equipo, configuración)
+- Multi-negocio: selector para usuarios con membresía en varias organizaciones
+- SEO y Open Graph optimizados, favicon suite personalizada
 
 ## Licencia
 
