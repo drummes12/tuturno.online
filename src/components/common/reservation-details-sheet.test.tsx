@@ -89,7 +89,7 @@ describe('ReservationDetailsSheet', () => {
     expect(onClose).toHaveBeenCalledTimes(2)
   })
 
-  it('muestra la zona de acciones cuando se proporciona', () => {
+  it('renderiza las acciones proporcionadas dentro del diálogo', () => {
     render(
       <ReservationDetailsSheet
         reservation={reservation}
@@ -99,7 +99,7 @@ describe('ReservationDetailsSheet', () => {
     )
 
     expect(
-      screen.getByRole('heading', { name: 'Gestionar reserva' })
+      screen.getByRole('dialog').querySelector('button:last-of-type')
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'Cancelar reserva' })
@@ -113,6 +113,9 @@ describe('ReservationDetailsSheet', () => {
 
     expect(
       screen.queryByRole('heading', { name: 'Gestionar reserva' })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Cancelar reserva' })
     ).not.toBeInTheDocument()
   })
 

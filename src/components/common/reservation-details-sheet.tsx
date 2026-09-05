@@ -211,14 +211,7 @@ export function ReservationDetailsSheet({
             </a>
           )}
 
-          {actions && (
-            <section className='mb-5 rounded-2xl border border-border p-4'>
-              <h3 className='mb-3 text-sm font-semibold tracking-tight'>
-                Gestionar reserva
-              </h3>
-              {actions}
-            </section>
-          )}
+          {actions}
 
           <div className='grid gap-5 sm:grid-cols-2'>
             <section className='rounded-2xl border border-border p-4'>

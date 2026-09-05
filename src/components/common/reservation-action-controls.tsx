@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { Reservation } from '@/types'
 import { canClientCancelReservation } from '@/lib/reservation-status'
 import { Button } from '@/components/common/button'
@@ -24,6 +24,11 @@ export type ReservationActionControlsProps = {
   onChanged?: (reservationId: string) => void | Promise<void>
   /** Marca data-tour para el botón de cancelación (guías interactivas). */
   cancelTourKey?: string
+  /**
+   * Envuelve las acciones en una card con título "Gestionar reserva"
+   * (uso dentro del sheet de detalle). Si no hay acciones, no renderiza nada.
+   */
+  framed?: boolean
 }
 
 export function ReservationActionControls({
@@ -31,7 +36,8 @@ export function ReservationActionControls({
   viewer,
   cancellationLimitHours = 2,
   onChanged,
-  cancelTourKey
+  cancelTourKey,
+  framed = false
 }: ReservationActionControlsProps) {
   const [acting, setActing] = useState(false)
   const [reasonMode, setReasonMode] = useState<ReasonMode>(null)
@@ -79,9 +85,21 @@ export function ReservationActionControls({
     return true
   }
 
+  function maybeFrame(content: ReactNode) {
+    if (!framed) return content
+    return (
+      <section className='mb-5 rounded-2xl border border-border p-4'>
+        <h3 className='mb-3 text-sm font-semibold tracking-tight'>
+          Gestionar reserva
+        </h3>
+        {content}
+      </section>
+    )
+  }
+
   if (reasonMode) {
     const isReject = reasonMode === 'reject'
-    return (
+    return maybeFrame(
       <div className='flex w-full flex-col gap-2.5 animate-fade-up'>
         {error && (
           <Alert variant='error' onDismiss={() => setError(null)}>
@@ -134,7 +152,7 @@ export function ReservationActionControls({
     )
   }
 
-  return (
+  return maybeFrame(
     <div className='flex w-full flex-col gap-2.5'>
       {error && (
         <Alert variant='error' onDismiss={() => setError(null)}>

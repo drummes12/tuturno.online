@@ -372,6 +372,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
               viewer='client'
               cancellationLimitHours={cancellationLimitHours}
               onChanged={handleReservationChanged}
+              framed
             />
           }
         />

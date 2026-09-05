@@ -318,6 +318,7 @@ export function AdminReservationsPage() {
               reservation={selectedReservation}
               viewer='business'
               onChanged={handleReservationChanged}
+              framed
             />
           }
         />

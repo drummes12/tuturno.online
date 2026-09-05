@@ -191,6 +191,38 @@ describe('ReservationActionControls', () => {
     )
   })
 
+  it('framed: envuelve las acciones en la card "Gestionar reserva"', () => {
+    render(
+      <ReservationActionControls
+        reservation={baseReservation}
+        viewer='client'
+        framed
+      />
+    )
+
+    expect(
+      screen.getByRole('heading', { name: 'Gestionar reserva' })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Cancelar reserva' })
+    ).toBeInTheDocument()
+  })
+
+  it('framed: no renderiza la card cuando no hay acciones', () => {
+    const { container } = render(
+      <ReservationActionControls
+        reservation={{ ...baseReservation, status: 'expired' }}
+        viewer='client'
+        framed
+      />
+    )
+
+    expect(container).toBeEmptyDOMElement()
+    expect(
+      screen.queryByRole('heading', { name: 'Gestionar reserva' })
+    ).not.toBeInTheDocument()
+  })
+
   it('muestra el error del RPC y permite reintentar', async () => {
     const user = userEvent.setup()
     mockConfirm.mockRejectedValueOnce(new Error('ya confirmada'))
