@@ -8,6 +8,7 @@ import { PhoneInput } from '@/components/common/phone-input'
 import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
+import { BackLink } from '@/components/common/back-link'
 import { useCanEdit } from '@/hooks/use-can-edit'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
 import { resolveWhatsAppLink, buildGeneralInquiryMessage } from '@/lib/whatsapp'
@@ -145,7 +146,10 @@ export function AdminConfigPage() {
     <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
       {/* Header */}
       <div className='animate-fade-up'>
-        <h1 className='text-2xl font-bold tracking-tight'>Configuración</h1>
+        <div className='flex items-center gap-1'>
+          <BackLink href='/admin/negocio' label='Negocio' />
+          <h1 className='text-2xl font-bold tracking-tight'>Configuración</h1>
+        </div>
         <p className='text-sm text-(--color-text-muted) mt-1'>
           Ajusta los datos del negocio y las reglas de operación.
         </p>

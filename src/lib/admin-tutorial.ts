@@ -37,6 +37,7 @@ export function markAdminTutorialSeen(userId: string): void {
 export type AdminTutorialStage =
   | 'admin-dashboard'
   | 'admin-resources'
+  | 'admin-business-hub'
   | 'admin-hours'
   | 'admin-config'
   | 'admin-reservations'

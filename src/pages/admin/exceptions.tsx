@@ -15,6 +15,7 @@ import { Button } from '@/components/common/button'
 import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
+import { BackLink } from '@/components/common/back-link'
 import {
   LockIcon,
   TrashIcon,
@@ -263,12 +264,15 @@ export function AdminExceptionsPage() {
     (affectedCount === null || affectedCount === 0 || confirmedCreate)
 
   return (
-    <div className='flex flex-col gap-5 max-w-3xl mx-auto'>
+    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
       {/* Header */}
       <div className='animate-fade-up'>
-        <h1 className='text-2xl font-bold tracking-tight'>
-          Cierres temporales
-        </h1>
+        <div className='flex items-center gap-1'>
+          <BackLink href='/admin/negocio' label='Negocio' />
+          <h1 className='text-2xl font-bold tracking-tight'>
+            Cierres temporales
+          </h1>
+        </div>
         <p className='text-sm text-(--color-text-muted) mt-1'>
           Bloquea nuevas reservas en un intervalo específico. No cancela
           reservas existentes.

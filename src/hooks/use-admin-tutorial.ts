@@ -70,6 +70,7 @@ function waitForElement(
 type TourId =
   | 'admin-dashboard'
   | 'admin-resources'
+  | 'admin-business-hub'
   | 'admin-hours'
   | 'admin-config'
   | 'admin-reservations'
@@ -164,21 +165,11 @@ function buildTours(): TourDef[] {
           }
         },
         {
-          element: '[data-tour="admin-nav-hours"]',
+          element: '[data-tour="admin-nav-business"]',
           popover: {
-            title: '2. Define tus horarios',
+            title: '2. Configura tu negocio',
             description:
-              'Configura las franjas horarias en las que aceptas reservas para cada día de la semana.',
-            side: 'bottom',
-            align: 'center'
-          }
-        },
-        {
-          element: '[data-tour="admin-nav-config"]',
-          popover: {
-            title: '3. Personaliza la operación',
-            description:
-              'Ajusta la duración de los turnos, el tiempo de hold, las políticas de cancelación y las instrucciones que verán tus clientes.',
+              'Aquí defines tus horarios, cierres puntuales, tu equipo y la configuración de la operación (duración de turnos, hold, políticas de cancelación e instrucciones).',
             side: 'bottom',
             align: 'center'
           }
@@ -219,6 +210,34 @@ function buildTours(): TourDef[] {
               'Si desactivas un recurso, tus clientes no podrán reservarlo, pero sus reservas existentes se mantienen. Útil para mantenimiento temporal.',
             side: 'top',
             align: 'end'
+          }
+        }
+      ]
+    },
+    // === Negocio /admin/negocio ===
+    {
+      id: 'admin-business-hub',
+      stage: 'admin-business-hub',
+      route: '/admin/negocio',
+      steps: [
+        {
+          element: '[data-tour="business-hub-hours"]',
+          popover: {
+            title: 'Horarios',
+            description:
+              'Define las franjas horarias en las que aceptas reservas para cada día de la semana.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="business-hub-config"]',
+          popover: {
+            title: 'Configuración',
+            description:
+              'Ajusta la duración de los turnos, el tiempo de hold, las políticas de cancelación y las instrucciones que verán tus clientes.',
+            side: 'bottom',
+            align: 'center'
           }
         }
       ]
@@ -417,6 +436,9 @@ function selectTour(route: string): TourDef | null {
   }
   if (route === '/admin/recursos') {
     return tours.find((t) => t.id === 'admin-resources') ?? null
+  }
+  if (route === '/admin/negocio') {
+    return tours.find((t) => t.id === 'admin-business-hub') ?? null
   }
   if (route === '/admin/horarios') {
     return tours.find((t) => t.id === 'admin-hours') ?? null

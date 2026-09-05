@@ -22,6 +22,7 @@ import { PrivacyPreferencesPage } from '@/pages/client/privacy-preferences'
 import { AdminDashboardPage } from '@/pages/admin/dashboard'
 import { AdminReservationsPage } from '@/pages/admin/reservations'
 import { AdminResourcesPage } from '@/pages/admin/resources'
+import { AdminBusinessHubPage } from '@/pages/admin/business-hub'
 import { AdminHoursPage } from '@/pages/admin/hours'
 import { AdminConfigPage } from '@/pages/admin/config'
 import { AdminExceptionsPage } from '@/pages/admin/exceptions'
@@ -174,6 +175,11 @@ export default function App() {
         <Route path='/admin/recursos'>
           <AdminRoute>
             <AdminResourcesPage />
+          </AdminRoute>
+        </Route>
+        <Route path='/admin/negocio'>
+          <AdminRoute>
+            <AdminBusinessHubPage />
           </AdminRoute>
         </Route>
         <Route path='/admin/horarios'>

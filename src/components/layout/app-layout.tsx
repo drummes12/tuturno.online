@@ -6,13 +6,11 @@ import {
   LayoutIcon,
   ListIcon,
   StoreIcon,
-  ScheduleIcon,
   SettingsIcon,
   LogOutIcon,
   LogInIcon,
   LockIcon,
-  HelpIcon,
-  UsersIcon
+  HelpIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
@@ -28,28 +26,23 @@ interface NavItem {
   icon: ReactNode
 }
 
+// Rutas de configuración ocasional agrupadas bajo /admin/negocio, para
+// no sobrecargar el bottom nav en mobile (máx. 4-5 destinos recomendado).
+const BUSINESS_HUB_ROUTES = [
+  '/admin/negocio',
+  '/admin/horarios',
+  '/admin/excepciones',
+  '/admin/equipo',
+  '/admin/configuracion'
+]
+
 const adminNav: NavItem[] = [
   { label: 'Operación', href: '/admin', icon: <LayoutIcon size={22} /> },
   { label: 'Reservas', href: '/admin/reservas', icon: <ListIcon size={22} /> },
   { label: 'Recursos', href: '/admin/recursos', icon: <StoreIcon size={22} /> },
   {
-    label: 'Horarios',
-    href: '/admin/horarios',
-    icon: <ScheduleIcon size={22} />
-  },
-  {
-    label: 'Cierres',
-    href: '/admin/excepciones',
-    icon: <LockIcon size={22} />
-  },
-  {
-    label: 'Equipo',
-    href: '/admin/equipo',
-    icon: <UsersIcon size={22} />
-  },
-  {
-    label: 'Configuración',
-    href: '/admin/configuracion',
+    label: 'Negocio',
+    href: '/admin/negocio',
     icon: <SettingsIcon size={22} />
   }
 ]
@@ -84,6 +77,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
     : []
 
   const nav = isAdmin ? adminNav : clientNav
+
+  // "Negocio" queda activo también en sus sub-rutas agrupadas (horarios,
+  // cierres, equipo, configuración), no solo en /admin/negocio exacto.
+  function isNavItemActive(href: string): boolean {
+    if (href === '/admin/negocio') {
+      return BUSINESS_HUB_ROUTES.includes(location)
+    }
+    return location === href
+  }
 
   // El tutorial del cliente aplica a visitantes/autenticados sin rol admin
   // en rutas tenant. El tutorial del admin aplica en cualquier ruta /admin.
@@ -180,7 +182,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         >
           <div className='mx-auto max-w-5xl px-4 flex items-center gap-1'>
             {nav.map((item) => {
-              const active = location === item.href
+              const active = isNavItemActive(item.href)
               return (
                 <Link
                   key={item.href}
@@ -191,11 +193,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       ? 'client-nav-reservations'
                       : item.href === '/admin/recursos'
                         ? 'admin-nav-resources'
-                        : item.href === '/admin/horarios'
-                          ? 'admin-nav-hours'
-                          : item.href === '/admin/configuracion'
-                            ? 'admin-nav-config'
-                            : undefined
+                        : item.href === '/admin/negocio'
+                          ? 'admin-nav-business'
+                          : undefined
                   }
                   className={`flex-1 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 ease-spring ${
                     active
@@ -227,12 +227,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
         >
           <div className='scrollbar-none flex snap-x snap-mandatory items-center gap-1 overflow-x-auto px-1 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
             {nav.map((item) => {
-              const active = location === item.href
+              const active = isNavItemActive(item.href)
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
+                  data-tour={
+                    item.href === '/admin/negocio'
+                      ? 'admin-nav-business'
+                      : undefined
+                  }
                   className={`flex-1 flex min-w-21 shrink-0 snap-start flex-col items-center gap-1 px-2 py-1.5 text-[10px] font-medium rounded-lg touch-target transition-colors ${
                     active ? 'text-primary' : 'text-text-muted'
                   }`}

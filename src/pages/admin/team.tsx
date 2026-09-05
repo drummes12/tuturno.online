@@ -16,6 +16,7 @@ import { Alert } from '@/components/common/alert'
 import { Badge } from '@/components/common/badge'
 import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
+import { BackLink } from '@/components/common/back-link'
 import {
   UserIcon,
   TrashIcon,
@@ -63,8 +64,11 @@ export function AdminTeamPage() {
   return (
     <div className='flex flex-col gap-6'>
       <div>
-        <h1 className='text-2xl font-bold tracking-tight'>Equipo</h1>
-        <p className='text-sm text-(--color-text-muted)'>
+        <div className='flex items-center gap-1'>
+          <BackLink href='/admin/negocio' label='Negocio' />
+          <h1 className='text-2xl font-bold tracking-tight'>Equipo</h1>
+        </div>
+        <p className='text-sm text-(--color-text-muted) mt-1'>
           Gestiona quién puede administrar este negocio. Los managers pueden ver
           y gestionar reservas, recursos y horarios. Solo el owner puede añadir
           o eliminar miembros.

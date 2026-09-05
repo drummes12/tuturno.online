@@ -10,6 +10,7 @@ import { Button } from '@/components/common/button'
 import { Spinner } from '@/components/common/spinner'
 import { Alert } from '@/components/common/alert'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
+import { BackLink } from '@/components/common/back-link'
 import { useCanEdit } from '@/hooks/use-can-edit'
 import {
   PlusIcon,
@@ -235,9 +236,12 @@ export function AdminHoursPage() {
     <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
       {/* Header */}
       <div className='animate-fade-up'>
-        <h1 className='text-2xl font-bold tracking-tight'>
-          Horarios de operación
-        </h1>
+        <div className='flex items-center gap-1'>
+          <BackLink href='/admin/negocio' label='Negocio' />
+          <h1 className='text-2xl font-bold tracking-tight'>
+            Horarios de operación
+          </h1>
+        </div>
         <p className='text-sm text-(--color-text-muted) mt-1'>
           Configura las franjas horarias de cada día. Puedes tener múltiples
           franjas (ej: mañana y tarde con descanso al mediodía).
