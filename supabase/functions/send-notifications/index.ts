@@ -10,7 +10,7 @@ import { resolveBusinessWhatsApp } from './whatsapp.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const RESEND_FROM_EMAIL =
-  Deno.env.get('RESEND_FROM_EMAIL') ?? 'hola@tuturno.online'
+  Deno.env.get('RESEND_FROM_EMAIL') ?? 'hola@mail.tuturno.online'
 // URL pública del frontend. Configúrala en Supabase secrets:
 //   supabase secrets set APP_URL=https://tuturno.online
 const APP_URL = (Deno.env.get('APP_URL') ?? 'https://tuturno.online')
