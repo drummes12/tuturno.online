@@ -477,7 +477,10 @@ describe('Email templates', () => {
 
     it('los emails de cliente incluyen el WhatsApp del negocio correcto', () => {
       const { html } = templates.reservation_confirmed(validPayload)
-      expect(html).toContain('https://wa.me/573001234567')
+      // Los links de WhatsApp se envuelven a través de /wa?to= para que
+      // el dominio del link coincida con el dominio de envío (deliverability).
+      expect(html).toContain('/wa?to=')
+      expect(html).toContain(encodeURIComponent('https://wa.me/573001234567'))
       expect(html).toContain('¿Necesitas comunicarte con el negocio?')
       expect(html).toContain('Abrir WhatsApp')
       expect(html).toContain('/email-icons/')
@@ -488,7 +491,8 @@ describe('Email templates', () => {
         ...validPayload,
         client_whatsapp: 'https://wa.me/573009998887'
       })
-      expect(html).toContain('https://wa.me/573009998887')
+      expect(html).toContain('/wa?to=')
+      expect(html).toContain(encodeURIComponent('https://wa.me/573009998887'))
       expect(html).toContain('¿Necesitas comunicarte con el cliente?')
       expect(html).toContain('Abrir WhatsApp')
     })
