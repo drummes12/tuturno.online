@@ -33,6 +33,9 @@ import { CreateBusinessPage } from '@/pages/business/create-business'
 import { PlatformDashboardPage } from '@/pages/platform/dashboard'
 import { MfaGate } from '@/components/platform/mfa-gate'
 
+// Redirect
+import { WhatsAppRedirectPage } from '@/pages/whatsapp-redirect'
+
 // Páginas legales
 import { PrivacyPage } from '@/pages/legal/privacy'
 import { TermsPage } from '@/pages/legal/terms'
@@ -110,6 +113,10 @@ export default function App() {
         {/* Páginas legales — públicas */}
         <Route path='/privacidad' component={PrivacyPage} />
         <Route path='/terminos' component={TermsPage} />
+
+        {/* Redirect a WhatsApp — los correos usan este enlace para
+            evitar links a wa.me que no matchean el dominio de envío */}
+        <Route path='/wa' component={WhatsAppRedirectPage} />
 
         {/* Auth — solo accesibles sin sesión */}
         <Route path='/login'>

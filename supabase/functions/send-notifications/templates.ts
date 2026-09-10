@@ -311,6 +311,16 @@ function whatsappContact(href: string, label: string): string {
 }
 
 /**
+ * Envuelve un link de WhatsApp (wa.me) a través del dominio de la app.
+ * Los correos no pueden incluir links directos a wa.me porque no matchean
+ * el dominio de envío, lo que dispara filtros de spam en Gmail/Outlook.
+ * En su lugar, se usa /wa?to=<url codificada> que redirige después de validar.
+ */
+function wrapWhatsAppLink(appUrl: string, href: string): string {
+  return `${link(appUrl, '/wa')}?to=${encodeURIComponent(href)}`
+}
+
+/**
  * Envoltorio HTML branded para todos los correos.
  * Usa estilos inline porque la mayoría de clientes de correo no soportan <style>.
  */
@@ -357,7 +367,7 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
             </td>
           </tr>
           ${cta ? `<tr><td align="center" style="padding:8px 12px 28px;"><table role="presentation" align="center" cellpadding="0" cellspacing="0" style="width:100%;"><tr><td align="center">${ctaButton(cta.href, cta.label)}</td></tr></table></td></tr>` : ''}
-          ${whatsapp ? `<tr><td style="padding:12px 28px">${whatsappContact(whatsapp.href, whatsapp.label)}</td></tr>` : ''}
+          ${whatsapp ? `<tr><td style="padding:12px 28px">${whatsappContact(wrapWhatsAppLink(appUrl, whatsapp.href), whatsapp.label)}</td></tr>` : ''}
           <tr>
             <td align="center" style="padding:25px 28px 28px;border-top:1px solid #e8eeea;text-align:center;">
               <p style="margin:0 auto;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9aa59d;line-height:1.6;text-align:center;max-width:40ch;">Este correo fue enviado por TuTurno. Si crees que llegó por error, puedes ignorarlo.</p>
