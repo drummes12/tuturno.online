@@ -21,6 +21,7 @@ import {
 } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
+import { useBusinessId } from '@/hooks/use-business-id'
 import { useSwipeTabs } from '@/hooks/use-swipe-tabs'
 import { sortReservationsByPriority } from '@/lib/sort'
 import {
@@ -38,6 +39,7 @@ const statusFilters: { key: ReservationFilter; label: string }[] = [
 ]
 
 export function AdminReservationsPage() {
+  const businessId = useBusinessId()
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -79,18 +81,19 @@ export function AdminReservationsPage() {
   }
 
   const load = useCallback(async () => {
+    if (!businessId) return
     setLoading(true)
     setError(null)
     const { start, end } = dayRangeUtc(selectedDate)
 
     try {
-      const data = await fetchReservationsByDate(start, end, filter)
+      const data = await fetchReservationsByDate(start, end, filter, businessId)
       setReservations(data)
     } catch {
       setError('No pudimos cargar las reservas.')
     }
     setLoading(false)
-  }, [filter, selectedDate])
+  }, [filter, selectedDate, businessId])
 
   // Tras una acción: recargar el listado y refrescar la reserva abierta
   const handleReservationChanged = useCallback(
@@ -125,8 +128,11 @@ export function AdminReservationsPage() {
       .catch(() => setError('No pudimos cargar la reserva.'))
   }, [deepLinkId])
 
-  // Realtime: recargar cuando cambien reservas
-  useReservationsRealtime(load)
+  // Realtime: recargar cuando cambien reservas del negocio activo
+  useReservationsRealtime(
+    load,
+    businessId ? `business_id=eq.${businessId}` : undefined
+  )
 
   // Ordenar: 1) pendientes antiguas, 2) próximas, 3) vencidas
   const sortedReservations = useMemo(

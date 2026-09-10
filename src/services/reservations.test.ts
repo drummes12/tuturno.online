@@ -61,11 +61,12 @@ describe('fetchPendingReservations', () => {
     const chain = createQueryChain({ data, error: null })
     mockFrom.mockReturnValue(chain)
 
-    const result = await fetchPendingReservations()
+    const result = await fetchPendingReservations('biz-1')
 
     expect(result).toEqual(data)
     expect(mockFrom).toHaveBeenCalledWith('reservations')
     expect(chain.select).toHaveBeenCalledWith(RESERVATION_SELECT)
+    expect(chain.eq).toHaveBeenCalledWith('business_id', 'biz-1')
     expect(chain.eq).toHaveBeenCalledWith('status', 'pending')
     expect(chain.order).toHaveBeenCalledWith('starts_at', { ascending: true })
   })
@@ -75,7 +76,7 @@ describe('fetchPendingReservations', () => {
     const chain = createQueryChain({ data: null, error: dbError })
     mockFrom.mockReturnValue(chain)
 
-    await expect(fetchPendingReservations()).rejects.toEqual(dbError)
+    await expect(fetchPendingReservations('biz-1')).rejects.toEqual(dbError)
   })
 })
 
@@ -100,11 +101,12 @@ describe('fetchTodayReservations', () => {
 
     const start = '2025-01-01T00:00:00Z'
     const end = '2025-01-02T00:00:00Z'
-    const result = await fetchTodayReservations(start, end)
+    const result = await fetchTodayReservations(start, end, 'biz-1')
 
     expect(result).toEqual(data)
     expect(mockFrom).toHaveBeenCalledWith('reservations')
     expect(chain.select).toHaveBeenCalledWith(RESERVATION_SELECT)
+    expect(chain.eq).toHaveBeenCalledWith('business_id', 'biz-1')
     expect(chain.gte).toHaveBeenCalledWith('starts_at', start)
     expect(chain.lte).toHaveBeenCalledWith('starts_at', end)
     expect(chain.neq).toHaveBeenCalledWith('status', 'pending')
@@ -117,29 +119,34 @@ describe('fetchTodayReservations', () => {
     mockFrom.mockReturnValue(chain)
 
     await expect(
-      fetchTodayReservations('2025-01-01T00:00:00Z', '2025-01-02T00:00:00Z')
+      fetchTodayReservations(
+        '2025-01-01T00:00:00Z',
+        '2025-01-02T00:00:00Z',
+        'biz-1'
+      )
     ).rejects.toEqual(dbError)
   })
 })
 
 describe('fetchReservationsByDate', () => {
-  it('sin status: filtra solo por rango de fechas, sin eq de status', async () => {
+  it('sin status: filtra solo por rango de fechas y business_id', async () => {
     const data = [sampleReservation({ id: 'r1', status: 'confirmed' })]
     const chain = createQueryChain({ data, error: null })
     mockFrom.mockReturnValue(chain)
 
     const start = '2025-01-01T00:00:00Z'
     const end = '2025-01-02T00:00:00Z'
-    const result = await fetchReservationsByDate(start, end)
+    const result = await fetchReservationsByDate(start, end, 'all', 'biz-1')
 
     expect(result).toEqual([{ ...data[0], status: 'completed' }])
     expect(mockFrom).toHaveBeenCalledWith('reservations')
     expect(chain.select).toHaveBeenCalledWith(RESERVATION_SELECT)
+    expect(chain.eq).toHaveBeenCalledWith('business_id', 'biz-1')
     expect(chain.gte).toHaveBeenCalledWith('starts_at', start)
     expect(chain.lte).toHaveBeenCalledWith('starts_at', end)
     expect(chain.order).toHaveBeenCalledWith('starts_at', { ascending: true })
-    // sin status -> no se llama eq con 'status'
-    expect(chain.eq).not.toHaveBeenCalled()
+    // sin status filter -> no se llama eq con 'status'
+    expect(chain.eq).not.toHaveBeenCalledWith('status', expect.anything())
   })
 
   it('con status: filtra después de consolidar los datos', async () => {
@@ -156,7 +163,12 @@ describe('fetchReservationsByDate', () => {
 
     const start = '2025-01-01T00:00:00Z'
     const end = '2025-01-02T00:00:00Z'
-    const result = await fetchReservationsByDate(start, end, 'confirmed')
+    const result = await fetchReservationsByDate(
+      start,
+      end,
+      'confirmed',
+      'biz-1'
+    )
 
     expect(result).toEqual(data)
     expect(chain.eq).not.toHaveBeenCalledWith('status', 'confirmed')
@@ -170,11 +182,12 @@ describe('fetchReservationsByDate', () => {
     const result = await fetchReservationsByDate(
       '2025-01-01T00:00:00Z',
       '2025-01-02T00:00:00Z',
-      'all'
+      'all',
+      'biz-1'
     )
 
     expect(result).toEqual(data)
-    expect(chain.eq).not.toHaveBeenCalled()
+    expect(chain.eq).not.toHaveBeenCalledWith('status', expect.anything())
   })
 
   it('lanza el error cuando supabase retorna error', async () => {
@@ -183,7 +196,12 @@ describe('fetchReservationsByDate', () => {
     mockFrom.mockReturnValue(chain)
 
     await expect(
-      fetchReservationsByDate('2025-01-01T00:00:00Z', '2025-01-02T00:00:00Z')
+      fetchReservationsByDate(
+        '2025-01-01T00:00:00Z',
+        '2025-01-02T00:00:00Z',
+        'all',
+        'biz-1'
+      )
     ).rejects.toEqual(dbError)
   })
 })

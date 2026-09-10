@@ -8,20 +8,28 @@ import type { Reservation, ReservationFilter } from '@/types'
 const RESERVATION_SELECT =
   '*, resource:resources(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
 
-export async function fetchPendingReservations(): Promise<Reservation[]> {
+export async function fetchPendingReservations(
+  businessId: string
+): Promise<Reservation[]> {
   const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
+    .eq('business_id', businessId)
     .eq('status', 'pending')
     .order('starts_at', { ascending: true })
   if (error) throw error
   return uniqueReservations((data ?? []) as Reservation[])
 }
 
-export async function fetchTodayReservations(start: string, end: string): Promise<Reservation[]> {
+export async function fetchTodayReservations(
+  start: string,
+  end: string,
+  businessId: string
+): Promise<Reservation[]> {
   const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
+    .eq('business_id', businessId)
     .gte('starts_at', start)
     .lte('starts_at', end)
     .neq('status', 'pending')
@@ -33,11 +41,13 @@ export async function fetchTodayReservations(start: string, end: string): Promis
 export async function fetchReservationsByDate(
   start: string,
   end: string,
-  filter: ReservationFilter = 'all'
+  filter: ReservationFilter = 'all',
+  businessId: string
 ): Promise<Reservation[]> {
   const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
+    .eq('business_id', businessId)
     .gte('starts_at', start)
     .lte('starts_at', end)
     .order('starts_at', { ascending: true })

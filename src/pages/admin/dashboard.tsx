@@ -24,6 +24,7 @@ import {
 } from '@/lib/whatsapp'
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
+import { useBusinessId } from '@/hooks/use-business-id'
 import { sortReservationsByPriority } from '@/lib/sort'
 import { parseISO, isAfter } from 'date-fns'
 import {
@@ -34,6 +35,7 @@ import {
 } from '@/services/reservations'
 
 export function AdminDashboardPage() {
+  const businessId = useBusinessId()
   const [pending, setPending] = useState<Reservation[]>([])
   const [today, setToday] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
@@ -55,6 +57,7 @@ export function AdminDashboardPage() {
   }
 
   const load = useCallback(async () => {
+    if (!businessId) return
     setLoading(true)
     setError(null)
     const now = new Date()
@@ -63,8 +66,8 @@ export function AdminDashboardPage() {
 
     try {
       const [pendingData, todayData] = await Promise.all([
-        fetchPendingReservations(),
-        fetchTodayReservations(start, end)
+        fetchPendingReservations(businessId),
+        fetchTodayReservations(start, end, businessId)
       ])
       setPending(pendingData)
       setToday(todayData)
@@ -72,14 +75,17 @@ export function AdminDashboardPage() {
       setError(err instanceof Error ? err.message : 'Error al cargar')
     }
     setLoading(false)
-  }, [])
+  }, [businessId])
 
   useEffect(() => {
     load()
   }, [load])
 
-  // Realtime: recargar cuando cambien reservas
-  useReservationsRealtime(load)
+  // Realtime: recargar cuando cambien reservas del negocio activo
+  useReservationsRealtime(
+    load,
+    businessId ? `business_id=eq.${businessId}` : undefined
+  )
 
   // Pendientes ordenadas: más antiguas primero (mayor urgencia)
   const sortedPending = useMemo(
