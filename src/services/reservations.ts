@@ -145,7 +145,8 @@ export async function createReservation(
     p_notes: notes
   })
   if (error) throw error
-  return { error: data?.error ?? null }
+  const row = Array.isArray(data) ? data[0] : data
+  return { error: row?.error ?? null }
 }
 
 export async function createReservationAdmin(
@@ -169,5 +170,6 @@ export async function createReservationAdmin(
     p_notes: options.notes ?? null
   })
   if (error) throw error
-  return { error: data?.error ?? null }
+  const row = Array.isArray(data) ? data[0] : data
+  return { error: row?.error ?? null }
 }

@@ -392,7 +392,10 @@ describe('cancelReservationByClient', () => {
 
 describe('createReservation', () => {
   it('llama al RPC create_reservation y retorna { error: null } cuando data.error es undefined', async () => {
-    mockRpc.mockResolvedValue({ data: {}, error: null })
+    mockRpc.mockResolvedValue({
+      data: [{ id: 'res-1', status: 'pending', error: null }],
+      error: null
+    })
 
     const result = await createReservation(
       'court-1',
@@ -410,7 +413,7 @@ describe('createReservation', () => {
 
   it('retorna { error } con el mensaje de data.error cuando la RPC lo provee', async () => {
     mockRpc.mockResolvedValue({
-      data: { error: 'slot not available' },
+      data: [{ id: null, status: null, error: 'slot not available' }],
       error: null
     })
 
@@ -440,7 +443,10 @@ describe('createReservation', () => {
 
 describe('createReservationAdmin', () => {
   it('llama al RPC create_reservation_admin con cliente existente (client_id)', async () => {
-    mockRpc.mockResolvedValue({ data: {}, error: null })
+    mockRpc.mockResolvedValue({
+      data: [{ id: 'res-1', status: 'confirmed', error: null }],
+      error: null
+    })
 
     const result = await createReservationAdmin(
       'court-1',
@@ -467,7 +473,10 @@ describe('createReservationAdmin', () => {
   })
 
   it('llama al RPC con guest info cuando no hay client_id', async () => {
-    mockRpc.mockResolvedValue({ data: {}, error: null })
+    mockRpc.mockResolvedValue({
+      data: [{ id: 'res-1', status: 'confirmed', error: null }],
+      error: null
+    })
 
     const result = await createReservationAdmin(
       'court-1',
@@ -495,7 +504,7 @@ describe('createReservationAdmin', () => {
 
   it('retorna { error } con el mensaje de data.error cuando la RPC lo provee', async () => {
     mockRpc.mockResolvedValue({
-      data: { error: 'court inactive' },
+      data: [{ id: null, status: null, error: 'court inactive' }],
       error: null
     })
 
