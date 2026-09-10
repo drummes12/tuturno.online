@@ -165,6 +165,68 @@ describe('useAuthStore', () => {
     expect(useAuthStore.getState().activeBusinessId).toBe('biz-2')
   })
 
+  it('setMemberships preserva el activeBusinessId si sigue en la nueva lista', () => {
+    useAuthStore.getState().setMemberships([
+      {
+        businessId: 'biz-1',
+        businessName: 'Negocio 1',
+        slug: 'negocio-1',
+        role: 'owner' as const
+      },
+      {
+        businessId: 'biz-2',
+        businessName: 'Negocio 2',
+        slug: 'negocio-2',
+        role: 'owner' as const
+      }
+    ])
+    useAuthStore.getState().setActiveBusinessId('biz-2')
+    // Simula re-llamada desde onAuthStateChange (token refresh, cambio de pestaña)
+    useAuthStore.getState().setMemberships([
+      {
+        businessId: 'biz-1',
+        businessName: 'Negocio 1',
+        slug: 'negocio-1',
+        role: 'owner' as const
+      },
+      {
+        businessId: 'biz-2',
+        businessName: 'Negocio 2',
+        slug: 'negocio-2',
+        role: 'owner' as const
+      }
+    ])
+    expect(useAuthStore.getState().activeBusinessId).toBe('biz-2')
+  })
+
+  it('setMemberships resetea al primer negocio si el activo ya no existe', () => {
+    useAuthStore.getState().setMemberships([
+      {
+        businessId: 'biz-1',
+        businessName: 'Negocio 1',
+        slug: 'negocio-1',
+        role: 'owner' as const
+      },
+      {
+        businessId: 'biz-2',
+        businessName: 'Negocio 2',
+        slug: 'negocio-2',
+        role: 'owner' as const
+      }
+    ])
+    useAuthStore.getState().setActiveBusinessId('biz-2')
+    // biz-2 fue eliminado, solo queda biz-1
+    useAuthStore.getState().setMemberships([
+      {
+        businessId: 'biz-1',
+        businessName: 'Negocio 1',
+        slug: 'negocio-1',
+        role: 'owner' as const
+      }
+    ])
+    expect(useAuthStore.getState().activeBusinessId).toBe('biz-1')
+  })
+
   describe('refreshMemberships', () => {
     it('carga memberships, isAdmin, isOwner, isPlatformAdmin y activeBusinessId', async () => {
       const memberships = [

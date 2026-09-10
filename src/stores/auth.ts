@@ -49,25 +49,35 @@ export const useAuthStore = create<AuthState>((set) => ({
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
   setMemberships: (memberships) =>
-    set({
+    set((state) => ({
       memberships,
-      activeBusinessId:
-        memberships.length > 0 ? memberships[0].businessId : null
-    }),
+      activeBusinessId: memberships.some(
+        (m) => m.businessId === state.activeBusinessId
+      )
+        ? state.activeBusinessId
+        : memberships.length > 0
+          ? memberships[0].businessId
+          : null
+    })),
   setActiveBusinessId: (businessId) => set({ activeBusinessId: businessId }),
   refreshMemberships: async (userId) => {
     const [memberships, isPlatformAdmin] = await Promise.all([
       fetchBusinessMemberships(userId),
       fetchIsPlatformAdmin()
     ])
-    set({
+    set((state) => ({
       memberships,
       isAdmin: memberships.length > 0,
       isOwner: memberships.some((m) => m.role === 'owner'),
       isPlatformAdmin,
-      activeBusinessId:
-        memberships.length > 0 ? memberships[0].businessId : null
-    })
+      activeBusinessId: memberships.some(
+        (m) => m.businessId === state.activeBusinessId
+      )
+        ? state.activeBusinessId
+        : memberships.length > 0
+          ? memberships[0].businessId
+          : null
+    }))
   },
   signOut: async () => {
     await signOutService()
