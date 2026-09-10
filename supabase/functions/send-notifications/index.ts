@@ -77,16 +77,23 @@ export default {
     const supabase = ctx.supabaseAdmin
 
     // Expirar primero para que las notificaciones recién encoladas se
-    // procesen en el mismo ciclo del cron.
-    const { data: expiredCount, error: expirationError } = await supabase.rpc(
-      'expire_pending_reservations'
-    )
-
-    if (expirationError) {
-      return new Response(JSON.stringify({ error: expirationError.message }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+    // procesen en el mismo ciclo del cron. Si el RPC falla (timeout, etc.),
+    // no bloqueamos el procesamiento de notificaciones ya encoladas.
+    let expiredCount: number | null = null
+    try {
+      const { data, error: expirationError } = await supabase.rpc(
+        'expire_pending_reservations'
+      )
+      if (expirationError) {
+        console.error(
+          'expire_pending_reservations error:',
+          expirationError.message
+        )
+      } else {
+        expiredCount = data ?? 0
+      }
+    } catch (err) {
+      console.error('expire_pending_reservations exception:', String(err))
     }
 
     // Claim atómico: cambia las filas a 'processing' antes de enviarlas,
@@ -152,58 +159,55 @@ export default {
           : null
 
       if (reservationId && row.type.includes('reservation')) {
-        // Seleccionar reservation_number por separado para no romper si la
-        // migración 03500 aún no se ha aplicado (la columna no existe).
+        // Una sola consulta a reservations: incluye reservation_number
+        // (migración 03500 ya aplicada en producción).
         const reservationResult = await supabase
           .from('reservations')
-          .select('business_id, decided_by, user_id')
+          .select('business_id, decided_by, user_id, reservation_number')
           .eq('id', reservationId)
           .maybeSingle()
         const reservation = reservationResult.data as ReservationLookup | null
 
         if (reservation?.business_id) {
-          // Intentar leer reservation_number por separado (post-migración 03500).
-          // Si la columna no existe, el select falla silenciosamente y se omite.
-          const numberResult = await supabase
-            .from('reservations')
-            .select('reservation_number')
-            .eq('id', reservationId)
-            .maybeSingle()
-          const numberData = numberResult.data as {
-            reservation_number?: number
-          } | null
-          if (numberData?.reservation_number) {
-            payload.reservation_number = numberData.reservation_number
+          if (reservation.reservation_number) {
+            payload.reservation_number = reservation.reservation_number
           }
 
-          const businessResult = await supabase
-            .from('businesses')
-            .select('slug, phone, whatsapp_link')
-            .eq('id', reservation.business_id)
-            .maybeSingle()
-          const business = businessResult.data as BusinessContactLookup | null
-          if (business?.slug) payload.business_slug = business.slug
-
-          if (CLIENT_RESERVATION_TEMPLATES.has(row.type)) {
-            payload.business_whatsapp =
-              resolveBusinessWhatsApp(
-                business?.whatsapp_link,
-                business?.phone
-              ) ?? undefined
-          }
-
-          if (
-            BUSINESS_RESERVATION_TEMPLATES.has(row.type) &&
-            reservation.user_id
-          ) {
-            const clientResult = await supabase
-              .from('profiles')
-              .select('phone')
-              .eq('id', reservation.user_id)
+          // Solo consultar businesses si el tipo necesita datos del negocio
+          // (slug para deep links, whatsapp para clientes).
+          const needsBusiness =
+            CLIENT_RESERVATION_TEMPLATES.has(row.type) ||
+            BUSINESS_RESERVATION_TEMPLATES.has(row.type)
+          if (needsBusiness) {
+            const businessResult = await supabase
+              .from('businesses')
+              .select('slug, phone, whatsapp_link')
+              .eq('id', reservation.business_id)
               .maybeSingle()
-            const client = clientResult.data as ClientContactLookup | null
-            payload.client_whatsapp =
-              resolveBusinessWhatsApp(null, client?.phone) ?? undefined
+            const business = businessResult.data as BusinessContactLookup | null
+            if (business?.slug) payload.business_slug = business.slug
+
+            if (CLIENT_RESERVATION_TEMPLATES.has(row.type)) {
+              payload.business_whatsapp =
+                resolveBusinessWhatsApp(
+                  business?.whatsapp_link,
+                  business?.phone
+                ) ?? undefined
+            }
+
+            if (
+              BUSINESS_RESERVATION_TEMPLATES.has(row.type) &&
+              reservation.user_id
+            ) {
+              const clientResult = await supabase
+                .from('profiles')
+                .select('phone')
+                .eq('id', reservation.user_id)
+                .maybeSingle()
+              const client = clientResult.data as ClientContactLookup | null
+              payload.client_whatsapp =
+                resolveBusinessWhatsApp(null, client?.phone) ?? undefined
+            }
           }
 
           if (
