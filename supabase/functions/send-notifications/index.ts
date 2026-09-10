@@ -235,7 +235,7 @@ export default {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            from: RESEND_FROM_EMAIL,
+            from: `TuTurno <${RESEND_FROM_EMAIL}>`,
             to: row.recipient_email,
             subject,
             html
