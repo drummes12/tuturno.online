@@ -212,6 +212,10 @@ begin
   end if;
 
   return new;
+exception
+  when others then
+    raise warning 'Push enqueue failed for reservation event %: %', new.id, sqlerrm;
+    return new;
 end;
 $$;
 

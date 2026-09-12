@@ -1,23 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { mockRpc, mockInvoke, mockFrom } = vi.hoisted(() => ({
+const { mockRpc, mockFrom } = vi.hoisted(() => ({
   mockRpc: vi.fn(),
-  mockInvoke: vi.fn(),
   mockFrom: vi.fn()
 }))
 
 vi.mock('@/lib/supabase', () => ({
   supabase: {
     rpc: mockRpc,
-    from: mockFrom,
-    functions: { invoke: mockInvoke }
+    from: mockFrom
   }
 }))
 
 import {
   removeCurrentPushSubscription,
-  savePushSubscription,
-  sendTestPush
+  savePushSubscription
 } from '@/services/push'
 
 const subscription = {
@@ -66,24 +63,6 @@ describe('removeCurrentPushSubscription', () => {
       'https://fcm.googleapis.com/current'
     )
     expect(unsubscribe).toHaveBeenCalledOnce()
-  })
-})
-
-describe('sendTestPush', () => {
-  it('invoca la Edge Function de prueba', async () => {
-    mockInvoke.mockResolvedValue({
-      data: { sent: 2, revoked: 0, failed: 0 },
-      error: null
-    })
-
-    await expect(sendTestPush()).resolves.toEqual({
-      sent: 2,
-      revoked: 0,
-      failed: 0
-    })
-    expect(mockInvoke).toHaveBeenCalledWith('send-test-push', {
-      body: {}
-    })
   })
 })
 

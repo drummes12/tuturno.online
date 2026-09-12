@@ -46,16 +46,3 @@ export async function removeCurrentPushSubscription(): Promise<void> {
     throw unsubscribeResult.reason
   }
 }
-
-export async function sendTestPush(): Promise<{
-  sent: number
-  revoked: number
-  failed: number
-}> {
-  const { data, error } = await supabase.functions.invoke('send-test-push', {
-    body: {}
-  })
-
-  if (error) throw error
-  return data as { sent: number; revoked: number; failed: number }
-}

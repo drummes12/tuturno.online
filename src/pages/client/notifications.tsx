@@ -4,7 +4,7 @@ import { Alert } from '@/components/common/alert'
 import { Button } from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import { BellIcon, ArrowLeftIcon } from '@/components/common/icon'
-import { savePushSubscription, sendTestPush } from '@/services/push'
+import { savePushSubscription } from '@/services/push'
 import {
   getExistingPushSubscription,
   getNotificationPermission,
@@ -21,7 +21,6 @@ export function NotificationsPage() {
     useState<NotificationPermissionState>(initialPermission)
   const [requesting, setRequesting] = useState(false)
   const [subscribing, setSubscribing] = useState(false)
-  const [sendingTest, setSendingTest] = useState(false)
   const [checkingSubscription, setCheckingSubscription] = useState(
     initialPermission === 'granted'
   )
@@ -83,25 +82,6 @@ export function NotificationsPage() {
       )
     } finally {
       setRequesting(false)
-    }
-  }
-
-  async function handleSendTestPush() {
-    setSendingTest(true)
-    setError(null)
-    setSuccess(null)
-
-    try {
-      const result = await sendTestPush()
-      setSuccess(`Notificación enviada a ${result.sent} dispositivo(s).`)
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : 'No pudimos enviar la notificación de prueba.'
-      )
-    } finally {
-      setSendingTest(false)
     }
   }
 
@@ -221,17 +201,6 @@ export function NotificationsPage() {
               Registrar este dispositivo
             </Button>
           )}
-
-        {subscription && (
-          <Button
-            variant='secondary'
-            loading={sendingTest}
-            onClick={handleSendTestPush}
-          >
-            <BellIcon size={18} />
-            Enviar push de prueba
-          </Button>
-        )}
 
         <p className='text-xs text-(--color-text-muted) mt-4 leading-relaxed'>
           La suscripción se crea localmente y se asocia de forma segura a tu
