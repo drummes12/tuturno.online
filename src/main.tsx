@@ -8,6 +8,9 @@ import '@fontsource/geist-mono/400.css'
 import './index.css'
 import App from './App.tsx'
 import { SERVICE_WORKER_UPDATE_EVENT } from '@/lib/service-worker'
+import { initializePwaInstallPrompt } from '@/lib/pwa-install'
+
+initializePwaInstallPrompt()
 
 const notifyServiceWorkerUpdate = (registration: ServiceWorkerRegistration) => {
   if (!navigator.serviceWorker.controller || !registration.waiting) return

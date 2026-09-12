@@ -123,7 +123,6 @@ export function PhoneIcon(props: IconProps) {
   )
 }
 
-/* Mail — for email, notifications */
 export function RefreshIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
@@ -142,6 +141,7 @@ export function BellIcon(props: IconProps) {
   )
 }
 
+/* Mail — for email, notifications */
 export function MailIcon(props: IconProps) {
   return (
     <svg {...base(props)}>
