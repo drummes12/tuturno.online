@@ -7,20 +7,22 @@ import {
   ListIcon,
   StoreIcon,
   SettingsIcon,
-  LogOutIcon,
   LogInIcon,
-  LockIcon,
-  HelpIcon,
   BellIcon,
   CheckIcon,
-  XIcon
+  XIcon,
+  HelpIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { PwaInstallPrompt } from '@/components/common/pwa-install-prompt'
 import { PwaNotificationPrompt } from '@/components/common/pwa-notification-prompt'
 import { PwaUpdatePrompt } from '@/components/common/pwa-update-prompt'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
-import { BusinessSelector } from '@/components/common/business-selector'
+import {
+  BusinessSelector,
+  NewReservationButton
+} from '@/components/common/business-selector'
+import { HeaderMenu } from '@/components/common/header-menu'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { extractSlugFromPath } from '@/lib/slug'
@@ -90,7 +92,8 @@ const adminNav: NavItem[] = [
 ]
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { user, isAdmin, isPlatformAdmin, signOut } = useAuthStore()
+  const { user, isAdmin, isPlatformAdmin, memberships, signOut } =
+    useAuthStore()
   const [location] = useLocation()
   const clientTutorial = useClientTutorial()
   const adminTutorial = useAdminTutorial()
@@ -160,26 +163,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <span>TuTurno</span>
           </Link>
           <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
-            {isAdmin && <BusinessSelector />}
-            {isPlatformAdmin && (
-              <Link
-                href='/plataforma'
-                className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
-                aria-label='Panel de plataforma'
-                title='Panel de plataforma'
-              >
-                <LockIcon size={16} className='shrink-0' />
-                <span className='hidden min-w-0 max-w-16 truncate sm:inline md:max-w-none'>
-                  Plataforma
-                </span>
-              </Link>
-            )}
-            {showTutorialButton && (
+            {user && showTutorialButton && (
               <button
+                type='button'
                 onClick={startTour}
                 disabled={isStarting}
                 data-tour='tutorial-trigger'
-                className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 active:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
+                className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
                 aria-label='Iniciar guía del tutorial'
                 aria-busy={isStarting}
                 title='Guía interactiva'
@@ -190,49 +180,33 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </span>
               </button>
             )}
+            {isAdmin && <NewReservationButton />}
             {user ? (
-              <>
-                <Link
-                  href={`/notificaciones?next=${encodeURIComponent(location)}`}
-                  className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
-                  aria-label={
-                    pushNotificationState.permission === 'granted' &&
-                    pushNotificationState.registered
-                      ? 'Notificaciones activas'
-                      : pushNotificationState.permission === 'denied'
-                        ? 'Notificaciones bloqueadas'
-                        : 'Configurar notificaciones'
-                  }
-                  title='Notificaciones'
-                >
+              <HeaderMenu
+                isAdmin={isAdmin}
+                isPlatformAdmin={isPlatformAdmin}
+                businessSelector={
+                  isAdmin && memberships.length > 0 ? (
+                    <BusinessSelector inMenu />
+                  ) : undefined
+                }
+                nextPath={location}
+                notificationIcon={
                   <NotificationStatusIcon
                     permission={pushNotificationState.permission}
                     registered={pushNotificationState.registered}
                   />
-                </Link>
-                {!isAdmin && (
-                  <Link
-                    href={`/preferencias?next=${encodeURIComponent(location)}`}
-                    className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
-                    aria-label='Preferencias de privacidad'
-                    title='Preferencias de privacidad'
-                  >
-                    <LockIcon size={16} className='shrink-0' />
-                    <span className='hidden min-w-0 max-w-16 truncate sm:inline md:max-w-none'>
-                      Privacidad
-                    </span>
-                  </Link>
-                )}
-                <button
-                  onClick={() => signOut()}
-                  className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
-                >
-                  <LogOutIcon size={16} className='shrink-0' />
-                  <span className='hidden min-w-0 max-w-12 truncate sm:inline md:max-w-none'>
-                    Salir
-                  </span>
-                </button>
-              </>
+                }
+                notificationLabel={
+                  pushNotificationState.permission === 'granted' &&
+                  pushNotificationState.registered
+                    ? 'Notificaciones activas'
+                    : pushNotificationState.permission === 'denied'
+                      ? 'Notificaciones bloqueadas'
+                      : 'Configurar notificaciones'
+                }
+                onSignOut={signOut}
+              />
             ) : (
               <Link
                 href='/login'
@@ -288,7 +262,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Content */}
-      <main className='flex-1 mx-auto w-full max-w-5xl px-4 py-6 pb-20 md:pb-6'>
+      <main className='flex-1 mx-auto w-full max-w-5xl px-4 py-6 pb-6'>
         {children}
       </main>
 
