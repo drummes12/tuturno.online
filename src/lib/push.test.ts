@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  getExistingPushSubscription,
   getNotificationPermission,
   requestNotificationPermission,
   subscribeToPush
@@ -7,6 +8,7 @@ import {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  Reflect.deleteProperty(navigator, 'serviceWorker')
 })
 
 describe('getNotificationPermission', () => {
@@ -33,6 +35,25 @@ describe('requestNotificationPermission', () => {
 
     await expect(requestNotificationPermission()).resolves.toBe('granted')
     expect(requestPermission).toHaveBeenCalledOnce()
+  })
+})
+
+describe('getExistingPushSubscription', () => {
+  it('returns the browser subscription currently registered', async () => {
+    const subscription = { endpoint: 'https://push.example/subscription' }
+
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        ready: Promise.resolve({
+          pushManager: {
+            getSubscription: vi.fn().mockResolvedValue(subscription)
+          }
+        })
+      }
+    })
+
+    await expect(getExistingPushSubscription()).resolves.toBe(subscription)
   })
 })
 

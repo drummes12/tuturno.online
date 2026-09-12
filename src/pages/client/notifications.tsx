@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'wouter'
 import { Alert } from '@/components/common/alert'
 import { Button } from '@/components/common/button'
@@ -6,6 +6,7 @@ import { Card } from '@/components/common/card'
 import { BellIcon, ArrowLeftIcon } from '@/components/common/icon'
 import { savePushSubscription, sendTestPush } from '@/services/push'
 import {
+  getExistingPushSubscription,
   getNotificationPermission,
   getReadyServiceWorker,
   isPushSupported,
@@ -15,18 +16,45 @@ import {
 } from '@/lib/push'
 
 export function NotificationsPage() {
-  const [permission, setPermission] = useState<NotificationPermissionState>(() =>
-    getNotificationPermission()
-  )
+  const initialPermission = getNotificationPermission()
+  const [permission, setPermission] =
+    useState<NotificationPermissionState>(initialPermission)
   const [requesting, setRequesting] = useState(false)
   const [subscribing, setSubscribing] = useState(false)
   const [sendingTest, setSendingTest] = useState(false)
+  const [checkingSubscription, setCheckingSubscription] = useState(
+    initialPermission === 'granted'
+  )
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   )
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const supported = isPushSupported()
+
+  useEffect(() => {
+    if (!supported || permission !== 'granted') {
+      setCheckingSubscription(false)
+      return
+    }
+
+    let active = true
+    setCheckingSubscription(true)
+    void getExistingPushSubscription()
+      .then((existingSubscription) => {
+        if (active && existingSubscription) {
+          setSubscription(existingSubscription)
+        }
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setCheckingSubscription(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [permission, supported])
 
   async function handleEnable() {
     setRequesting(true)
@@ -148,12 +176,16 @@ export function NotificationsPage() {
           </Alert>
         )}
 
-        {supported && permission === 'granted' && !subscription && !success && (
-          <Alert variant='success'>
-            Las notificaciones están permitidas. Aún falta registrar este
-            dispositivo con Push.
-          </Alert>
-        )}
+        {supported &&
+          permission === 'granted' &&
+          !checkingSubscription &&
+          !subscription &&
+          !success && (
+            <Alert variant='success'>
+              Las notificaciones están permitidas. Aún falta registrar este
+              dispositivo con Push.
+            </Alert>
+          )}
 
         {subscription && (
           <Alert variant='success'>
@@ -180,12 +212,15 @@ export function NotificationsPage() {
           </Button>
         )}
 
-        {supported && permission === 'granted' && !subscription && (
-          <Button loading={subscribing} onClick={handleSubscribe}>
-            <BellIcon size={18} />
-            Registrar este dispositivo
-          </Button>
-        )}
+        {supported &&
+          permission === 'granted' &&
+          !checkingSubscription &&
+          !subscription && (
+            <Button loading={subscribing} onClick={handleSubscribe}>
+              <BellIcon size={18} />
+              Registrar este dispositivo
+            </Button>
+          )}
 
         {subscription && (
           <Button

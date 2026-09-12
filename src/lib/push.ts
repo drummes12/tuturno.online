@@ -49,12 +49,17 @@ function getVapidPublicKey() {
   return publicKey
 }
 
-export async function subscribeToPush() {
+export async function getExistingPushSubscription() {
   const registration = await getReadyServiceWorker()
-  const existingSubscription = await registration.pushManager.getSubscription()
+  return registration.pushManager.getSubscription()
+}
+
+export async function subscribeToPush() {
+  const existingSubscription = await getExistingPushSubscription()
 
   if (existingSubscription) return existingSubscription
 
+  const registration = await getReadyServiceWorker()
   return registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: decodeVapidPublicKey(getVapidPublicKey())
