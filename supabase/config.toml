@@ -446,12 +446,6 @@ import_map = "./functions/send-notifications/deno.json"
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
 entrypoint = "./functions/send-notifications/index.ts"
 
-[functions.send-test-push]
-enabled = true
-verify_jwt = true
-import_map = "./functions/send-test-push/deno.json"
-entrypoint = "./functions/send-test-push/index.ts"
-
 [functions.send-push-notifications]
 enabled = true
 verify_jwt = false
