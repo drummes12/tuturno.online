@@ -32,7 +32,7 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(title, {
       body,
       icon: '/android-chrome-192x192.png',
-      badge: '/android-chrome-192x192.png',
+      badge: '/notification-badge.svg',
       data: { url },
       tag: typeof payload.tag === 'string' ? payload.tag : 'tuturno'
     })
