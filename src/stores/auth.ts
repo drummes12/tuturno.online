@@ -3,6 +3,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { signOut as signOutService } from '@/services/auth'
 import { fetchBusinessMemberships } from '@/services/profiles'
 import { fetchIsPlatformAdmin } from '@/services/platform'
+import { removeCurrentPushSubscription } from '@/services/push'
 import type { Profile } from '@/types'
 import type { BusinessMembership } from '@/services/profiles'
 
@@ -80,6 +81,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     }))
   },
   signOut: async () => {
+    try {
+      await removeCurrentPushSubscription()
+    } catch (error) {
+      console.warn('[TuTurno] No se pudo revocar la suscripción push:', error)
+    }
     await signOutService()
     set({
       session: null,

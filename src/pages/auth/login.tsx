@@ -35,7 +35,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className='flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8'>
+    <div className='flex-1 flex items-center justify-center px-4 py-8'>
       <div className='w-full max-w-md animate-fade-up'>
         {/* Brand mark */}
         <div className='flex flex-col items-center gap-3 mb-8'>

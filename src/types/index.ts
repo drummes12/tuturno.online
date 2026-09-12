@@ -158,6 +158,16 @@ export interface Reservation {
   updated_at: string
   // Relaciones opcionales
   resource?: Resource
+  business?: Pick<
+    Business,
+    | 'id'
+    | 'name'
+    | 'slug'
+    | 'phone'
+    | 'whatsapp_link'
+    | 'resource_label_singular'
+    | 'cancellation_limit_hours'
+  >
   profile?: Profile | null
   client?: Client | null
 }

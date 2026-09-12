@@ -57,7 +57,8 @@ export async function fetchReservationsByDate(
 }
 
 export async function fetchUserReservations(
-  userId: string
+  userId: string,
+  businessId?: string
 ): Promise<Reservation[]> {
   // Un usuario puede tener reservas de dos formas:
   // 1. user_id directo en reservations (reservas creadas por él mismo)
@@ -80,11 +81,18 @@ export async function fetchUserReservations(
       ? `user_id.eq.${userId},client_id.in.(${clientIds.join(',')})`
       : `user_id.eq.${userId}`
 
-  const { data, error } = await supabase
+  const baseQuery = supabase
     .from('reservations')
-    .select('*, resource:resources(*), client:clients(*)')
+    .select(
+      '*, resource:resources(*), business:businesses(id,name,slug,phone,whatsapp_link,resource_label_singular,cancellation_limit_hours), client:clients(*)'
+    )
     .or(orFilter)
-    .order('starts_at', { ascending: false })
+  const scopedQuery = businessId
+    ? baseQuery.eq('business_id', businessId)
+    : baseQuery
+  const { data, error } = await scopedQuery.order('starts_at', {
+    ascending: false
+  })
   if (error) throw error
   return uniqueReservations((data ?? []) as Reservation[])
 }

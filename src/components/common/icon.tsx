@@ -123,6 +123,64 @@ export function PhoneIcon(props: IconProps) {
   )
 }
 
+export function RefreshIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d='M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4' />
+      <path d='M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4' />
+    </svg>
+  )
+}
+
+export function MenuIcon({
+  open = false,
+  ...props
+}: IconProps & { open?: boolean }) {
+  return (
+    <svg {...base(props)}>
+      <line
+        x1='4'
+        y1='6'
+        x2='20'
+        y2='6'
+        className='transition-transform duration-200 ease-out'
+        style={{
+          transform: open ? 'translateY(6px) rotate(45deg)' : 'none',
+          transformOrigin: '12px 6px'
+        }}
+      />
+      <line
+        x1='4'
+        y1='12'
+        x2='20'
+        y2='12'
+        className='transition-opacity duration-150 ease-out'
+        style={{ opacity: open ? 0 : 1 }}
+      />
+      <line
+        x1='4'
+        y1='18'
+        x2='20'
+        y2='18'
+        className='transition-transform duration-200 ease-out'
+        style={{
+          transform: open ? 'translateY(-6px) rotate(-45deg)' : 'none',
+          transformOrigin: '12px 18px'
+        }}
+      />
+    </svg>
+  )
+}
+
+export function BellIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9' />
+      <path d='M10 21h4' />
+    </svg>
+  )
+}
+
 /* Mail — for email, notifications */
 export function MailIcon(props: IconProps) {
   return (

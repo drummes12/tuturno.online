@@ -23,6 +23,15 @@ interface ConsentRow {
 
 export function PrivacyPreferencesPage() {
   const { user } = useAuthStore()
+  const requestedReturnPath = new URLSearchParams(window.location.search).get(
+    'next'
+  )
+  const returnPath = requestedReturnPath?.startsWith('/')
+    ? requestedReturnPath
+    : '/'
+  const returnLabel = returnPath.includes('/mis-reservas')
+    ? 'Volver a tus reservas'
+    : 'Volver'
   const [consents, setConsents] = useState<ConsentRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -84,11 +93,11 @@ export function PrivacyPreferencesPage() {
   return (
     <div className='flex flex-col gap-4 max-w-2xl mx-auto'>
       <Link
-        href='/'
+        href={returnPath}
         className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
       >
         <ArrowLeftIcon size={16} />
-        Volver al inicio
+        {returnLabel}
       </Link>
 
       <div className='animate-fade-up'>

@@ -2,7 +2,9 @@
   "name": "TuTurno — Reservas online",
   "short_name": "TuTurno",
   "description": "Plataforma de reservas online para canchas, salas, consultorios y más.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a5226",
   "theme_color": "#0a5226",
@@ -22,6 +24,12 @@
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }

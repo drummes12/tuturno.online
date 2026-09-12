@@ -73,14 +73,17 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
     setLoading(true)
 
     try {
-      const data = await fetchUserReservations(user.id)
+      const data = await fetchUserReservations(
+        user.id,
+        tenantBusinessId ?? undefined
+      )
       setReservations(data)
     } catch {
       setError('No pudimos cargar tus reservas.')
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [tenantBusinessId, user])
 
   useEffect(() => {
     loadReservations()
@@ -138,10 +141,16 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   // Ordenar: 1) pendientes antiguas, 2) próximas, 3) vencidas
   const sorted = sortReservationsByPriority(filtered)
 
-  const cancellationLimitHours = business?.cancellation_limit_hours ?? 2
+  function getCancellationLimitHours(r: Reservation): number {
+    return (
+      r.business?.cancellation_limit_hours ??
+      business?.cancellation_limit_hours ??
+      2
+    )
+  }
 
   function canCancel(r: Reservation): boolean {
-    return canClientCancelReservation(r, cancellationLimitHours)
+    return canClientCancelReservation(r, getCancellationLimitHours(r))
   }
 
   // Tras una acción: recargar el listado y refrescar la reserva abierta
@@ -179,15 +188,23 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   }, [deepLinkId, loading, reservations])
 
   function buildReservationWhatsAppLink(r: Reservation): string | null {
+    const reservationBusiness = r.business
+    const reservationBusinessName = reservationBusiness?.name ?? businessName
+    const reservationResourceLabel =
+      reservationBusiness?.resource_label_singular ?? resourceLabelSingular
     const msg = buildClientPendingMessage({
-      businessName,
-      resourceName: r.resource?.name ?? resourceLabelSingular,
-      resourceLabel: resourceLabelSingular,
+      businessName: reservationBusinessName,
+      resourceName: r.resource?.name ?? reservationResourceLabel,
+      resourceLabel: reservationResourceLabel,
       dateLabel: formatLocal(r.starts_at, "EEEE d 'de' MMMM"),
       timeLabel: formatLocal(r.starts_at, 'HH:mm'),
       clientName: profile?.full_name ?? ''
     })
-    return resolveWhatsAppLink(businessWhatsappLink, businessPhone, msg)
+    return resolveWhatsAppLink(
+      reservationBusiness?.whatsapp_link ?? businessWhatsappLink,
+      reservationBusiness?.phone ?? businessPhone,
+      msg
+    )
   }
 
   const handleFilterSwipe = useCallback((index: number) => {
@@ -203,9 +220,15 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   return (
     <div className='flex flex-col gap-5'>
       <div className='animate-fade-up'>
-        <h1 className='text-2xl font-bold tracking-tight'>Mis reservas</h1>
+        <h1 className='text-2xl font-bold tracking-tight'>
+          {slug
+            ? `Tus reservas en ${businessName || 'este negocio'}`
+            : 'Tus reservas'}
+        </h1>
         <p className='text-sm text-(--color-text-muted) mt-0.5'>
-          Gestiona tus solicitudes de turnos.
+          {slug
+            ? 'Consulta el estado de tus turnos y gestiona tus reservas.'
+            : 'Consulta el estado de todas tus reservas.'}
         </p>
       </div>
 
@@ -251,15 +274,18 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
               </div>
               <div>
                 <p className='font-medium text-(--color-text) mb-1'>
-                  No tienes reservas aquí
+                  {slug
+                    ? 'No tienes reservas en este negocio'
+                    : 'Todavía no tienes reservas'}
                 </p>
                 <p className='text-sm text-text-muted'>
                   {filter === 'upcoming' &&
-                    'Busca un turno disponible y solicita tu reserva.'}
+                    'Busca disponibilidad y reserva un turno cuando quieras.'}
                   {filter === 'pending' &&
-                    'No tienes reservas esperando confirmación.'}
+                    'No tienes solicitudes pendientes de confirmación.'}
                   {filter === 'confirmed' && 'No tienes reservas confirmadas.'}
-                  {filter === 'past' && 'No hay historial de reservas pasadas.'}
+                  {filter === 'past' &&
+                    'Todavía no hay reservas en tu historial.'}
                 </p>
               </div>
               <Link href={slug ? `/b/${slug}` : '/'}>
@@ -283,13 +309,15 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                   type='button'
                   onClick={() => setSelectedReservation(r)}
                   className='w-full cursor-pointer rounded-xl p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
-                  aria-label={`Ver detalles de tu reserva de ${r.resource?.name ?? resourceLabelSingular} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
+                  aria-label={`Ver detalles de tu reserva de ${r.resource?.name ?? r.business?.resource_label_singular ?? resourceLabelSingular} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
                 >
                   <div className='flex items-start justify-between gap-3'>
                     <div className='min-w-0 flex-1'>
                       <div className='flex items-center gap-2'>
                         <p className='font-semibold text-(--color-text) tracking-tight'>
-                          {r.resource?.name ?? resourceLabelSingular}
+                          {r.resource?.name ??
+                            r.business?.resource_label_singular ??
+                            resourceLabelSingular}
                         </p>
                         {r.reservation_number && (
                           <span className='shrink-0 rounded-md bg-surface-inset px-1.5 py-0.5 text-xs font-semibold text-text-muted'>
@@ -320,6 +348,16 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                   )}
                 </button>
 
+                {!slug && r.business && (
+                  <Link
+                    href={`/b/${r.business.slug}`}
+                    className='mt-2 flex items-center gap-1.5 px-2 text-xs font-medium text-primary hover:underline'
+                  >
+                    Reservar de nuevo en {r.business.name}
+                    <ChevronRightIcon size={14} />
+                  </Link>
+                )}
+
                 {canCancel(r) && (
                   <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
                     {r.status === 'pending' &&
@@ -340,7 +378,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                     <ReservationActionControls
                       reservation={r}
                       viewer='client'
-                      cancellationLimitHours={cancellationLimitHours}
+                      cancellationLimitHours={getCancellationLimitHours(r)}
                       onChanged={handleReservationChanged}
                       cancelTourKey={
                         index === 0 ? 'reservation-cancel' : undefined
@@ -349,14 +387,16 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                   </div>
                 )}
 
-                {r.status === 'confirmed' && !canCancel(r) && business && (
-                  <p className='text-xs text-text-muted mt-2 pt-2 border-t border-border'>
-                    La cancelación directa está disponible hasta{' '}
-                    {cancellationLimitHours}{' '}
-                    {cancellationLimitHours === 1 ? 'hora' : 'horas'} antes del
-                    turno.
-                  </p>
-                )}
+                {r.status === 'confirmed' &&
+                  !canCancel(r) &&
+                  (r.business || business) && (
+                    <p className='text-xs text-text-muted mt-2 pt-2 border-t border-border'>
+                      La cancelación directa está disponible hasta{' '}
+                      {getCancellationLimitHours(r)}{' '}
+                      {getCancellationLimitHours(r) === 1 ? 'hora' : 'horas'}{' '}
+                      antes del turno.
+                    </p>
+                  )}
               </Card>
             ))}
           </div>
@@ -366,13 +406,18 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
         <ReservationDetailsSheet
           reservation={selectedReservation}
           onClose={closeReservationDetails}
-          resourceLabel={resourceLabelSingular}
+          resourceLabel={
+            selectedReservation?.business?.resource_label_singular ??
+            resourceLabelSingular
+          }
           whatsappHref={buildReservationWhatsAppLink(selectedReservation)}
           actions={
             <ReservationActionControls
               reservation={selectedReservation}
               viewer='client'
-              cancellationLimitHours={cancellationLimitHours}
+              cancellationLimitHours={getCancellationLimitHours(
+                selectedReservation
+              )}
               onChanged={handleReservationChanged}
               framed
             />

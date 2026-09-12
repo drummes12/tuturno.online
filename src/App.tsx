@@ -17,6 +17,7 @@ import { AvailabilityPage } from '@/pages/client/availability'
 import { ReservePage } from '@/pages/client/reserve'
 import { MyReservationsPage } from '@/pages/client/my-reservations'
 import { PrivacyPreferencesPage } from '@/pages/client/privacy-preferences'
+import { NotificationsPage } from '@/pages/client/notifications'
 
 // Admin pages
 import { AdminDashboardPage } from '@/pages/admin/dashboard'
@@ -132,6 +133,13 @@ export default function App() {
         {/* /recuperar-password es accesible con y sin sesión (recovery flow) */}
         <Route path='/recuperar-password' component={RecoverPasswordPage} />
 
+        {/* Mis reservas globales del usuario autenticado */}
+        <Route path='/mis-reservas'>
+          <ProtectedRoute>
+            <MyReservationsPage />
+          </ProtectedRoute>
+        </Route>
+
         {/* Public tenant routes */}
         <Route path='/b/:slug'>
           {(params) => <AvailabilityPage slug={params.slug} />}
@@ -158,6 +166,13 @@ export default function App() {
         <Route path='/preferencias'>
           <ProtectedRoute>
             <PrivacyPreferencesPage />
+          </ProtectedRoute>
+        </Route>
+
+        {/* Notificaciones del dispositivo */}
+        <Route path='/notificaciones'>
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         </Route>
 
@@ -212,9 +227,6 @@ export default function App() {
 
         {/* Legacy redirects — old single-tenant routes */}
         <Route path='/reservar'>
-          <Redirect to='/' />
-        </Route>
-        <Route path='/mis-reservas'>
           <Redirect to='/' />
         </Route>
 

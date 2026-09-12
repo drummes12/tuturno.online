@@ -16,6 +16,20 @@ const expirationMigration = readFileSync(
   ),
   'utf8'
 )
+const pushRoutingMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/03800_push_reservation_notifications.sql'
+  ),
+  'utf8'
+)
+const pushDeepLinkMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/04000_push_notification_deep_links.sql'
+  ),
+  'utf8'
+)
 
 function functionDefinition(sql: string, functionName: string): string {
   const start = sql.indexOf(`create or replace function public.${functionName}`)
@@ -99,6 +113,36 @@ describe('Reservation notification routing', () => {
     expect(expirationMigration).toContain("'reservation_expired'")
     expect(expirationMigration).toContain('enqueue_notification')
     expect(expirationMigration).toContain("r.status = 'pending'")
+  })
+
+  it('encola push en una bandeja independiente con idempotencia', () => {
+    expect(pushRoutingMigration).toContain('push_notification_outbox')
+    expect(pushRoutingMigration).toContain(
+      'idempotency_key text unique not null'
+    )
+    expect(pushRoutingMigration).toContain(
+      'create or replace function public.enqueue_push_notification('
+    )
+    expect(pushRoutingMigration).toContain(
+      'create trigger trg_enqueue_reservation_push_notifications'
+    )
+    expect(pushDeepLinkMigration).toContain(
+      "'/b/' || v_reservation.business_slug || '/mis-reservas?reservation='"
+    )
+    expect(pushDeepLinkMigration).toContain("'/admin/reservas?reservation='")
+  })
+
+  it('cubre los cinco estados de reserva en el trigger push', () => {
+    expect(pushRoutingMigration).toContain("'pending'")
+    expect(pushRoutingMigration).toContain("'confirmed'")
+    expect(pushRoutingMigration).toContain("'rejected'")
+    expect(pushRoutingMigration).toContain("'cancelled_by_client'")
+    expect(pushRoutingMigration).toContain("'cancelled_by_business'")
+    expect(pushRoutingMigration).toContain("'expired'")
+  })
+
+  it('mantiene la configuración de correo separada', () => {
+    expect(pushRoutingMigration).not.toContain('public.notification_outbox')
   })
 
   it('respeta la bandera email_notifications_enabled de business_members', () => {

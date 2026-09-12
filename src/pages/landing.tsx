@@ -1,5 +1,6 @@
 import { useState, type SubmitEvent } from 'react'
 import { Link, useLocation } from 'wouter'
+import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import {
@@ -15,6 +16,7 @@ import {
 const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/
 
 export function LandingPage() {
+  const { user } = useAuthStore()
   const [slug, setSlug] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [, navigate] = useLocation()
@@ -32,6 +34,56 @@ export function LandingPage() {
     }
     setError(null)
     navigate(`/b/${trimmed}`)
+  }
+
+  if (user) {
+    return (
+      <div className='flex-1 flex flex-col items-center px-4 py-8'>
+        <div className='flex w-full max-w-lg flex-col gap-6'>
+          <section className='flex flex-col items-center gap-4 text-center animate-fade-up'>
+            <div className='flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-(--shadow-pitch)'>
+              <StoreIcon size={32} />
+            </div>
+            <div>
+              <h1 className='text-3xl font-bold tracking-tight text-(--color-text) text-balance'>
+                Encuentra tu organización
+              </h1>
+              <p className='mt-2 text-base text-(--color-text-muted) text-pretty'>
+                Ingresa el identificador del negocio para consultar su
+                disponibilidad y reservar un turno.
+              </p>
+            </div>
+          </section>
+
+          <section className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-5 shadow-(--shadow-xs) animate-fade-up'>
+            <form onSubmit={handleGoToOrg} className='flex flex-col gap-3'>
+              <Input
+                label='Identificador del negocio'
+                placeholder='mi-negocio'
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                error={error}
+                hint='Ejemplo: canchas-el-parque'
+                icon={<ArrowRightIcon size={18} />}
+              />
+              <Button type='submit' size='md' className='w-full'>
+                Ver disponibilidad
+                <ArrowRightIcon size={18} />
+              </Button>
+            </form>
+          </section>
+
+          <div className='flex flex-col gap-3'>
+            <Link href='/crear-negocio'>
+              <Button variant='ghost' size='md' className='w-full'>
+                <StoreIcon size={18} />
+                Quiero TuTurno para mi negocio
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
