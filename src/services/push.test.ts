@@ -1,15 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { mockRpc, mockInvoke } = vi.hoisted(() => ({
+const { mockRpc, mockInvoke, mockFrom } = vi.hoisted(() => ({
   mockRpc: vi.fn(),
-  mockInvoke: vi.fn()
+  mockInvoke: vi.fn(),
+  mockFrom: vi.fn()
 }))
 
 vi.mock('@/lib/supabase', () => ({
-  supabase: { rpc: mockRpc, functions: { invoke: mockInvoke } }
+  supabase: {
+    rpc: mockRpc,
+    from: mockFrom,
+    functions: { invoke: mockInvoke }
+  }
 }))
 
-import { savePushSubscription, sendTestPush } from '@/services/push'
+import {
+  removeCurrentPushSubscription,
+  savePushSubscription,
+  sendTestPush
+} from '@/services/push'
 
 const subscription = {
   endpoint: 'https://fcm.googleapis.com/push/subscription',
@@ -26,6 +35,38 @@ const subscription = {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  Reflect.deleteProperty(navigator, 'serviceWorker')
+})
+
+describe('removeCurrentPushSubscription', () => {
+  it('elimina del backend y desuscribe el endpoint actual', async () => {
+    const unsubscribe = vi.fn().mockResolvedValue(true)
+    const eq = vi.fn().mockResolvedValue({ error: null })
+    const deleteQuery = vi.fn().mockReturnValue({ eq })
+    mockFrom.mockReturnValue({ delete: deleteQuery })
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        ready: Promise.resolve({
+          pushManager: {
+            getSubscription: vi.fn().mockResolvedValue({
+              endpoint: 'https://fcm.googleapis.com/current',
+              unsubscribe
+            })
+          }
+        })
+      }
+    })
+
+    await expect(removeCurrentPushSubscription()).resolves.toBeUndefined()
+    expect(mockFrom).toHaveBeenCalledWith('push_subscriptions')
+    expect(deleteQuery).toHaveBeenCalledOnce()
+    expect(eq).toHaveBeenCalledWith(
+      'endpoint',
+      'https://fcm.googleapis.com/current'
+    )
+    expect(unsubscribe).toHaveBeenCalledOnce()
+  })
 })
 
 describe('sendTestPush', () => {

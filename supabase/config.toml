@@ -452,6 +452,12 @@ verify_jwt = true
 import_map = "./functions/send-test-push/deno.json"
 entrypoint = "./functions/send-test-push/index.ts"
 
+[functions.send-push-notifications]
+enabled = true
+verify_jwt = false
+import_map = "./functions/send-push-notifications/deno.json"
+entrypoint = "./functions/send-push-notifications/index.ts"
+
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/send-notifications/*.html" ]

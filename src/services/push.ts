@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { getExistingPushSubscription } from '@/lib/push'
 
 export async function savePushSubscription(
   subscription: PushSubscription
@@ -25,6 +26,25 @@ export async function savePushSubscription(
   }
 
   return data
+}
+
+export async function removeCurrentPushSubscription(): Promise<void> {
+  const subscription = await getExistingPushSubscription()
+  if (!subscription) return
+
+  const [deleteResult, unsubscribeResult] = await Promise.allSettled([
+    supabase
+      .from('push_subscriptions')
+      .delete()
+      .eq('endpoint', subscription.endpoint),
+    subscription.unsubscribe()
+  ])
+
+  if (deleteResult.status === 'rejected') throw deleteResult.reason
+  if (deleteResult.value.error) throw deleteResult.value.error
+  if (unsubscribeResult.status === 'rejected') {
+    throw unsubscribeResult.reason
+  }
 }
 
 export async function sendTestPush(): Promise<{

@@ -1,14 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { mockSignOut, mockFetchBusinessMemberships, mockFetchIsPlatformAdmin } =
-  vi.hoisted(() => ({
-    mockSignOut: vi.fn(),
-    mockFetchBusinessMemberships: vi.fn(),
-    mockFetchIsPlatformAdmin: vi.fn()
-  }))
+const {
+  mockSignOut,
+  mockRemoveCurrentPushSubscription,
+  mockFetchBusinessMemberships,
+  mockFetchIsPlatformAdmin
+} = vi.hoisted(() => ({
+  mockSignOut: vi.fn(),
+  mockRemoveCurrentPushSubscription: vi.fn(),
+  mockFetchBusinessMemberships: vi.fn(),
+  mockFetchIsPlatformAdmin: vi.fn()
+}))
 
 vi.mock('@/services/auth', () => ({
   signOut: mockSignOut
+}))
+
+vi.mock('@/services/push', () => ({
+  removeCurrentPushSubscription: mockRemoveCurrentPushSubscription
 }))
 
 vi.mock('@/services/profiles', () => ({
@@ -95,6 +104,7 @@ describe('useAuthStore', () => {
 
   it('signOut llama al servicio y limpia el estado', async () => {
     mockSignOut.mockResolvedValue(undefined)
+    mockRemoveCurrentPushSubscription.mockResolvedValue(undefined)
     // Llenar el estado primero
     useAuthStore.getState().setSession({ user: { id: 'x' } } as any)
     useAuthStore.getState().setIsAdmin(true)
@@ -103,6 +113,7 @@ describe('useAuthStore', () => {
     await useAuthStore.getState().signOut()
 
     expect(mockSignOut).toHaveBeenCalledTimes(1)
+    expect(mockRemoveCurrentPushSubscription).toHaveBeenCalledTimes(1)
     const state = useAuthStore.getState()
     expect(state.session).toBeNull()
     expect(state.user).toBeNull()
