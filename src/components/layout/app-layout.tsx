@@ -132,6 +132,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       : []
 
   const nav = isAdmin ? adminNav : clientNav
+  const hasBottomNav = Boolean(user) && nav.length > 0
 
   // "Negocio" queda activo también en sus sub-rutas agrupadas (horarios,
   // cierres, equipo, configuración), no solo en /admin/negocio exacto.
@@ -148,7 +149,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
     (isAdmin && location.startsWith('/admin')) || (!isAdmin && !!tenantBase)
 
   return (
-    <div className='min-h-dvh flex flex-col bg-surface overflow-clip'>
+    <div
+      className={`min-h-dvh flex flex-col bg-surface overflow-clip ${hasBottomNav ? 'has-bottom-nav' : ''}`}
+    >
       {/* Top bar — pitch green with depth */}
       <header className='sticky top-0 z-40 bg-pitch-800 text-white border-b border-pitch-900 shadow-[0_4px_20px_rgba(4,33,15,0.25)]'>
         <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
@@ -309,7 +312,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
       )}
 
-      <div className='fixed bottom-20 right-4 z-30 md:bottom-6 md:right-6 flex flex-col gap-2'>
+      <div className='fixed bottom-[calc(var(--bottom-nav-height)+1rem)] right-4 z-30 md:bottom-6 md:right-6 flex flex-col gap-2'>
         {/* FAB de WhatsApp — solo para clientes en rutas tenant */}
         {!isAdmin && location.startsWith('/b/') && <WhatsAppFab />}
 
@@ -324,7 +327,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Footer — enlaces legales públicos */}
-      <footer className='border-t border-border bg-surface-elevated mt-auto'>
+      <footer className='border-t border-border bg-surface-elevated mt-auto pb-(--bottom-nav-height)'>
         <div className='mx-auto max-w-5xl px-4 py-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-(--color-text-muted)'>
           <span>© {new Date().getFullYear()} TuTurno</span>
           <Link
