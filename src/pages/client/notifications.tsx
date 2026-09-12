@@ -9,6 +9,7 @@ import {
   getReadyServiceWorker,
   isPushSupported,
   requestNotificationPermission,
+  subscribeToPush,
   type NotificationPermissionState
 } from '@/lib/push'
 
@@ -17,6 +18,10 @@ export function NotificationsPage() {
     getNotificationPermission()
   )
   const [requesting, setRequesting] = useState(false)
+  const [subscribing, setSubscribing] = useState(false)
+  const [subscription, setSubscription] = useState<PushSubscription | null>(
+    null
+  )
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const supported = isPushSupported()
@@ -33,7 +38,7 @@ export function NotificationsPage() {
       if (nextPermission === 'granted') {
         await getReadyServiceWorker()
         setSuccess(
-          'Permiso concedido y Service Worker listo. En el siguiente paso registraremos este dispositivo.'
+          'Permiso concedido. Ahora puedes registrar este dispositivo.'
         )
       } else if (nextPermission === 'denied') {
         setError(
@@ -48,6 +53,28 @@ export function NotificationsPage() {
       )
     } finally {
       setRequesting(false)
+    }
+  }
+
+  async function handleSubscribe() {
+    setSubscribing(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const nextSubscription = await subscribeToPush()
+      setSubscription(nextSubscription)
+      setSuccess(
+        'PushSubscription creada en este dispositivo. Todavía no la hemos enviado a TuTurno.'
+      )
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : 'No pudimos registrar este dispositivo.'
+      )
+    } finally {
+      setSubscribing(false)
     }
   }
 
@@ -70,10 +97,7 @@ export function NotificationsPage() {
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <div className='flex items-start gap-3 mb-4'>
-          <BellIcon
-            size={20}
-            className='text-(--color-text-muted) mt-0.5'
-          />
+          <BellIcon size={20} className='text-(--color-text-muted) mt-0.5' />
           <div>
             <h2 className='text-sm font-semibold'>Notificaciones push</h2>
             <p className='text-xs text-(--color-text-muted) mt-1'>
@@ -93,10 +117,21 @@ export function NotificationsPage() {
           </Alert>
         )}
 
-        {supported && permission === 'granted' && !success && (
+        {supported && permission === 'granted' && !subscription && !success && (
           <Alert variant='success'>
-            Las notificaciones están permitidas en este dispositivo. Aún falta
-            registrar la suscripción con TuTurno.
+            Las notificaciones están permitidas. Aún falta registrar este
+            dispositivo con Push.
+          </Alert>
+        )}
+
+        {subscription && (
+          <Alert variant='success'>
+            <div className='flex flex-col gap-1'>
+              <span>Este dispositivo ya tiene una PushSubscription local.</span>
+              <span className='text-xs opacity-80'>
+                Servicio: {new URL(subscription.endpoint).origin}
+              </span>
+            </div>
           </Alert>
         )}
 
@@ -114,9 +149,16 @@ export function NotificationsPage() {
           </Button>
         )}
 
+        {supported && permission === 'granted' && !subscription && (
+          <Button loading={subscribing} onClick={handleSubscribe}>
+            <BellIcon size={18} />
+            Registrar este dispositivo
+          </Button>
+        )}
+
         <p className='text-xs text-(--color-text-muted) mt-4 leading-relaxed'>
-          En este paso solo solicitamos el permiso del navegador. No guardamos
-          datos ni enviamos notificaciones todavía.
+          La suscripción se crea localmente en el navegador. En el siguiente
+          paso la guardaremos de forma segura y asociada a tu usuario.
         </p>
       </Card>
     </div>

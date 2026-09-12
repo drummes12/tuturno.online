@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   getNotificationPermission,
-  requestNotificationPermission
+  requestNotificationPermission,
+  subscribeToPush
 } from '@/lib/push'
 
 afterEach(() => {
@@ -32,5 +33,26 @@ describe('requestNotificationPermission', () => {
 
     await expect(requestNotificationPermission()).resolves.toBe('granted')
     expect(requestPermission).toHaveBeenCalledOnce()
+  })
+})
+
+describe('subscribeToPush', () => {
+  it('reuses an existing browser subscription', async () => {
+    const subscription = { endpoint: 'https://push.example/subscription' }
+    const getSubscription = vi.fn().mockResolvedValue(subscription)
+    const subscribe = vi.fn()
+
+    Object.defineProperty(navigator, 'serviceWorker', {
+      configurable: true,
+      value: {
+        ready: Promise.resolve({
+          pushManager: { getSubscription, subscribe }
+        })
+      }
+    })
+
+    await expect(subscribeToPush()).resolves.toBe(subscription)
+    expect(getSubscription).toHaveBeenCalledOnce()
+    expect(subscribe).not.toHaveBeenCalled()
   })
 })
