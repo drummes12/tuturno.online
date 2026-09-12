@@ -17,6 +17,17 @@ export async function markNotificationRead(id: string): Promise<void> {
   if (error) throw error
 }
 
+export async function markReservationNotificationsRead(
+  reservationId: string
+): Promise<number> {
+  const { data, error } = await supabase.rpc(
+    'mark_reservation_notifications_read',
+    { p_reservation_id: reservationId }
+  )
+  if (error) throw error
+  return typeof data === 'number' ? data : 0
+}
+
 export async function markAllNotificationsRead(): Promise<number> {
   const { data, error } = await supabase.rpc('mark_all_notifications_read')
   if (error) throw error

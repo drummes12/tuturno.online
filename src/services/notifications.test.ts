@@ -11,6 +11,7 @@ import {
   archiveReadNotifications,
   fetchMyNotifications,
   markAllNotificationsRead,
+  markReservationNotificationsRead,
   markNotificationRead
 } from '@/services/notifications'
 
@@ -59,6 +60,29 @@ describe('markNotificationRead', () => {
   it('propaga errores', async () => {
     mockRpc.mockResolvedValue({ data: null, error: { message: 'x' } })
     await expect(markNotificationRead('n1')).rejects.toEqual({ message: 'x' })
+  })
+})
+
+describe('markReservationNotificationsRead', () => {
+  it('devuelve el conteo del RPC', async () => {
+    mockRpc.mockResolvedValue({ data: 2, error: null })
+    await expect(markReservationNotificationsRead('r1')).resolves.toBe(2)
+    expect(mockRpc).toHaveBeenCalledWith(
+      'mark_reservation_notifications_read',
+      { p_reservation_id: 'r1' }
+    )
+  })
+
+  it('devuelve 0 si el RPC no retorna número', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: null })
+    await expect(markReservationNotificationsRead('r1')).resolves.toBe(0)
+  })
+
+  it('propaga errores', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { message: 'x' } })
+    await expect(markReservationNotificationsRead('r1')).rejects.toEqual({
+      message: 'x'
+    })
   })
 })
 

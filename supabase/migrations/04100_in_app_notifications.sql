@@ -91,6 +91,31 @@ $$;
 revoke all on function public.mark_notification_read(uuid) from public, anon;
 grant execute on function public.mark_notification_read(uuid) to authenticated;
 
+create or replace function public.mark_reservation_notifications_read(
+  p_reservation_id uuid
+)
+returns integer
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_count integer;
+begin
+  update public.push_notification_outbox
+  set read_at = now()
+  where user_id = auth.uid()
+    and read_at is null
+    and archived_at is null
+    and (payload->>'reservation_id')::uuid = p_reservation_id;
+
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$$;
+
+revoke all on function public.mark_reservation_notifications_read(uuid) from public, anon;
+grant execute on function public.mark_reservation_notifications_read(uuid) to authenticated;
+
 create or replace function public.mark_all_notifications_read()
 returns integer
 language plpgsql

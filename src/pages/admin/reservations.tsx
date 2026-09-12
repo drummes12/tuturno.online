@@ -29,6 +29,7 @@ import {
   fetchReservationsByDate,
   fetchReservationById
 } from '@/services/reservations'
+import { markReservationNotificationsRead } from '@/services/notifications'
 
 const statusFilters: { key: ReservationFilter; label: string }[] = [
   { key: 'all', label: 'Todas' },
@@ -117,6 +118,7 @@ export function AdminReservationsPage() {
   useEffect(() => {
     if (!deepLinkId || deepLinkHandled.current === deepLinkId) return
     deepLinkHandled.current = deepLinkId
+    void markReservationNotificationsRead(deepLinkId).catch(() => {})
     fetchReservationById(deepLinkId)
       .then((reservation) => {
         if (reservation) {

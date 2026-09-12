@@ -5,6 +5,7 @@ import {
   fetchUserReservations,
   fetchReservationById
 } from '@/services/reservations'
+import { markReservationNotificationsRead } from '@/services/notifications'
 import { fetchBusinessContactById } from '@/services/business'
 import { useTenant } from '@/hooks/use-tenant'
 import { Card } from '@/components/common/card'
@@ -171,6 +172,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
     if (!deepLinkId || deepLinkHandled.current === deepLinkId || loading)
       return
     deepLinkHandled.current = deepLinkId
+    void markReservationNotificationsRead(deepLinkId).catch(() => {})
     const match = reservations.find((r) => r.id === deepLinkId)
     if (match) {
       setSelectedReservation(match)
