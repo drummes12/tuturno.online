@@ -4,6 +4,7 @@ import { Alert } from '@/components/common/alert'
 import { Button } from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import { BellIcon, ArrowLeftIcon } from '@/components/common/icon'
+import { savePushSubscription } from '@/services/push'
 import {
   getNotificationPermission,
   getReadyServiceWorker,
@@ -64,9 +65,19 @@ export function NotificationsPage() {
     try {
       const nextSubscription = await subscribeToPush()
       setSubscription(nextSubscription)
-      setSuccess(
-        'PushSubscription creada en este dispositivo. Todavía no la hemos enviado a TuTurno.'
-      )
+
+      try {
+        await savePushSubscription(nextSubscription)
+        setSuccess(
+          'PushSubscription creada y asociada a tu usuario en TuTurno.'
+        )
+      } catch (caught) {
+        setError(
+          caught instanceof Error
+            ? `La suscripción local existe, pero no pudimos guardarla: ${caught.message}`
+            : 'La suscripción local existe, pero no pudimos guardarla en TuTurno.'
+        )
+      }
     } catch (caught) {
       setError(
         caught instanceof Error
@@ -127,7 +138,7 @@ export function NotificationsPage() {
         {subscription && (
           <Alert variant='success'>
             <div className='flex flex-col gap-1'>
-              <span>Este dispositivo ya tiene una PushSubscription local.</span>
+              <span>Este dispositivo tiene una PushSubscription local.</span>
               <span className='text-xs opacity-80'>
                 Servicio: {new URL(subscription.endpoint).origin}
               </span>
@@ -157,8 +168,8 @@ export function NotificationsPage() {
         )}
 
         <p className='text-xs text-(--color-text-muted) mt-4 leading-relaxed'>
-          La suscripción se crea localmente en el navegador. En el siguiente
-          paso la guardaremos de forma segura y asociada a tu usuario.
+          La suscripción se crea localmente y se asocia de forma segura a tu
+          usuario autenticado. Nunca exponemos sus claves en la interfaz.
         </p>
       </Card>
     </div>
