@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react'
 import { Link } from 'wouter'
 import { Button } from '@/components/common/button'
 import { BellIcon, XIcon } from '@/components/common/icon'
-import { useAuthStore } from '@/stores/auth'
-import { usePushNotifications } from '@/hooks/use-push-notifications'
+import type { PushNotificationState } from '@/hooks/use-push-notifications'
 
-export function PwaNotificationPrompt() {
-  const { user } = useAuthStore()
+interface PwaNotificationPromptProps {
+  state: PushNotificationState
+}
+
+export function PwaNotificationPrompt({ state }: PwaNotificationPromptProps) {
   const { permission, busy, error, showPrompt, requestAndRegister, dismiss } =
-    usePushNotifications(user?.id ?? null)
+    state
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {

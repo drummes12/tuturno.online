@@ -107,9 +107,12 @@ export function usePushNotifications(userId: string | null) {
   return {
     permission,
     busy,
+    registered,
     error,
     showPrompt,
     requestAndRegister,
     dismiss
   }
 }
+
+export type PushNotificationState = ReturnType<typeof usePushNotifications>

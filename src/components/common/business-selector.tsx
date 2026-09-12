@@ -75,7 +75,7 @@ export function BusinessSelector() {
       {active && (
         <a
           href={publicUrl ?? '#'}
-          className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 transition-[background-color,border-color,transform,color] touch-target'
+          className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
           aria-label='Crear reserva a nombre de un cliente'
           title='Crear reserva a nombre de un cliente'
         >

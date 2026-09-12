@@ -11,7 +11,9 @@ import {
   LogInIcon,
   LockIcon,
   HelpIcon,
-  BellIcon
+  BellIcon,
+  CheckIcon,
+  XIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { PwaInstallPrompt } from '@/components/common/pwa-install-prompt'
@@ -22,6 +24,42 @@ import { BusinessSelector } from '@/components/common/business-selector'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { extractSlugFromPath } from '@/lib/slug'
+import { usePushNotifications } from '@/hooks/use-push-notifications'
+import type { NotificationPermissionState } from '@/lib/push'
+
+function NotificationStatusIcon({
+  permission,
+  registered
+}: {
+  permission: NotificationPermissionState
+  registered: boolean
+}) {
+  const active = permission === 'granted' && registered
+  const blocked = permission === 'denied'
+  const badgeClass = active
+    ? 'bg-success text-white'
+    : blocked
+      ? 'bg-danger text-white'
+      : 'bg-yellow-500 text-white'
+
+  return (
+    <span className='relative inline-flex'>
+      <BellIcon size={16} />
+      <span
+        className={`absolute -right-2 -bottom-1 flex h-3.5 w-3.5 items-center justify-center rounded-full ${badgeClass}`}
+        aria-hidden='true'
+      >
+        {active ? (
+          <CheckIcon size={9} strokeWidth={2.5} />
+        ) : blocked ? (
+          <XIcon size={9} strokeWidth={2.5} />
+        ) : (
+          <span className='text-[9px] font-bold leading-none'>?</span>
+        )}
+      </span>
+    </span>
+  )
+}
 
 interface NavItem {
   label: string
@@ -56,6 +94,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation()
   const clientTutorial = useClientTutorial()
   const adminTutorial = useAdminTutorial()
+  const pushNotificationState = usePushNotifications(user?.id ?? null)
 
   const startTour = isAdmin ? adminTutorial.startTour : clientTutorial.startTour
   const isStarting = isAdmin
@@ -146,11 +185,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <Link
                   href='/notificaciones'
                   className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
-                  aria-label='Notificaciones'
+                  aria-label={
+                    pushNotificationState.permission === 'granted' &&
+                    pushNotificationState.registered
+                      ? 'Notificaciones activas'
+                      : pushNotificationState.permission === 'denied'
+                        ? 'Notificaciones bloqueadas'
+                        : 'Configurar notificaciones'
+                  }
                   title='Notificaciones'
                 >
-                  <BellIcon size={16} />
-                  <span className='hidden sm:inline'>Notificaciones</span>
+                  <NotificationStatusIcon
+                    permission={pushNotificationState.permission}
+                    registered={pushNotificationState.registered}
+                  />
                 </Link>
                 {!isAdmin && (
                   <Link
@@ -276,7 +324,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       <div className='fixed inset-x-0 bottom-4 z-50 flex flex-col gap-2 px-4 sm:inset-x-auto sm:right-4 sm:w-[min(100%-2rem,28rem)] sm:px-0'>
         <PwaInstallPrompt />
-        <PwaNotificationPrompt />
+        <PwaNotificationPrompt state={pushNotificationState} />
         <PwaUpdatePrompt />
       </div>
 

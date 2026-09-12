@@ -187,7 +187,7 @@ export function NotificationsPage() {
                       Notificaciones activas en este dispositivo.
                     </span>
                     <span className='text-xs opacity-80'>
-                      Servicio: {new URL(subscription.endpoint).origin}
+                      Este dispositivo está sincronizado con tu cuenta.
                     </span>
                   </div>
                 </Alert>
