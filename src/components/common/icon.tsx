@@ -124,6 +124,15 @@ export function PhoneIcon(props: IconProps) {
 }
 
 /* Mail — for email, notifications */
+export function RefreshIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <path d='M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4' />
+      <path d='M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4' />
+    </svg>
+  )
+}
+
 export function BellIcon(props: IconProps) {
   return (
     <svg {...base(props)}>

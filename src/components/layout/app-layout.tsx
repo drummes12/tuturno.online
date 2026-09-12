@@ -14,6 +14,7 @@ import {
   BellIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
+import { PwaUpdatePrompt } from '@/components/common/pwa-update-prompt'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
 import { BusinessSelector } from '@/components/common/business-selector'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
@@ -270,6 +271,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {/* FAB de ubicación — disponible en la página pública tenant */}
         {location.startsWith('/b/') && <GoogleMapsFab />}
       </div>
+
+      <PwaUpdatePrompt />
 
       {/* Footer — enlaces legales públicos */}
       <footer className='border-t border-border bg-surface-elevated mt-auto'>
