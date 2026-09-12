@@ -117,7 +117,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
           icon: <ListIcon size={22} />
         }
       ]
-    : []
+    : user
+      ? [
+          {
+            label: 'Mis reservas',
+            href: '/mis-reservas',
+            icon: <ListIcon size={22} />
+          }
+        ]
+      : []
 
   const nav = isAdmin ? adminNav : clientNav
 
@@ -185,7 +193,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             {user ? (
               <>
                 <Link
-                  href='/notificaciones'
+                  href={`/notificaciones?next=${encodeURIComponent(location)}`}
                   className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
                   aria-label={
                     pushNotificationState.permission === 'granted' &&
@@ -204,7 +212,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </Link>
                 {!isAdmin && (
                   <Link
-                    href='/preferencias'
+                    href={`/preferencias?next=${encodeURIComponent(location)}`}
                     className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
                     aria-label='Preferencias de privacidad'
                     title='Preferencias de privacidad'

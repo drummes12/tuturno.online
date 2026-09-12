@@ -265,7 +265,7 @@ describe('fetchUserReservations', () => {
     expect(clientsChain.eq).toHaveBeenCalledWith('user_id', userId)
     expect(mockFrom).toHaveBeenNthCalledWith(2, 'reservations')
     expect(reservationsChain.select).toHaveBeenCalledWith(
-      '*, resource:resources(*), client:clients(*)'
+      '*, resource:resources(*), business:businesses(id,name,slug,phone,whatsapp_link,resource_label_singular,cancellation_limit_hours), client:clients(*)'
     )
     expect(reservationsChain.or).toHaveBeenCalledWith(
       `user_id.eq.${userId},client_id.in.(client-1,client-2)`
@@ -273,6 +273,20 @@ describe('fetchUserReservations', () => {
     expect(reservationsChain.order).toHaveBeenCalledWith('starts_at', {
       ascending: false
     })
+  })
+
+  it('filtra por negocio cuando se solicita la vista contextual', async () => {
+    const clientsChain = createQueryChain({ data: [], error: null })
+    const reservationsChain = createQueryChain({ data: [], error: null })
+    mockFrom.mockReturnValueOnce(clientsChain)
+    mockFrom.mockReturnValueOnce(reservationsChain)
+
+    await fetchUserReservations('user-123', 'business-1')
+
+    expect(reservationsChain.eq).toHaveBeenCalledWith(
+      'business_id',
+      'business-1'
+    )
   })
 
   it('cuando el usuario no tiene clients vinculados, filtra solo por user_id', async () => {

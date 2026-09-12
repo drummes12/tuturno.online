@@ -17,6 +17,15 @@ import { isIosDevice } from '@/lib/pwa-install'
 
 export function NotificationsPage() {
   const initialPermission = getNotificationPermission()
+  const requestedReturnPath = new URLSearchParams(window.location.search).get(
+    'next'
+  )
+  const returnPath = requestedReturnPath?.startsWith('/')
+    ? requestedReturnPath
+    : '/'
+  const returnLabel = returnPath.includes('/mis-reservas')
+    ? 'Volver a tus reservas'
+    : 'Volver'
   const [permission, setPermission] =
     useState<NotificationPermissionState>(initialPermission)
   const [requesting, setRequesting] = useState(false)
@@ -112,11 +121,11 @@ export function NotificationsPage() {
   return (
     <div className='mx-auto flex w-full max-w-2xl flex-col gap-6'>
       <Link
-        href='/'
+        href={returnPath}
         className='-ml-2 flex w-fit items-center gap-1.5 rounded-lg px-2 text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target'
       >
         <ArrowLeftIcon size={16} />
-        Volver al inicio
+        {returnLabel}
       </Link>
 
       <header className='flex flex-col gap-1'>

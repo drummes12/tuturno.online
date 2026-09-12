@@ -133,6 +133,13 @@ export default function App() {
         {/* /recuperar-password es accesible con y sin sesión (recovery flow) */}
         <Route path='/recuperar-password' component={RecoverPasswordPage} />
 
+        {/* Mis reservas globales del usuario autenticado */}
+        <Route path='/mis-reservas'>
+          <ProtectedRoute>
+            <MyReservationsPage />
+          </ProtectedRoute>
+        </Route>
+
         {/* Public tenant routes */}
         <Route path='/b/:slug'>
           {(params) => <AvailabilityPage slug={params.slug} />}
