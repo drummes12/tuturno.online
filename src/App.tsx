@@ -17,6 +17,7 @@ import { AvailabilityPage } from '@/pages/client/availability'
 import { ReservePage } from '@/pages/client/reserve'
 import { MyReservationsPage } from '@/pages/client/my-reservations'
 import { PrivacyPreferencesPage } from '@/pages/client/privacy-preferences'
+import { NotificationsPage } from '@/pages/client/notifications'
 
 // Admin pages
 import { AdminDashboardPage } from '@/pages/admin/dashboard'
@@ -158,6 +159,13 @@ export default function App() {
         <Route path='/preferencias'>
           <ProtectedRoute>
             <PrivacyPreferencesPage />
+          </ProtectedRoute>
+        </Route>
+
+        {/* Notificaciones del dispositivo */}
+        <Route path='/notificaciones'>
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         </Route>
 

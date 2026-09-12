@@ -10,7 +10,8 @@ import {
   LogOutIcon,
   LogInIcon,
   LockIcon,
-  HelpIcon
+  HelpIcon,
+  BellIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { GoogleMapsFab } from '@/components/common/google-maps-fab'
@@ -139,6 +140,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
             {user ? (
               <>
+                <Link
+                  href='/notificaciones'
+                  className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                  aria-label='Notificaciones'
+                  title='Notificaciones'
+                >
+                  <BellIcon size={16} />
+                  <span className='hidden sm:inline'>Notificaciones</span>
+                </Link>
                 {!isAdmin && (
                   <Link
                     href='/preferencias'
