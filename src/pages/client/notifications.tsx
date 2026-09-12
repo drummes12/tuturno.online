@@ -4,7 +4,7 @@ import { Alert } from '@/components/common/alert'
 import { Button } from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import { BellIcon, ArrowLeftIcon } from '@/components/common/icon'
-import { savePushSubscription } from '@/services/push'
+import { savePushSubscription, sendTestPush } from '@/services/push'
 import {
   getNotificationPermission,
   getReadyServiceWorker,
@@ -20,6 +20,7 @@ export function NotificationsPage() {
   )
   const [requesting, setRequesting] = useState(false)
   const [subscribing, setSubscribing] = useState(false)
+  const [sendingTest, setSendingTest] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   )
@@ -54,6 +55,25 @@ export function NotificationsPage() {
       )
     } finally {
       setRequesting(false)
+    }
+  }
+
+  async function handleSendTestPush() {
+    setSendingTest(true)
+    setError(null)
+    setSuccess(null)
+
+    try {
+      const result = await sendTestPush()
+      setSuccess(`Notificación enviada a ${result.sent} dispositivo(s).`)
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : 'No pudimos enviar la notificación de prueba.'
+      )
+    } finally {
+      setSendingTest(false)
     }
   }
 
@@ -164,6 +184,17 @@ export function NotificationsPage() {
           <Button loading={subscribing} onClick={handleSubscribe}>
             <BellIcon size={18} />
             Registrar este dispositivo
+          </Button>
+        )}
+
+        {subscription && (
+          <Button
+            variant='secondary'
+            loading={sendingTest}
+            onClick={handleSendTestPush}
+          >
+            <BellIcon size={18} />
+            Enviar push de prueba
           </Button>
         )}
 
