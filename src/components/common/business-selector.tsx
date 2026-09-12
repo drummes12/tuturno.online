@@ -20,14 +20,14 @@ export function BusinessSelector() {
   const hasMultiple = memberships.length > 1
 
   return (
-    <div className='flex items-center gap-1.5'>
+    <div className='flex min-w-0 items-center gap-1.5'>
       {/* Selector — solo si hay múltiples negocios */}
       {hasMultiple && (
         <div className='relative'>
           <select
             value={activeBusinessId ?? ''}
             onChange={(e) => setActiveBusinessId(e.target.value || null)}
-            className='appearance-none bg-white/10 border border-white/15 rounded-lg pl-7 pr-6 w-11 h-11 sm:w-auto sm:max-w-50 sm:h-auto sm:py-1.5 text-sm font-medium text-transparent sm:text-white truncate cursor-pointer hover:bg-white/15 focus:outline-none focus:border-white/40 transition-colors'
+            className='appearance-none h-11 w-11 min-w-0 sm:w-auto sm:max-w-32 md:max-w-50 rounded-lg border border-white/15 bg-white/5 pl-8 pr-7 py-2 text-sm font-medium text-transparent sm:text-white truncate cursor-pointer shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 active:scale-95 touch-target'
             aria-label='Seleccionar negocio'
           >
             {memberships.map((m) => (
@@ -42,7 +42,7 @@ export function BusinessSelector() {
             ))}
           </select>
           <StoreIcon
-            size={14}
+            size={16}
             className='absolute left-2.5 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none'
           />
           {/* Chevron */}
@@ -66,7 +66,7 @@ export function BusinessSelector() {
 
       {/* Nombre del negocio cuando solo hay uno (mobile: oculto, desktop: visible) */}
       {!hasMultiple && active && (
-        <span className='hidden sm:inline text-sm font-medium text-white/80 max-w-40 truncate'>
+        <span className='hidden min-w-0 max-w-24 truncate text-sm font-medium text-white/80 sm:inline md:max-w-40'>
           {active.businessName}
         </span>
       )}
@@ -79,8 +79,8 @@ export function BusinessSelector() {
           aria-label='Crear reserva a nombre de un cliente'
           title='Crear reserva a nombre de un cliente'
         >
-          <CalendarPlusIcon size={14} />
-          <span className='hidden sm:inline'>Nueva reserva</span>
+          <CalendarPlusIcon size={16} className='shrink-0' />
+          <span className='hidden sm:inline truncate'>Nueva reserva</span>
         </a>
       )}
     </div>

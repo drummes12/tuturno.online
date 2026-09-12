@@ -139,10 +139,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div className='min-h-dvh flex flex-col bg-surface overflow-clip'>
       {/* Top bar — pitch green with depth */}
       <header className='sticky top-0 z-40 bg-pitch-800 text-white border-b border-pitch-900 shadow-[0_4px_20px_rgba(4,33,15,0.25)]'>
-        <div className='mx-auto max-w-5xl px-4 h-14 flex items-center justify-between'>
+        <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
           <Link
             href='/'
-            className='flex items-center gap-2 font-bold text-base tracking-tight'
+            className='flex min-w-0 shrink items-center gap-2 font-bold text-base tracking-tight'
           >
             <img
               src='/logo-mark.svg'
@@ -151,17 +151,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
             />
             <span>TuTurno</span>
           </Link>
-          <div className='flex items-center gap-1 sm:gap-2'>
+          <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
             {isAdmin && <BusinessSelector />}
             {isPlatformAdmin && (
               <Link
                 href='/plataforma'
-                className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
+                className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
                 aria-label='Panel de plataforma'
                 title='Panel de plataforma'
               >
-                <LockIcon size={16} />
-                <span className='hidden sm:inline'>Plataforma</span>
+                <LockIcon size={16} className='shrink-0' />
+                <span className='hidden min-w-0 max-w-16 truncate sm:inline md:max-w-none'>
+                  Plataforma
+                </span>
               </Link>
             )}
             {showTutorialButton && (
@@ -169,13 +171,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 onClick={startTour}
                 disabled={isStarting}
                 data-tour='tutorial-trigger'
-                className='inline-flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 active:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
+                className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 active:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
                 aria-label='Iniciar guía del tutorial'
                 aria-busy={isStarting}
                 title='Guía interactiva'
               >
-                <HelpIcon size={16} />
-                <span className='hidden sm:inline'>
+                <HelpIcon size={16} className='shrink-0' />
+                <span className='hidden min-w-0 max-w-12 truncate sm:inline md:max-w-none'>
                   {isStarting ? 'Abriendo…' : 'Guía'}
                 </span>
               </button>
@@ -184,7 +186,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <>
                 <Link
                   href='/notificaciones'
-                  className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                  className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
                   aria-label={
                     pushNotificationState.permission === 'granted' &&
                     pushNotificationState.registered
@@ -203,30 +205,34 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 {!isAdmin && (
                   <Link
                     href='/preferencias'
-                    className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                    className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
                     aria-label='Preferencias de privacidad'
                     title='Preferencias de privacidad'
                   >
-                    <LockIcon size={16} />
-                    <span className='hidden sm:inline'>Privacidad</span>
+                    <LockIcon size={16} className='shrink-0' />
+                    <span className='hidden min-w-0 max-w-16 truncate sm:inline md:max-w-none'>
+                      Privacidad
+                    </span>
                   </Link>
                 )}
                 <button
                   onClick={() => signOut()}
-                  className='flex items-center justify-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                  className='flex min-w-0 max-w-24 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
                 >
-                  <LogOutIcon size={16} />
-                  <span className='hidden sm:inline'>Salir</span>
+                  <LogOutIcon size={16} className='shrink-0' />
+                  <span className='hidden min-w-0 max-w-12 truncate sm:inline md:max-w-none'>
+                    Salir
+                  </span>
                 </button>
               </>
             ) : (
               <Link
                 href='/login'
                 data-tour='auth-entry'
-                className='flex items-center gap-1.5 text-sm text-chalk-dim hover:text-white transition-colors touch-target px-2 py-2 rounded-lg'
+                className='flex min-w-0 max-w-24 items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
               >
-                <LogInIcon size={16} />
-                <span>Ingresar</span>
+                <LogInIcon size={16} className='shrink-0' />
+                <span className='min-w-0 truncate'>Ingresar</span>
               </Link>
             )}
           </div>
