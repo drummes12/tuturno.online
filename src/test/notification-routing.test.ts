@@ -23,6 +23,13 @@ const pushRoutingMigration = readFileSync(
   ),
   'utf8'
 )
+const pushDeepLinkMigration = readFileSync(
+  resolve(
+    process.cwd(),
+    'supabase/migrations/04000_push_notification_deep_links.sql'
+  ),
+  'utf8'
+)
 
 function functionDefinition(sql: string, functionName: string): string {
   const start = sql.indexOf(`create or replace function public.${functionName}`)
@@ -119,6 +126,10 @@ describe('Reservation notification routing', () => {
     expect(pushRoutingMigration).toContain(
       'create trigger trg_enqueue_reservation_push_notifications'
     )
+    expect(pushDeepLinkMigration).toContain(
+      "'/b/' || v_reservation.business_slug || '/mis-reservas?reservation='"
+    )
+    expect(pushDeepLinkMigration).toContain("'/admin/reservas?reservation='")
   })
 
   it('cubre los cinco estados de reserva en el trigger push', () => {
