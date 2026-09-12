@@ -3,7 +3,7 @@ import { Link } from 'wouter'
 import { Alert } from '@/components/common/alert'
 import { Button } from '@/components/common/button'
 import { Card } from '@/components/common/card'
-import { BellIcon, ArrowLeftIcon } from '@/components/common/icon'
+import { ArrowLeftIcon, BellIcon, CheckIcon } from '@/components/common/icon'
 import { savePushSubscription } from '@/services/push'
 import {
   getExistingPushSubscription,
@@ -14,6 +14,7 @@ import {
   subscribeToPush,
   type NotificationPermissionState
 } from '@/lib/push'
+import { isIosDevice } from '@/lib/pwa-install'
 
 export function NotificationsPage() {
   const initialPermission = getNotificationPermission()
@@ -30,6 +31,7 @@ export function NotificationsPage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const supported = isPushSupported()
+  const ios = isIosDevice()
 
   useEffect(() => {
     if (!supported || permission !== 'granted') {
@@ -67,11 +69,11 @@ export function NotificationsPage() {
       if (nextPermission === 'granted') {
         await getReadyServiceWorker()
         setSuccess(
-          'Permiso concedido. Ahora puedes registrar este dispositivo.'
+          'Permiso concedido. Tu dispositivo se registrará automáticamente al iniciar sesión.'
         )
       } else if (nextPermission === 'denied') {
         setError(
-          'Las notificaciones fueron bloqueadas. Puedes habilitarlas desde los permisos del sitio en Chrome.'
+          'Las notificaciones quedaron bloqueadas. Sigue las instrucciones para habilitarlas desde los permisos del dispositivo.'
         )
       }
     } catch (caught) {
@@ -96,14 +98,12 @@ export function NotificationsPage() {
 
       try {
         await savePushSubscription(nextSubscription)
-        setSuccess(
-          'PushSubscription creada y asociada a tu usuario en TuTurno.'
-        )
+        setSuccess('Este dispositivo quedó registrado para recibir avisos.')
       } catch (caught) {
         setError(
           caught instanceof Error
-            ? `La suscripción local existe, pero no pudimos guardarla: ${caught.message}`
-            : 'La suscripción local existe, pero no pudimos guardarla en TuTurno.'
+            ? `La suscripción local existe, pero no pudimos sincronizarla: ${caught.message}`
+            : 'La suscripción local existe, pero no pudimos sincronizarla.'
         )
       }
     } catch (caught) {
@@ -118,94 +118,178 @@ export function NotificationsPage() {
   }
 
   return (
-    <div className='flex flex-col gap-4 max-w-2xl mx-auto'>
+    <div className='mx-auto flex w-full max-w-2xl flex-col gap-6'>
       <Link
         href='/'
-        className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
+        className='-ml-2 flex w-fit items-center gap-1.5 rounded-lg px-2 text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target'
       >
         <ArrowLeftIcon size={16} />
         Volver al inicio
       </Link>
 
-      <div className='animate-fade-up'>
+      <header className='flex flex-col gap-1'>
         <h1 className='text-2xl font-bold tracking-tight'>Notificaciones</h1>
-        <p className='text-sm text-(--color-text-muted) mt-1'>
-          Controla si este dispositivo puede recibir avisos de TuTurno.
+        <p className='text-sm leading-relaxed text-(--color-text-muted)'>
+          Revisa el estado de los avisos de TuTurno en este dispositivo.
         </p>
-      </div>
+      </header>
 
-      <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
-        <div className='flex items-start gap-3 mb-4'>
-          <BellIcon size={20} className='text-(--color-text-muted) mt-0.5' />
-          <div>
-            <h2 className='text-sm font-semibold'>Notificaciones push</h2>
-            <p className='text-xs text-(--color-text-muted) mt-1'>
-              Recibe avisos sobre cambios importantes sin tener que mantener
-              TuTurno abierto.
-            </p>
-          </div>
-        </div>
-
-        {success && <Alert variant='success'>{success}</Alert>}
-        {error && <Alert variant='error'>{error}</Alert>}
-
-        {!supported && (
-          <Alert variant='info'>
-            Este navegador no tiene soporte completo para notificaciones push.
-            Abre TuTurno en Chrome Android o en un navegador compatible.
-          </Alert>
-        )}
-
-        {supported &&
-          permission === 'granted' &&
-          !checkingSubscription &&
-          !subscription &&
-          !success && (
-            <Alert variant='success'>
-              Las notificaciones están permitidas. Aún falta registrar este
-              dispositivo con Push.
-            </Alert>
-          )}
-
-        {subscription && (
-          <Alert variant='success'>
-            <div className='flex flex-col gap-1'>
-              <span>Este dispositivo tiene una PushSubscription local.</span>
-              <span className='text-xs opacity-80'>
-                Servicio: {new URL(subscription.endpoint).origin}
-              </span>
+      <Card className='p-5 sm:p-6'>
+        <div className='flex flex-col gap-5'>
+          <div className='flex items-start gap-3'>
+            <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-primary'>
+              <BellIcon size={20} />
+            </span>
+            <div className='min-w-0'>
+              <h2 className='text-base font-semibold'>
+                Estado del dispositivo
+              </h2>
+              <p className='mt-1 text-sm leading-relaxed text-(--color-text-muted)'>
+                Las notificaciones push son complementarias al correo y te
+                avisan cuando cambia el estado de una reserva.
+              </p>
             </div>
-          </Alert>
-        )}
+          </div>
 
-        {supported && permission === 'denied' && !error && (
-          <Alert variant='warning'>
-            Las notificaciones están bloqueadas para este sitio. Habilítalas
-            desde la configuración de permisos de Chrome.
-          </Alert>
-        )}
+          <div className='flex flex-col gap-3'>
+            {success && <Alert variant='success'>{success}</Alert>}
+            {error && <Alert variant='error'>{error}</Alert>}
 
-        {supported && permission === 'default' && (
-          <Button loading={requesting} onClick={handleEnable}>
-            <BellIcon size={18} />
-            Activar notificaciones
-          </Button>
-        )}
+            {!supported && (
+              <Alert variant='info'>
+                Este navegador no tiene soporte completo para notificaciones
+                push. Abre TuTurno en Chrome, Brave o Safari con la PWA
+                instalada.
+              </Alert>
+            )}
 
-        {supported &&
-          permission === 'granted' &&
-          !checkingSubscription &&
-          !subscription && (
-            <Button loading={subscribing} onClick={handleSubscribe}>
+            {supported && permission === 'default' && (
+              <Alert variant='info'>
+                Todavía no has concedido permiso para recibir avisos en este
+                dispositivo.
+              </Alert>
+            )}
+
+            {supported && permission === 'denied' && !error && (
+              <Alert variant='warning'>
+                Las notificaciones están bloqueadas para este sitio o
+                aplicación.
+              </Alert>
+            )}
+
+            {supported &&
+              permission === 'granted' &&
+              !checkingSubscription &&
+              subscription && (
+                <Alert variant='success'>
+                  <div className='flex flex-col gap-1'>
+                    <span className='font-medium'>
+                      Notificaciones activas en este dispositivo.
+                    </span>
+                    <span className='text-xs opacity-80'>
+                      Servicio: {new URL(subscription.endpoint).origin}
+                    </span>
+                  </div>
+                </Alert>
+              )}
+
+            {supported &&
+              permission === 'granted' &&
+              !checkingSubscription &&
+              !subscription &&
+              !success && (
+                <Alert variant='warning'>
+                  El permiso está concedido, pero este dispositivo todavía no
+                  está sincronizado con tu cuenta.
+                </Alert>
+              )}
+          </div>
+
+          {supported && permission === 'default' && (
+            <Button
+              loading={requesting}
+              onClick={handleEnable}
+              className='w-full sm:w-fit'
+            >
               <BellIcon size={18} />
-              Registrar este dispositivo
+              Activar notificaciones
             </Button>
           )}
 
-        <p className='text-xs text-(--color-text-muted) mt-4 leading-relaxed'>
-          La suscripción se crea localmente y se asocia de forma segura a tu
-          usuario autenticado. Nunca exponemos sus claves en la interfaz.
-        </p>
+          {supported &&
+            permission === 'granted' &&
+            !checkingSubscription &&
+            !subscription && (
+              <Button
+                variant='secondary'
+                loading={subscribing}
+                onClick={handleSubscribe}
+                className='w-full sm:w-fit'
+              >
+                <BellIcon size={18} />
+                Reintentar sincronización
+              </Button>
+            )}
+        </div>
+      </Card>
+
+      {supported && permission === 'denied' && (
+        <Card className='p-5 sm:p-6'>
+          <div className='flex flex-col gap-4'>
+            <div>
+              <h2 className='text-base font-semibold'>
+                Cómo volver a activarlas
+              </h2>
+              <p className='mt-1 text-sm leading-relaxed text-(--color-text-muted)'>
+                El navegador no puede mostrar el permiso nuevamente desde la
+                app. Debes cambiarlo desde la configuración del sitio o del
+                dispositivo.
+              </p>
+            </div>
+
+            <ol className='flex flex-col gap-3'>
+              {(ios
+                ? [
+                    'Abre Configuración en tu iPhone o iPad.',
+                    'Entra en Notificaciones y busca TuTurno.',
+                    'Activa Permitir notificaciones y vuelve a abrir la PWA.'
+                  ]
+                : [
+                    'Abre los permisos del sitio desde el ícono junto a la dirección web.',
+                    'Busca Notificaciones y selecciona Permitir.',
+                    'Vuelve a TuTurno y cierra y abre la aplicación.'
+                  ]
+              ).map((step, index) => (
+                <li key={step} className='flex items-start gap-3 text-sm'>
+                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-pitch-100 text-xs font-semibold text-primary'>
+                    {index + 1}
+                  </span>
+                  <span className='pt-0.5 leading-relaxed text-(--color-text-muted)'>
+                    {step}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </Card>
+      )}
+
+      <Card className='p-5 sm:p-6'>
+        <div className='flex flex-col gap-3'>
+          <h2 className='text-base font-semibold'>Cómo funciona</h2>
+          <ul className='flex flex-col gap-3 text-sm text-(--color-text-muted)'>
+            <li className='flex items-start gap-2.5'>
+              <CheckIcon size={17} className='mt-0.5 shrink-0 text-primary' />
+              <span>
+                Recibes avisos cuando cambia el estado de una reserva.
+              </span>
+            </li>
+            <li className='flex items-start gap-2.5'>
+              <CheckIcon size={17} className='mt-0.5 shrink-0 text-primary' />
+              <span>El correo sigue disponible como canal de respaldo.</span>
+            </li>
+          </ul>
+        </div>
       </Card>
     </div>
   )
