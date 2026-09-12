@@ -188,7 +188,7 @@ export function NotificationCenter({
           <div
             role='dialog'
             aria-label='Notificaciones'
-            className='fixed inset-x-0 bottom-0 z-50 flex max-h-[80vh] flex-col overflow-hidden rounded-t-2xl border border-border bg-surface-elevated shadow-(--shadow-md) sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:max-h-[70vh] sm:w-[min(24rem,calc(100vw-2rem))] sm:rounded-xl'
+            className='fixed inset-x-0 bottom-0 z-50 flex max-h-[80vh] flex-col overflow-hidden rounded-t-2xl border border-border bg-surface-elevated text-(--color-text) shadow-(--shadow-md) sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-[calc(100%+0.5rem)] sm:max-h-[70vh] sm:w-[min(24rem,calc(100vw-2rem))] sm:rounded-xl'
           >
             <div className='flex items-center justify-between gap-2 border-b border-border px-4 py-3'>
               <h2 className='text-sm font-semibold'>Notificaciones</h2>
