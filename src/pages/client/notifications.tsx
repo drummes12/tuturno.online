@@ -8,7 +8,6 @@ import { savePushSubscription } from '@/services/push'
 import {
   getExistingPushSubscription,
   getNotificationPermission,
-  getReadyServiceWorker,
   isPushSupported,
   requestNotificationPermission,
   subscribeToPush,
@@ -57,6 +56,12 @@ export function NotificationsPage() {
     }
   }, [permission, supported])
 
+  async function registerCurrentSubscription() {
+    const nextSubscription = await subscribeToPush()
+    setSubscription(nextSubscription)
+    await savePushSubscription(nextSubscription)
+  }
+
   async function handleEnable() {
     setRequesting(true)
     setError(null)
@@ -67,10 +72,8 @@ export function NotificationsPage() {
       setPermission(nextPermission)
 
       if (nextPermission === 'granted') {
-        await getReadyServiceWorker()
-        setSuccess(
-          'Permiso concedido. Tu dispositivo se registrará automáticamente al iniciar sesión.'
-        )
+        await registerCurrentSubscription()
+        setSuccess('Este dispositivo quedó registrado para recibir avisos.')
       } else if (nextPermission === 'denied') {
         setError(
           'Las notificaciones quedaron bloqueadas. Sigue las instrucciones para habilitarlas desde los permisos del dispositivo.'
@@ -93,19 +96,8 @@ export function NotificationsPage() {
     setSuccess(null)
 
     try {
-      const nextSubscription = await subscribeToPush()
-      setSubscription(nextSubscription)
-
-      try {
-        await savePushSubscription(nextSubscription)
-        setSuccess('Este dispositivo quedó registrado para recibir avisos.')
-      } catch (caught) {
-        setError(
-          caught instanceof Error
-            ? `La suscripción local existe, pero no pudimos sincronizarla: ${caught.message}`
-            : 'La suscripción local existe, pero no pudimos sincronizarla.'
-        )
-      }
+      await registerCurrentSubscription()
+      setSuccess('Este dispositivo quedó registrado para recibir avisos.')
     } catch (caught) {
       setError(
         caught instanceof Error
