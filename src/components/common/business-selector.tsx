@@ -20,7 +20,7 @@ export function BusinessSelector() {
   const hasMultiple = memberships.length > 1
 
   return (
-    <div className='flex min-w-0 items-center gap-1.5'>
+    <div className='flex items-center gap-1 sm:gap-2'>
       {/* Selector — solo si hay múltiples negocios */}
       {hasMultiple && (
         <div className='relative'>

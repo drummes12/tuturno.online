@@ -229,9 +229,6 @@ export default function App() {
         <Route path='/reservar'>
           <Redirect to='/' />
         </Route>
-        <Route path='/mis-reservas'>
-          <Redirect to='/' />
-        </Route>
 
         {/* 404 */}
         <Route>
