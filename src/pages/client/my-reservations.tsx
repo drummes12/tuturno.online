@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Link } from 'wouter'
+import { Link, useSearch } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
 import {
   fetchUserReservations,
@@ -56,11 +56,10 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   )
   const [filter, setFilter] = useState<Filter>('upcoming')
   const [error, setError] = useState<string | null>(null)
-  // Deep link desde correos: /b/{slug}/mis-reservas?reservation={id}
-  const [deepLinkId] = useState(() =>
-    new URLSearchParams(window.location.search).get('reservation')
-  )
-  const deepLinkHandled = useRef(false)
+  // Deep link desde correos/notificaciones: /b/{slug}/mis-reservas?reservation={id}
+  const search = useSearch()
+  const deepLinkId = new URLSearchParams(search).get('reservation')
+  const deepLinkHandled = useRef<string | null>(null)
   const [businessPhone, setBusinessPhone] = useState<string | null>(null)
   const [businessWhatsappLink, setBusinessWhatsappLink] = useState<
     string | null
@@ -169,8 +168,9 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
 
   // Deep link: abrir la reserva del correo aunque no esté en el filtro visible
   useEffect(() => {
-    if (deepLinkHandled.current || !deepLinkId || loading) return
-    deepLinkHandled.current = true
+    if (!deepLinkId || deepLinkHandled.current === deepLinkId || loading)
+      return
+    deepLinkHandled.current = deepLinkId
     const match = reservations.find((r) => r.id === deepLinkId)
     if (match) {
       setSelectedReservation(match)

@@ -23,6 +23,7 @@ import {
   NewReservationButton
 } from '@/components/common/business-selector'
 import { HeaderMenu } from '@/components/common/header-menu'
+import { NotificationCenter } from '@/components/common/notification-center'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { extractSlugFromPath } from '@/lib/slug'
@@ -181,6 +182,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
             )}
             {isAdmin && <NewReservationButton />}
+            {user && (
+              <NotificationCenter
+                userId={user.id}
+                settingsHref={`/notificaciones?next=${encodeURIComponent(location)}`}
+              />
+            )}
             {user ? (
               <HeaderMenu
                 isAdmin={isAdmin}

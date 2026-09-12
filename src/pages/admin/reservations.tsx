@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useSearch } from 'wouter'
 import { Card } from '@/components/common/card'
 import { StatusBadge } from '@/components/common/badge'
 import { Alert } from '@/components/common/alert'
@@ -49,11 +50,10 @@ export function AdminReservationsPage() {
     () => setSelectedReservation(null),
     []
   )
-  // Deep link desde correos: /admin/reservas?reservation={id}
-  const [deepLinkId] = useState(() =>
-    new URLSearchParams(window.location.search).get('reservation')
-  )
-  const deepLinkHandled = useRef(false)
+  // Deep link desde correos/notificaciones: /admin/reservas?reservation={id}
+  const search = useSearch()
+  const deepLinkId = new URLSearchParams(search).get('reservation')
+  const deepLinkHandled = useRef<string | null>(null)
   const [filter, setFilter] = useState<ReservationFilter>('all')
   const [selectedDate, setSelectedDate] = useState(
     format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
@@ -115,8 +115,8 @@ export function AdminReservationsPage() {
 
   // Deep link: abrir la reserva aunque no coincida con fecha/filtro actuales
   useEffect(() => {
-    if (deepLinkHandled.current || !deepLinkId) return
-    deepLinkHandled.current = true
+    if (!deepLinkId || deepLinkHandled.current === deepLinkId) return
+    deepLinkHandled.current = deepLinkId
     fetchReservationById(deepLinkId)
       .then((reservation) => {
         if (reservation) {
