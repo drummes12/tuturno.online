@@ -196,6 +196,17 @@ export interface NotificationOutbox {
   sent_at: string | null
 }
 
+export interface AppNotification {
+  id: string
+  type: NotificationType | string
+  payload: Record<string, unknown>
+  created_at: string
+  read_at: string | null
+  reservation_id: string | null
+  reservation_status: ReservationStatus | null
+  reservation_number: number | null
+}
+
 export interface SignupRequest {
   id: string
   user_id: string

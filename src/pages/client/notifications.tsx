@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'wouter'
 import { Alert } from '@/components/common/alert'
+import { BackLink } from '@/components/common/back-link'
 import { Button } from '@/components/common/button'
 import { Card } from '@/components/common/card'
-import { ArrowLeftIcon, BellIcon, CheckIcon } from '@/components/common/icon'
+import { BellIcon, CheckIcon } from '@/components/common/icon'
 import { savePushSubscription } from '@/services/push'
 import {
   getExistingPushSubscription,
@@ -23,9 +23,9 @@ export function NotificationsPage() {
   const returnPath = requestedReturnPath?.startsWith('/')
     ? requestedReturnPath
     : '/'
-  const returnLabel = returnPath.includes('/mis-reservas')
-    ? 'Volver a tus reservas'
-    : 'Volver'
+  const backLabel = returnPath.includes('/mis-reservas')
+    ? 'tus reservas'
+    : 'inicio'
   const [permission, setPermission] =
     useState<NotificationPermissionState>(initialPermission)
   const [requesting, setRequesting] = useState(false)
@@ -120,20 +120,15 @@ export function NotificationsPage() {
 
   return (
     <div className='mx-auto flex w-full max-w-2xl flex-col gap-6'>
-      <Link
-        href={returnPath}
-        className='-ml-2 flex w-fit items-center gap-1.5 rounded-lg px-2 text-sm text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target'
-      >
-        <ArrowLeftIcon size={16} />
-        {returnLabel}
-      </Link>
-
-      <header className='flex flex-col gap-1'>
-        <h1 className='text-2xl font-bold tracking-tight'>Notificaciones</h1>
-        <p className='text-sm leading-relaxed text-(--color-text-muted)'>
+      <div>
+        <div className='flex items-center gap-1'>
+          <BackLink href={returnPath} label={backLabel} />
+          <h1 className='text-2xl font-bold tracking-tight'>Notificaciones</h1>
+        </div>
+        <p className='mt-1 text-sm leading-relaxed text-(--color-text-muted)'>
           Revisa el estado de los avisos de TuTurno en este dispositivo.
         </p>
-      </header>
+      </div>
 
       <Card className='p-5 sm:p-6'>
         <div className='flex flex-col gap-5'>

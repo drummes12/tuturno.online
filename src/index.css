@@ -142,6 +142,20 @@ body {
   min-height: 44px;
 }
 
+/* Altura del bottom nav de mobile — la define el layout y la consumen
+   footer, bottom sheets y FABs para no quedar detrás de la barra. */
+:root {
+  --bottom-nav-height: 0px;
+}
+.has-bottom-nav {
+  --bottom-nav-height: calc(4.5rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+  .has-bottom-nav {
+    --bottom-nav-height: 0px;
+  }
+}
+
 /* Horizontal chip rails stay clean while remaining swipeable */
 .scrollbar-none {
   scrollbar-width: none;
