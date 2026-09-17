@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { toZonedTime, fromZonedTime } from 'date-fns-tz'
 
 export const BUSINESS_TIMEZONE = 'America/Bogota'
@@ -27,5 +28,5 @@ export function formatLocal(
   pattern: string,
 ): string {
   const d = typeof date === 'string' ? new Date(date) : date
-  return format(toZonedTime(d, BUSINESS_TIMEZONE), pattern)
+  return format(toZonedTime(d, BUSINESS_TIMEZONE), pattern, { locale: es })
 }

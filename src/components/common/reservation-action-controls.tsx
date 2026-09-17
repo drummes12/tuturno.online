@@ -89,7 +89,7 @@ export function ReservationActionControls({
     if (!framed) return content
     return (
       <section className='mb-5 rounded-2xl border border-border p-4'>
-        <h3 className='mb-3 text-sm font-semibold tracking-tight'>
+        <h3 className='mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
           Gestionar reserva
         </h3>
         {content}

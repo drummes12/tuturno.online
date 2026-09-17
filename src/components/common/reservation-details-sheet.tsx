@@ -4,6 +4,7 @@ import { differenceInMinutes } from 'date-fns'
 import type { ReactNode } from 'react'
 import type { Reservation } from '@/types'
 import { StatusBadge } from '@/components/common/badge'
+import { SlotTicket } from '@/components/common/slot-ticket'
 import {
   CalendarIcon,
   ClockIcon,
@@ -37,7 +38,7 @@ function DetailRow({ icon, label, children }: DetailRowProps) {
         {icon}
       </span>
       <div className='min-w-0 flex-1'>
-        <p className='text-xs font-medium uppercase tracking-wide text-text-muted'>
+        <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
           {label}
         </p>
         <div className='mt-0.5 text-sm text-(--color-text)'>{children}</div>
@@ -146,7 +147,7 @@ export function ReservationDetailsSheet({
 
         <div className='flex shrink-0 items-start justify-between gap-4 px-5 pb-4 pt-4 sm:px-7 sm:pt-7'>
           <div className='min-w-0'>
-            <p className='text-xs font-semibold uppercase tracking-[0.14em] text-primary'>
+            <p className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary'>
               Detalle de reserva
             </p>
             <h2
@@ -179,23 +180,20 @@ export function ReservationDetailsSheet({
         </div>
 
         <div className='min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:px-7 sm:pb-7'>
-          <div className='mb-5 flex items-center justify-between gap-3 rounded-2xl bg-surface-inset p-4'>
-            <div>
-              <p className='text-xs font-medium uppercase tracking-wide text-text-muted'>
-                Estado actual
-              </p>
-              <div className='mt-1'>
-                <StatusBadge status={reservation.status} />
-              </div>
-            </div>
-            <div className='text-right'>
-              <p className='nums text-2xl font-bold tracking-tight text-primary'>
-                {formatLocal(reservation.starts_at, 'HH:mm')}
-              </p>
-              <p className='text-xs text-text-muted'>
-                {formatLocal(reservation.starts_at, "EEE d 'de' MMMM")}
-              </p>
-            </div>
+          <div className='mb-5'>
+            <p className='mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
+              Estado actual
+            </p>
+            <SlotTicket
+              resourceName={resourceName}
+              dateLabel={formatLocal(reservation.starts_at, "EEE d 'de' MMM")}
+              timeLabel={formatLocal(reservation.starts_at, 'HH:mm')}
+              durationMinutes={differenceInMinutes(
+                new Date(reservation.ends_at),
+                new Date(reservation.starts_at)
+              )}
+              badge={<StatusBadge status={reservation.status} />}
+            />
           </div>
 
           {whatsappHref && (
@@ -215,7 +213,7 @@ export function ReservationDetailsSheet({
 
           <div className='grid gap-5 sm:grid-cols-2'>
             <section className='rounded-2xl border border-border p-4'>
-              <h3 className='mb-3 text-sm font-semibold tracking-tight'>
+              <h3 className='mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
                 Reserva
               </h3>
               <div className='divide-y divide-border'>
@@ -226,7 +224,7 @@ export function ReservationDetailsSheet({
                   <span className='font-medium'>{resourceName}</span>
                 </DetailRow>
                 <DetailRow icon={<CalendarIcon size={17} />} label='Fecha'>
-                  <span className='capitalize'>
+                  <span className='first-letter:uppercase'>
                     {formatLocal(
                       reservation.starts_at,
                       "EEEE d 'de' MMMM 'de' yyyy"
@@ -246,7 +244,7 @@ export function ReservationDetailsSheet({
             </section>
 
             <section className='rounded-2xl border border-border p-4'>
-              <h3 className='mb-3 text-sm font-semibold tracking-tight'>
+              <h3 className='mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
                 Cliente
               </h3>
               <div className='divide-y divide-border'>
@@ -282,7 +280,7 @@ export function ReservationDetailsSheet({
 
           {(reservation.notes || reservation.decision_reason) && (
             <section className='mt-5 rounded-2xl border border-border p-4'>
-              <h3 className='mb-3 text-sm font-semibold tracking-tight'>
+              <h3 className='mb-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
                 Notas
               </h3>
               <div className='flex flex-col gap-3 text-sm'>

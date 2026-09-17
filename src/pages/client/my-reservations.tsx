@@ -24,7 +24,7 @@ import {
 } from '@/components/common/icon'
 import { resolveWhatsAppLink, buildClientPendingMessage } from '@/lib/whatsapp'
 import type { Reservation } from '@/types'
-import { parseISO, isAfter } from 'date-fns'
+import { parseISO, isAfter, differenceInMinutes } from 'date-fns'
 import { formatLocal } from '@/lib/time'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 import { useSwipeTabs } from '@/hooks/use-swipe-tabs'
@@ -110,10 +110,10 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
     user?.id ? `user_id=eq.${user.id}` : undefined
   )
 
-  const filtered = reservations.filter((r) => {
+  const matchesFilter = (r: Reservation, f: Filter) => {
     const now = new Date()
     const start = parseISO(r.starts_at)
-    switch (filter) {
+    switch (f) {
       case 'upcoming':
         return (
           isAfter(start, now) && ['pending', 'confirmed'].includes(r.status)
@@ -136,7 +136,14 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
       default:
         return true
     }
-  })
+  }
+  const filtered = reservations.filter((r) => matchesFilter(r, filter))
+  const counts = Object.fromEntries(
+    filters.map((f) => [
+      f.key,
+      reservations.filter((r) => matchesFilter(r, f.key)).length
+    ])
+  ) as Record<Filter, number>
 
   // Ordenar: 1) pendientes antiguas, 2) próximas, 3) vencidas
   const sorted = sortReservationsByPriority(filtered)
@@ -244,13 +251,21 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`shrink-0 px-4 py-2.5 rounded-full text-sm font-medium border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
+            className={`shrink-0 px-4 py-2.5 rounded-full font-mono text-xs uppercase tracking-wider font-medium border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
               filter === f.key
                 ? 'bg-(--color-primary) text-white border-(--color-primary) shadow-(--shadow-pitch)'
-                : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
+                : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-strong hover:text-(--color-text)'
             }`}
           >
             {f.label}
+            <span
+              className={
+                filter === f.key ? 'text-white/70' : 'text-text-muted/60'
+              }
+            >
+              {' '}
+              · {counts[f.key] ?? 0}
+            </span>
           </button>
         ))}
       </div>
@@ -299,41 +314,58 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
             </div>
           </Card>
         ) : (
-          <div className='flex flex-col gap-3'>
+          <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
             {sorted.map((r, index) => (
               <Card
                 key={r.id}
-                className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-flood-500' : ''}`}
+                className={`group flex h-full flex-col p-4 animate-stagger transition-all duration-200 ease-spring hover:-translate-y-0.5 hover:border-strong ${r.status === 'pending' ? 'border-l-4 border-l-flood-500' : ''}`}
                 style={{ '--index': index } as React.CSSProperties}
                 data-tour={index === 0 ? 'reservation-card' : undefined}
               >
                 <button
                   type='button'
                   onClick={() => setSelectedReservation(r)}
-                  className='w-full cursor-pointer rounded-xl p-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
+                  className='w-full flex-1 cursor-pointer rounded-xl p-2 text-left flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
                   aria-label={`Ver detalles de tu reserva de ${r.resource?.name ?? r.business?.resource_label_singular ?? resourceLabelSingular} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
                 >
-                  <div className='flex items-start justify-between gap-3'>
-                    <div className='min-w-0 flex-1'>
-                      <div className='flex items-center gap-2'>
-                        <p className='font-semibold text-(--color-text) tracking-tight'>
+                  <div className='flex items-center justify-between gap-2'>
+                    <p className='font-mono text-[11px] font-medium tracking-[0.14em] text-(--color-text-muted)'>
+                      {formatLocal(r.starts_at, "EEE d 'de' MMM")}
+                    </p>
+                    {r.reservation_number && (
+                      <span className='font-mono text-[11px] uppercase tracking-wider text-text-muted/70'>
+                        #{r.reservation_number}
+                      </span>
+                    )}
+                  </div>
+                  <div className='mt-1 flex items-end justify-between gap-3'>
+                    <div className='min-w-0'>
+                      <p className='font-mono text-[26px] font-bold leading-none tracking-tight'>
+                        {formatLocal(r.starts_at, 'HH:mm')}
+                      </p>
+                      <p className='mt-1.5 flex items-baseline font-semibold text-(--color-text) tracking-tight'>
+                        <span className='truncate'>
                           {r.resource?.name ??
                             r.business?.resource_label_singular ??
                             resourceLabelSingular}
-                        </p>
-                        {r.reservation_number && (
-                          <span className='shrink-0 rounded-md bg-surface-inset px-1.5 py-0.5 text-xs font-semibold text-text-muted'>
-                            #{r.reservation_number}
-                          </span>
-                        )}
-                      </div>
-                      <p className='text-sm text-(--color-text-muted) capitalize mt-0.5'>
-                        {formatLocal(r.starts_at, "EEE d 'de' MMMM, HH:mm")}
+                        </span>
+                        <span className='shrink-0 font-normal text-(--color-text-muted)'>
+                          {' '}
+                          ·{' '}
+                          {differenceInMinutes(
+                            parseISO(r.ends_at),
+                            parseISO(r.starts_at)
+                          )}{' '}
+                          min
+                        </span>
                       </p>
                     </div>
                     <div className='flex shrink-0 items-center gap-1'>
                       <StatusBadge status={r.status} />
-                      <ChevronRightIcon size={18} className='text-text-muted' />
+                      <ChevronRightIcon
+                        size={18}
+                        className='text-text-muted transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
+                      />
                     </div>
                   </div>
 
@@ -353,10 +385,11 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                 {!slug && r.business && (
                   <Link
                     href={`/b/${r.business.slug}`}
-                    className='mt-2 flex items-center gap-1.5 px-2 text-xs font-medium text-primary hover:underline'
+                    className='mt-2 flex min-w-0 items-center gap-1.5 px-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-primary hover:underline'
                   >
-                    Reservar de nuevo en {r.business.name}
-                    <ChevronRightIcon size={14} />
+                    <span className='shrink-0'>Reservar de nuevo ·</span>
+                    <span className='truncate'>{r.business.name}</span>
+                    <ChevronRightIcon size={14} className='shrink-0' />
                   </Link>
                 )}
 
