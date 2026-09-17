@@ -387,32 +387,34 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   }
 
   return (
-    <div className='flex flex-col gap-4 max-w-md mx-auto'>
-      <Link
-        href={slug ? `/b/${slug}` : '/'}
-        className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 py-2 rounded-lg'
-      >
-        <ArrowLeftIcon size={14} />
-        Disponibilidad
-      </Link>
+    <div className='flex flex-col gap-4 max-w-md mx-auto lg:max-w-4xl lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-8'>
+      <div className='flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start'>
+        <Link
+          href={slug ? `/b/${slug}` : '/'}
+          className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target rounded-lg'
+        >
+          <ArrowLeftIcon size={14} />
+          Disponibilidad
+        </Link>
 
-      <div className='animate-fade-up'>
-        <h1 className='text-2xl font-bold tracking-tight'>
-          {isAdmin ? 'Crear reserva' : 'Confirmar reserva'}
-        </h1>
-        <p className='text-sm text-(--color-text-muted) mt-0.5'>
-          {isAdmin
-            ? 'Registra una reserva directamente confirmada.'
-            : 'Revisa los datos antes de enviar.'}
-        </p>
+        <div className='animate-fade-up'>
+          <h1 className='text-2xl font-bold tracking-tight'>
+            {isAdmin ? 'Crear reserva' : 'Confirmar reserva'}
+          </h1>
+          <p className='text-sm text-(--color-text-muted) mt-0.5'>
+            {isAdmin
+              ? 'Registra una reserva directamente confirmada.'
+              : 'Revisa los datos antes de enviar.'}
+          </p>
+        </div>
+
+        <SlotTicket
+          resourceName={resourceName}
+          dateLabel={dateLabel || ''}
+          timeLabel={timeLabel}
+          durationMinutes={business?.slot_duration_minutes ?? 60}
+        />
       </div>
-
-      <SlotTicket
-        resourceName={resourceName}
-        dateLabel={dateLabel || ''}
-        timeLabel={timeLabel}
-        durationMinutes={business?.slot_duration_minutes ?? 60}
-      />
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
@@ -587,49 +589,51 @@ function DemoReservePreview({
   }
 
   return (
-    <div className='flex flex-col gap-4 max-w-md mx-auto'>
-      <Link
-        href={slug ? `/b/${slug}` : '/'}
-        className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 py-2 rounded-lg'
-      >
-        <ArrowLeftIcon size={14} />
-        Disponibilidad
-      </Link>
+    <div className='flex flex-col gap-4 max-w-md mx-auto lg:max-w-5xl lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-8'>
+      <div className='flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start'>
+        <Link
+          href={slug ? `/b/${slug}` : '/'}
+          className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target rounded-lg'
+        >
+          <ArrowLeftIcon size={14} />
+          Disponibilidad
+        </Link>
 
-      <div className='animate-fade-up'>
-        <h1 className='text-2xl font-bold tracking-tight'>
-          Vista previa de reserva
-        </h1>
-        <p className='text-sm text-(--color-text-muted) mt-0.5'>
-          Así se vería el formulario de reserva en {businessName}.
-        </p>
-      </div>
-
-      {/* Demo banner */}
-      <div
-        className='flex items-start gap-3 p-4 rounded-xl border border-flood-500/40 bg-flood-500/10 text-(--color-text) animate-fade-up'
-        role='status'
-      >
-        <InfoIcon
-          size={20}
-          className='shrink-0 mt-0.5 text-(--color-warning)'
-        />
-        <div className='flex-1'>
-          <p className='text-sm font-semibold'>Modo demostración</p>
-          <p className='text-xs mt-0.5 text-(--color-text-muted)'>
-            Vista previa del formulario que verían tus clientes. En un negocio
-            real, aquí enviarían la solicitud y tú la confirmarías — en la demo
-            no se crean reservas reales.
+        <div className='animate-fade-up'>
+          <h1 className='text-2xl font-bold tracking-tight'>
+            Vista previa de reserva
+          </h1>
+          <p className='text-sm text-(--color-text-muted) mt-0.5'>
+            Así se vería el formulario de reserva en {businessName}.
           </p>
         </div>
-      </div>
 
-      <SlotTicket
-        resourceName={resourceName}
-        dateLabel={dateLabel}
-        timeLabel={timeLabel}
-        durationMinutes={slotDurationMinutes}
-      />
+        {/* Demo banner */}
+        <div
+          className='flex items-start gap-3 p-4 rounded-xl border border-flood-500/40 bg-flood-500/10 text-(--color-text) animate-fade-up'
+          role='status'
+        >
+          <InfoIcon
+            size={20}
+            className='shrink-0 mt-0.5 text-(--color-warning)'
+          />
+          <div className='flex-1'>
+            <p className='text-sm font-semibold'>Modo demostración</p>
+            <p className='text-xs mt-0.5 text-(--color-text-muted)'>
+              Vista previa del formulario que verían tus clientes. En un negocio
+              real, aquí enviarían la solicitud y tú la confirmarías — en la
+              demo no se crean reservas reales.
+            </p>
+          </div>
+        </div>
+
+        <SlotTicket
+          resourceName={resourceName}
+          dateLabel={dateLabel}
+          timeLabel={timeLabel}
+          durationMinutes={slotDurationMinutes}
+        />
+      </div>
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <div className='flex flex-col gap-4'>

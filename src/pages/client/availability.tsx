@@ -434,7 +434,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
           </div>
         </Card>
       ) : resources.length > 0 ? (
-        <div className='flex flex-col gap-6 animate-fade-up'>
+        <div className='grid grid-cols-1 gap-6 animate-fade-up lg:grid-cols-2 xl:grid-cols-3'>
           {slotGroups.map((group, groupIndex) => {
             if (group.slots.length === 0) return null
             const availableCount = group.slots.filter(
@@ -442,7 +442,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             ).length
 
             return (
-              <section key={group.key}>
+              <section key={group.key} className='self-start'>
                 {/* Turno header */}
                 <div className='flex items-center justify-between mb-3'>
                   <div className='flex items-center gap-2.5'>
