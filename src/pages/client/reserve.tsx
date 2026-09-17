@@ -26,8 +26,6 @@ import {
 import {
   ArrowLeftIcon,
   StoreIcon,
-  ClockIcon,
-  CalendarIcon,
   HourglassIcon,
   CheckIcon,
   WhatsAppIcon,
@@ -157,9 +155,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         resourceName={resourceName}
         loadingResource={loadingResource}
         businessName={business?.name ?? 'Demo'}
-        resourceLabelSingular={
-          businessContact?.resource_label_singular ?? 'Recurso'
-        }
+
         slotDurationMinutes={business?.slot_duration_minutes ?? 60}
       />
     )
@@ -339,7 +335,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         <Card elevated className='w-full p-8 text-center'>
           <div className='flex flex-col items-center gap-4'>
             <div
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center ${isAdmin ? 'bg-pitch-100 text-pitch-700' : 'bg-yellow-50 text-yellow-700'}`}
+              className={`w-16 h-16 rounded-2xl flex items-center justify-center ${isAdmin ? 'bg-pitch-500/15 text-pitch-700 dark:text-pitch-300' : 'bg-flood-500/15 text-yellow-700 dark:text-flood-300'}`}
             >
               {isAdmin ? <CheckIcon size={32} /> : <HourglassIcon size={32} />}
             </div>
@@ -390,33 +386,13 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
     )
   }
 
-  const details = [
-    {
-      icon: <StoreIcon size={16} />,
-      label: businessContact?.resource_label_singular ?? 'Recurso',
-      value: resourceName
-    },
-    {
-      icon: <CalendarIcon size={16} />,
-      label: 'Fecha',
-      value: dateLabel,
-      capitalize: true
-    },
-    { icon: <ClockIcon size={16} />, label: 'Hora', value: timeLabel },
-    {
-      icon: <ClockIcon size={16} />,
-      label: 'Duración',
-      value: `${business?.slot_duration_minutes ?? 60} minutos`
-    }
-  ]
-
   return (
     <div className='flex flex-col gap-4 max-w-md mx-auto'>
       <Link
         href={slug ? `/b/${slug}` : '/'}
-        className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
+        className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 py-2 rounded-lg'
       >
-        <ArrowLeftIcon size={16} />
+        <ArrowLeftIcon size={14} />
         Disponibilidad
       </Link>
 
@@ -431,27 +407,12 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         </p>
       </div>
 
-      <Card
-        className='p-5 animate-fade-up'
-        elevated
-        data-tour='reservation-summary'
-      >
-        <dl className='flex flex-col gap-3 text-sm'>
-          {details.map((d) => (
-            <div key={d.label} className='flex justify-between items-center'>
-              <dt className='flex items-center gap-2 text-(--color-text-muted)'>
-                <span className='text-graphite-400'>{d.icon}</span>
-                {d.label}
-              </dt>
-              <dd
-                className={`font-medium nums ${d.capitalize ? 'capitalize' : ''}`}
-              >
-                {d.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </Card>
+      <SlotTicket
+        resourceName={resourceName}
+        dateLabel={dateLabel || ''}
+        timeLabel={timeLabel}
+        durationMinutes={business?.slot_duration_minutes ?? 60}
+      />
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
@@ -499,7 +460,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
                 type='checkbox'
                 checked={marketingOptIn}
                 onChange={(e) => setMarketingOptIn(e.target.checked)}
-                className='mt-0.5 h-4 w-4 rounded border-border text-(--color-primary) focus:ring-(--color-primary) cursor-pointer'
+                className='mt-0.5 h-4 w-4 rounded border-border accent-(--color-primary) cursor-pointer'
               />
               <span className='leading-relaxed'>
                 Acepto recibir novedades y promociones de{' '}
@@ -573,7 +534,6 @@ function DemoReservePreview({
   resourceName,
   loadingResource,
   businessName,
-  resourceLabelSingular,
   slotDurationMinutes
 }: {
   slug?: string
@@ -583,7 +543,6 @@ function DemoReservePreview({
   resourceName: string | null
   loadingResource: boolean
   businessName: string
-  resourceLabelSingular: string
   slotDurationMinutes: number
 }) {
   const timeLabel = (() => {
@@ -627,33 +586,13 @@ function DemoReservePreview({
     )
   }
 
-  const details = [
-    {
-      icon: <StoreIcon size={16} />,
-      label: resourceLabelSingular,
-      value: resourceName
-    },
-    {
-      icon: <CalendarIcon size={16} />,
-      label: 'Fecha',
-      value: dateLabel,
-      capitalize: true
-    },
-    { icon: <ClockIcon size={16} />, label: 'Hora', value: timeLabel },
-    {
-      icon: <ClockIcon size={16} />,
-      label: 'Duración',
-      value: `${slotDurationMinutes} minutos`
-    }
-  ]
-
   return (
     <div className='flex flex-col gap-4 max-w-md mx-auto'>
       <Link
         href={slug ? `/b/${slug}` : '/'}
-        className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
+        className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 py-2 rounded-lg'
       >
-        <ArrowLeftIcon size={16} />
+        <ArrowLeftIcon size={14} />
         Disponibilidad
       </Link>
 
@@ -668,40 +607,29 @@ function DemoReservePreview({
 
       {/* Demo banner */}
       <div
-        className='flex items-start gap-3 p-4 rounded-xl bg-yellow-50 border border-yellow-300 text-yellow-900 animate-fade-up'
+        className='flex items-start gap-3 p-4 rounded-xl border border-flood-500/40 bg-flood-500/10 text-(--color-text) animate-fade-up'
         role='status'
       >
-        <InfoIcon size={20} className='shrink-0 mt-0.5' />
+        <InfoIcon
+          size={20}
+          className='shrink-0 mt-0.5 text-(--color-warning)'
+        />
         <div className='flex-1'>
           <p className='text-sm font-semibold'>Modo demostración</p>
-          <p className='text-xs mt-0.5'>
-            Las reservas no son reales. Este formulario es solo una vista previa
-            del flujo que verían tus clientes.
+          <p className='text-xs mt-0.5 text-(--color-text-muted)'>
+            Vista previa del formulario que verían tus clientes. En un negocio
+            real, aquí enviarían la solicitud y tú la confirmarías — en la demo
+            no se crean reservas reales.
           </p>
         </div>
       </div>
 
-      <Card
-        className='p-5 animate-fade-up'
-        elevated
-        data-tour='reservation-summary'
-      >
-        <dl className='flex flex-col gap-3 text-sm'>
-          {details.map((d) => (
-            <div key={d.label} className='flex justify-between items-center'>
-              <dt className='flex items-center gap-2 text-(--color-text-muted)'>
-                <span className='text-graphite-400'>{d.icon}</span>
-                {d.label}
-              </dt>
-              <dd
-                className={`font-medium nums ${d.capitalize ? 'capitalize' : ''}`}
-              >
-                {d.value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </Card>
+      <SlotTicket
+        resourceName={resourceName}
+        dateLabel={dateLabel}
+        timeLabel={timeLabel}
+        durationMinutes={slotDurationMinutes}
+      />
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <div className='flex flex-col gap-4'>
@@ -728,11 +656,6 @@ function DemoReservePreview({
             hint='Información adicional para el negocio.'
           />
 
-          <Alert variant='info'>
-            <strong>Demostración:</strong> En un negocio real, aquí el cliente
-            enviaría la solicitud y el negocio la confirmaría.
-          </Alert>
-
           <Link href={slug ? `/b/${slug}` : '/'}>
             <Button variant='secondary' size='lg' className='w-full'>
               <ArrowLeftIcon size={18} />
@@ -746,6 +669,52 @@ function DemoReservePreview({
           </Link>
         </div>
       </Card>
+    </div>
+  )
+}
+
+/**
+ * Ticket del turno — la misma fila del tablero de disponibilidad,
+ * ahora como resumen de lo que se está por reservar.
+ */
+function SlotTicket({
+  resourceName,
+  dateLabel,
+  timeLabel,
+  durationMinutes
+}: {
+  resourceName: string | null
+  dateLabel: string
+  timeLabel: string
+  durationMinutes: number
+}) {
+  return (
+    <div
+      className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm) animate-fade-up dark:border-white/10 dark:bg-pitch-950 dark:text-chalk'
+      data-tour='reservation-summary'
+    >
+      <div className='flex items-center justify-between border-b border-border px-5 py-3 dark:border-white/10'>
+        <span className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) dark:text-chalk-dim/70'>
+          Tu turno
+        </span>
+        <span className='font-mono text-[11px] capitalize text-(--color-text-muted) dark:text-chalk-dim/70'>
+          {dateLabel}
+        </span>
+      </div>
+      <div className='flex items-center gap-4 px-5 py-4'>
+        <span className='nums font-mono text-2xl font-bold text-(--color-text) dark:text-chalk'>
+          {timeLabel}
+        </span>
+        <div className='flex-1 min-w-0'>
+          <p className='truncate text-sm font-medium'>{resourceName}</p>
+          <p className='text-xs text-(--color-text-muted) nums dark:text-chalk-dim/60'>
+            {durationMinutes} min
+          </p>
+        </div>
+        <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-yellow-700 dark:border-flood-400/40 dark:text-flood-300'>
+          Seleccionado
+        </span>
+      </div>
     </div>
   )
 }

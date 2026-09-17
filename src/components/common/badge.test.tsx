@@ -17,11 +17,11 @@ describe('Badge', () => {
   it('applies variant classes for each variant', () => {
     const variants: Array<[string, string]> = [
       ['neutral', 'bg-surface-inset'],
-      ['success', 'bg-pitch-100'],
-      ['warning', 'bg-orange-50'],
-      ['danger', 'bg-red-50'],
-      ['info', 'bg-blue-50'],
-      ['accent', 'bg-yellow-50']
+      ['success', 'bg-pitch-500/10'],
+      ['warning', 'bg-orange-500/10'],
+      ['danger', 'bg-signal-red/10'],
+      ['info', 'bg-signal-blue/10'],
+      ['accent', 'bg-flood-500/10']
     ]
 
     for (const [variant, expectedClass] of variants) {

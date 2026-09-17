@@ -8,11 +8,15 @@ interface BadgeProps {
 
 const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
   neutral: 'bg-surface-inset text-text-muted border-border',
-  success: 'bg-pitch-100 text-pitch-800 border-pitch-300',
-  warning: 'bg-orange-50 text-orange-800 border-orange-200',
-  danger: 'bg-red-50 text-red-800 border-red-200',
-  info: 'bg-blue-50 text-blue-800 border-blue-200',
-  accent: 'bg-yellow-50 text-yellow-800 border-yellow-200',
+  success:
+    'bg-pitch-500/10 text-pitch-700 border-pitch-500/40 dark:bg-pitch-400/10 dark:text-pitch-300 dark:border-pitch-400/30',
+  warning:
+    'bg-orange-500/10 text-orange-700 border-orange-500/40 dark:bg-orange-400/10 dark:text-orange-300 dark:border-orange-400/30',
+  danger:
+    'bg-signal-red/10 text-signal-red border-signal-red/40 dark:bg-red-400/10 dark:text-red-300 dark:border-red-400/30',
+  info: 'bg-signal-blue/10 text-signal-blue border-signal-blue/40 dark:bg-blue-400/10 dark:text-blue-300 dark:border-blue-400/30',
+  accent:
+    'bg-flood-500/10 text-yellow-700 border-flood-500/40 dark:bg-flood-400/10 dark:text-flood-300 dark:border-flood-400/30'
 }
 
 export function Badge({ children, variant = 'neutral' }: BadgeProps) {

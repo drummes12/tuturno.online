@@ -115,7 +115,7 @@ export function HeaderMenu({
               close()
               void onSignOut()
             }}
-            className='flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-danger transition-colors hover:bg-red-50 touch-target'
+            className='flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-danger transition-colors hover:bg-signal-red/10 touch-target'
           >
             <LogOutIcon size={17} className='shrink-0' />
             <span>Cerrar sesión</span>

@@ -42,14 +42,14 @@ const stateBadge: Record<
 function StateIcon({ state }: { state: NotificationState }) {
   if (state === 'pending') {
     return (
-      <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-yellow-100 text-yellow-700'>
+      <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-flood-500/15 text-yellow-700 dark:text-flood-300'>
         <ClockIcon size={16} />
       </span>
     )
   }
   if (state === 'unread') {
     return (
-      <span className='relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pitch-100 text-primary'>
+      <span className='relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 text-primary'>
         <BellIcon size={16} />
         <span
           className='absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-primary'
@@ -265,7 +265,7 @@ export function NotificationCenter({
                       <li key={n.id}>
                         <div
                           className={`flex items-start gap-2 border-b border-border/60 px-2 py-1.5 ${
-                            isNotificationUnread(n) ? 'bg-pitch-100/50' : ''
+                            isNotificationUnread(n) ? 'bg-pitch-500/10' : ''
                           }`}
                         >
                           <button
@@ -294,10 +294,10 @@ export function NotificationCenter({
                               </span>
                               <span className='mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-text-muted'>
                                 <span>
-                                  {formatDistanceToNow(
-                                    parseISO(n.created_at),
-                                    { locale: es, addSuffix: true }
-                                  )}
+                                  {formatDistanceToNow(parseISO(n.created_at), {
+                                    locale: es,
+                                    addSuffix: true
+                                  })}
                                 </span>
                                 {businessName && (
                                   <>

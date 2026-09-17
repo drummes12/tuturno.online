@@ -46,7 +46,7 @@ function NotificationStatusIcon({
     ? 'bg-success text-white'
     : blocked
       ? 'bg-danger text-white'
-      : 'bg-yellow-500 text-white'
+      : 'bg-warning text-white'
 
   return (
     <span className='relative inline-flex'>

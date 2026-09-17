@@ -303,7 +303,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
             {sorted.map((r, index) => (
               <Card
                 key={r.id}
-                className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
+                className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-flood-500' : ''}`}
                 style={{ '--index': index } as React.CSSProperties}
                 data-tour={index === 0 ? 'reservation-card' : undefined}
               >

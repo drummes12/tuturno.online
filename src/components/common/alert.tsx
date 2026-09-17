@@ -15,20 +15,23 @@ const variantConfig: Record<
   { container: string; icon: ReactNode }
 > = {
   error: {
-    container: 'bg-red-50 border-red-200 text-red-800',
+    container:
+      'border-signal-red/40 bg-signal-red/10 text-signal-red dark:border-red-400/30 dark:bg-red-400/10 dark:text-red-300',
     icon: <AlertIcon size={18} />
   },
   warning: {
-    container: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    container:
+      'border-flood-500/40 bg-flood-500/10 text-yellow-700 dark:border-flood-400/30 dark:bg-flood-400/10 dark:text-flood-300',
     icon: <AlertIcon size={18} />
   },
   info: {
-    container: 'bg-blue-50 border-blue-200 text-blue-800',
+    container:
+      'border-signal-blue/40 bg-signal-blue/10 text-signal-blue dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-300',
     icon: <InfoIcon size={18} />
   },
   success: {
     container:
-      'bg-pitch-100 border-pitch-300 text-pitch-800',
+      'border-pitch-500/40 bg-pitch-500/10 text-pitch-700 dark:border-pitch-400/30 dark:bg-pitch-400/10 dark:text-pitch-300',
     icon: <CheckIcon size={18} />
   }
 }
@@ -71,14 +74,14 @@ export function ErrorBanner({
   return (
     <div
       role='alert'
-      className='flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 text-red-800 px-4 py-3 text-sm animate-fade-up'
+      className='flex items-start gap-2.5 rounded-xl border border-signal-red/40 bg-signal-red/10 px-4 py-3 text-sm text-signal-red animate-fade-up dark:border-red-400/30 dark:bg-red-400/10 dark:text-red-300'
     >
       <AlertIcon size={18} className='shrink-0 mt-0.5' />
       <span className='flex-1'>{message}</span>
       {onDismiss && (
         <button
           onClick={onDismiss}
-          className='shrink-0 text-red-600 hover:text-red-800 transition-colors touch-target -mr-1 -mt-1'
+          className='shrink-0 opacity-60 transition-opacity hover:opacity-100 touch-target -mr-1 -mt-1'
           aria-label='Cerrar error'
         >
           <XIcon size={16} />
