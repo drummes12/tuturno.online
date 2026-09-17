@@ -166,7 +166,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             El contenido siempre vive en la columna max-w-5xl, así al
             zoom-out los controles no se van a los bordes de pantalla. */}
         <div
-          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900/80 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' ? 'morph-header-inner' : ''}`}
+          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900/90 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
             <Link
@@ -298,7 +298,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Content */}
-      <main className='flex-1 mx-auto w-full max-w-5xl px-4 py-6 pb-6'>
+      <main className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-6 pb-6'>
         {children}
       </main>
 

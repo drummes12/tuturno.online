@@ -56,7 +56,7 @@ const STATUS_STYLE: Record<SlotStatus, { chip: string; label: string }> = {
   },
   ultimo: {
     chip: 'border-flood-400/40 bg-flood-400/10 text-flood-300',
-    label: 'Último cupo'
+    label: 'En espera'
   }
 }
 

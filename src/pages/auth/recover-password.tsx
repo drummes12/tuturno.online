@@ -4,7 +4,9 @@ import { resetPassword, updatePassword, signOut } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
-import { Card } from '@/components/common/card'
+import { Alert } from '@/components/common/alert'
+import { AuthShell } from '@/components/auth/auth-shell'
+import { MailIcon, CheckIcon, ArrowLeftIcon } from '@/components/common/icon'
 
 export function RecoverPasswordPage() {
   const { user } = useAuthStore()
@@ -84,8 +86,8 @@ export function RecoverPasswordPage() {
   }
 
   return (
-    <div className='flex min-h-[calc(100dvh-3.5rem)] items-center justify-center px-4 py-8'>
-      <Card elevated className='w-full max-w-md p-6 md:p-8'>
+    <AuthShell>
+      <div className='w-full animate-fade-up'>
         {/* --- Flow de recovery: establecer nueva contraseña --- */}
         {isRecoveryFlow && !updated && (
           <>
@@ -120,11 +122,7 @@ export function RecoverPasswordPage() {
                 autoComplete='new-password'
                 minLength={6}
               />
-              {error && (
-                <p className='text-sm text-(--color-danger) bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
-                  {error}
-                </p>
-              )}
+              {error && <Alert variant='error'>{error}</Alert>}
               <Button
                 type='submit'
                 loading={updating}
@@ -139,34 +137,44 @@ export function RecoverPasswordPage() {
 
         {/* --- Contraseña actualizada --- */}
         {isRecoveryFlow && updated && (
-          <>
-            <h1 className='text-xl font-bold mb-2'>Contraseña actualizada</h1>
-            <p className='text-sm text-(--color-text-muted) mb-6'>
-              Tu contraseña se actualizó correctamente. Te redirigiremos al
-              inicio de sesión…
-            </p>
-            <Link href='/login'>
+          <div className='flex flex-col items-center gap-4 text-center'>
+            <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-pitch-700 dark:text-pitch-300'>
+              <CheckIcon size={32} />
+            </div>
+            <div>
+              <h1 className='text-xl font-bold mb-2'>Contraseña actualizada</h1>
+              <p className='text-sm text-(--color-text-muted)'>
+                Tu contraseña se actualizó correctamente. Te redirigiremos al
+                inicio de sesión…
+              </p>
+            </div>
+            <Link href='/login' className='w-full'>
               <Button variant='secondary' className='w-full'>
                 Ir a iniciar sesión
               </Button>
             </Link>
-          </>
+          </div>
         )}
 
         {/* --- Flow normal: solicitar enlace de recuperación --- */}
         {!isRecoveryFlow && sent && (
-          <>
-            <h1 className='text-xl font-bold mb-2'>Revisa tu correo</h1>
-            <p className='text-sm text-(--color-text-muted) mb-6'>
-              Te enviamos un enlace para restablecer tu contraseña a{' '}
-              <strong>{email}</strong>.
-            </p>
-            <Link href='/login'>
+          <div className='flex flex-col items-center gap-4 text-center'>
+            <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-pitch-700 dark:text-pitch-300'>
+              <MailIcon size={32} />
+            </div>
+            <div>
+              <h1 className='text-xl font-bold mb-2'>Revisa tu correo</h1>
+              <p className='text-sm text-(--color-text-muted) max-w-xs'>
+                Te enviamos un enlace para restablecer tu contraseña a{' '}
+                <strong>{email}</strong>.
+              </p>
+            </div>
+            <Link href='/login' className='w-full'>
               <Button variant='secondary' className='w-full'>
                 Volver a iniciar sesión
               </Button>
             </Link>
-          </>
+          </div>
         )}
 
         {!isRecoveryFlow && !sent && (
@@ -187,11 +195,7 @@ export function RecoverPasswordPage() {
                 autoComplete='email'
                 autoFocus
               />
-              {error && (
-                <p className='text-sm text-(--color-danger) bg-red-50 border border-red-200 rounded-lg px-3 py-2'>
-                  {error}
-                </p>
-              )}
+              {error && <Alert variant='error'>{error}</Alert>}
               <Button
                 type='submit'
                 loading={loading}
@@ -211,7 +215,15 @@ export function RecoverPasswordPage() {
             </p>
           </>
         )}
-      </Card>
-    </div>
+
+        <Link
+          href='/'
+          className='flex items-center justify-center gap-1.5 mt-6 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors'
+        >
+          <ArrowLeftIcon size={14} />
+          Volver al inicio
+        </Link>
+      </div>
+    </AuthShell>
   )
 }

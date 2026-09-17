@@ -23,7 +23,7 @@ export function Input({
     <div className={`flex flex-col gap-1.5 ${wrapperClassName}`}>
       <label
         htmlFor={inputId}
-        className='text-sm font-medium text-(--color-text) tracking-tight'
+        className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
       >
         {label}
       </label>
