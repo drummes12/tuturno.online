@@ -29,7 +29,7 @@ export function PwaNotificationPrompt({ state }: PwaNotificationPromptProps) {
 
   return (
     <div className='w-full' role='alert' aria-live='polite'>
-      <div className='flex items-center gap-3 rounded-2xl border border-pitch-300 bg-pitch-100 p-3 shadow-[0_12px_35px_rgba(4,33,15,0.2)]'>
+      <div className='flex items-center gap-3 rounded-2xl border border-border-strong bg-surface-elevated p-3 shadow-(--shadow-lg)'>
         <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white'>
           <BellIcon size={20} />
         </span>
@@ -61,7 +61,7 @@ export function PwaNotificationPrompt({ state }: PwaNotificationPromptProps) {
           <button
             type='button'
             onClick={dismiss}
-            className='inline-flex h-11 w-11 items-center justify-center rounded-lg text-(--color-text-muted) transition-colors hover:bg-pitch-200 hover:text-(--color-text) touch-target'
+            className='inline-flex h-11 w-11 items-center justify-center rounded-lg text-(--color-text-muted) transition-colors hover:bg-surface-inset hover:text-(--color-text) touch-target'
             aria-label='Cerrar aviso de notificaciones'
             title='Más tarde'
           >

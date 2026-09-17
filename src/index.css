@@ -1,6 +1,11 @@
 @import 'tailwindcss';
 @import 'driver.js/dist/driver.css';
 
+/* Variante dark por clase (.dark en <html>), no por media query:
+   el toggle manual manda; el script inline en index.html resuelve
+   la preferencia inicial antes del primer paint. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ─────────────────────────────────────────────────────────────
    Design tokens — TuTurno
    Mundo de color: cancha de fútbol, líneas blancas, iluminación
@@ -86,9 +91,101 @@
   --ease-press: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Base */
-* {
-  border-color: var(--color-border);
+/* ─────────────────────────────────────────────────────────────
+   Tema oscuro — la misma cancha, de noche. Superficies grafito
+   cálidas, el pitch sube a acento luminoso, el floodlight gana
+   peso como señal. Nada de negro puro.
+   ───────────────────────────────────────────────────────────── */
+.dark {
+  --color-surface: #0f1512;
+  --color-surface-elevated: #18201b;
+  --color-surface-inset: #121a15;
+  --color-text: #edf1ea;
+  --color-text-muted: #93a096;
+  --color-border: rgba(237, 241, 234, 0.09);
+  --color-border-strong: rgba(237, 241, 234, 0.18);
+  --color-primary: var(--color-pitch-500);
+  --color-primary-hover: var(--color-pitch-400);
+  --color-success: var(--color-pitch-500);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.45), 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-pitch: 0 4px 16px rgba(27, 191, 99, 0.22);
+  --shadow-flood: 0 4px 16px rgba(250, 204, 21, 0.18);
+
+  color-scheme: dark;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Header morph — barra embebida en el hero que se contrae a
+   píldora al hacer scroll. CSS scroll-driven puro: sin soporte
+   (Safari estable) el header queda siempre como píldora.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --header-pill-bg: rgb(6 59 28 / 0.8);
+  --header-pill-border: rgb(255 255 255 / 0.12);
+  /* Debe coincidir con el max-w-5xl del contenido: la animación
+     sobrescribe la clase (así funciona scroll-driven), el valor no. */
+  --header-pill-max-w: 64rem;
+}
+
+.dark {
+  --header-pill-bg: rgb(20 24 23 / 0.75);
+  --header-pill-border: rgb(255 255 255 / 0.1);
+}
+
+@supports (animation-timeline: scroll(root)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .morph-header {
+      animation: morph-header-pad linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 96px;
+    }
+
+    .morph-header-inner {
+      animation: morph-header-pill linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 96px;
+    }
+  }
+}
+
+@keyframes morph-header-pad {
+  from {
+    padding: 0;
+  }
+  to {
+    padding: 12px 16px 0;
+  }
+}
+
+@keyframes morph-header-pill {
+  from {
+    max-width: 100%;
+    border-radius: 0;
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  to {
+    max-width: var(--header-pill-max-w);
+    border-radius: 1.25rem;
+    background-color: var(--header-pill-bg);
+    border-color: var(--header-pill-border);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(4px);
+  }
+}
+
+/* Base — dentro de @layer para que las utilidades border-* (que viven
+   en @layer utilities) puedan sobreescribir el color por defecto. */
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
 }
 
 html {
@@ -240,6 +337,35 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
   border-radius: var(--radius-sm);
+}
+
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-inset) 25%,
+    var(--color-graphite-700) 50%,
+    var(--color-surface-inset) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* Transición suave al cambiar de tema */
+body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Dot "en vivo" — pulso semántico para disponibilidad real */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.live-dot {
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
 }
 
 /* ─────────────────────────────────────────────────────────────

@@ -29,15 +29,15 @@ beforeEach(() => {
 })
 
 describe('LandingPage', () => {
-  it('muestra el branding TuTurno', () => {
+  it('muestra el titular principal', () => {
     render(<LandingPage />)
     const h1 = screen.getByRole('heading', { level: 1 })
-    expect(h1.textContent).toMatch(/TuTurno/)
+    expect(h1.textContent).toMatch(/llena tu cancha/i)
   })
 
   it('muestra el botón de demostración que enlaza a /b/demo', () => {
     render(<LandingPage />)
-    const demoLink = screen.getByRole('link', { name: /demostración/i })
+    const demoLink = screen.getByRole('link', { name: /probar demostración/i })
     expect(demoLink).toHaveAttribute('href', '/b/demo')
   })
 

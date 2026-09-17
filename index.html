@@ -12,6 +12,15 @@
   <link rel="manifest" href="/site.webmanifest" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0a5226" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1512" />
+  <script>
+    // Aplica el tema antes del primer paint para evitar flash.
+    (function () {
+      var t = localStorage.getItem('tuturno:theme');
+      var dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
 <!-- Primary Meta Tags -->
 <title>TuTurno — Reservas online para canchas, salas y consultorios</title>
 <meta name="title" content="TuTurno — Reservas online para canchas, salas y consultorios" />

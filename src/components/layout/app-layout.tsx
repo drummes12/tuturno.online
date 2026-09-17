@@ -11,7 +11,9 @@ import {
   BellIcon,
   CheckIcon,
   XIcon,
-  HelpIcon
+  HelpIcon,
+  SunIcon,
+  MoonIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { PwaInstallPrompt } from '@/components/common/pwa-install-prompt'
@@ -26,6 +28,7 @@ import { HeaderMenu } from '@/components/common/header-menu'
 import { NotificationCenter } from '@/components/common/notification-center'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
+import { useTheme } from '@/hooks/use-theme'
 import { extractSlugFromPath } from '@/lib/slug'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import type { NotificationPermissionState } from '@/lib/push'
@@ -98,6 +101,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation()
   const clientTutorial = useClientTutorial()
   const adminTutorial = useAdminTutorial()
+  const { dark, toggle: toggleTheme } = useTheme()
   const pushNotificationState = usePushNotifications(user?.id ?? null)
 
   const startTour = isAdmin ? adminTutorial.startTour : clientTutorial.startTour
@@ -152,81 +156,103 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div
       className={`min-h-dvh flex flex-col bg-surface overflow-clip ${hasBottomNav ? 'has-bottom-nav' : ''}`}
     >
-      {/* Top bar — pitch green with depth */}
-      <header className='sticky top-0 z-40 bg-pitch-800 text-white border-b border-pitch-900 shadow-[0_4px_20px_rgba(4,33,15,0.25)]'>
-        <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
-          <Link
-            href='/'
-            className='flex min-w-0 shrink items-center gap-2 font-bold text-base tracking-tight'
-          >
-            <img
-              src='/logo-mark.svg'
-              alt='TuTurno'
-              className='w-8 h-8 rounded-lg'
-            />
-            <span>TuTurno</span>
-          </Link>
-          <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
-            {user && showTutorialButton && (
+      {/* Top bar — píldora flotante. En la landing arranca embebida a
+          ancho completo sobre el hero y se contrae a píldora al scroll
+          (scroll-driven CSS; sin soporte queda píldora siempre). */}
+      <header
+        className={`sticky top-0 z-40 px-3 pt-3 text-white sm:px-4 ${location === '/' ? 'morph-header' : ''}`}
+      >
+        {/* Barra visual: hace el morph ancho-completo → píldora.
+            El contenido siempre vive en la columna max-w-5xl, así al
+            zoom-out los controles no se van a los bordes de pantalla. */}
+        <div
+          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900/80 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' ? 'morph-header-inner' : ''}`}
+        >
+          <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
+            <Link
+              href='/'
+              className='flex min-w-0 shrink items-center gap-2 font-bold text-base tracking-tight'
+            >
+              <img
+                src='/logo-mark.svg'
+                alt='TuTurno'
+                className='w-8 h-8 rounded-lg'
+              />
+              <span>TuTurno</span>
+            </Link>
+            <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
               <button
                 type='button'
-                onClick={startTour}
-                disabled={isStarting}
-                data-tour='tutorial-trigger'
-                className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
-                aria-label='Iniciar guía del tutorial'
-                aria-busy={isStarting}
-                title='Guía interactiva'
+                onClick={toggleTheme}
+                className='inline-flex h-11 w-11 items-center justify-center rounded-lg text-white/85 transition-[background-color,transform,color] hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target'
+                aria-label={
+                  dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'
+                }
+                title={dark ? 'Tema claro' : 'Tema oscuro'}
               >
-                <HelpIcon size={16} className='shrink-0' />
-                <span className='hidden min-w-0 max-w-12 truncate sm:inline md:max-w-none'>
-                  {isStarting ? 'Abriendo…' : 'Guía'}
-                </span>
+                {dark ? <SunIcon size={18} /> : <MoonIcon size={18} />}
               </button>
-            )}
-            {isAdmin && <NewReservationButton />}
-            {user && (
-              <NotificationCenter
-                userId={user.id}
-                settingsHref={`/notificaciones?next=${encodeURIComponent(location)}`}
-              />
-            )}
-            {user ? (
-              <HeaderMenu
-                isAdmin={isAdmin}
-                isPlatformAdmin={isPlatformAdmin}
-                businessSelector={
-                  isAdmin && memberships.length > 0 ? (
-                    <BusinessSelector inMenu />
-                  ) : undefined
-                }
-                nextPath={location}
-                notificationIcon={
-                  <NotificationStatusIcon
-                    permission={pushNotificationState.permission}
-                    registered={pushNotificationState.registered}
-                  />
-                }
-                notificationLabel={
-                  pushNotificationState.permission === 'granted' &&
-                  pushNotificationState.registered
-                    ? 'Notificaciones activas'
-                    : pushNotificationState.permission === 'denied'
-                      ? 'Notificaciones bloqueadas'
-                      : 'Configurar notificaciones'
-                }
-                onSignOut={signOut}
-              />
-            ) : (
-              <Link
-                href='/login'
-                data-tour='auth-entry'
-                className='flex min-w-0 max-w-24 items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-chalk-dim transition-colors hover:text-white touch-target'
-              >
-                <LogInIcon size={16} className='shrink-0' />
-                <span className='min-w-0 truncate'>Ingresar</span>
-              </Link>
-            )}
+              {user && showTutorialButton && (
+                <button
+                  type='button'
+                  onClick={startTour}
+                  disabled={isStarting}
+                  data-tour='tutorial-trigger'
+                  className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
+                  aria-label='Iniciar guía del tutorial'
+                  aria-busy={isStarting}
+                  title='Guía interactiva'
+                >
+                  <HelpIcon size={16} className='shrink-0' />
+                  <span className='hidden min-w-0 max-w-12 truncate sm:inline md:max-w-none'>
+                    {isStarting ? 'Abriendo…' : 'Guía'}
+                  </span>
+                </button>
+              )}
+              {isAdmin && <NewReservationButton />}
+              {user && (
+                <NotificationCenter
+                  userId={user.id}
+                  settingsHref={`/notificaciones?next=${encodeURIComponent(location)}`}
+                />
+              )}
+              {user ? (
+                <HeaderMenu
+                  isAdmin={isAdmin}
+                  isPlatformAdmin={isPlatformAdmin}
+                  businessSelector={
+                    isAdmin && memberships.length > 0 ? (
+                      <BusinessSelector inMenu />
+                    ) : undefined
+                  }
+                  nextPath={location}
+                  notificationIcon={
+                    <NotificationStatusIcon
+                      permission={pushNotificationState.permission}
+                      registered={pushNotificationState.registered}
+                    />
+                  }
+                  notificationLabel={
+                    pushNotificationState.permission === 'granted' &&
+                    pushNotificationState.registered
+                      ? 'Notificaciones activas'
+                      : pushNotificationState.permission === 'denied'
+                        ? 'Notificaciones bloqueadas'
+                        : 'Configurar notificaciones'
+                  }
+                  onSignOut={signOut}
+                />
+              ) : (
+                <Link
+                  href='/login'
+                  data-tour='auth-entry'
+                  className='flex min-w-0 max-w-28 items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white/90 shadow-sm transition-[background-color,border-color,color] hover:border-white/35 hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target'
+                >
+                  <LogInIcon size={16} className='shrink-0' />
+                  <span className='min-w-0 truncate'>Ingresar</span>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </header>

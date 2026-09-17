@@ -20,3 +20,22 @@ if (!window.matchMedia) {
     dispatchEvent: vi.fn(),
   }))
 }
+
+// Mock global de IntersectionObserver (no existe en jsdom). Reporta
+// visible de inmediato para que los Reveal no oculten contenido en tests.
+if (!window.IntersectionObserver) {
+  window.IntersectionObserver = class {
+    cb: IntersectionObserverCallback
+    constructor(cb: IntersectionObserverCallback) {
+      this.cb = cb
+    }
+    observe() {
+      this.cb(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        this as unknown as IntersectionObserver
+      )
+    }
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof IntersectionObserver
+}
