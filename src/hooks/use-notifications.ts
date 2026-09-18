@@ -19,6 +19,19 @@ export function useNotifications(userId: string | null) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const unreadCount = countUnread(notifications)
+
+  // Badging API: el icono de la PWA refleja las sin leer.
+  // Solo aplica a la app instalada (standalone); en pestaña es no-op.
+  useEffect(() => {
+    if (!('setAppBadge' in navigator)) return
+    if (!userId || unreadCount === 0) {
+      void navigator.clearAppBadge?.().catch(() => {})
+    } else {
+      void navigator.setAppBadge?.(unreadCount).catch(() => {})
+    }
+  }, [userId, unreadCount])
+
   const refresh = useCallback(async () => {
     if (!userId) {
       setNotifications([])
@@ -131,7 +144,7 @@ export function useNotifications(userId: string | null) {
 
   return {
     notifications,
-    unreadCount: countUnread(notifications),
+    unreadCount,
     loading,
     error,
     refresh,
