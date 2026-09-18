@@ -106,73 +106,95 @@ export function PrivacyPreferencesPage() {
         </p>
       </div>
 
-      <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
-        <div className='flex items-start gap-3 mb-4'>
-          <MailIcon size={20} className='text-(--color-text-muted) mt-0.5' />
-          <div>
-            <h2 className='text-sm font-semibold'>
-              Promociones por correo electrónico
+      <Card
+        className='p-0 overflow-hidden animate-fade-up'
+        style={{ animationDelay: '60ms' }}
+      >
+        <div className='flex items-center gap-3 border-b border-border px-5 py-4'>
+          <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
+            <MailIcon size={16} />
+          </span>
+          <div className='min-w-0'>
+            <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
+              Promociones por correo
             </h2>
-            <p className='text-xs text-(--color-text-muted) mt-1'>
-              Cada negocio gestiona su propio marketing. Puedes darte de baja o
-              reactivar tu consentimiento por negocio cuando quieras. Esto no
-              afecta las notificaciones operativas de tus reservas.
+            <p className='text-xs text-(--color-text-muted) mt-0.5'>
+              Marketing por negocio — no afecta los avisos de tus reservas.
             </p>
           </div>
         </div>
 
-        {error && <Alert variant='error'>{error}</Alert>}
+        {error && (
+          <div className='p-4'>
+            <Alert variant='error'>{error}</Alert>
+          </div>
+        )}
 
         {consents.length === 0 ? (
-          <p className='text-sm text-(--color-text-muted) py-4 text-center'>
+          <p className='text-sm text-(--color-text-muted) px-5 py-8 text-center'>
             No tienes consentimientos de marketing registrados. Cuando reserves
             y aceptes promociones de un negocio, aparecerán aquí.
           </p>
         ) : (
-          <ul className='flex flex-col gap-3'>
-            {consents.map((c) => (
-              <li
-                key={c.business_id}
-                className='flex items-center justify-between gap-3 p-3 rounded-lg border border-border bg-surface-elevated'
-              >
-                <div className='flex flex-col min-w-0'>
-                  <span className='text-sm font-medium truncate'>
-                    {c.business_name}
-                  </span>
-                  <span className='text-xs text-(--color-text-muted)'>
-                    {c.status === 'accepted'
-                      ? `Aceptado${c.accepted_at ? ` · ${new Date(c.accepted_at).toLocaleDateString('es-CO')}` : ''}`
-                      : 'Dado de baja'}
-                  </span>
-                </div>
-                {c.status === 'accepted' ? (
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    loading={busyId === c.business_id}
-                    onClick={() => handleWithdraw(c.business_id)}
-                  >
-                    Dar de baja
-                  </Button>
-                ) : (
-                  <Button
-                    variant='secondary'
-                    size='sm'
-                    loading={busyId === c.business_id}
-                    onClick={() => handleReaccept(c.business_id)}
-                  >
-                    <CheckIcon size={16} />
-                    Reactivar
-                  </Button>
-                )}
-              </li>
-            ))}
+          <ul className='flex flex-col divide-y divide-border/60'>
+            {consents.map((c) => {
+              const accepted = c.status === 'accepted'
+              return (
+                <li
+                  key={c.business_id}
+                  className='flex items-center justify-between gap-3 px-5 py-3.5 transition-colors hover:bg-surface-inset/60'
+                >
+                  <div className='flex min-w-0 flex-col gap-0.5'>
+                    <span className='text-sm font-medium truncate'>
+                      {c.business_name}
+                    </span>
+                    <span
+                      className={`flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${
+                        accepted
+                          ? 'text-pitch-700 dark:text-pitch-300'
+                          : 'text-(--color-text-muted)'
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${accepted ? 'bg-pitch-500' : 'bg-(--color-text-muted)/50'}`}
+                        aria-hidden='true'
+                      />
+                      {accepted
+                        ? `Aceptado${c.accepted_at ? ` · ${new Date(c.accepted_at).toLocaleDateString('es-CO')}` : ''}`
+                        : 'Dado de baja'}
+                    </span>
+                  </div>
+                  {accepted ? (
+                    <Button
+                      variant='secondary'
+                      size='sm'
+                      loading={busyId === c.business_id}
+                      onClick={() => handleWithdraw(c.business_id)}
+                    >
+                      Dar de baja
+                    </Button>
+                  ) : (
+                    <Button
+                      variant='secondary'
+                      size='sm'
+                      loading={busyId === c.business_id}
+                      onClick={() => handleReaccept(c.business_id)}
+                    >
+                      <CheckIcon size={16} />
+                      Reactivar
+                    </Button>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
       </Card>
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '120ms' }}>
-        <h2 className='text-sm font-semibold mb-2'>Tus derechos</h2>
+        <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text) mb-2'>
+          Tus derechos
+        </h2>
         <p className='text-xs text-(--color-text-muted) leading-relaxed'>
           Puedes consultar, corregir, solicitar la supresión o retirar tu
           consentimiento de marketing en cualquier momento. Para ejercer tus
