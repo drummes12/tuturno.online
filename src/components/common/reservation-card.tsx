@@ -102,10 +102,13 @@ export function ReservationCard({
     </>
   )
 
-  return (
+  const isPending = r.status === 'pending'
+
+  const card = (
     <Card
       elevated={elevated}
-      className={`group flex h-full flex-col p-4 animate-stagger transition-all duration-200 ease-spring ${onOpen ? 'hover:-translate-y-0.5 hover:border-strong' : ''} ${r.status === 'pending' ? 'border-l-4 border-l-flood-500' : ''} ${className}`}
+      bordered={!isPending}
+      className={`group flex h-full flex-col p-4 ${isPending ? '' : 'animate-stagger'} transition-all duration-200 ease-spring ${onOpen ? 'hover:-translate-y-0.5 hover:border-strong' : ''} ${className}`}
       style={{ '--index': index } as React.CSSProperties}
       data-tour={tourKey}
     >
@@ -129,4 +132,20 @@ export function ReservationCard({
       )}
     </Card>
   )
+
+  // Pendiente: un arco de luz flood recorre el borde — el estado de
+  // espera pide atención sin competir con el contenido del ticket.
+  if (isPending) {
+    return (
+      <div
+        className='border-beam h-full animate-stagger rounded-xl p-[1.5px]'
+        style={{ '--index': index } as React.CSSProperties}
+        data-tour={tourKey}
+      >
+        {card}
+      </div>
+    )
+  }
+
+  return card
 }

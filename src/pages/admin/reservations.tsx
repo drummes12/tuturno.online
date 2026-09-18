@@ -328,6 +328,7 @@ export function AdminReservationsPage() {
         <ReservationDetailsSheet
           reservation={selectedReservation}
           onClose={closeReservationDetails}
+          viewer='business'
           whatsappHref={buildReservationWhatsAppLink(selectedReservation)}
           actions={
             <ReservationActionControls

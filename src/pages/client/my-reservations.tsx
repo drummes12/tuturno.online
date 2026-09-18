@@ -401,6 +401,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
         <ReservationDetailsSheet
           reservation={selectedReservation}
           onClose={closeReservationDetails}
+          viewer='client'
           resourceLabel={
             selectedReservation?.business?.resource_label_singular ??
             resourceLabelSingular

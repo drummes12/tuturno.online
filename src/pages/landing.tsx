@@ -225,54 +225,59 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Fixture board — replica la grilla real de disponibilidad */}
-          <Link
-            href='/b/demo'
-            aria-label='Ver la demostración en vivo'
-            className='group block animate-fade-up rounded-2xl border border-white/15 bg-white/6 shadow-(--shadow-lg) backdrop-blur-sm transition-[border-color,transform,box-shadow] duration-300 ease-spring hover:border-white/25 dark:border-white/10 dark:bg-white/4 dark:hover:border-white/20'
+          {/* Fixture board — replica la grilla real de disponibilidad.
+              El border-beam invita al click: es "la luz del estadio". */}
+          <div
+            className='border-beam animate-fade-up rounded-2xl p-[1.5px]'
             style={{ animationDelay: '120ms' }}
           >
-            <div className='flex items-center justify-between border-b border-white/15 px-5 py-3.5 dark:border-white/10'>
-              <span className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-chalk-dim/70'>
-                Esta noche · 4 espacios
-              </span>
-              <span className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
-                <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-400' />
-                En vivo
-              </span>
-            </div>
-            <ul className='flex flex-col divide-y divide-white/10 dark:divide-white/6'>
-              {TONIGHT_SLOTS.map((slot, i) => {
-                const status = STATUS_STYLE[slot.status]
-                return (
-                  <li
-                    key={`${slot.time}-${slot.court}`}
-                    className='animate-stagger flex items-center gap-4 px-5 py-3 transition-[transform,background-color] duration-200 ease-spring hover:translate-x-0.5 hover:bg-white/8 dark:hover:bg-white/6'
-                    style={{ '--index': i } as CSSProperties}
-                  >
-                    <span className='nums w-12 font-mono text-sm font-semibold text-chalk'>
-                      {slot.time}
-                    </span>
-                    <span className='flex-1 truncate text-sm text-chalk-dim/70'>
-                      {slot.court}
-                    </span>
-                    <span
-                      className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-medium ${status.chip}`}
+            <Link
+              href='/b/demo'
+              aria-label='Ver la demostración en vivo'
+              className='group block rounded-2xl bg-pitch-950 shadow-(--shadow-lg) backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-spring'
+            >
+              <div className='flex items-center justify-between border-b border-white/15 px-5 py-3.5 dark:border-white/10'>
+                <span className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-chalk-dim/70'>
+                  Esta noche · 4 espacios
+                </span>
+                <span className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
+                  <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-400' />
+                  En vivo
+                </span>
+              </div>
+              <ul className='flex flex-col divide-y divide-white/10 dark:divide-white/6'>
+                {TONIGHT_SLOTS.map((slot, i) => {
+                  const status = STATUS_STYLE[slot.status]
+                  return (
+                    <li
+                      key={`${slot.time}-${slot.court}`}
+                      className='animate-stagger flex items-center gap-4 px-5 py-3 transition-[transform,background-color] duration-200 ease-spring hover:translate-x-0.5 hover:bg-white/8 dark:hover:bg-white/6'
+                      style={{ '--index': i } as CSSProperties}
                     >
-                      {status.label}
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-            <div className='flex items-center justify-between border-t border-white/15 px-5 py-3 text-xs text-chalk-dim/70 dark:border-white/10 dark:text-chalk-dim/60'>
-              <span>Así se ve tu disponibilidad</span>
-              <span className='flex items-center gap-1 font-medium text-pitch-300 transition-transform duration-200 ease-spring group-hover:translate-x-0.5'>
-                Ver demo
-                <ArrowRightIcon size={13} />
-              </span>
-            </div>
-          </Link>
+                      <span className='nums w-12 font-mono text-sm font-semibold text-chalk'>
+                        {slot.time}
+                      </span>
+                      <span className='flex-1 truncate text-sm text-chalk-dim/70'>
+                        {slot.court}
+                      </span>
+                      <span
+                        className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-medium ${status.chip}`}
+                      >
+                        {status.label}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+              <div className='flex items-center justify-between border-t border-white/15 px-5 py-3 text-xs text-chalk-dim/70 dark:border-white/10 dark:text-chalk-dim/60'>
+                <span>Así se ve tu disponibilidad</span>
+                <span className='flex items-center gap-1 font-medium text-pitch-300 transition-transform duration-200 ease-spring group-hover:translate-x-0.5'>
+                  Ver demo
+                  <ArrowRightIcon size={13} />
+                </span>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
 

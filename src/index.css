@@ -315,6 +315,19 @@ body {
   animation: sheet-up 0.34s var(--ease-spring) both;
 }
 
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-backdrop-in {
+  animation: backdrop-in 0.22s ease-out both;
+}
+
 /* Popover anclado — crece desde su esquina superior derecha (donde
    está el botón que lo abrió), no desde abajo como un sheet. */
 @keyframes popover-in {
@@ -370,6 +383,73 @@ body {
 /* Transición suave al cambiar de tema */
 body {
   transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Border beam — arco de luz que recorre el borde (estado pendiente).
+   Usa @property para animar el ángulo del gradiente cónico; sin
+   soporte queda un arco estático que sigue funcionando como acento. */
+@property --beam-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes beam-spin {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+.border-beam {
+  --beam-color: var(--color-flood-500);
+  --beam-width: 1.5px;
+  position: relative;
+}
+
+/* El beam se dibuja como anillo enmascarado: el gradiente cónico
+   se recorta al perímetro exacto, así el arco respeta las esquinas
+   redondeadas en vez de quedar detrás de la card. */
+.border-beam::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--beam-width);
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0deg,
+    var(--beam-color) 55deg,
+    transparent 110deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: beam-spin 3.5s linear infinite;
+  pointer-events: none;
+}
+
+.dark .border-beam {
+  --beam-color: var(--color-flood-400);
+}
+
+/* Variante pitch — el arco viaja en verde claro (papelera del turno) */
+.border-beam--pitch {
+  --beam-color: var(--color-pitch-500);
+}
+
+.dark .border-beam--pitch {
+  --beam-color: var(--color-pitch-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .border-beam::before {
+    animation: none;
+  }
 }
 
 /* Dot "en vivo" — pulso semántico para disponibilidad real */
