@@ -161,13 +161,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
           ancho completo sobre el hero y se contrae a píldora al scroll
           (scroll-driven CSS; sin soporte queda píldora siempre). */}
       <header
-        className={`sticky top-0 z-40 px-3 pt-3 text-white sm:px-4 ${location === '/' ? 'morph-header' : ''}`}
+        className={`sticky top-0 z-40 px-3 pt-3 text-white sm:px-4 ${location === '/' && !user ? 'morph-header' : ''}`}
       >
         {/* Barra visual: hace el morph ancho-completo → píldora.
             El contenido siempre vive en la columna max-w-5xl, así al
             zoom-out los controles no se van a los bordes de pantalla. */}
         <div
-          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900/90 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' ? 'morph-header-inner' : ''}`}
+          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900/90 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
             <Link

@@ -32,7 +32,7 @@ describe('LandingPage', () => {
   it('muestra el titular principal', () => {
     render(<LandingPage />)
     const h1 = screen.getByRole('heading', { level: 1 })
-    expect(h1.textContent).toMatch(/llena tu cancha/i)
+    expect(h1.textContent).toMatch(/los turnos entran solos/i)
   })
 
   it('muestra el botón de demostración que enlaza a /b/demo', () => {

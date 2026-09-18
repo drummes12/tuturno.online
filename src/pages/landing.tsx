@@ -13,6 +13,7 @@ import { Input } from '@/components/common/input'
 import {
   CalendarIcon,
   ClockIcon,
+  ListIcon,
   StoreIcon,
   ArrowRightIcon,
   LogInIcon,
@@ -38,11 +39,11 @@ interface BoardSlot {
 const TONIGHT_SLOTS: BoardSlot[] = [
   { time: '18:00', court: 'Cancha 1 · Fútbol 5', status: 'reservado' },
   { time: '19:00', court: 'Cancha 2 · Fútbol 5', status: 'reservado' },
-  { time: '20:00', court: 'Cancha 1 · Fútbol 5', status: 'ultimo' },
+  { time: '20:00', court: 'Sala Norte · Reuniones', status: 'ultimo' },
   { time: '20:00', court: 'Cancha 3 · Fútbol 8', status: 'libre' },
   { time: '21:00', court: 'Cancha 2 · Pádel', status: 'libre' },
-  { time: '22:00', court: 'Cancha 1 · Fútbol 5', status: 'libre' },
-  { time: '23:00', court: 'Cancha 3 · Fútbol 8', status: 'libre' }
+  { time: '22:00', court: 'Consultorio 3 · Terapia', status: 'libre' },
+  { time: '23:00', court: 'Cancha 1 · Fútbol 5', status: 'libre' }
 ]
 
 const STATUS_STYLE: Record<SlotStatus, { chip: string; label: string }> = {
@@ -101,35 +102,75 @@ export function LandingPage() {
 
   if (user) {
     return (
-      <div className='flex-1 flex flex-col items-center px-4 py-8'>
-        <div className='flex w-full max-w-lg flex-col gap-6'>
-          <section className='flex flex-col items-center gap-4 text-center animate-fade-up'>
-            <div className='flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-(--shadow-pitch)'>
-              <StoreIcon size={32} />
+      <div className='flex-1 flex flex-col items-center px-4 py-2 sm:py-6'>
+        <div className='flex w-full max-w-md flex-col gap-4'>
+          {/* Banda cancha — la misma noche del hero, en versión compacta */}
+          <section className='relative overflow-hidden rounded-2xl bg-pitch-950 px-6 py-6 text-chalk shadow-(--shadow-lg) animate-fade-up'>
+            <div
+              aria-hidden='true'
+              className='pointer-events-none absolute inset-0'
+            >
+              <div className='absolute inset-x-0 top-0 h-24 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.12),transparent)]' />
+              <div className='absolute inset-y-0 left-1/2 w-px bg-white/10' />
+              <div className='absolute left-1/2 top-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10' />
             </div>
-            <div>
-              <h1 className='text-3xl font-bold tracking-tight text-(--color-text) text-balance'>
-                Encuentra tu organización
+            <div className='relative flex flex-col gap-1'>
+              <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-300'>
+                Tu turno
+              </span>
+              <h1 className='text-2xl font-bold leading-tight tracking-[-0.02em] sm:text-3xl'>
+                ¿Qué reservas
+                <br />
+                hoy?
               </h1>
-              <p className='mt-2 text-base text-(--color-text-muted) text-pretty'>
-                Ingresa el identificador del negocio para consultar su
-                disponibilidad y reservar un turno.
+              <p className='mt-1.5 text-sm text-chalk-dim/80'>
+                Entra al tablero de tu negocio o revisa tus reservas.
               </p>
             </div>
           </section>
 
-          <section className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-5 shadow-(--shadow-xs) animate-fade-up'>
+          {/* Mis reservas — el destino más probable, como fila de fixture */}
+          <Link
+            href='/mis-reservas'
+            className='group flex items-center gap-4 rounded-2xl border border-border bg-surface-elevated px-5 py-3.5 shadow-(--shadow-xs) transition-[transform,border-color] duration-200 ease-spring hover:-translate-y-0.5 hover:border-border-strong animate-fade-up'
+            style={{ animationDelay: '60ms' }}
+          >
+            <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
+              <ListIcon size={18} />
+            </span>
+            <span className='min-w-0 flex-1'>
+              <span className='block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
+                Mis reservas
+              </span>
+              <span className='mt-0.5 block truncate text-sm text-(--color-text-muted)'>
+                Próximas, pendientes y pasadas
+              </span>
+            </span>
+            <ArrowRightIcon
+              size={16}
+              className='shrink-0 text-(--color-text-muted) transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
+            />
+          </Link>
+
+          {/* Buscar negocio por slug */}
+          <section
+            className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-4 shadow-(--shadow-xs) animate-fade-up'
+            style={{ animationDelay: '120ms' }}
+          >
+            <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+              Ir a un negocio
+            </span>
             {orgForm}
           </section>
 
-          <div className='flex flex-col gap-3'>
-            <Link href='/crear-negocio'>
-              <Button variant='ghost' size='md' className='w-full'>
-                <StoreIcon size={18} />
-                Quiero TuTurno para mi negocio
-              </Button>
-            </Link>
-          </div>
+          <Link
+            href='/crear-negocio'
+            className='flex items-center justify-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target animate-fade-up'
+            style={{ animationDelay: '180ms' }}
+          >
+            <StoreIcon size={15} />
+            Quiero TuTurno para mi negocio
+          </Link>
         </div>
       </div>
     )
@@ -154,7 +195,7 @@ export function LandingPage() {
         <div className='relative mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 pt-28 pb-16 sm:pt-32 sm:pb-20 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16 lg:pb-24'>
           <div className='flex flex-col items-start gap-6'>
             <h1 className='text-balance text-4xl font-bold leading-[1.05] tracking-[-0.03em] sm:text-5xl'>
-              Llena tu cancha.
+              Tu agenda, llena.
               <br />
               Los turnos entran solos.
             </h1>
@@ -191,7 +232,7 @@ export function LandingPage() {
           >
             <div className='flex items-center justify-between border-b border-white/15 px-5 py-3.5 dark:border-white/10'>
               <span className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-chalk-dim/70'>
-                Esta noche · 3 canchas
+                Esta noche · 4 espacios
               </span>
               <span className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
                 <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-400' />
@@ -244,7 +285,7 @@ export function LandingPage() {
               {[
                 {
                   title: 'Publicas tus horarios',
-                  desc: 'Configuras canchas, turnos y cierres una sola vez. Tu página pública queda lista: tuturno.online/b/tu-negocio.'
+                  desc: 'Configuras espacios, turnos y cierres una sola vez. Tu página pública queda lista: tuturno.online/b/tu-negocio.'
                 },
                 {
                   title: 'El cliente pide su turno',
@@ -279,9 +320,9 @@ export function LandingPage() {
                 Todo lo que necesita tu negocio, nada que sobre
               </h2>
               <p className='text-base text-(--color-text-muted) text-pretty'>
-                Pensado para canchas de fútbol, pádel y tenis. Y si tu negocio
-                también trabaja por turnos (una sala, un consultorio, una mesa),
-                te sirve igual.
+                Pensado para cualquier espacio que se reserve por turnos:
+                canchas, salas, consultorios, mesas, estudios. Si tu negocio
+                trabaja por horarios, te sirve.
               </p>
               <div className='mt-2 flex flex-col gap-2'>
                 <Link href='/crear-negocio' className='w-fit'>
@@ -385,7 +426,7 @@ export function LandingPage() {
         </div>
         <div className='relative mx-auto flex w-full max-w-3xl flex-col items-center gap-8 px-6 text-center'>
           <h2 className='text-balance text-3xl font-bold tracking-[-0.02em] sm:text-4xl'>
-            ¿Listo para llenar tu cancha?
+            ¿Listo para llenar tu agenda?
           </h2>
           <div className='flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row'>
             <Link href='/crear-negocio'>
