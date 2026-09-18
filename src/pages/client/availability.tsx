@@ -304,27 +304,30 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             className='hidden md:block p-4 animate-fade-up'
             style={{ animationDelay: '30ms' }}
           >
-            <div className='flex items-start gap-3'>
+            <div className='flex items-center gap-3'>
               <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-pitch-500/15 text-pitch-700 dark:text-pitch-300 shrink-0'>
                 <MapPinIcon size={18} />
               </div>
               <div className='flex-1 min-w-0'>
-                <h3 className='text-sm font-semibold tracking-tight mb-0.5'>
+                <h3 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) mb-0.5'>
                   Cómo llegar
                 </h3>
-                <p className='text-xs text-(--color-text-muted) mb-2'>
+                <p className='truncate text-sm font-medium'>
                   {formatFullAddress(location)}
                 </p>
-                <a
-                  href={googleMapsLink(location)}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='inline-flex items-center gap-1.5 text-xs font-medium text-(--color-primary) hover:underline'
-                >
-                  <ExternalLinkIcon size={14} />
-                  Abrir en Google Maps
-                </a>
               </div>
+              <a
+                href={googleMapsLink(location)}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-surface-inset px-3 py-2 text-xs font-medium text-(--color-text) transition-colors hover:border-graphite-300 hover:bg-surface touch-target'
+              >
+                <ExternalLinkIcon
+                  size={14}
+                  className='text-(--color-primary)'
+                />
+                Maps
+              </a>
             </div>
           </Card>
         )}
