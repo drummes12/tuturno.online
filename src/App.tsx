@@ -1,4 +1,5 @@
 import { Route, Switch, Redirect } from 'wouter'
+import { lazy, Suspense } from 'react'
 import { useSession } from '@/hooks/use-session'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Spinner } from '@/components/common/spinner'
@@ -19,19 +20,53 @@ import { MyReservationsPage } from '@/pages/client/my-reservations'
 import { PrivacyPreferencesPage } from '@/pages/client/privacy-preferences'
 import { NotificationsPage } from '@/pages/client/notifications'
 
-// Admin pages
-import { AdminDashboardPage } from '@/pages/admin/dashboard'
-import { AdminReservationsPage } from '@/pages/admin/reservations'
-import { AdminResourcesPage } from '@/pages/admin/resources'
-import { AdminBusinessHubPage } from '@/pages/admin/business-hub'
-import { AdminHoursPage } from '@/pages/admin/hours'
-import { AdminConfigPage } from '@/pages/admin/config'
-import { AdminExceptionsPage } from '@/pages/admin/exceptions'
-import { AdminTeamPage } from '@/pages/admin/team'
+// Admin pages — lazy: solo los miembros del negocio las descargan
+const AdminDashboardPage = lazy(() =>
+  import('@/pages/admin/dashboard').then((m) => ({
+    default: m.AdminDashboardPage
+  }))
+)
+const AdminReservationsPage = lazy(() =>
+  import('@/pages/admin/reservations').then((m) => ({
+    default: m.AdminReservationsPage
+  }))
+)
+const AdminResourcesPage = lazy(() =>
+  import('@/pages/admin/resources').then((m) => ({
+    default: m.AdminResourcesPage
+  }))
+)
+const AdminBusinessHubPage = lazy(() =>
+  import('@/pages/admin/business-hub').then((m) => ({
+    default: m.AdminBusinessHubPage
+  }))
+)
+const AdminHoursPage = lazy(() =>
+  import('@/pages/admin/hours').then((m) => ({ default: m.AdminHoursPage }))
+)
+const AdminConfigPage = lazy(() =>
+  import('@/pages/admin/config').then((m) => ({ default: m.AdminConfigPage }))
+)
+const AdminExceptionsPage = lazy(() =>
+  import('@/pages/admin/exceptions').then((m) => ({
+    default: m.AdminExceptionsPage
+  }))
+)
+const AdminTeamPage = lazy(() =>
+  import('@/pages/admin/team').then((m) => ({ default: m.AdminTeamPage }))
+)
 
-// Onboarding y plataforma
-import { CreateBusinessPage } from '@/pages/business/create-business'
-import { PlatformDashboardPage } from '@/pages/platform/dashboard'
+// Onboarding y plataforma — lazy: flujos poco frecuentes
+const CreateBusinessPage = lazy(() =>
+  import('@/pages/business/create-business').then((m) => ({
+    default: m.CreateBusinessPage
+  }))
+)
+const PlatformDashboardPage = lazy(() =>
+  import('@/pages/platform/dashboard').then((m) => ({
+    default: m.PlatformDashboardPage
+  }))
+)
 import { MfaGate } from '@/components/platform/mfa-gate'
 
 // Redirect
@@ -107,136 +142,144 @@ export default function App() {
 
   return (
     <AppLayout>
-      <Switch>
-        {/* Landing */}
-        <Route path='/' component={LandingPage} />
-
-        {/* Páginas legales — públicas */}
-        <Route path='/privacidad' component={PrivacyPage} />
-        <Route path='/terminos' component={TermsPage} />
-
-        {/* Redirect a WhatsApp — los correos usan este enlace para
-            evitar links a wa.me que no matchean el dominio de envío */}
-        <Route path='/wa' component={WhatsAppRedirectPage} />
-
-        {/* Auth — solo accesibles sin sesión */}
-        <Route path='/login'>
-          <GuestRoute>
-            <LoginPage />
-          </GuestRoute>
-        </Route>
-        <Route path='/registro'>
-          <GuestRoute>
-            <RegisterPage />
-          </GuestRoute>
-        </Route>
-        {/* /recuperar-password es accesible con y sin sesión (recovery flow) */}
-        <Route path='/recuperar-password' component={RecoverPasswordPage} />
-
-        {/* Mis reservas globales del usuario autenticado */}
-        <Route path='/mis-reservas'>
-          <ProtectedRoute>
-            <MyReservationsPage />
-          </ProtectedRoute>
-        </Route>
-
-        {/* Public tenant routes */}
-        <Route path='/b/:slug'>
-          {(params) => <AvailabilityPage slug={params.slug} />}
-        </Route>
-        <Route path='/b/:slug/reservar'>
-          {(params) => <ReservePage slug={params.slug} />}
-        </Route>
-        <Route path='/b/:slug/mis-reservas'>
-          {(params) => (
-            <ProtectedRoute>
-              <MyReservationsPage slug={params.slug} />
-            </ProtectedRoute>
-          )}
-        </Route>
-
-        {/* Onboarding de negocios */}
-        <Route path='/crear-negocio'>
-          <ProtectedRoute>
-            <CreateBusinessPage />
-          </ProtectedRoute>
-        </Route>
-
-        {/* Preferencias de privacidad del cliente */}
-        <Route path='/preferencias'>
-          <ProtectedRoute>
-            <PrivacyPreferencesPage />
-          </ProtectedRoute>
-        </Route>
-
-        {/* Notificaciones del dispositivo */}
-        <Route path='/notificaciones'>
-          <ProtectedRoute>
-            <NotificationsPage />
-          </ProtectedRoute>
-        </Route>
-
-        {/* Panel de plataforma (operador) */}
-        <Route path='/plataforma'>
-          <PlatformRoute>
-            <PlatformDashboardPage />
-          </PlatformRoute>
-        </Route>
-
-        {/* Admin */}
-        <Route path='/admin'>
-          <AdminRoute>
-            <AdminDashboardPage />
-          </AdminRoute>
-        </Route>
-        <Route path='/admin/reservas'>
-          <AdminRoute>
-            <AdminReservationsPage />
-          </AdminRoute>
-        </Route>
-        <Route path='/admin/recursos'>
-          <AdminRoute>
-            <AdminResourcesPage />
-          </AdminRoute>
-        </Route>
-        <Route path='/admin/negocio'>
-          <AdminRoute>
-            <AdminBusinessHubPage />
-          </AdminRoute>
-        </Route>
-        <Route path='/admin/horarios'>
-          <AdminRoute>
-            <AdminHoursPage />
-          </AdminRoute>
-        </Route>
-        <Route path='/admin/configuracion'>
-          <AdminRoute>
-            <AdminConfigPage />
-          </AdminRoute>
-        </Route>
-        <Route path='/admin/excepciones'>
-          <AdminRoute>
-            <AdminExceptionsPage />
-          </AdminRoute>
-        </Route>
-        <Route path='/admin/equipo'>
-          <AdminRoute>
-            <AdminTeamPage />
-          </AdminRoute>
-        </Route>
-
-        {/* Legacy redirects — old single-tenant routes */}
-        <Route path='/reservar'>
-          <Redirect to='/' />
-        </Route>
-
-        {/* 404 */}
-        <Route>
-          <div className='text-center py-12'>
-            <p className='text-text-muted'>Página no encontrada.</p>
+      <Suspense
+        fallback={
+          <div className='min-h-dvh flex items-center justify-center'>
+            <Spinner size='lg' />
           </div>
-        </Route>
-      </Switch>
+        }
+      >
+        <Switch>
+          {/* Landing */}
+          <Route path='/' component={LandingPage} />
+
+          {/* Páginas legales — públicas */}
+          <Route path='/privacidad' component={PrivacyPage} />
+          <Route path='/terminos' component={TermsPage} />
+
+          {/* Redirect a WhatsApp — los correos usan este enlace para
+            evitar links a wa.me que no matchean el dominio de envío */}
+          <Route path='/wa' component={WhatsAppRedirectPage} />
+
+          {/* Auth — solo accesibles sin sesión */}
+          <Route path='/login'>
+            <GuestRoute>
+              <LoginPage />
+            </GuestRoute>
+          </Route>
+          <Route path='/registro'>
+            <GuestRoute>
+              <RegisterPage />
+            </GuestRoute>
+          </Route>
+          {/* /recuperar-password es accesible con y sin sesión (recovery flow) */}
+          <Route path='/recuperar-password' component={RecoverPasswordPage} />
+
+          {/* Mis reservas globales del usuario autenticado */}
+          <Route path='/mis-reservas'>
+            <ProtectedRoute>
+              <MyReservationsPage />
+            </ProtectedRoute>
+          </Route>
+
+          {/* Public tenant routes */}
+          <Route path='/b/:slug'>
+            {(params) => <AvailabilityPage slug={params.slug} />}
+          </Route>
+          <Route path='/b/:slug/reservar'>
+            {(params) => <ReservePage slug={params.slug} />}
+          </Route>
+          <Route path='/b/:slug/mis-reservas'>
+            {(params) => (
+              <ProtectedRoute>
+                <MyReservationsPage slug={params.slug} />
+              </ProtectedRoute>
+            )}
+          </Route>
+
+          {/* Onboarding de negocios */}
+          <Route path='/crear-negocio'>
+            <ProtectedRoute>
+              <CreateBusinessPage />
+            </ProtectedRoute>
+          </Route>
+
+          {/* Preferencias de privacidad del cliente */}
+          <Route path='/preferencias'>
+            <ProtectedRoute>
+              <PrivacyPreferencesPage />
+            </ProtectedRoute>
+          </Route>
+
+          {/* Notificaciones del dispositivo */}
+          <Route path='/notificaciones'>
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          </Route>
+
+          {/* Panel de plataforma (operador) */}
+          <Route path='/plataforma'>
+            <PlatformRoute>
+              <PlatformDashboardPage />
+            </PlatformRoute>
+          </Route>
+
+          {/* Admin */}
+          <Route path='/admin'>
+            <AdminRoute>
+              <AdminDashboardPage />
+            </AdminRoute>
+          </Route>
+          <Route path='/admin/reservas'>
+            <AdminRoute>
+              <AdminReservationsPage />
+            </AdminRoute>
+          </Route>
+          <Route path='/admin/recursos'>
+            <AdminRoute>
+              <AdminResourcesPage />
+            </AdminRoute>
+          </Route>
+          <Route path='/admin/negocio'>
+            <AdminRoute>
+              <AdminBusinessHubPage />
+            </AdminRoute>
+          </Route>
+          <Route path='/admin/horarios'>
+            <AdminRoute>
+              <AdminHoursPage />
+            </AdminRoute>
+          </Route>
+          <Route path='/admin/configuracion'>
+            <AdminRoute>
+              <AdminConfigPage />
+            </AdminRoute>
+          </Route>
+          <Route path='/admin/excepciones'>
+            <AdminRoute>
+              <AdminExceptionsPage />
+            </AdminRoute>
+          </Route>
+          <Route path='/admin/equipo'>
+            <AdminRoute>
+              <AdminTeamPage />
+            </AdminRoute>
+          </Route>
+
+          {/* Legacy redirects — old single-tenant routes */}
+          <Route path='/reservar'>
+            <Redirect to='/' />
+          </Route>
+
+          {/* 404 */}
+          <Route>
+            <div className='text-center py-12'>
+              <p className='text-text-muted'>Página no encontrada.</p>
+            </div>
+          </Route>
+        </Switch>
+      </Suspense>
     </AppLayout>
   )
 }
