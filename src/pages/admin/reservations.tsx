@@ -31,6 +31,7 @@ import {
   fetchReservationById
 } from '@/services/reservations'
 import { markReservationNotificationsRead } from '@/services/notifications'
+import { Page } from '@/components/layout/page'
 
 const statusFilters: { key: ReservationFilter; label: string }[] = [
   { key: 'all', label: 'Todas' },
@@ -151,7 +152,7 @@ export function AdminReservationsPage() {
   )
 
   return (
-    <div className='flex flex-col gap-5'>
+    <Page>
       {/* Header */}
       <div className='animate-fade-up'>
         <h1 className='text-2xl font-bold tracking-tight'>Reservas</h1>
@@ -213,7 +214,7 @@ export function AdminReservationsPage() {
 
       {/* Filter chips */}
       <div
-        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-4 -mx-4 px-4 animate-fade-up'
+        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 animate-fade-up'
         data-tour='admin-reservations-filters'
         style={{ animationDelay: '60ms' }}
       >
@@ -340,6 +341,6 @@ export function AdminReservationsPage() {
           }
         />
       )}
-    </div>
+    </Page>
   )
 }

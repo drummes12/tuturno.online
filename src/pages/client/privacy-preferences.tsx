@@ -12,6 +12,7 @@ import { Button } from '@/components/common/button'
 import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
 import { CheckIcon, MailIcon } from '@/components/common/icon'
+import { Page } from '@/components/layout/page'
 
 interface ConsentRow {
   business_id: string
@@ -92,7 +93,7 @@ export function PrivacyPreferencesPage() {
   }
 
   return (
-    <div className='flex flex-col gap-4 max-w-2xl mx-auto'>
+    <Page width='narrow'>
       <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
           <BackLink href={returnPath} label={backLabel} />
@@ -209,6 +210,6 @@ export function PrivacyPreferencesPage() {
           para más información.
         </p>
       </Card>
-    </div>
+    </Page>
   )
 }

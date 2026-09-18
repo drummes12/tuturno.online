@@ -27,6 +27,7 @@ import {
   SparklesIcon
 } from '@/components/common/icon'
 import type { Business } from '@/types'
+import { Page } from '@/components/layout/page'
 
 const INSTRUCTIONS_TEMPLATE =
   '## Para confirmar tu reserva\n\n1. Realiza el abono del 50% al negocio.\n2. Envía el comprobante por WhatsApp.\n3. Espera la confirmación del negocio.'
@@ -164,7 +165,7 @@ export function AdminConfigPage() {
   })
 
   return (
-    <div className='flex flex-col gap-5 w-full max-w-5xl mx-auto'>
+    <Page>
       {/* Header */}
       <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
@@ -746,7 +747,7 @@ export function AdminConfigPage() {
 
       {/* Compartir página de reservas — QR + copiar link */}
       <ShareCard slug={business.slug} businessName={business.name} />
-    </div>
+    </Page>
   )
 }
 

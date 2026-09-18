@@ -22,6 +22,7 @@ import {
   EditIcon
 } from '@/components/common/icon'
 import type { Resource } from '@/types'
+import { Page } from '@/components/layout/page'
 
 export function AdminResourcesPage() {
   const canEdit = useCanEdit()
@@ -140,7 +141,7 @@ export function AdminResourcesPage() {
   if (loading) return <Spinner size='lg' />
 
   return (
-    <div className='flex flex-col gap-5 w-full max-w-2xl mx-auto'>
+    <Page width='narrow'>
       <div className='flex items-center justify-between animate-fade-up'>
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>Recursos</h1>
@@ -307,6 +308,6 @@ export function AdminResourcesPage() {
           </ul>
         </div>
       )}
-    </div>
+    </Page>
   )
 }

@@ -15,6 +15,7 @@ import {
   type NotificationPermissionState
 } from '@/lib/push'
 import { isIosDevice } from '@/lib/pwa-install'
+import { Page } from '@/components/layout/page'
 
 export function NotificationsPage() {
   const initialPermission = getNotificationPermission()
@@ -144,7 +145,7 @@ export function NotificationsPage() {
             : 'Permiso concedido, falta sincronizar este dispositivo.'
 
   return (
-    <div className='mx-auto flex w-full max-w-2xl flex-col gap-6'>
+    <Page width='narrow'>
       <div>
         <div className='flex items-center gap-1'>
           <BackLink href={returnPath} label={backLabel} />
@@ -270,6 +271,6 @@ export function NotificationsPage() {
           </div>
         </Card>
       )}
-    </div>
+    </Page>
   )
 }

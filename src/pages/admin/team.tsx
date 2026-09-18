@@ -24,6 +24,7 @@ import {
   PlusIcon
 } from '@/components/common/icon'
 import { formatLocal } from '@/lib/time'
+import { Page } from '@/components/layout/page'
 
 export function AdminTeamPage() {
   const canEdit = useCanEdit()
@@ -62,7 +63,7 @@ export function AdminTeamPage() {
   }
 
   return (
-    <div className='flex flex-col gap-6 max-w-2xl mx-auto w-full'>
+    <Page width='narrow'>
       <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
           <BackLink href='/admin/negocio' label='Negocio' />
@@ -128,7 +129,7 @@ export function AdminTeamPage() {
           </ul>
         </div>
       </section>
-    </div>
+    </Page>
   )
 }
 

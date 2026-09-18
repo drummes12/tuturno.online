@@ -24,6 +24,7 @@ import type {
   SignupRequest,
   SignupRequestStatus
 } from '@/types'
+import { Page } from '@/components/layout/page'
 
 const STATUS_BADGE: Record<
   SignupRequestStatus,
@@ -77,7 +78,7 @@ export function PlatformDashboardPage() {
   const history = requests.filter((r) => r.status !== 'pending')
 
   return (
-    <div className='mx-auto max-w-3xl px-4 py-6 flex flex-col gap-6'>
+    <Page width='default'>
       <div>
         <h1 className='text-2xl font-bold tracking-tight'>Plataforma</h1>
         <p className='text-sm text-(--color-text-muted)'>
@@ -170,13 +171,14 @@ export function PlatformDashboardPage() {
             {audit.map((entry) => (
               <p key={entry.id} className='text-xs text-(--color-text-muted)'>
                 <span className='font-mono'>{entry.action}</span> ·{' '}
-                {entry.target_type} · {formatLocal(entry.created_at, 'd MMM yyyy, HH:mm')}
+                {entry.target_type} ·{' '}
+                {formatLocal(entry.created_at, 'd MMM yyyy, HH:mm')}
               </p>
             ))}
           </Card>
         </section>
       )}
-    </div>
+    </Page>
   )
 }
 

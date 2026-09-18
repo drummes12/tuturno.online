@@ -7,6 +7,7 @@ import {
   SettingsIcon,
   ChevronRightIcon
 } from '@/components/common/icon'
+import { Page } from '@/components/layout/page'
 
 type HubItem = {
   label: string
@@ -54,7 +55,7 @@ const items: HubItem[] = [
  */
 export function AdminBusinessHubPage() {
   return (
-    <div className='flex flex-col gap-5 w-full max-w-2xl mx-auto'>
+    <Page width='narrow'>
       <div>
         <h1 className='text-2xl font-bold tracking-tight'>Negocio</h1>
         <p className='text-sm text-text-muted mt-0.5'>
@@ -89,6 +90,6 @@ export function AdminBusinessHubPage() {
           </Link>
         ))}
       </div>
-    </div>
+    </Page>
   )
 }

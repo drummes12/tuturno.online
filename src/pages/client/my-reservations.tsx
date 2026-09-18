@@ -29,6 +29,7 @@ import { formatLocal } from '@/lib/time'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 import { useSwipeTabs } from '@/hooks/use-swipe-tabs'
 import { sortReservationsByPriority } from '@/lib/sort'
+import { Page } from '@/components/layout/page'
 
 type Filter = 'upcoming' | 'pending' | 'confirmed' | 'past'
 
@@ -227,7 +228,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   })
 
   return (
-    <div className='flex flex-col gap-5'>
+    <Page>
       <div className='animate-fade-up'>
         <h1 className='text-2xl font-bold tracking-tight'>
           {slug
@@ -243,7 +244,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
 
       {/* Filter chips */}
       <div
-        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-4 -mx-4 px-4 animate-fade-up'
+        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 animate-fade-up'
         style={{ animationDelay: '60ms' }}
         data-tour='reservations-filters'
       >
@@ -420,6 +421,6 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
           }
         />
       )}
-    </div>
+    </Page>
   )
 }

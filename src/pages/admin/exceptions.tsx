@@ -33,6 +33,7 @@ import type { AvailabilityException, Resource } from '@/types'
 import { formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
 import { fromZonedTime } from 'date-fns-tz'
 import { format } from 'date-fns'
+import { Page } from '@/components/layout/page'
 
 type Scope = 'business' | 'resource'
 
@@ -283,7 +284,7 @@ export function AdminExceptionsPage() {
     (affectedCount === null || affectedCount === 0 || confirmedCreate)
 
   return (
-    <div className='flex flex-col gap-5 w-full max-w-5xl mx-auto'>
+    <Page>
       {/* Header */}
       <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
@@ -693,6 +694,6 @@ export function AdminExceptionsPage() {
           </div>
         </details>
       )}
-    </div>
+    </Page>
   )
 }

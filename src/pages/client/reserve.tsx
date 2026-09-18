@@ -38,6 +38,7 @@ import {
 } from '@/lib/whatsapp'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Page } from '@/components/layout/page'
 
 type ReservePageProps = {
   slug?: string
@@ -388,7 +389,10 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   }
 
   return (
-    <div className='flex flex-col gap-4 max-w-md mx-auto lg:max-w-4xl lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-8'>
+    <Page
+      width='full'
+      className='max-w-md lg:max-w-4xl lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-8'
+    >
       <div className='flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start'>
         <Link
           href={slug ? `/b/${slug}` : '/'}
@@ -521,7 +525,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
           </div>
         </form>
       </Card>
-    </div>
+    </Page>
   )
 }
 
@@ -590,7 +594,10 @@ function DemoReservePreview({
   }
 
   return (
-    <div className='flex flex-col gap-4 max-w-md mx-auto lg:max-w-5xl lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-8'>
+    <Page
+      width='full'
+      className='max-w-md lg:max-w-5xl lg:grid lg:grid-cols-[1fr_1.2fr] lg:gap-8'
+    >
       <div className='flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start'>
         <Link
           href={slug ? `/b/${slug}` : '/'}
@@ -674,6 +681,6 @@ function DemoReservePreview({
           </Link>
         </div>
       </Card>
-    </div>
+    </Page>
   )
 }

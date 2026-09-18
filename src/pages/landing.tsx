@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
+import { Page } from '@/components/layout/page'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import {
@@ -102,7 +103,7 @@ export function LandingPage() {
 
   if (user) {
     return (
-      <div className='flex-1 flex flex-col items-center px-4 py-2 sm:py-6'>
+      <Page width='full' className='flex-1 items-center'>
         <div className='grid w-full max-w-md grid-cols-1 gap-4 lg:max-w-5xl lg:grid-cols-[1fr_1.15fr] lg:gap-5'>
           {/* Panel cancha — izquierda en desktop, banda arriba en mobile */}
           <section className='relative overflow-hidden rounded-2xl bg-pitch-950 px-6 py-6 text-chalk shadow-(--shadow-lg) animate-fade-up lg:flex lg:flex-col lg:justify-between lg:p-8'>
@@ -174,7 +175,7 @@ export function LandingPage() {
             </Link>
           </div>
         </div>
-      </div>
+      </Page>
     )
   }
 

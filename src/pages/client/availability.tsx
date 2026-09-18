@@ -28,6 +28,7 @@ import { es } from 'date-fns/locale'
 import { BUSINESS_TIMEZONE } from '@/lib/time'
 import { toZonedTime } from 'date-fns-tz'
 import type { ReactNode } from 'react'
+import { Page } from '@/components/layout/page'
 
 type AvailabilityPageProps = {
   slug?: string
@@ -247,7 +248,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
   const reserveHrefBase = `/b/${slug}/reservar`
 
   return (
-    <div className='flex flex-col gap-5'>
+    <Page>
       {/* Demo banner */}
       {isDemo && (
         <div
@@ -355,7 +356,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
         <DatePickerSkeleton />
       ) : resources.length > 0 ? (
         <div
-          className='flex gap-2 overflow-x-auto py-4 px-4 snap-x snap-mandatory animate-fade-up scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+          className='flex gap-2 overflow-x-auto py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 snap-x snap-mandatory animate-fade-up scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
           style={{ animationDelay: '60ms' }}
           data-tour='availability-date-picker'
         >
@@ -393,7 +394,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
       {/* Resource selector — chips */}
       {resources.length > 1 && (
         <div
-          className='flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 animate-fade-up [-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden'
+          className='flex gap-2 overflow-x-auto pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 animate-fade-up [-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden'
           style={{ animationDelay: '120ms' }}
           data-tour='availability-resource-selector'
         >
@@ -569,6 +570,6 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
           })}
         </div>
       ) : null}
-    </div>
+    </Page>
   )
 }

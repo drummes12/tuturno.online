@@ -43,6 +43,7 @@ import {
   confirmReservation,
   rejectReservation
 } from '@/services/reservations'
+import { Page } from '@/components/layout/page'
 
 /** Antigüedad compacta de una solicitud: "15 min", "3 h", "2 d". */
 function waitLabel(createdAt: string): string {
@@ -322,7 +323,7 @@ export function AdminDashboardPage() {
   }
 
   return (
-    <div className='flex flex-col gap-6'>
+    <Page>
       {/* Header */}
       <div className='animate-fade-up'>
         <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
@@ -534,6 +535,6 @@ export function AdminDashboardPage() {
           }
         />
       )}
-    </div>
+    </Page>
   )
 }

@@ -3,6 +3,7 @@ import { Link } from 'wouter'
 import { Card } from '@/components/common/card'
 import { ArrowLeftIcon } from '@/components/common/icon'
 import { CURRENT_POLICY_VERSION } from '@/types'
+import { Page } from '@/components/layout/page'
 
 interface LegalPageProps {
   title: string
@@ -16,7 +17,7 @@ interface LegalPageProps {
  */
 export function LegalPage({ title, subtitle, children }: LegalPageProps) {
   return (
-    <div className='flex flex-col gap-4 max-w-3xl mx-auto'>
+    <Page width='default'>
       <Link
         href='/'
         className='flex items-center gap-1.5 text-sm text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target -ml-2 px-2 rounded-lg'
@@ -45,6 +46,6 @@ export function LegalPage({ title, subtitle, children }: LegalPageProps) {
           {children}
         </div>
       </Card>
-    </div>
+    </Page>
   )
 }

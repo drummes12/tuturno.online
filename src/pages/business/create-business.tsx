@@ -393,7 +393,7 @@ function StatusCard({
   children?: React.ReactNode
 }) {
   return (
-    <div className='flex flex-1 items-center justify-center py-8 px-4'>
+    <div className='flex flex-1 items-center justify-center py-8'>
       <Card
         bordered
         className='w-full max-w-md overflow-hidden p-0 animate-fade-up'

@@ -341,7 +341,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Content */}
-      <main className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-6 pb-6'>
+      <main className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8'>
         {children}
       </main>
 

@@ -26,6 +26,7 @@ import type { BusinessHours } from '@/types'
 import { useBusinessId } from '@/hooks/use-business-id'
 import { toZonedTime } from 'date-fns-tz'
 import { BUSINESS_TIMEZONE } from '@/lib/time'
+import { Page } from '@/components/layout/page'
 
 const days = [
   'Domingo',
@@ -321,7 +322,7 @@ export function AdminHoursPage() {
   }
 
   return (
-    <div className='flex flex-col gap-5 w-full max-w-5xl mx-auto'>
+    <Page>
       {/* Header */}
       <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
@@ -673,6 +674,6 @@ export function AdminHoursPage() {
           </Button>
         </Card>
       </div>
-    </div>
+    </Page>
   )
 }
