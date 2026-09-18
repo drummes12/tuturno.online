@@ -40,7 +40,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
               Acceso
             </p>
             <p className='mt-3 text-2xl font-bold leading-snug tracking-tight text-balance'>
-              Llena tu cancha.
+              Tu agenda, llena.
               <br />
               Los turnos entran solos.
             </p>
