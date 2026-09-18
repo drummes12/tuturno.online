@@ -85,13 +85,13 @@ const BUSINESS_HUB_ROUTES = [
 ]
 
 const adminNav: NavItem[] = [
-  { label: 'Operación', href: '/admin', icon: <LayoutIcon size={22} /> },
-  { label: 'Reservas', href: '/admin/reservas', icon: <ListIcon size={22} /> },
-  { label: 'Recursos', href: '/admin/recursos', icon: <StoreIcon size={22} /> },
+  { label: 'Operación', href: '/admin', icon: <LayoutIcon size={18} /> },
+  { label: 'Reservas', href: '/admin/reservas', icon: <ListIcon size={18} /> },
+  { label: 'Recursos', href: '/admin/recursos', icon: <StoreIcon size={18} /> },
   {
     label: 'Negocio',
     href: '/admin/negocio',
-    icon: <SettingsIcon size={22} />
+    icon: <SettingsIcon size={18} />
   }
 ]
 
@@ -117,12 +117,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {
           label: 'Disponibilidad',
           href: tenantBase,
-          icon: <CalendarIcon size={22} />
+          icon: <CalendarIcon size={18} />
         },
         {
           label: 'Mis reservas',
           href: `${tenantBase}/mis-reservas`,
-          icon: <ListIcon size={22} />
+          icon: <ListIcon size={18} />
         }
       ]
     : user
@@ -130,7 +130,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {
             label: 'Mis reservas',
             href: '/mis-reservas',
-            icon: <ListIcon size={22} />
+            icon: <ListIcon size={18} />
           }
         ]
       : []
@@ -150,7 +150,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   // El tutorial del cliente aplica a visitantes/autenticados sin rol admin
   // en rutas tenant. El tutorial del admin aplica en cualquier ruta /admin.
   const showTutorialButton =
-    (isAdmin && location.startsWith('/admin')) || (!isAdmin && !!tenantBase)
+    (isAdmin && location.startsWith('/admin')) ||
+    (!isAdmin && (Boolean(tenantBase) || location === '/mis-reservas'))
 
   return (
     <div
@@ -263,9 +264,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
           aria-label={
             isAdmin ? 'Navegación de administración' : 'Navegación del negocio'
           }
-          className='hidden md:block border-b overflow-x-auto border-border bg-surface-elevated'
+          className='hidden md:block'
         >
-          <div className='mx-auto max-w-5xl px-4 flex items-center gap-1'>
+          <div className='mx-auto flex max-w-5xl items-center justify-center gap-1.5 px-4 py-4 border-b border-border'>
             {nav.map((item) => {
               const active = isNavItemActive(item.href)
               return (
@@ -282,14 +283,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
                           ? 'admin-nav-business'
                           : undefined
                   }
-                  className={`flex-1 flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 ease-spring ${
+                  className={`flex items-center gap-2 rounded-full px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
                     active
-                      ? 'border-primary! text-primary!'
-                      : 'border-transparent text-text-muted hover:text-text'
+                      ? 'bg-primary text-white'
+                      : 'text-text-muted hover:bg-surface-inset hover:text-text'
                   }`}
                 >
-                  <span className='opacity-70'>{item.icon}</span>
-                  <span className='truncate'>{item.label}</span>
+                  <span className={active ? '' : 'opacity-70'}>
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
                 </Link>
               )
             })}
@@ -302,15 +305,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Bottom nav — mobile, thumb zone, with icons */}
+      {/* Bottom nav — mobile, píldora flotante en zona del pulgar */}
       {user && nav.length > 0 && (
         <nav
           aria-label={
             isAdmin ? 'Navegación de administración' : 'Navegación del negocio'
           }
-          className='fixed bottom-0 left-0 right-0 z-40 bg-surface-elevated/95 backdrop-blur-lg border-t border-border md:hidden'
+          className='fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden'
         >
-          <div className='scrollbar-none flex snap-x snap-mandatory items-center gap-1 overflow-x-auto px-1 py-1.5 pb-[max(env(safe-area-inset-bottom),0.375rem)]'>
+          <div className='mx-auto flex max-w-md items-center gap-1 rounded-2xl border border-border bg-surface-elevated/95 p-1.5 shadow-(--shadow-lg) backdrop-blur-lg'>
             {nav.map((item) => {
               const active = isNavItemActive(item.href)
               return (
@@ -323,13 +326,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       ? 'admin-nav-business'
                       : undefined
                   }
-                  className={`flex-1 flex min-w-21 shrink-0 snap-start flex-col items-center gap-1 px-2 py-1.5 text-[10px] font-medium rounded-lg touch-target transition-colors ${
-                    active ? 'text-primary' : 'text-text-muted'
+                  className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2 font-mono text-[10px] font-semibold uppercase tracking-wide transition-colors touch-target ${
+                    active ? 'bg-primary text-white' : 'text-text-muted'
                   }`}
                 >
-                  <span className={active ? 'text-primary' : ''}>
-                    {item.icon}
-                  </span>
+                  {item.icon}
                   <span className='max-w-full truncate'>{item.label}</span>
                 </Link>
               )

@@ -332,8 +332,8 @@ function selectTour(
     return tours.find((t) => t.id === 'reservation') ?? null
   }
 
-  // En /b/:slug/mis-reservas, tour de mis reservas
-  if (/^\/b\/[^/]+\/mis-reservas$/.test(route)) {
+  // En /mis-reservas o /b/:slug/mis-reservas, tour de mis reservas
+  if (route === '/mis-reservas' || /^\/b\/[^/]+\/mis-reservas$/.test(route)) {
     return tours.find((t) => t.id === 'my-reservations') ?? null
   }
 
