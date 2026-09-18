@@ -15,6 +15,7 @@ import {
   XIcon
 } from '@/components/common/icon'
 import { formatLocal } from '@/lib/time'
+import { RESERVATION_BEAM_CLASS } from '@/lib/reservation-status'
 
 type ReservationDetailsSheetProps = {
   reservation: Reservation
@@ -195,7 +196,9 @@ export function ReservationDetailsSheet({
         {/* Border-beam solo en mobile: un arco de luz pitch recorre
             el borde de la papeleta. En desktop el panel es full-bleed
             y la cancha habla por sí sola. */}
-        <div className='border-beam beam-pitch-500 dark:beam-pitch-400 mx-4 mt-3 rounded-xl p-1 sm:m-0 sm:rounded-none sm:p-0 sm:before:hidden'>
+        <div
+          className={`border-beam ${RESERVATION_BEAM_CLASS[reservation.status]} mx-4 mt-3 rounded-xl sm:m-0 sm:rounded-none sm:p-0 sm:before:hidden`}
+        >
           <div className='dark relative overflow-hidden rounded-[14.5px] bg-pitch-950 text-chalk sm:flex sm:h-full sm:flex-col sm:rounded-none'>
             {/* Líneas de cancha — decorativas */}
             <div
@@ -203,7 +206,7 @@ export function ReservationDetailsSheet({
               className='pointer-events-none absolute inset-0'
             >
               <span className='absolute top-0 left-1/2 h-full w-px -translate-x-1/2 bg-chalk/5' />
-              <span className='absolute top-1/2 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-chalk/5 sm:h-40 sm:w-40' />
+              <span className='absolute top-1/2 left-1/2 size-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-chalk/5 sm:h-40 sm:w-40' />
               <span className='absolute top-1/2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chalk/15' />
               <span className='absolute inset-x-0 bottom-0 hidden h-16 border-t border-chalk/5 sm:block' />
             </div>

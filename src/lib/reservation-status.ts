@@ -81,6 +81,22 @@ export function canClientCancelReservation(
   return isAfter(limit, new Date())
 }
 
+/**
+ * Clases `beam-*` por estado — mismo lenguaje de color que StatusBadge:
+ * pendiente → naranja, confirmada → pitch, rechazada → rojo,
+ * canceladas/expirada → grafito, completada → azul.
+ * Los literales deben quedar visibles para el scanner de Tailwind.
+ */
+export const RESERVATION_BEAM_CLASS: Record<ReservationStatus, string> = {
+  pending: 'beam-orange-500 dark:beam-orange-400',
+  confirmed: 'beam-pitch-500 dark:beam-pitch-400',
+  rejected: 'beam-signal-red dark:beam-red-400',
+  cancelled_by_client: 'beam-graphite-400 dark:beam-graphite-300',
+  cancelled_by_business: 'beam-graphite-400 dark:beam-graphite-300',
+  expired: 'beam-graphite-400 dark:beam-graphite-300',
+  completed: 'beam-blue-500 dark:beam-blue-400'
+}
+
 export function filterReservations(
   reservations: Reservation[],
   filter: ReservationFilter = 'all',

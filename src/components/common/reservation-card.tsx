@@ -138,7 +138,7 @@ export function ReservationCard({
   if (isPending) {
     return (
       <div
-        className='border-beam h-full animate-stagger rounded-xl p-[1.5px]'
+        className='border-beam h-full animate-stagger rounded-xl'
         style={{ '--index': index } as React.CSSProperties}
         data-tour={tourKey}
       >
