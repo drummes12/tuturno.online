@@ -23,7 +23,7 @@ function createDriver(opts: {
   return driver({
     steps: opts.steps,
     showProgress: true,
-    progressText: 'Paso {{current}} de {{total}}',
+    progressText: '{{current}} / {{total}}',
     nextBtnText: 'Siguiente →',
     prevBtnText: '← Anterior',
     doneBtnText: 'Entendido ✓',
