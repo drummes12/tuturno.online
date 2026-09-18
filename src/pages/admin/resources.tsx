@@ -140,11 +140,11 @@ export function AdminResourcesPage() {
   if (loading) return <Spinner size='lg' />
 
   return (
-    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
+    <div className='flex flex-col gap-5 w-full max-w-2xl mx-auto'>
       <div className='flex items-center justify-between animate-fade-up'>
         <div>
           <h1 className='text-2xl font-bold tracking-tight'>Recursos</h1>
-          <p className='text-sm text-(--color-text-muted) mt-0.5'>
+          <p className='text-sm text-(--color-text-muted) mt-0.5 nums'>
             {resources.length} {resources.length === 1 ? singularLabel : label}{' '}
             {resources.length === 1 ? 'configurado' : 'configurados'}
           </p>
@@ -178,10 +178,10 @@ export function AdminResourcesPage() {
                 <PlusIcon size={16} />
               )}
             </div>
-            <h2 className='font-semibold text-sm tracking-tight'>
+            <h2 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text)'>
               {editingResource
                 ? `Editando "${editingResource.name}"`
-                : 'Nuevo recurso'}
+                : `Nuevo ${singularLabel}`}
             </h2>
           </div>
           <form onSubmit={handleSave} className='flex flex-col gap-4'>
@@ -239,45 +239,55 @@ export function AdminResourcesPage() {
           </div>
         </Card>
       ) : (
-        <div className='flex flex-col gap-2.5'>
-          {resources.map((resource, index) => (
-            <Card
-              key={resource.id}
-              data-tour={index === 0 ? 'admin-resource-card' : undefined}
-              className={`p-4 animate-stagger ${!resource.is_active ? 'opacity-60' : ''}`}
-              style={{ '--index': index } as React.CSSProperties}
-            >
-              <div className='flex items-center justify-between gap-3'>
-                <div className='min-w-0 flex-1 flex items-center gap-2'>
-                  <div
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${resource.is_active ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300' : 'bg-surface-inset text-text-muted'}`}
-                  >
-                    <StoreIcon size={18} />
-                  </div>
-                  <div className='min-w-0'>
-                    <p className='font-medium text-sm truncate'>
-                      {resource.name}
-                    </p>
-                    {resource.description && (
-                      <p className='text-xs text-(--color-text-muted) truncate mt-0.5'>
-                        {resource.description}
-                      </p>
-                    )}
-                  </div>
+        <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm) animate-fade-up'>
+          <ul className='flex flex-col divide-y divide-border'>
+            {resources.map((resource, index) => (
+              <li
+                key={resource.id}
+                data-tour={index === 0 ? 'admin-resource-card' : undefined}
+                className={`flex animate-stagger flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 sm:flex-nowrap sm:px-5 ${!resource.is_active ? 'opacity-60' : ''}`}
+                style={{ '--index': index } as React.CSSProperties}
+              >
+                <span className='w-6 shrink-0 font-mono text-[11px] font-medium text-text-muted/70 nums'>
+                  {String(resource.sort_order).padStart(2, '0')}
+                </span>
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${resource.is_active ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300' : 'bg-surface-inset text-text-muted'}`}
+                >
+                  <StoreIcon size={18} />
                 </div>
-                <div className='flex items-center gap-2 shrink-0'>
+                <div className='min-w-0 flex-1'>
+                  <p className='truncate text-sm font-medium'>
+                    {resource.name}
+                  </p>
+                  {resource.description && (
+                    <p className='mt-0.5 truncate text-xs text-(--color-text-muted)'>
+                      {resource.description}
+                    </p>
+                  )}
+                </div>
+                <div className='flex w-full shrink-0 items-center justify-end gap-2.5 pl-9 sm:w-auto sm:pl-0'>
+                  <span
+                    className={`rounded-md border px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${
+                      resource.is_active
+                        ? 'border-pitch-500/40 bg-pitch-500/10 text-pitch-700 dark:border-pitch-400/30 dark:text-pitch-300'
+                        : 'border-border bg-surface-inset text-text-muted'
+                    }`}
+                  >
+                    {resource.is_active ? 'Activo' : 'Inactivo'}
+                  </span>
                   {canEdit && (
                     <button
                       onClick={() => toggleActive(resource)}
                       data-tour={
                         index === 0 ? 'admin-resource-toggle' : undefined
                       }
-                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${resource.is_active ? 'bg-primary' : 'bg-graphite-300'}`}
+                      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${resource.is_active ? 'bg-primary' : 'bg-graphite-300'}`}
                       aria-label={`${resource.is_active ? 'Desactivar' : 'Activar'} ${resource.name}`}
                       aria-pressed={resource.is_active}
                     >
                       <span
-                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${resource.is_active ? 'translate-x-5' : ''}`}
+                        className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${resource.is_active ? 'translate-x-5' : ''}`}
                       />
                     </button>
                   )}
@@ -292,9 +302,9 @@ export function AdminResourcesPage() {
                     </Button>
                   )}
                 </div>
-              </div>
-            </Card>
-          ))}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
