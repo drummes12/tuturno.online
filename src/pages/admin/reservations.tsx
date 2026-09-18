@@ -10,10 +10,12 @@ import {
   UserIcon,
   CalendarIcon,
   InboxIcon,
-  WhatsAppIcon
+  WhatsAppIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
 } from '@/components/common/icon'
 import type { Reservation, ReservationFilter } from '@/types'
-import { format } from 'date-fns'
+import { format, addDays, parseISO } from 'date-fns'
 import { dayRangeUtc, formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
 import {
   resolveWhatsAppLink,
@@ -55,8 +57,15 @@ export function AdminReservationsPage() {
   const deepLinkId = new URLSearchParams(search).get('reservation')
   const deepLinkHandled = useRef<string | null>(null)
   const [filter, setFilter] = useState<ReservationFilter>('all')
-  const [selectedDate, setSelectedDate] = useState(
-    format(toZonedTime(new Date(), BUSINESS_TIMEZONE), 'yyyy-MM-dd')
+  const todayStr = format(
+    toZonedTime(new Date(), BUSINESS_TIMEZONE),
+    'yyyy-MM-dd'
+  )
+  const [selectedDate, setSelectedDate] = useState(todayStr)
+  const shiftDay = useCallback(
+    (delta: number) =>
+      setSelectedDate((d) => format(addDays(parseISO(d), delta), 'yyyy-MM-dd')),
+    []
   )
   const handleFilterSwipe = useCallback((index: number) => {
     const nextFilter = statusFilters[index]
@@ -155,29 +164,56 @@ export function AdminReservationsPage() {
         </p>
       </div>
 
-      {/* Date picker — styled */}
+      {/* Date nav — control segmentado: ‹ fecha › + salto a hoy */}
       <div
-        className='flex items-center gap-2 animate-fade-up'
+        className='animate-fade-up'
         data-tour='admin-reservations-date'
         style={{ animationDelay: '60ms' }}
       >
-        <div className='relative flex-1'>
-          <CalendarIcon
-            size={18}
-            className='absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none'
-          />
-          <input
-            type='date'
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className='w-full rounded-xl border border-border bg-surface-inset pl-11 pr-4 py-3 text-base text-(--color-text) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring touch-target'
-          />
+        <div className='flex items-stretch overflow-hidden rounded-xl border border-border bg-surface-inset transition-colors focus-within:border-(--color-primary) focus-within:ring-4 focus-within:ring-(--color-primary)/15'>
+          <button
+            type='button'
+            onClick={() => shiftDay(-1)}
+            className='flex w-12 shrink-0 items-center justify-center border-r border-border text-(--color-text-muted) transition-colors hover:bg-surface-elevated hover:text-(--color-text) touch-target'
+            aria-label='Día anterior'
+          >
+            <ChevronLeftIcon size={18} />
+          </button>
+          <div className='relative min-w-0 flex-1'>
+            <CalendarIcon
+              size={18}
+              className='absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none'
+            />
+            <input
+              type='date'
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className='w-full min-w-0 appearance-none bg-transparent px-4 py-3 pl-11 text-base text-(--color-text) focus:outline-none touch-target'
+            />
+          </div>
+          <button
+            type='button'
+            onClick={() => shiftDay(1)}
+            className='flex w-12 shrink-0 items-center justify-center border-l border-border text-(--color-text-muted) transition-colors hover:bg-surface-elevated hover:text-(--color-text) touch-target'
+            aria-label='Día siguiente'
+          >
+            <ChevronRightIcon size={18} />
+          </button>
+          {selectedDate !== todayStr && (
+            <button
+              type='button'
+              onClick={() => setSelectedDate(todayStr)}
+              className='shrink-0 border-l border-pitch-500/40 bg-pitch-500/10 px-4 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-700 transition-colors hover:bg-pitch-500/20 dark:border-pitch-400/30 dark:text-pitch-300 touch-target'
+            >
+              Hoy
+            </button>
+          )}
         </div>
       </div>
 
       {/* Filter chips */}
       <div
-        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-4 -mx-4 px-4 animate-fade-up'
         data-tour='admin-reservations-filters'
         style={{ animationDelay: '60ms' }}
       >
@@ -216,60 +252,75 @@ export function AdminReservationsPage() {
                 <InboxIcon size={24} />
               </div>
               <p className='text-text-muted text-sm'>
-                No hay reservas para este filtro.
+                No hay reservas
+                {filter !== 'all' &&
+                  ` ${statusFilters.find((f) => f.key === filter)?.label.toLowerCase()}`}{' '}
+                para esta fecha.
               </p>
             </div>
           </Card>
         ) : (
-          <div className='grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3'>
-            {sortedReservations.map((r, index) => (
-              <ReservationCard
-                key={r.id}
-                reservation={r}
-                onOpen={setSelectedReservation}
-                index={index}
-                tourKey={index === 0 ? 'admin-reservations-card' : undefined}
-                info={
-                  <p className='text-xs text-(--color-text-muted) mt-1.5 flex items-center gap-1.5'>
-                    <UserIcon size={12} className='shrink-0' />
-                    <span className='truncate'>
-                      {r.client?.name ??
-                        r.profile?.full_name ??
-                        'Cliente sin nombre'}
-                    </span>
-                    {!r.client?.user_id && !r.profile && (
-                      <span className='font-mono text-[11px] font-medium uppercase tracking-wide text-yellow-800 bg-flood-500/15 dark:text-flood-300 px-1.5 py-0.5 rounded-full shrink-0'>
-                        Invitado
+          <div className='flex flex-col gap-3'>
+            <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted nums'>
+              {formatLocal(`${selectedDate}T12:00:00Z`, "EEEE d 'de' MMMM")} ·{' '}
+              {sortedReservations.length} reserva
+              {sortedReservations.length !== 1 ? 's' : ''}
+            </p>
+            <div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-3'>
+              {sortedReservations.map((r, index) => (
+                <ReservationCard
+                  key={r.id}
+                  reservation={r}
+                  onOpen={setSelectedReservation}
+                  index={index}
+                  className={
+                    ['completed', 'cancelled', 'rejected'].includes(r.status)
+                      ? 'opacity-75'
+                      : ''
+                  }
+                  tourKey={index === 0 ? 'admin-reservations-card' : undefined}
+                  info={
+                    <p className='text-xs text-(--color-text-muted) mt-1.5 flex items-center gap-1.5'>
+                      <UserIcon size={12} className='shrink-0' />
+                      <span className='truncate'>
+                        {r.client?.name ??
+                          r.profile?.full_name ??
+                          'Cliente sin nombre'}
                       </span>
-                    )}
-                  </p>
-                }
-                footer={
-                  <>
-                    {buildReservationWhatsAppLink(r) && (
-                      <a
-                        href={buildReservationWhatsAppLink(r)!}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='flex items-center gap-1.5 text-sm font-medium text-pitch-700 hover:bg-pitch-100 dark:text-pitch-300 dark:hover:bg-pitch-500/15 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                        aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
-                      >
-                        <WhatsAppIcon size={16} />
-                        <span className='hidden sm:inline'>WhatsApp</span>
-                      </a>
-                    )}
-                    <div className='flex gap-2 ml-auto'>
-                      <ReservationActionControls
-                        reservation={r}
-                        viewer='business'
-                        onChanged={handleReservationChanged}
-                        cancelTourKey='admin-reservations-cancel'
-                      />
-                    </div>
-                  </>
-                }
-              />
-            ))}
+                      {!r.client?.user_id && !r.profile && (
+                        <span className='font-mono text-[11px] font-medium uppercase tracking-wide text-yellow-800 bg-flood-500/15 dark:text-flood-300 px-1.5 py-0.5 rounded-full shrink-0'>
+                          Invitado
+                        </span>
+                      )}
+                    </p>
+                  }
+                  footer={
+                    <>
+                      {buildReservationWhatsAppLink(r) && (
+                        <a
+                          href={buildReservationWhatsAppLink(r)!}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          className='flex items-center gap-1.5 text-sm font-medium text-pitch-700 hover:bg-pitch-100 dark:text-pitch-300 dark:hover:bg-pitch-500/15 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                          aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
+                        >
+                          <WhatsAppIcon size={16} />
+                          <span className='hidden sm:inline'>WhatsApp</span>
+                        </a>
+                      )}
+                      <div className='flex gap-2 ml-auto'>
+                        <ReservationActionControls
+                          reservation={r}
+                          viewer='business'
+                          onChanged={handleReservationChanged}
+                          cancelTourKey='admin-reservations-cancel'
+                        />
+                      </div>
+                    </>
+                  }
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>
