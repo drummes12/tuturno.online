@@ -278,7 +278,7 @@ export function AdminHoursPage() {
             <Card
               key={dayIdx}
               data-tour={dayIdx === 1 ? 'admin-hours-day' : undefined}
-              className={`p-0 overflow-hidden animate-fade-up ${hasOverlap ? 'border-red-300' : ''}`}
+              className={`p-0 overflow-hidden animate-fade-up ${hasOverlap ? 'border-danger/60' : ''}`}
               style={{ animationDelay: `${dayIdx * 20}ms` }}
             >
               {/* Header del día */}
@@ -303,7 +303,7 @@ export function AdminHoursPage() {
                   />
                 </button>
                 <span
-                  className={`text-sm font-semibold tracking-tight ${
+                  className={`font-mono text-xs font-medium uppercase tracking-[0.14em] ${
                     isActive ? 'text-text' : 'text-text-muted'
                   }`}
                 >
@@ -318,7 +318,7 @@ export function AdminHoursPage() {
                   <button
                     onClick={() => addFranja(dayIdx)}
                     data-tour={dayIdx === 1 ? 'admin-hours-add' : undefined}
-                    className='ml-auto flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-50 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
+                    className='ml-auto flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-100 dark:hover:bg-pitch-500/10 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
                     aria-label={`Agregar franja a ${dayName}`}
                   >
                     <PlusIcon size={14} />
@@ -359,8 +359,8 @@ export function AdminHoursPage() {
                       >
                         {/* Etiqueta de franja */}
                         <div
-                          className={`col-span-2 flex items-center gap-1.5 text-xs font-medium sm:w-20 sm:shrink-0 ${
-                            franjaOverlap ? 'text-red-600' : 'text-text-muted'
+                          className={`col-span-2 flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] sm:w-20 sm:shrink-0 ${
+                            franjaOverlap ? 'text-danger' : 'text-text-muted'
                           }`}
                         >
                           <LabelIcon size={14} />
@@ -382,7 +382,7 @@ export function AdminHoursPage() {
                             }
                             className={`min-w-0 flex-1 rounded-lg border bg-surface-inset px-2.5 py-2 text-sm touch-target nums sm:px-3 ${
                               franjaOverlap
-                                ? 'border-red-300 focus:border-red-500'
+                                ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'
                             } focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Apertura ${dayName} ${label.text}`}
@@ -403,7 +403,7 @@ export function AdminHoursPage() {
                             }
                             className={`min-w-0 flex-1 rounded-lg border bg-surface-inset px-2.5 py-2 text-sm touch-target nums sm:px-3 ${
                               franjaOverlap
-                                ? 'border-red-300 focus:border-red-500'
+                                ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'
                             } focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Cierre ${dayName} ${label.text}`}
@@ -429,7 +429,7 @@ export function AdminHoursPage() {
                         {canEdit && (
                           <button
                             onClick={() => deleteFranja(globalIdx)}
-                            className='col-start-2 flex items-center justify-center w-10 h-10 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0 sm:w-8 sm:h-8'
+                            className='col-start-2 flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0 sm:w-8 sm:h-8'
                             aria-label={`Eliminar franja de ${label.text}`}
                             title='Eliminar franja'
                           >
@@ -461,7 +461,7 @@ export function AdminHoursPage() {
             {franjas.filter((f) => !f._isDeleted && f.is_active).length} franjas
             activas
             {hasOverlaps && (
-              <span className='text-red-600 font-medium'>
+              <span className='text-danger font-medium'>
                 {' '}
                 · solapamientos detectados
               </span>

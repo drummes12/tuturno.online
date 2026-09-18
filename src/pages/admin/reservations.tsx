@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useSearch } from 'wouter'
 import { Card } from '@/components/common/card'
-import { StatusBadge } from '@/components/common/badge'
 import { Alert } from '@/components/common/alert'
+import { ReservationCard } from '@/components/common/reservation-card'
 import { ReservationSkeleton } from '@/components/common/skeleton'
 import { ReservationDetailsSheet } from '@/components/common/reservation-details-sheet'
 import { ReservationActionControls } from '@/components/common/reservation-action-controls'
@@ -10,8 +10,7 @@ import {
   UserIcon,
   CalendarIcon,
   InboxIcon,
-  WhatsAppIcon,
-  ChevronRightIcon
+  WhatsAppIcon
 } from '@/components/common/icon'
 import type { Reservation, ReservationFilter } from '@/types'
 import { format } from 'date-fns'
@@ -186,7 +185,7 @@ export function AdminReservationsPage() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`shrink-0 px-4 py-2.5 rounded-full text-sm font-medium border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
+            className={`shrink-0 px-4 py-2.5 rounded-full font-mono text-[11px] font-medium uppercase tracking-[0.14em] border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
               filter === f.key
                 ? 'bg-(--color-primary) text-white border-(--color-primary) shadow-(--shadow-pitch)'
                 : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
@@ -222,96 +221,54 @@ export function AdminReservationsPage() {
             </div>
           </Card>
         ) : (
-          <div className='flex flex-col gap-2.5'>
+          <div className='grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3'>
             {sortedReservations.map((r, index) => (
-              <Card
+              <ReservationCard
                 key={r.id}
-                data-tour={index === 0 ? 'admin-reservations-card' : undefined}
-                className={`p-4 animate-stagger ${r.status === 'pending' ? 'border-l-4 border-l-yellow-400' : ''}`}
-                style={{ '--index': index } as React.CSSProperties}
-              >
-                <button
-                  type='button'
-                  onClick={() => setSelectedReservation(r)}
-                  className='w-full cursor-pointer rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
-                  aria-label={`Ver detalles de la reserva de ${r.client?.name ?? r.profile?.full_name ?? 'cliente'} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
-                >
-                  <div className='flex flex-col'>
-                    <div className='flex items-start gap-2 justify-between'>
-                      <p className='font-medium text-sm flex items-center gap-1.5'>
-                        <span className='nums font-bold text-primary'>
-                          {formatLocal(r.starts_at, 'HH:mm')}
-                        </span>
-                        <span className='text-text-muted'>·</span>
-                        <span className='truncate'>{r.resource?.name}</span>
-                        {r.reservation_number && (
-                          <span className='shrink-0 rounded-md bg-surface-inset px-1.5 py-0.5 text-xs font-semibold text-text-muted'>
-                            #{r.reservation_number}
-                          </span>
-                        )}
-                      </p>
-                      <div className='flex shrink-0 items-center gap-1'>
-                        <StatusBadge status={r.status} />
-                        <ChevronRightIcon
-                          size={18}
-                          className='text-text-muted'
-                        />
-                      </div>
+                reservation={r}
+                onOpen={setSelectedReservation}
+                index={index}
+                tourKey={index === 0 ? 'admin-reservations-card' : undefined}
+                info={
+                  <p className='text-xs text-(--color-text-muted) mt-1.5 flex items-center gap-1.5'>
+                    <UserIcon size={12} className='shrink-0' />
+                    <span className='truncate'>
+                      {r.client?.name ??
+                        r.profile?.full_name ??
+                        'Cliente sin nombre'}
+                    </span>
+                    {!r.client?.user_id && !r.profile && (
+                      <span className='font-mono text-[11px] font-medium uppercase tracking-wide text-yellow-800 bg-flood-500/15 dark:text-flood-300 px-1.5 py-0.5 rounded-full shrink-0'>
+                        Invitado
+                      </span>
+                    )}
+                  </p>
+                }
+                footer={
+                  <>
+                    {buildReservationWhatsAppLink(r) && (
+                      <a
+                        href={buildReservationWhatsAppLink(r)!}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='flex items-center gap-1.5 text-sm font-medium text-pitch-700 hover:bg-pitch-100 dark:text-pitch-300 dark:hover:bg-pitch-500/15 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                        aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
+                      >
+                        <WhatsAppIcon size={16} />
+                        <span className='hidden sm:inline'>WhatsApp</span>
+                      </a>
+                    )}
+                    <div className='flex gap-2 ml-auto'>
+                      <ReservationActionControls
+                        reservation={r}
+                        viewer='business'
+                        onChanged={handleReservationChanged}
+                        cancelTourKey='admin-reservations-cancel'
+                      />
                     </div>
-                    <div>
-                      <p className='text-xs text-(--color-text-muted) mt-1 flex items-center gap-1.5'>
-                        <UserIcon size={12} className='shrink-0' />
-                        <span className='truncate'>
-                          {r.client?.name ??
-                            r.profile?.full_name ??
-                            'Cliente sin nombre'}
-                        </span>
-                        {!r.client?.user_id && !r.profile && (
-                          <span className='text-xs font-medium text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full shrink-0'>
-                            Invitado
-                          </span>
-                        )}
-                      </p>
-                      {r.notes && (
-                        <p className='text-xs italic text-(--color-text-muted) mt-1.5 border-l-2 border-border pl-2'>
-                          {r.notes}
-                        </p>
-                      )}
-                      {r.decision_reason && (
-                        <p className='text-xs text-(--color-text-muted) mt-1.5'>
-                          Motivo: {r.decision_reason}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </button>
-
-                {/* Action bar — WhatsApp siempre disponible + acciones por estado */}
-                <div className='mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2'>
-                  {/* WhatsApp — acción de contacto, sutil pero visible */}
-                  {buildReservationWhatsAppLink(r) && (
-                    <a
-                      href={buildReservationWhatsAppLink(r)!}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='flex items-center gap-1.5 text-sm font-medium text-green-700 hover:text-green-800 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors touch-target'
-                      aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
-                    >
-                      <WhatsAppIcon size={16} />
-                      <span className='hidden sm:inline'>WhatsApp</span>
-                    </a>
-                  )}
-
-                  <div className='flex gap-2 ml-auto'>
-                    <ReservationActionControls
-                      reservation={r}
-                      viewer='business'
-                      onChanged={handleReservationChanged}
-                      cancelTourKey='admin-reservations-cancel'
-                    />
-                  </div>
-                </div>
-              </Card>
+                  </>
+                }
+              />
             ))}
           </div>
         )}

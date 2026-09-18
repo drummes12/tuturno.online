@@ -183,7 +183,7 @@ export function ShareCard({ slug, businessName }: ShareCardProps) {
   return (
     <Card className='p-5 animate-fade-up'>
       <div className='flex items-center gap-2 mb-4'>
-        <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+        <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
           <QrIcon size={18} />
         </div>
         <div className='min-w-0 flex-1'>
@@ -226,7 +226,7 @@ export function ShareCard({ slug, businessName }: ShareCardProps) {
               href={publicUrl}
               target='_blank'
               rel='noopener noreferrer'
-              className='inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-800 hover:bg-green-100 hover:border-green-300 transition-colors touch-target w-full sm:w-auto'
+              className='inline-flex items-center justify-center gap-2 rounded-lg border border-pitch-600/30 bg-pitch-100 px-4 py-2.5 text-sm font-medium text-pitch-800 hover:bg-pitch-200 dark:bg-pitch-500/15 dark:text-pitch-300 dark:border-pitch-500/30 dark:hover:bg-pitch-500/25 transition-colors touch-target w-full sm:w-auto'
               aria-label='Abrir página de reservas en nueva pestaña'
               title='Abre la página que ven tus clientes'
             >

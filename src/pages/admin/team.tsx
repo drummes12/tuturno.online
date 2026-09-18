@@ -86,7 +86,7 @@ export function AdminTeamPage() {
       )}
 
       <section className='flex flex-col gap-3' data-tour='admin-team-members'>
-        <h2 className='text-lg font-semibold tracking-tight'>
+        <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
           Miembros ({members.length})
         </h2>
         {(() => {
@@ -178,7 +178,7 @@ function InviteMemberForm({
 
   return (
     <section className='flex flex-col gap-3'>
-      <h2 className='text-lg font-semibold tracking-tight'>Añadir manager</h2>
+      <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>Añadir manager</h2>
       <Card className='p-4 flex flex-col gap-3'>
         <p className='text-sm text-(--color-text-muted)'>
           Busca a una persona por su email. Debe tener cuenta creada en TuTurno.

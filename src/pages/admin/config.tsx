@@ -175,7 +175,7 @@ export function AdminConfigPage() {
             {/* Datos del negocio */}
             <Card className='order-1 p-5 animate-fade-up'>
               <div className='flex items-center gap-2 mb-4'>
-                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
                   <StoreIcon size={18} />
                 </div>
                 <h2 className='font-semibold text-sm tracking-tight'>
@@ -256,7 +256,7 @@ export function AdminConfigPage() {
                       href={testLink}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-800 hover:bg-green-100 hover:border-green-300 transition-colors touch-target w-full sm:w-auto'
+                      className='inline-flex items-center justify-center gap-2 rounded-lg border border-pitch-600/30 bg-pitch-100 px-4 py-2.5 text-sm font-medium text-pitch-800 hover:bg-pitch-200 dark:bg-pitch-500/15 dark:text-pitch-300 dark:border-pitch-500/30 dark:hover:bg-pitch-500/25 transition-colors touch-target w-full sm:w-auto'
                       aria-label='Probar link de WhatsApp en nueva pestaña'
                       title='Abre el mismo link que vería tu cliente al tocar el botón flotante'
                     >
@@ -275,7 +275,7 @@ export function AdminConfigPage() {
               style={{ animationDelay: '20ms' }}
             >
               <div className='flex items-center gap-2 mb-4'>
-                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
                   <MapPinIcon size={18} />
                 </div>
                 <h2 className='font-semibold text-sm tracking-tight'>
@@ -329,7 +329,7 @@ export function AdminConfigPage() {
 
                 {/* Ubicación en mapas */}
                 <div>
-                  <label className='text-sm font-medium text-(--color-text) tracking-tight mb-2 block'>
+                  <label className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) mb-2 block'>
                     Ubicación en mapas
                   </label>
                   <p className='text-xs text-(--color-text-muted) mb-3'>
@@ -341,7 +341,7 @@ export function AdminConfigPage() {
                     <div className='flex items-start gap-3'>
                       <MapPinIcon
                         size={20}
-                        className='text-pitch-700 shrink-0 mt-0.5'
+                        className='text-pitch-700 dark:text-pitch-400 shrink-0 mt-0.5'
                       />
                       <div className='min-w-0 flex-1'>
                         <p className='text-sm font-medium'>
@@ -376,7 +376,7 @@ export function AdminConfigPage() {
               style={{ animationDelay: '40ms' }}
             >
               <div className='flex items-center gap-2 mb-4'>
-                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+                <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
                   <ClockIcon size={18} />
                 </div>
                 <h2 className='font-semibold text-sm tracking-tight'>Turnos</h2>
@@ -400,7 +400,7 @@ export function AdminConfigPage() {
                         }
                         className={`flex flex-col items-center justify-center py-2.5 rounded-lg border text-sm font-medium transition-all ${
                           business.slot_duration_minutes === min
-                            ? 'border-primary bg-pitch-50 text-primary'
+                            ? 'border-primary bg-pitch-100 text-primary dark:bg-pitch-500/15'
                             : 'border-border bg-surface-inset text-text-muted hover:border-graphite-300'
                         }`}
                         aria-pressed={business.slot_duration_minutes === min}
@@ -452,7 +452,7 @@ export function AdminConfigPage() {
                         }
                         className={`flex flex-col items-center justify-center py-2.5 rounded-lg border text-sm font-medium transition-all ${
                           business.gap_minutes === opt.v
-                            ? 'border-primary bg-pitch-50 text-primary'
+                            ? 'border-primary bg-pitch-100 text-primary dark:bg-pitch-500/15'
                             : 'border-border bg-surface-inset text-text-muted hover:border-graphite-300'
                         }`}
                         aria-pressed={business.gap_minutes === opt.v}
@@ -604,7 +604,7 @@ export function AdminConfigPage() {
             style={{ animationDelay: '100ms' }}
           >
             <div className='flex items-center gap-2 mb-4'>
-              <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+              <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
                 <CheckIcon size={18} />
               </div>
               <h2 className='font-semibold text-sm tracking-tight'>

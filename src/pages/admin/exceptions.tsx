@@ -294,13 +294,13 @@ export function AdminExceptionsPage() {
           <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
             <LockIcon size={18} />
           </div>
-          <h2 className='font-semibold text-sm tracking-tight'>Nuevo cierre</h2>
+          <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em]'>Nuevo cierre</h2>
         </div>
 
         <div className='flex flex-col gap-4'>
           {/* Alcance */}
           <div className='flex flex-col gap-2'>
-            <label className='text-sm font-medium text-(--color-text)'>
+            <label className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
               Alcance
             </label>
             <div className='flex gap-2'>
@@ -336,7 +336,7 @@ export function AdminExceptionsPage() {
             <div className='flex flex-col gap-2'>
               <label
                 htmlFor='exception-resource'
-                className='text-sm font-medium text-(--color-text)'
+                className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
               >
                 Recurso
               </label>
@@ -361,7 +361,7 @@ export function AdminExceptionsPage() {
             <div className='flex-1 flex flex-col gap-2'>
               <label
                 htmlFor='exception-start-date'
-                className='text-sm font-medium text-(--color-text)'
+                className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
               >
                 Fecha inicio
               </label>
@@ -377,7 +377,7 @@ export function AdminExceptionsPage() {
             <div className='flex-1 flex flex-col gap-2'>
               <label
                 htmlFor='exception-end-date'
-                className='text-sm font-medium text-(--color-text)'
+                className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
               >
                 Fecha fin
               </label>
@@ -401,7 +401,7 @@ export function AdminExceptionsPage() {
               disabled={!canEdit}
               className='w-5 h-5 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15 disabled:opacity-60'
             />
-            <span className='text-sm font-medium text-(--color-text)'>
+            <span className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
               Todo el día
             </span>
           </label>
@@ -412,7 +412,7 @@ export function AdminExceptionsPage() {
               <div className='flex flex-col gap-2'>
                 <label
                   htmlFor='exception-start-time'
-                  className='text-sm font-medium text-(--color-text)'
+                  className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
                 >
                   Hora inicio
                 </label>
@@ -428,7 +428,7 @@ export function AdminExceptionsPage() {
               <div className='flex flex-col gap-2'>
                 <label
                   htmlFor='exception-end-time'
-                  className='text-sm font-medium text-(--color-text)'
+                  className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
                 >
                   Hora fin
                 </label>
@@ -448,7 +448,7 @@ export function AdminExceptionsPage() {
           <div className='flex flex-col gap-2'>
             <label
               htmlFor='exception-reason'
-              className='text-sm font-medium text-(--color-text)'
+              className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
             >
               Motivo (opcional)
             </label>
@@ -514,7 +514,7 @@ export function AdminExceptionsPage() {
 
       {/* Excepciones activas/futuras */}
       <div className='animate-fade-up' style={{ animationDelay: '60ms' }}>
-        <h2 className='font-semibold text-sm tracking-tight mb-3 flex items-center gap-2'>
+        <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted mb-3 flex items-center gap-2'>
           <CalendarIcon size={16} className='text-text-muted' />
           Cierres programados ({upcomingExceptions.length})
         </h2>
@@ -536,8 +536,8 @@ export function AdminExceptionsPage() {
                     <span
                       className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         exc.resource_id
-                          ? 'bg-pitch-100 text-pitch-700'
-                          : 'bg-blue-50 text-blue-700'
+                          ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'
+                          : 'bg-signal-blue/10 text-signal-blue dark:bg-signal-blue/20 dark:text-blue-300'
                       }`}
                     >
                       {resourceName(exc.resource_id)}
@@ -556,7 +556,7 @@ export function AdminExceptionsPage() {
                   <button
                     onClick={() => handleDelete(exc.id)}
                     disabled={deletingId === exc.id}
-                    className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-50'
+                    className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-50'
                     aria-label='Eliminar cierre'
                     title='Eliminar cierre'
                   >
@@ -602,7 +602,7 @@ export function AdminExceptionsPage() {
                   <button
                     onClick={() => handleDelete(exc.id)}
                     disabled={deletingId === exc.id}
-                    className='flex items-center justify-center w-9 h-9 text-text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-50'
+                    className='flex items-center justify-center w-9 h-9 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-50'
                     aria-label='Eliminar cierre pasado'
                   >
                     <TrashIcon size={16} />

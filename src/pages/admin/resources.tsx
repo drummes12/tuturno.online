@@ -171,7 +171,7 @@ export function AdminResourcesPage() {
       {showForm && (
         <Card elevated className='p-5 animate-fade-up'>
           <div className='flex items-center gap-2 mb-4'>
-            <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700'>
+            <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
               {editingResource ? (
                 <EditIcon size={16} />
               ) : (
@@ -250,7 +250,7 @@ export function AdminResourcesPage() {
               <div className='flex items-center justify-between gap-3'>
                 <div className='min-w-0 flex-1 flex items-center gap-2'>
                   <div
-                    className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${resource.is_active ? 'bg-pitch-100 text-pitch-700' : 'bg-surface-inset text-text-muted'}`}
+                    className={`flex items-center justify-center w-9 h-9 rounded-lg shrink-0 ${resource.is_active ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300' : 'bg-surface-inset text-text-muted'}`}
                   >
                     <StoreIcon size={18} />
                   </div>

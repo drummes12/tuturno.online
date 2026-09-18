@@ -67,9 +67,9 @@ export function AdminBusinessHubPage() {
           <Link key={item.href} href={item.href}>
             <Card
               data-tour={item.tourKey}
-              className='flex items-center gap-4 p-4 hover:border-graphite-300 hover:shadow-(--shadow-sm) transition-all cursor-pointer touch-target'
+              className='group flex items-center gap-4 p-4 hover:border-pitch-600/40 hover:shadow-(--shadow-sm) transition-all cursor-pointer touch-target'
             >
-              <div className='flex items-center justify-center w-11 h-11 rounded-xl bg-surface-inset text-graphite-600 shrink-0'>
+              <div className='flex items-center justify-center w-11 h-11 rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300 shrink-0'>
                 {item.icon}
               </div>
               <div className='flex-1 min-w-0'>
@@ -82,7 +82,7 @@ export function AdminBusinessHubPage() {
               </div>
               <ChevronRightIcon
                 size={18}
-                className='text-graphite-400 shrink-0'
+                className='text-text-muted shrink-0 transition-transform duration-200 group-hover:translate-x-0.5'
               />
             </Card>
           </Link>
