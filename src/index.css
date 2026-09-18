@@ -385,9 +385,21 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Border beam — arco de luz que recorre el borde (estado pendiente).
+/* Border beam — arco de luz que recorre el borde de un elemento.
    Usa @property para animar el ángulo del gradiente cónico; sin
-   soporte queda un arco estático que sigue funcionando como acento. */
+   soporte queda un arco estático que sigue funcionando como acento.
+
+   Uso:
+   - `border-beam` activa el efecto (color por defecto: flood) —
+     es todo lo que se necesita: el anillo pinta por encima del borde
+     como lo haría un border nativo y hereda el border-radius.
+   - `beam-{color}` cambia el color con cualquier color del theme:
+     beam-pitch-500, beam-signal-red… el par dark se compone con la
+     variante nativa: dark:beam-pitch-400.
+   - Ajustes puntuales vía CSS vars: [--beam-width:2px],
+     [--beam-color:var(--color-x)].
+   - Opcional: padding + hijo con radio menor si se prefiere el beam
+     como "marco" separado del contenido en vez de borde superpuesto. */
 @property --beam-angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -400,50 +412,54 @@ body {
   }
 }
 
-.border-beam {
+/* Registrado como utility de Tailwind: autocompletado en el editor
+   y composición con variantes (dark:, sm:, hover:, etc.). */
+@utility border-beam {
   --beam-color: var(--color-flood-500);
   --beam-width: 1.5px;
   position: relative;
+
+  /* Default dark — dentro del utility para que compita en la misma
+     capa/especificidad que dark:beam-*; si viviera fuera de @layer
+     ganaría siempre sobre cualquier beam-{color}. */
+  &:where(.dark, .dark *) {
+    --beam-color: var(--color-flood-400);
+  }
+
+  /* El beam se dibuja como anillo enmascarado: el gradiente cónico
+     se recorta al perímetro exacto, así el arco respeta las esquinas
+     redondeadas en vez de quedar detrás de la card. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: var(--beam-width);
+    background: conic-gradient(
+      from var(--beam-angle),
+      transparent 0deg,
+      var(--beam-color) 55deg,
+      transparent 110deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: beam-spin 3.5s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
 }
 
-/* El beam se dibuja como anillo enmascarado: el gradiente cónico
-   se recorta al perímetro exacto, así el arco respeta las esquinas
-   redondeadas en vez de quedar detrás de la card. */
-.border-beam::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: var(--beam-width);
-  background: conic-gradient(
-    from var(--beam-angle),
-    transparent 0deg,
-    var(--beam-color) 55deg,
-    transparent 110deg
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  animation: beam-spin 3.5s linear infinite;
-  pointer-events: none;
-}
-
-.dark .border-beam {
-  --beam-color: var(--color-flood-400);
-}
-
-/* Variante pitch — el arco viaja en verde claro (papelera del turno) */
-.border-beam--pitch {
-  --beam-color: var(--color-pitch-500);
-}
-
-.dark .border-beam--pitch {
-  --beam-color: var(--color-pitch-400);
+/* beam-{color} — cualquier color del theme de Tailwind con
+   autocompletado: beam-pitch-500, beam-signal-red, beam-chalk…
+   Componible con variantes: dark:beam-pitch-400. */
+@utility beam-* {
+  --beam-color: --value(--color-*, [color]);
 }
 
 @media (prefers-reduced-motion: reduce) {

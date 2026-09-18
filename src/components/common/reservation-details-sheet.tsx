@@ -195,7 +195,7 @@ export function ReservationDetailsSheet({
         {/* Border-beam solo en mobile: un arco de luz pitch recorre
             el borde de la papeleta. En desktop el panel es full-bleed
             y la cancha habla por sí sola. */}
-        <div className='border-beam border-beam--pitch mx-4 mt-3 rounded-xl p-1 sm:m-0 sm:rounded-none sm:p-0 sm:before:hidden'>
+        <div className='border-beam beam-pitch-500 dark:beam-pitch-400 mx-4 mt-3 rounded-xl p-1 sm:m-0 sm:rounded-none sm:p-0 sm:before:hidden'>
           <div className='dark relative overflow-hidden rounded-[14.5px] bg-pitch-950 text-chalk sm:flex sm:h-full sm:flex-col sm:rounded-none'>
             {/* Líneas de cancha — decorativas */}
             <div

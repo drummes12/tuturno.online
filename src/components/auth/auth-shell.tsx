@@ -11,7 +11,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
     <div className='flex flex-1 items-center justify-center py-8'>
       <Card
         bordered
-        className='grid w-full max-w-md overflow-hidden p-0 animate-fade-up lg:max-w-4xl lg:grid-cols-[1fr_1.15fr]'
+        className='border-beam beam-pitch-500 dark:beam-pitch-400 grid w-full max-w-md overflow-hidden p-0 animate-fade-up lg:max-w-4xl lg:grid-cols-[1fr_1.15fr]'
       >
         {/* Panel de cancha — solo desktop */}
         <aside className='relative hidden flex-col justify-between overflow-hidden bg-pitch-950 p-10 text-chalk lg:flex'>

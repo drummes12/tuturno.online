@@ -62,8 +62,47 @@ const STATUS_STYLE: Record<SlotStatus, { chip: string; label: string }> = {
   }
 }
 
+// Fila accionable del home autenticado — misma anatomía en cliente y negocio.
+function HomeRow({
+  href,
+  icon,
+  title,
+  desc,
+  delay
+}: {
+  href: string
+  icon: ReactNode
+  title: string
+  desc: string
+  delay: number
+}) {
+  return (
+    <Link
+      href={href}
+      className='group flex items-center gap-4 rounded-2xl border border-border bg-surface-elevated px-5 py-3.5 shadow-(--shadow-xs) transition-[transform,border-color] duration-200 ease-spring hover:-translate-y-0.5 hover:border-border-strong animate-fade-up'
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
+        {icon}
+      </span>
+      <span className='min-w-0 flex-1'>
+        <span className='block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
+          {title}
+        </span>
+        <span className='mt-0.5 block truncate text-sm text-(--color-text-muted)'>
+          {desc}
+        </span>
+      </span>
+      <ArrowRightIcon
+        size={16}
+        className='shrink-0 text-(--color-text-muted) transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
+      />
+    </Link>
+  )
+}
+
 export function LandingPage() {
-  const { user } = useAuthStore()
+  const { user, memberships, activeBusinessId } = useAuthStore()
   const [slug, setSlug] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [, navigate] = useLocation()
@@ -102,6 +141,11 @@ export function LandingPage() {
   )
 
   if (user) {
+    const business =
+      memberships.find((m) => m.businessId === activeBusinessId) ??
+      memberships[0] ??
+      null
+
     return (
       <Page width='full' className='flex-1 items-center'>
         <div className='grid w-full max-w-md grid-cols-1 gap-4 lg:max-w-5xl lg:grid-cols-[1fr_1.15fr] lg:gap-5'>
@@ -116,63 +160,87 @@ export function LandingPage() {
               <div className='absolute left-1/2 top-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10' />
             </div>
             <span className='relative font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-300'>
-              Tu turno
+              {business ? business.businessName : 'Tu turno'}
             </span>
             <div className='relative mt-4 lg:mt-0'>
               <h1 className='text-2xl font-bold leading-tight tracking-[-0.02em] sm:text-3xl'>
-                ¿Qué reservas
-                <br />
-                hoy?
+                {business ? (
+                  <>
+                    ¿Cómo va tu
+                    <br />
+                    cancha?
+                  </>
+                ) : (
+                  <>
+                    ¿Qué reservas
+                    <br />
+                    hoy?
+                  </>
+                )}
               </h1>
               <p className='mt-1.5 text-sm text-chalk-dim/80'>
-                Entra al tablero de tu negocio o revisa tus reservas.
+                {business
+                  ? 'Gestiona tus turnos o revisa tu página pública.'
+                  : 'Entra al tablero de tu negocio o revisa tus reservas.'}
               </p>
             </div>
           </section>
 
           <div className='flex flex-col gap-4'>
-            {/* Mis reservas — el destino más probable, como fila de fixture */}
-            <Link
-              href='/mis-reservas'
-              className='group flex items-center gap-4 rounded-2xl border border-border bg-surface-elevated px-5 py-3.5 shadow-(--shadow-xs) transition-[transform,border-color] duration-200 ease-spring hover:-translate-y-0.5 hover:border-border-strong animate-fade-up'
-              style={{ animationDelay: '60ms' }}
-            >
-              <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
-                <ListIcon size={18} />
-              </span>
-              <span className='min-w-0 flex-1'>
-                <span className='block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
-                  Mis reservas
-                </span>
-                <span className='mt-0.5 block truncate text-sm text-(--color-text-muted)'>
-                  Próximas, pendientes y pasadas
-                </span>
-              </span>
-              <ArrowRightIcon
-                size={16}
-                className='shrink-0 text-(--color-text-muted) transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
-              />
-            </Link>
-
-            {/* Buscar negocio por slug */}
-            <section
-              className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-4 shadow-(--shadow-xs) animate-fade-up'
-              style={{ animationDelay: '120ms' }}
-            >
-              <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
-                Ir a un negocio
-              </span>
-              {orgForm}
-            </section>
-
-            <Link
-              href='/crear-negocio'
-              className='flex items-center justify-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target animate-fade-up'
-              style={{ animationDelay: '180ms' }}
-            >
-              <StoreIcon size={15} />
-              Quiero TuTurno para mi negocio
-            </Link>
+            {business ? (
+              <>
+                {/* Negocio — operación primero */}
+                <HomeRow
+                  href='/admin'
+                  icon={<CalendarIcon size={18} />}
+                  title='Panel de administración'
+                  desc='Reservas, horarios y configuración'
+                  delay={60}
+                />
+                <HomeRow
+                  href={`/b/${business.slug}`}
+                  icon={<StoreIcon size={18} />}
+                  title='Mi página pública'
+                  desc='Cómo te ven tus clientes'
+                  delay={120}
+                />
+                <HomeRow
+                  href='/mis-reservas'
+                  icon={<ListIcon size={18} />}
+                  title='Mis reservas'
+                  desc='Las que agendaste como cliente'
+                  delay={180}
+                />
+              </>
+            ) : (
+              <>
+                {/* Cliente — reservar primero */}
+                <HomeRow
+                  href='/mis-reservas'
+                  icon={<ListIcon size={18} />}
+                  title='Mis reservas'
+                  desc='Próximas, pendientes y pasadas'
+                  delay={60}
+                />
+                <section
+                  className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-4 shadow-(--shadow-xs) animate-fade-up'
+                  style={{ animationDelay: '120ms' }}
+                >
+                  <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+                    Ir a un negocio
+                  </span>
+                  {orgForm}
+                </section>
+                <Link
+                  href='/crear-negocio'
+                  className='flex items-center justify-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target animate-fade-up'
+                  style={{ animationDelay: '180ms' }}
+                >
+                  <StoreIcon size={15} />
+                  Quiero TuTurno para mi negocio
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </Page>
