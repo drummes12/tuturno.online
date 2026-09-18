@@ -4,29 +4,35 @@ import {
   LockIcon,
   LogOutIcon,
   MenuIcon,
+  MoonIcon,
+  SunIcon,
   UserIcon
 } from '@/components/common/icon'
 
 interface HeaderMenuProps {
   isAdmin: boolean
   isPlatformAdmin: boolean
-  businessSelector?: ReactNode
+  businessSelector?: (close: () => void) => ReactNode
+  mobileExtras?: (close: () => void) => ReactNode
   nextPath: string
   notificationIcon: ReactNode
   notificationLabel: string
   userEmail?: string
   onSignOut: () => void
+  themeToggle?: { dark: boolean; onToggle: () => void }
 }
 
 export function HeaderMenu({
   isAdmin,
   isPlatformAdmin,
   businessSelector,
+  mobileExtras,
   nextPath,
   notificationIcon,
   notificationLabel,
   userEmail,
-  onSignOut
+  onSignOut,
+  themeToggle
 }: HeaderMenuProps) {
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -88,7 +94,15 @@ export function HeaderMenu({
               <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
                 Organización activa
               </span>
-              {businessSelector}
+              {businessSelector(close)}
+            </div>
+          )}
+
+          {/* Acciones que en mobile se retiran de la barra superior */}
+          {mobileExtras && (
+            <div className='flex flex-col gap-1 sm:hidden'>
+              {mobileExtras(close)}
+              <div className='my-1 h-px bg-border' />
             </div>
           )}
 
@@ -121,6 +135,24 @@ export function HeaderMenu({
               <UserIcon size={17} className='shrink-0 text-text-muted' />
               <span>Privacidad</span>
             </Link>
+          )}
+
+          {themeToggle && (
+            <button
+              type='button'
+              onClick={() => {
+                close()
+                themeToggle.onToggle()
+              }}
+              className='flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm text-(--color-text) transition-colors hover:bg-surface-inset touch-target'
+            >
+              {themeToggle.dark ? (
+                <SunIcon size={17} className='shrink-0 text-text-muted' />
+              ) : (
+                <MoonIcon size={17} className='shrink-0 text-text-muted' />
+              )}
+              <span>{themeToggle.dark ? 'Tema claro' : 'Tema oscuro'}</span>
+            </button>
           )}
 
           <div className='my-1 h-px bg-border' />

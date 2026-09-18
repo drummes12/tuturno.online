@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
 import {
   CalendarIcon,
+  CalendarPlusIcon,
   LayoutIcon,
   ListIcon,
   StoreIcon,
@@ -11,9 +12,7 @@ import {
   BellIcon,
   CheckIcon,
   XIcon,
-  HelpIcon,
-  SunIcon,
-  MoonIcon
+  HelpIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { PwaInstallPrompt } from '@/components/common/pwa-install-prompt'
@@ -96,8 +95,14 @@ const adminNav: NavItem[] = [
 ]
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { user, isAdmin, isPlatformAdmin, memberships, signOut } =
-    useAuthStore()
+  const {
+    user,
+    isAdmin,
+    isPlatformAdmin,
+    memberships,
+    activeBusinessId,
+    signOut
+  } = useAuthStore()
   const [location] = useLocation()
   const clientTutorial = useClientTutorial()
   const adminTutorial = useAdminTutorial()
@@ -167,7 +172,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             El contenido siempre vive en la columna max-w-5xl, así al
             zoom-out los controles no se van a los bordes de pantalla. */}
         <div
-          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900/90 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
+          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900 sm:bg-pitch-900/90 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
             <Link
@@ -182,24 +187,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span>TuTurno</span>
             </Link>
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
-              <button
-                type='button'
-                onClick={toggleTheme}
-                className='inline-flex h-11 w-11 items-center justify-center rounded-lg text-white/85 transition-[background-color,transform,color] hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target'
-                aria-label={
-                  dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'
-                }
-                title={dark ? 'Tema claro' : 'Tema oscuro'}
-              >
-                {dark ? <SunIcon size={18} /> : <MoonIcon size={18} />}
-              </button>
               {user && showTutorialButton && (
                 <button
                   type='button'
                   onClick={startTour}
                   disabled={isStarting}
                   data-tour='tutorial-trigger'
-                  className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
+                  className='hidden sm:inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
                   aria-label='Iniciar guía del tutorial'
                   aria-busy={isStarting}
                   title='Guía interactiva'
@@ -222,10 +216,54 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   isAdmin={isAdmin}
                   isPlatformAdmin={isPlatformAdmin}
                   businessSelector={
-                    isAdmin && memberships.length > 0 ? (
-                      <BusinessSelector inMenu />
-                    ) : undefined
+                    isAdmin && memberships.length > 0
+                      ? (close) => <BusinessSelector inMenu onSelect={close} />
+                      : undefined
                   }
+                  mobileExtras={(close) => (
+                    <>
+                      {isAdmin &&
+                        (() => {
+                          const active =
+                            memberships.find(
+                              (m) => m.businessId === activeBusinessId
+                            ) ?? memberships[0]
+                          if (!active) return null
+                          return (
+                            <a
+                              href={`/b/${active.slug}`}
+                              onClick={close}
+                              className='flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm text-(--color-text) transition-colors hover:bg-surface-inset touch-target'
+                            >
+                              <CalendarPlusIcon
+                                size={17}
+                                className='shrink-0 text-text-muted'
+                              />
+                              <span>Nueva reserva</span>
+                            </a>
+                          )
+                        })()}
+                      {showTutorialButton && (
+                        <button
+                          type='button'
+                          onClick={() => {
+                            close()
+                            startTour()
+                          }}
+                          disabled={isStarting}
+                          className='flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-(--color-text) transition-colors hover:bg-surface-inset disabled:opacity-60 touch-target'
+                        >
+                          <HelpIcon
+                            size={17}
+                            className='shrink-0 text-text-muted'
+                          />
+                          <span>
+                            {isStarting ? 'Abriendo…' : 'Guía interactiva'}
+                          </span>
+                        </button>
+                      )}
+                    </>
+                  )}
                   nextPath={location}
                   userEmail={user.email}
                   notificationIcon={
@@ -243,6 +281,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                         : 'Configurar notificaciones'
                   }
                   onSignOut={signOut}
+                  themeToggle={{ dark, onToggle: toggleTheme }}
                 />
               ) : (
                 <Link

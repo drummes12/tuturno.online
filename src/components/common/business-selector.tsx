@@ -1,17 +1,28 @@
 import { useAuthStore } from '@/stores/auth'
-import { StoreIcon, CalendarPlusIcon } from '@/components/common/icon'
+import {
+  StoreIcon,
+  CalendarPlusIcon,
+  CheckIcon
+} from '@/components/common/icon'
 
 interface BusinessSelectorProps {
   inMenu?: boolean
+  onSelect?: () => void
 }
 
 type BusinessDisplayProps = {
   businessName: string
   role: 'owner' | 'manager'
   inMenu: boolean
+  interactive: boolean
 }
 
-function BusinessDisplay({ businessName, role, inMenu }: BusinessDisplayProps) {
+function BusinessDisplay({
+  businessName,
+  role,
+  inMenu,
+  interactive
+}: BusinessDisplayProps) {
   return (
     <div className='pointer-events-none flex min-w-0 items-center gap-2'>
       <StoreIcon
@@ -32,27 +43,32 @@ function BusinessDisplay({ businessName, role, inMenu }: BusinessDisplayProps) {
           {role === 'owner' ? 'Propietario' : 'Administrador'}
         </span>
       </span>
-      <svg
-        className={`ml-auto shrink-0 ${inMenu ? 'text-text-muted' : 'text-white/60'}`}
-        width='12'
-        height='12'
-        viewBox='0 0 12 12'
-        fill='none'
-        aria-hidden='true'
-      >
-        <path
-          d='M3 4.5L6 7.5L9 4.5'
-          stroke='currentColor'
-          strokeWidth='1.5'
-          strokeLinecap='round'
-          strokeLinejoin='round'
-        />
-      </svg>
+      {interactive && (
+        <svg
+          className={`ml-auto shrink-0 ${inMenu ? 'text-text-muted' : 'text-white/60'}`}
+          width='12'
+          height='12'
+          viewBox='0 0 12 12'
+          fill='none'
+          aria-hidden='true'
+        >
+          <path
+            d='M3 4.5L6 7.5L9 4.5'
+            stroke='currentColor'
+            strokeWidth='1.5'
+            strokeLinecap='round'
+            strokeLinejoin='round'
+          />
+        </svg>
+      )}
     </div>
   )
 }
 
-export function BusinessSelector({ inMenu = false }: BusinessSelectorProps) {
+export function BusinessSelector({
+  inMenu = false,
+  onSelect
+}: BusinessSelectorProps) {
   const { memberships, activeBusinessId, setActiveBusinessId } = useAuthStore()
 
   if (memberships.length === 0) return null
@@ -60,6 +76,50 @@ export function BusinessSelector({ inMenu = false }: BusinessSelectorProps) {
   const active =
     memberships.find((m) => m.businessId === activeBusinessId) ?? memberships[0]
   const hasMultiple = memberships.length > 1
+
+  // Dentro del menú: lista real de opciones en vez de un <select> invisible,
+  // que no es fiable como hit-target dentro de un popover.
+  if (inMenu && hasMultiple) {
+    return (
+      <ul className='flex w-full flex-col gap-0.5'>
+        {memberships.map((membership) => {
+          const isActive = membership.businessId === active.businessId
+          return (
+            <li key={membership.businessId}>
+              <button
+                type='button'
+                onClick={() => {
+                  setActiveBusinessId(membership.businessId)
+                  onSelect?.()
+                }}
+                className='flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-surface-inset touch-target'
+                aria-pressed={isActive}
+              >
+                <StoreIcon size={16} className='shrink-0 text-text-muted' />
+                <span className='min-w-0 flex-1'>
+                  <span className='block truncate text-sm font-semibold leading-tight text-(--color-text)'>
+                    {membership.businessName}
+                  </span>
+                  <span className='mt-0.5 block truncate text-[11px] font-medium leading-tight text-text-muted'>
+                    {membership.role === 'owner'
+                      ? 'Propietario'
+                      : 'Administrador'}
+                  </span>
+                </span>
+                {isActive && (
+                  <CheckIcon
+                    size={16}
+                    className='shrink-0 text-pitch-700 dark:text-pitch-300'
+                  />
+                )}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    )
+  }
+
   const shellClasses = inMenu
     ? 'w-full border-border-strong bg-surface'
     : 'w-11 border-white/15 bg-white/5 sm:w-auto sm:max-w-32 md:max-w-50'
@@ -93,6 +153,7 @@ export function BusinessSelector({ inMenu = false }: BusinessSelectorProps) {
             businessName={active.businessName}
             role={active.role}
             inMenu={inMenu}
+            interactive
           />
         </div>
       ) : (
@@ -103,6 +164,7 @@ export function BusinessSelector({ inMenu = false }: BusinessSelectorProps) {
             businessName={active.businessName}
             role={active.role}
             inMenu={inMenu}
+            interactive={false}
           />
         </div>
       )}
