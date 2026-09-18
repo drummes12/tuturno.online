@@ -338,20 +338,24 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                       </span>
                     )}
                   </div>
-                  <div className='mt-1 flex items-end justify-between gap-3'>
-                    <div className='min-w-0'>
+                  <div className='mt-1 flex flex-col'>
+                    <div className='min-w-0 flex items-start justify-between gap-3'>
                       <p className='font-mono text-[26px] font-bold leading-none tracking-tight'>
                         {formatLocal(r.starts_at, 'HH:mm')}
                       </p>
-                      <p className='mt-1.5 flex items-baseline font-semibold text-(--color-text) tracking-tight'>
+                      <StatusBadge status={r.status} />
+                    </div>
+                    <div className='flex shrink-0 items-end justify-between gap-1'>
+                      <p className='mt-1.5 flex items-baseline font-semibold text-(--color-text) tracking-tight gap-1'>
                         <span className='truncate'>
                           {r.resource?.name ??
                             r.business?.resource_label_singular ??
                             resourceLabelSingular}
                         </span>
+                        <span className='shrink-0 text-(--color-text-muted)'>
+                          &bull;
+                        </span>
                         <span className='shrink-0 font-normal text-(--color-text-muted)'>
-                          {' '}
-                          ·{' '}
                           {differenceInMinutes(
                             parseISO(r.ends_at),
                             parseISO(r.starts_at)
@@ -359,9 +363,6 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                           min
                         </span>
                       </p>
-                    </div>
-                    <div className='flex shrink-0 items-center gap-1'>
-                      <StatusBadge status={r.status} />
                       <ChevronRightIcon
                         size={18}
                         className='text-text-muted transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
@@ -385,9 +386,10 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                 {!slug && r.business && (
                   <Link
                     href={`/b/${r.business.slug}`}
-                    className='mt-2 flex min-w-0 items-center gap-1.5 px-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-primary hover:underline'
+                    className='mt-2 flex min-w-0 items-center gap-1 px-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-primary hover:underline'
                   >
-                    <span className='shrink-0'>Reservar de nuevo ·</span>
+                    <span className='shrink-0'>Reservar de nuevo</span>
+                    <span className='shrink-0'>&bull;</span>
                     <span className='truncate'>{r.business.name}</span>
                     <ChevronRightIcon size={14} className='shrink-0' />
                   </Link>

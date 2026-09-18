@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'wouter'
-import { LockIcon, LogOutIcon, MenuIcon } from '@/components/common/icon'
+import {
+  LockIcon,
+  LogOutIcon,
+  MenuIcon,
+  UserIcon
+} from '@/components/common/icon'
 
 interface HeaderMenuProps {
   isAdmin: boolean
@@ -9,6 +14,7 @@ interface HeaderMenuProps {
   nextPath: string
   notificationIcon: ReactNode
   notificationLabel: string
+  userEmail?: string
   onSignOut: () => void
 }
 
@@ -19,6 +25,7 @@ export function HeaderMenu({
   nextPath,
   notificationIcon,
   notificationLabel,
+  userEmail,
   onSignOut
 }: HeaderMenuProps) {
   const [open, setOpen] = useState(false)
@@ -64,13 +71,21 @@ export function HeaderMenu({
 
       {open && (
         <div
-          className='absolute right-0 top-[calc(100%+0.5rem)] z-50 flex min-w-56 flex-col gap-1 rounded-xl border border-border bg-surface-elevated p-1.5 shadow-(--shadow-md)'
+          className='absolute right-0 top-[calc(100%+0.5rem)] z-50 flex min-w-56 flex-col gap-1 rounded-xl border border-border bg-surface-elevated p-1.5 shadow-(--shadow-md) animate-popover-in'
           role='dialog'
           aria-label='Más opciones'
         >
+          {userEmail && (
+            <div className='border-b border-border px-3 pb-2 pt-1.5'>
+              <span className='block truncate font-mono text-[11px] text-(--color-text-muted)'>
+                {userEmail}
+              </span>
+            </div>
+          )}
+
           {businessSelector && (
             <div className='flex flex-col gap-1.5 border-b border-border px-2 pb-2'>
-              <span className='text-[11px] font-semibold uppercase tracking-wide text-text-muted'>
+              <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
                 Organización activa
               </span>
               {businessSelector}
@@ -103,7 +118,7 @@ export function HeaderMenu({
               onClick={close}
               className='flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm text-(--color-text) transition-colors hover:bg-surface-inset touch-target'
             >
-              <LockIcon size={17} className='shrink-0 text-text-muted' />
+              <UserIcon size={17} className='shrink-0 text-text-muted' />
               <span>Privacidad</span>
             </Link>
           )}

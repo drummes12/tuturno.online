@@ -227,6 +227,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     ) : undefined
                   }
                   nextPath={location}
+                  userEmail={user.email}
                   notificationIcon={
                     <NotificationStatusIcon
                       permission={pushNotificationState.permission}
