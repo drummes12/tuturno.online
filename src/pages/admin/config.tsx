@@ -191,7 +191,7 @@ export function AdminConfigPage() {
       <form onSubmit={handleSave} className='flex flex-col gap-4'>
         <fieldset
           disabled={!canEdit}
-          className='flex flex-col gap-4 border-0 p-0 m-0 md:grid md:grid-cols-2 md:items-start'
+          className='flex min-w-0 flex-col gap-4 border-0 p-0 m-0 md:grid md:grid-cols-2 md:items-start'
         >
           <div className='contents md:order-1 md:flex md:flex-col md:gap-4'>
             {/* Datos del negocio */}
@@ -669,7 +669,7 @@ export function AdminConfigPage() {
                   disabled={!canEdit}
                   placeholder={INSTRUCTIONS_TEMPLATE}
                   rows={8}
-                  className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y font-mono disabled:opacity-60'
+                  className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y font-mono disabled:opacity-60'
                   aria-describedby='reservation-instructions-hint'
                 />
               )}

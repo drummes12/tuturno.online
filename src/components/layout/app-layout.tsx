@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
 import {
@@ -114,6 +114,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     ? adminTutorial.isStarting
     : clientTutorial.isStarting
 
+  // Reset de scroll al cambiar de ruta — 'instant' para que el
+  // scroll-behavior: smooth global no convierta la navegación en
+  // un desplazamiento animado desde la posición anterior.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [location])
+
   // Build tenant-aware client nav
   const slug = extractSlugFromPath(location)
   const tenantBase = slug ? `/b/${slug}` : null
@@ -166,7 +173,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           ancho completo sobre el hero y se contrae a píldora al scroll
           (scroll-driven CSS; sin soporte queda píldora siempre). */}
       <header
-        className={`sticky top-0 z-40 px-3 pt-3 text-white sm:px-4 ${location === '/' && !user ? 'morph-header' : ''}`}
+        className={`sticky top-0 z-40 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] text-white sm:px-4 ${location === '/' && !user ? 'morph-header' : ''}`}
       >
         {/* Barra visual: hace el morph ancho-completo → píldora.
             El contenido siempre vive en la columna max-w-5xl, así al
@@ -230,7 +237,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                             ) ?? memberships[0]
                           if (!active) return null
                           return (
-                            <a
+                            <Link
                               href={`/b/${active.slug}`}
                               onClick={close}
                               className='flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm text-(--color-text) transition-colors hover:bg-surface-inset touch-target'
@@ -240,7 +247,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                                 className='shrink-0 text-text-muted'
                               />
                               <span>Nueva reserva</span>
-                            </a>
+                            </Link>
                           )
                         })()}
                       {showTutorialButton && (
@@ -394,7 +401,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Footer — enlaces legales públicos */}
-      <footer className='border-t border-border bg-surface-elevated mt-auto pb-(--bottom-nav-height)'>
+      <footer className='border-t border-border bg-surface-elevated mt-auto pb-[max(var(--bottom-nav-height),env(safe-area-inset-bottom))]'>
         <div className='mx-auto max-w-5xl px-4 py-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-(--color-text-muted)'>
           <span>© {new Date().getFullYear()} TuTurno</span>
           <Link

@@ -192,6 +192,11 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* La app gestiona su propio scroll: sin rubber-band ni pull-to-refresh
+     en el documento raíz (modo standalone/PWA). */
+  overscroll-behavior: none;
+  /* Sin flash gris/azul al tocar — el feedback lo da :active */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -203,9 +208,10 @@ body {
   font-feature-settings: 'cv11', 'ss01';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Safe area for mobile */
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Los safe-area insets se aplican en el header y el footer del
+     AppLayout, no aquí: con padding en body + #root min-h-dvh el
+     documento siempre excede el viewport y queda un scroll fantasma
+     con una franja del fondo al final (visible en PWA instalada). */
 }
 
 #root {

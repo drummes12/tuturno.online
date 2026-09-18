@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { Link } from 'wouter'
 import { differenceInMinutes } from 'date-fns'
 import type { ReactNode } from 'react'
 import type { Reservation } from '@/types'
@@ -47,22 +48,32 @@ function ContactRow({
   label,
   href,
   external,
+  onNavigate,
   children
 }: {
   icon: ReactNode
   label: string
   href?: string
   external?: boolean
+  onNavigate?: () => void
   children: ReactNode
 }) {
+  const linkClass =
+    'nums mt-0.5 block truncate text-sm font-medium text-primary underline-offset-2 transition-colors hover:text-(--color-primary-hover) hover:underline'
   const value = href ? (
-    <a
-      href={href}
-      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className='nums mt-0.5 block truncate text-sm font-medium text-primary underline-offset-2 transition-colors hover:text-(--color-primary-hover) hover:underline'
-    >
-      {children}
-    </a>
+    href.startsWith('/') ? (
+      <Link href={href} onClick={onNavigate} className={linkClass}>
+        {children}
+      </Link>
+    ) : (
+      <a
+        href={href}
+        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        className={linkClass}
+      >
+        {children}
+      </a>
+    )
   ) : (
     <span className='mt-0.5 block truncate text-sm font-medium text-(--color-text)'>
       {children}
@@ -330,6 +341,7 @@ export function ReservationDetailsSheet({
                   icon={<StoreIcon size={17} />}
                   label='Página'
                   href={`/b/${businessSlug}`}
+                  onNavigate={onClose}
                 >
                   Ver disponibilidad
                 </ContactRow>
