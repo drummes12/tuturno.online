@@ -103,9 +103,9 @@ export function LandingPage() {
   if (user) {
     return (
       <div className='flex-1 flex flex-col items-center px-4 py-2 sm:py-6'>
-        <div className='flex w-full max-w-md flex-col gap-4'>
-          {/* Banda cancha — la misma noche del hero, en versión compacta */}
-          <section className='relative overflow-hidden rounded-2xl bg-pitch-950 px-6 py-6 text-chalk shadow-(--shadow-lg) animate-fade-up'>
+        <div className='grid w-full max-w-md grid-cols-1 gap-4 lg:max-w-5xl lg:grid-cols-[1fr_1.15fr] lg:gap-5'>
+          {/* Panel cancha — izquierda en desktop, banda arriba en mobile */}
+          <section className='relative overflow-hidden rounded-2xl bg-pitch-950 px-6 py-6 text-chalk shadow-(--shadow-lg) animate-fade-up lg:flex lg:flex-col lg:justify-between lg:p-8'>
             <div
               aria-hidden='true'
               className='pointer-events-none absolute inset-0'
@@ -114,10 +114,10 @@ export function LandingPage() {
               <div className='absolute inset-y-0 left-1/2 w-px bg-white/10' />
               <div className='absolute left-1/2 top-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10' />
             </div>
-            <div className='relative flex flex-col gap-1'>
-              <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-300'>
-                Tu turno
-              </span>
+            <span className='relative font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-300'>
+              Tu turno
+            </span>
+            <div className='relative mt-4 lg:mt-0'>
               <h1 className='text-2xl font-bold leading-tight tracking-[-0.02em] sm:text-3xl'>
                 ¿Qué reservas
                 <br />
@@ -129,48 +129,50 @@ export function LandingPage() {
             </div>
           </section>
 
-          {/* Mis reservas — el destino más probable, como fila de fixture */}
-          <Link
-            href='/mis-reservas'
-            className='group flex items-center gap-4 rounded-2xl border border-border bg-surface-elevated px-5 py-3.5 shadow-(--shadow-xs) transition-[transform,border-color] duration-200 ease-spring hover:-translate-y-0.5 hover:border-border-strong animate-fade-up'
-            style={{ animationDelay: '60ms' }}
-          >
-            <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
-              <ListIcon size={18} />
-            </span>
-            <span className='min-w-0 flex-1'>
-              <span className='block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
-                Mis reservas
+          <div className='flex flex-col gap-4'>
+            {/* Mis reservas — el destino más probable, como fila de fixture */}
+            <Link
+              href='/mis-reservas'
+              className='group flex items-center gap-4 rounded-2xl border border-border bg-surface-elevated px-5 py-3.5 shadow-(--shadow-xs) transition-[transform,border-color] duration-200 ease-spring hover:-translate-y-0.5 hover:border-border-strong animate-fade-up'
+              style={{ animationDelay: '60ms' }}
+            >
+              <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
+                <ListIcon size={18} />
               </span>
-              <span className='mt-0.5 block truncate text-sm text-(--color-text-muted)'>
-                Próximas, pendientes y pasadas
+              <span className='min-w-0 flex-1'>
+                <span className='block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
+                  Mis reservas
+                </span>
+                <span className='mt-0.5 block truncate text-sm text-(--color-text-muted)'>
+                  Próximas, pendientes y pasadas
+                </span>
               </span>
-            </span>
-            <ArrowRightIcon
-              size={16}
-              className='shrink-0 text-(--color-text-muted) transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
-            />
-          </Link>
+              <ArrowRightIcon
+                size={16}
+                className='shrink-0 text-(--color-text-muted) transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
+              />
+            </Link>
 
-          {/* Buscar negocio por slug */}
-          <section
-            className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-4 shadow-(--shadow-xs) animate-fade-up'
-            style={{ animationDelay: '120ms' }}
-          >
-            <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
-              Ir a un negocio
-            </span>
-            {orgForm}
-          </section>
+            {/* Buscar negocio por slug */}
+            <section
+              className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-4 shadow-(--shadow-xs) animate-fade-up'
+              style={{ animationDelay: '120ms' }}
+            >
+              <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+                Ir a un negocio
+              </span>
+              {orgForm}
+            </section>
 
-          <Link
-            href='/crear-negocio'
-            className='flex items-center justify-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target animate-fade-up'
-            style={{ animationDelay: '180ms' }}
-          >
-            <StoreIcon size={15} />
-            Quiero TuTurno para mi negocio
-          </Link>
+            <Link
+              href='/crear-negocio'
+              className='flex items-center justify-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target animate-fade-up'
+              style={{ animationDelay: '180ms' }}
+            >
+              <StoreIcon size={15} />
+              Quiero TuTurno para mi negocio
+            </Link>
+          </div>
         </div>
       </div>
     )
