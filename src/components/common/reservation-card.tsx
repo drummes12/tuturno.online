@@ -103,15 +103,10 @@ export function ReservationCard({
   )
 
   const isPending = r.status === 'pending'
+  const indexStyle = { '--index': index } as React.CSSProperties
 
-  const card = (
-    <Card
-      elevated={elevated}
-      bordered={!isPending}
-      className={`group flex h-full flex-col p-4 ${isPending ? '' : 'animate-stagger'} transition-all duration-200 ease-spring ${onOpen ? 'hover:-translate-y-0.5 hover:border-strong' : ''} ${className}`}
-      style={{ '--index': index } as React.CSSProperties}
-      data-tour={tourKey}
-    >
+  const body = (
+    <>
       {onOpen ? (
         <button
           type='button'
@@ -130,6 +125,18 @@ export function ReservationCard({
           {footer}
         </div>
       )}
+    </>
+  )
+
+  const card = (
+    <Card
+      elevated={elevated}
+      bordered={!isPending}
+      className={`group flex h-full flex-col p-4 ${isPending ? '' : 'animate-stagger'} transition-all duration-200 ease-spring ${onOpen ? 'hover:-translate-y-0.5 hover:border-strong' : ''} ${className}`}
+      style={indexStyle}
+      data-tour={tourKey}
+    >
+      {body}
     </Card>
   )
 

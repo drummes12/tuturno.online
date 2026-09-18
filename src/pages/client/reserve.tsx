@@ -15,7 +15,7 @@ import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
-import { SlotTicket } from '@/components/common/slot-ticket'
+import { PitchTicket } from '@/components/common/pitch-ticket'
 import { Alert } from '@/components/common/alert'
 import { Skeleton } from '@/components/common/skeleton'
 import { Spinner } from '@/components/common/spinner'
@@ -334,56 +334,71 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   if (success) {
     return (
       <div className='flex flex-col items-center gap-4 py-12 max-w-md mx-auto animate-fade-up'>
-        <Card elevated className='w-full p-8 text-center'>
-          <div className='flex flex-col items-center gap-4'>
-            <div
-              className={`w-16 h-16 rounded-2xl flex items-center justify-center ${isAdmin ? 'bg-pitch-500/15 text-pitch-700 dark:text-pitch-300' : 'bg-flood-500/15 text-yellow-700 dark:text-flood-300'}`}
-            >
-              {isAdmin ? <CheckIcon size={32} /> : <HourglassIcon size={32} />}
-            </div>
-            <div>
-              <h1 className='text-xl font-bold mb-1.5 tracking-tight'>
-                {isAdmin ? 'Reserva confirmada' : 'Solicitud recibida'}
-              </h1>
-              <p className='text-sm text-(--color-text-muted) max-w-xs'>
-                {isAdmin
-                  ? 'La reserva fue creada y confirmada directamente.'
-                  : 'Tu reserva está pendiente de confirmación por el negocio. Te avisaremos por correo cuando la confirmen o rechacen.'}
-              </p>
-            </div>
-          </div>
-          <div className='flex flex-col gap-2 mt-6'>
-            {!isAdmin && whatsappLink && (
-              <a
-                href={whatsappLink}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='flex items-center justify-center gap-2 w-full rounded-xl bg-green-600 text-white font-medium py-3 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
-              >
-                <WhatsAppIcon size={20} />
-                Abrir WhatsApp
-              </a>
-            )}
-            <Link
-              href={
+        {/* Papeleta del turno — el momento de marca: acabas de reservar. */}
+        <PitchTicket
+          kicker='Tu turno'
+          badge={
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${
                 isAdmin
-                  ? '/admin/reservas'
-                  : slug
-                    ? `/b/${slug}/mis-reservas`
-                    : '/mis-reservas'
-              }
+                  ? 'border-pitch-400/40 bg-pitch-400/10 text-pitch-300'
+                  : 'border-orange-400/40 bg-orange-400/10 text-orange-300'
+              }`}
             >
-              <Button className='w-full'>
-                {isAdmin ? 'Ver reservas' : 'Ver mis reservas'}
-              </Button>
-            </Link>
-            <Link href={slug ? `/b/${slug}` : '/'}>
-              <Button variant='secondary' className='w-full'>
-                Volver a la disponibilidad
-              </Button>
-            </Link>
-          </div>
-        </Card>
+              {isAdmin ? <CheckIcon size={12} /> : <HourglassIcon size={12} />}
+              {isAdmin ? 'Confirmada' : 'Pendiente'}
+            </span>
+          }
+          dateLabel={dateLabel || ''}
+          timeLabel={timeLabel}
+          resourceName={resourceName}
+          resourceIcon={<StoreIcon size={16} />}
+          resourceLabel={business?.resource_label_singular}
+          meta={`(${business?.slot_duration_minutes ?? 60} MIN)`}
+          note={
+            isAdmin
+              ? 'La reserva fue creada y confirmada directamente.'
+              : 'Pendiente de confirmación por el negocio. Te avisaremos por correo.'
+          }
+          beam={
+            isAdmin
+              ? 'beam-pitch-500 dark:beam-pitch-400'
+              : 'beam-orange-500 dark:beam-orange-400'
+          }
+          className='w-full'
+        />
+
+        <div className='flex w-full flex-col gap-2'>
+          {!isAdmin && whatsappLink && (
+            <a
+              href={whatsappLink}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='flex items-center justify-center gap-2 w-full rounded-xl bg-green-600 text-white font-medium py-3 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
+            >
+              <WhatsAppIcon size={20} />
+              Abrir WhatsApp
+            </a>
+          )}
+          <Link
+            href={
+              isAdmin
+                ? '/admin/reservas'
+                : slug
+                  ? `/b/${slug}/mis-reservas`
+                  : '/mis-reservas'
+            }
+          >
+            <Button className='w-full'>
+              {isAdmin ? 'Ver reservas' : 'Ver mis reservas'}
+            </Button>
+          </Link>
+          <Link href={slug ? `/b/${slug}` : '/'}>
+            <Button variant='secondary' className='w-full'>
+              Volver a la disponibilidad
+            </Button>
+          </Link>
+        </div>
       </div>
     )
   }
@@ -413,11 +428,21 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
           </p>
         </div>
 
-        <SlotTicket
-          resourceName={resourceName}
+        {/* Lo que estás por reservar, como papeleta — mismo lenguaje
+            que la confirmación que verás al terminar. */}
+        <PitchTicket
+          kicker='Tu turno'
+          badge={
+            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-yellow-700 dark:border-flood-400/40 dark:text-flood-300'>
+              Seleccionado
+            </span>
+          }
           dateLabel={dateLabel || ''}
           timeLabel={timeLabel}
-          durationMinutes={business?.slot_duration_minutes ?? 60}
+          resourceName={resourceName}
+          resourceIcon={<StoreIcon size={16} />}
+          resourceLabel={business?.resource_label_singular}
+          meta={`(${business?.slot_duration_minutes ?? 60} MIN)`}
         />
       </div>
 
@@ -635,11 +660,18 @@ function DemoReservePreview({
           </div>
         </div>
 
-        <SlotTicket
-          resourceName={resourceName}
+        <PitchTicket
+          kicker='Tu turno'
+          badge={
+            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-yellow-700 dark:border-flood-400/40 dark:text-flood-300'>
+              Seleccionado
+            </span>
+          }
           dateLabel={dateLabel}
           timeLabel={timeLabel}
-          durationMinutes={slotDurationMinutes}
+          resourceName={resourceName}
+          resourceIcon={<StoreIcon size={16} />}
+          meta={`(${slotDurationMinutes} MIN)`}
         />
       </div>
 

@@ -4,6 +4,7 @@ import { differenceInMinutes } from 'date-fns'
 import type { ReactNode } from 'react'
 import type { Reservation } from '@/types'
 import { StatusBadge } from '@/components/common/badge'
+import { PitchTicket } from '@/components/common/pitch-ticket'
 import {
   ChevronRightIcon,
   MailIcon,
@@ -196,81 +197,56 @@ export function ReservationDetailsSheet({
         {/* Border-beam solo en mobile: un arco de luz pitch recorre
             el borde de la papeleta. En desktop el panel es full-bleed
             y la cancha habla por sí sola. */}
-        <div
-          className={`border-beam ${RESERVATION_BEAM_CLASS[reservation.status]} mx-4 mt-3 rounded-xl sm:m-0 sm:rounded-none sm:p-0 sm:before:hidden`}
-        >
-          <div className='dark relative overflow-hidden rounded-[14.5px] bg-pitch-950 text-chalk sm:flex sm:h-full sm:flex-col sm:rounded-none'>
-            {/* Líneas de cancha — decorativas */}
-            <div
-              aria-hidden='true'
-              className='pointer-events-none absolute inset-0'
-            >
-              <span className='absolute top-0 left-1/2 h-full w-px -translate-x-1/2 bg-chalk/5' />
-              <span className='absolute top-1/2 left-1/2 size-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-chalk/5 sm:h-40 sm:w-40' />
-              <span className='absolute top-1/2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chalk/15' />
-              <span className='absolute inset-x-0 bottom-0 hidden h-16 border-t border-chalk/5 sm:block' />
-            </div>
-
-            {/* Barra — kicker mono + estado + cerrar */}
-            <div className='relative flex items-center justify-between gap-3 px-5 pt-4'>
-              <p className='flex items-baseline gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-chalk-dim/70'>
-                <span>Reserva</span>
-                {reservation.reservation_number && (
-                  <span className='text-chalk'>
-                    #{reservation.reservation_number}
-                  </span>
-                )}
-              </p>
-              <div className='flex items-center gap-2'>
-                <StatusBadge status={reservation.status} />
-                <button
-                  ref={closeButtonRef}
-                  type='button'
-                  onClick={onClose}
-                  className='touch-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-chalk-dim/70 transition-all duration-150 ease-out hover:bg-white/10 hover:text-chalk active:scale-[0.92]'
-                  aria-label='Cerrar detalle de reserva'
-                >
-                  <XIcon size={20} />
-                </button>
-              </div>
-            </div>
-
-            {/* Scoreboard */}
-            <div className='relative px-5 pt-4 pb-5 sm:flex sm:flex-1 sm:flex-col sm:justify-center sm:py-8'>
-              <div className='flex items-center justify-between gap-3'>
-                <p className='font-mono text-[11px] font-medium tracking-[0.14em] text-chalk-dim/70 uppercase'>
-                  {formatLocal(
-                    reservation.starts_at,
-                    "EEEE d 'de' MMMM 'de' yyyy"
-                  )}
-                </p>
-                <p className='nums shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-flood-400'>
-                  ({duration})
-                </p>
-              </div>
-
-              <p className='flex items-center justify-center nums mt-3 font-mono text-[40px] font-bold leading-none tracking-tight sm:text-[44px]'>
-                {formatLocal(reservation.starts_at, 'HH:mm')}
-                <span className='mx-1.5 text-chalk/40'>–</span>
-                {formatLocal(reservation.ends_at, 'HH:mm')}
-              </p>
-
-              <div className='mt-3 flex items-center gap-2 border-t border-chalk/10 pt-3'>
-                <StoreIcon size={16} className='shrink-0 text-pitch-400' />
-                <h2
-                  id='reservation-details-title'
-                  className='truncate text-base font-semibold tracking-tight'
-                >
-                  {resourceName}
-                </h2>
-                <span className='shrink-0 font-mono text-xs uppercase tracking-[0.14em] text-chalk-dim/60'>
-                  {resourceLabel}
+        {/* Papeleta pitch — el mismo PitchTicket del sistema, con los
+            extras del sheet: #reserva + cerrar en la barra, acta de
+            metadata en el pie. En desktop es la columna de contexto
+            full-bleed; el beam queda solo en mobile. */}
+        <PitchTicket
+          kicker={
+            <span className='flex items-baseline gap-2 text-chalk-dim/70'>
+              Reserva
+              {reservation.reservation_number && (
+                <span className='text-chalk'>
+                  #{reservation.reservation_number}
                 </span>
-              </div>
-            </div>
-
-            {/* Metadata — pie del acta */}
-            <dl className='relative flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-chalk/10 px-5 py-3 font-mono text-[10.5px] uppercase tracking-[0.12em] text-chalk-dim/50 sm:h-16 sm:items-center'>
+              )}
+            </span>
+          }
+          badge={
+            <span className='flex items-center gap-2'>
+              <StatusBadge status={reservation.status} />
+              <button
+                ref={closeButtonRef}
+                type='button'
+                onClick={onClose}
+                className='touch-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-chalk-dim/70 transition-all duration-150 ease-out hover:bg-white/10 hover:text-chalk active:scale-[0.92]'
+                aria-label='Cerrar detalle de reserva'
+              >
+                <XIcon size={20} />
+              </button>
+            </span>
+          }
+          dateLabel={formatLocal(
+            reservation.starts_at,
+            "EEEE d 'de' MMMM 'de' yyyy"
+          )}
+          timeLabel={
+            <>
+              {formatLocal(reservation.starts_at, 'HH:mm')}
+              <span className='mx-1.5 text-chalk/40'>–</span>
+              {formatLocal(reservation.ends_at, 'HH:mm')}
+            </>
+          }
+          resourceName={
+            <h2 id='reservation-details-title' className='truncate'>
+              {resourceName}
+            </h2>
+          }
+          resourceIcon={<StoreIcon size={16} />}
+          resourceLabel={resourceLabel}
+          meta={`(${duration})`}
+          note={
+            <dl className='flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-chalk-dim/50 sm:h-11 sm:items-center'>
               <div className='flex items-baseline gap-1.5'>
                 <dt>Creada</dt>
                 <dd className='nums text-chalk-dim/80'>
@@ -284,8 +260,13 @@ export function ReservationDetailsSheet({
                 </dd>
               </div>
             </dl>
-          </div>
-        </div>
+          }
+          beam={RESERVATION_BEAM_CLASS[reservation.status]}
+          className='mx-4 mt-3 sm:m-0 sm:rounded-none sm:before:hidden'
+          panelClassName='sm:flex sm:h-full sm:flex-col sm:rounded-none'
+          contentClassName='sm:mt-0 sm:flex sm:flex-1 sm:flex-col sm:justify-center'
+          timeClassName='text-[40px] sm:text-[44px]'
+        />
 
         {/* Columna de operación */}
         <div className='min-h-0 overflow-y-auto overscroll-contain px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-5 sm:pt-5 sm:pb-5'>

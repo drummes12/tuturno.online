@@ -16,11 +16,16 @@ import { ReservationSkeleton } from '@/components/common/skeleton'
 import { ReservationDetailsSheet } from '@/components/common/reservation-details-sheet'
 import { ReservationActionControls } from '@/components/common/reservation-action-controls'
 import { canClientCancelReservation } from '@/lib/reservation-status'
+import { RESERVATION_BEAM_CLASS } from '@/lib/reservation-status'
+import { PitchTicket } from '@/components/common/pitch-ticket'
+import { StatusBadge } from '@/components/common/badge'
+import { differenceInMinutes } from 'date-fns'
 import {
   CalendarPlusIcon,
   InboxIcon,
   WhatsAppIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  StoreIcon
 } from '@/components/common/icon'
 import { resolveWhatsAppLink, buildClientPendingMessage } from '@/lib/whatsapp'
 import type { Reservation } from '@/types'
@@ -149,6 +154,16 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   // Ordenar: 1) pendientes antiguas, 2) próximas, 3) vencidas
   const sorted = sortReservationsByPriority(filtered)
 
+  // La reserva inminente se destaca como papeleta a ancho completo;
+  // el resto sigue en el grid de tickets.
+  const next =
+    sorted.find(
+      (r) =>
+        (r.status === 'confirmed' || r.status === 'pending') &&
+        isAfter(parseISO(r.ends_at), new Date())
+    ) ?? null
+  const rest = next ? sorted.filter((r) => r.id !== next.id) : sorted
+
   function getCancellationLimitHours(r: Reservation): number {
     return (
       r.business?.cancellation_limit_hours ??
@@ -177,8 +192,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
 
   // Deep link: abrir la reserva del correo aunque no esté en el filtro visible
   useEffect(() => {
-    if (!deepLinkId || deepLinkHandled.current === deepLinkId || loading)
-      return
+    if (!deepLinkId || deepLinkHandled.current === deepLinkId || loading) return
     deepLinkHandled.current = deepLinkId
     void markReservationNotificationsRead(deepLinkId).catch(() => {})
     const match = reservations.find((r) => r.id === deepLinkId)
@@ -315,86 +329,113 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
             </div>
           </Card>
         ) : (
-          <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
-            {sorted.map((r, index) => (
-              <ReservationCard
-                key={r.id}
-                reservation={r}
-                onOpen={setSelectedReservation}
-                index={index}
-                tourKey={index === 0 ? 'reservation-card' : undefined}
+          <div className='flex flex-col gap-4'>
+            {next && (
+              <PitchTicket
+                kicker='Próximo turno'
+                badge={<StatusBadge status={next.status} />}
+                dateLabel={formatLocal(next.starts_at, "EEEE d 'de' MMMM")}
+                timeLabel={`${formatLocal(next.starts_at, 'HH:mm')} – ${formatLocal(next.ends_at, 'HH:mm')}`}
                 resourceName={
-                  r.business?.resource_label_singular ?? resourceLabelSingular
+                  next.resource?.name ??
+                  next.business?.resource_label_singular ??
+                  resourceLabelSingular
                 }
-                footer={
-                  (!slug && r.business) ||
-                  canCancel(r) ||
-                  (r.status === 'confirmed' &&
-                    !canCancel(r) &&
-                    (r.business || business)) ? (
-                    <>
-                      {!slug && r.business && (
-                        <Link
-                          href={`/b/${r.business.slug}`}
-                          className='flex min-w-0 items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-primary hover:underline'
-                        >
-                          <span className='shrink-0'>Reservar de nuevo</span>
-                          <span className='shrink-0'>&bull;</span>
-                          <span className='truncate'>{r.business.name}</span>
-                          <ChevronRightIcon size={14} className='shrink-0' />
-                        </Link>
-                      )}
-
-                      {canCancel(r) && (
-                        <>
-                          {r.status === 'pending' &&
-                            buildReservationWhatsAppLink(r) && (
-                              <a
-                                href={buildReservationWhatsAppLink(r)!}
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                data-tour={
-                                  index === 0
-                                    ? 'reservation-whatsapp'
-                                    : undefined
-                                }
-                                className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
-                              >
-                                <WhatsAppIcon size={18} />
-                                Confirmar por WhatsApp
-                              </a>
-                            )}
-                          <ReservationActionControls
-                            reservation={r}
-                            viewer='client'
-                            cancellationLimitHours={getCancellationLimitHours(
-                              r
-                            )}
-                            onChanged={handleReservationChanged}
-                            cancelTourKey={
-                              index === 0 ? 'reservation-cancel' : undefined
-                            }
-                          />
-                        </>
-                      )}
-
-                      {r.status === 'confirmed' &&
-                        !canCancel(r) &&
-                        (r.business || business) && (
-                          <p className='text-xs text-text-muted w-full'>
-                            La cancelación directa está disponible hasta{' '}
-                            {getCancellationLimitHours(r)}{' '}
-                            {getCancellationLimitHours(r) === 1
-                              ? 'hora'
-                              : 'horas'}{' '}
-                            antes del turno.
-                          </p>
-                        )}
-                    </>
-                  ) : undefined
+                resourceIcon={<StoreIcon size={16} />}
+                resourceLabel={
+                  next.resource?.name
+                    ? (next.business?.resource_label_singular ??
+                      resourceLabelSingular)
+                    : undefined
                 }
+                meta={`(${differenceInMinutes(parseISO(next.ends_at), parseISO(next.starts_at))} MIN)`}
+                note={!slug && next.business ? next.business.name : undefined}
+                beam={RESERVATION_BEAM_CLASS[next.status]}
+                onOpen={() => setSelectedReservation(next)}
+                className='animate-fade-up'
               />
-            ))}
+            )}
+            <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+              {rest.map((r, index) => (
+                <ReservationCard
+                  key={r.id}
+                  reservation={r}
+                  onOpen={setSelectedReservation}
+                  index={index}
+                  tourKey={index === 0 ? 'reservation-card' : undefined}
+                  resourceName={
+                    r.business?.resource_label_singular ?? resourceLabelSingular
+                  }
+                  footer={
+                    (!slug && r.business) ||
+                    canCancel(r) ||
+                    (r.status === 'confirmed' &&
+                      !canCancel(r) &&
+                      (r.business || business)) ? (
+                      <>
+                        {!slug && r.business && (
+                          <Link
+                            href={`/b/${r.business.slug}`}
+                            className='flex min-w-0 items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-primary hover:underline'
+                          >
+                            <span className='shrink-0'>Reservar de nuevo</span>
+                            <span className='shrink-0'>&bull;</span>
+                            <span className='truncate'>{r.business.name}</span>
+                            <ChevronRightIcon size={14} className='shrink-0' />
+                          </Link>
+                        )}
+
+                        {canCancel(r) && (
+                          <>
+                            {r.status === 'pending' &&
+                              buildReservationWhatsAppLink(r) && (
+                                <a
+                                  href={buildReservationWhatsAppLink(r)!}
+                                  target='_blank'
+                                  rel='noopener noreferrer'
+                                  data-tour={
+                                    index === 0
+                                      ? 'reservation-whatsapp'
+                                      : undefined
+                                  }
+                                  className='flex items-center justify-center gap-2 rounded-lg bg-green-600 text-white font-medium text-sm py-2.5 px-4 hover:bg-green-700 active:scale-95 transition-all duration-200 ease-spring touch-target'
+                                >
+                                  <WhatsAppIcon size={18} />
+                                  Confirmar por WhatsApp
+                                </a>
+                              )}
+                            <ReservationActionControls
+                              reservation={r}
+                              viewer='client'
+                              cancellationLimitHours={getCancellationLimitHours(
+                                r
+                              )}
+                              onChanged={handleReservationChanged}
+                              cancelTourKey={
+                                index === 0 ? 'reservation-cancel' : undefined
+                              }
+                            />
+                          </>
+                        )}
+
+                        {r.status === 'confirmed' &&
+                          !canCancel(r) &&
+                          (r.business || business) && (
+                            <p className='text-xs text-text-muted w-full'>
+                              La cancelación directa está disponible hasta{' '}
+                              {getCancellationLimitHours(r)}{' '}
+                              {getCancellationLimitHours(r) === 1
+                                ? 'hora'
+                                : 'horas'}{' '}
+                              antes del turno.
+                            </p>
+                          )}
+                      </>
+                    ) : undefined
+                  }
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>
