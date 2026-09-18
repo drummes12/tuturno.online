@@ -27,6 +27,14 @@ vi.mock('@/hooks/use-notifications', () => ({
   useNotifications: (userId: string | null) => mockUseNotifications(userId)
 }))
 
+const { mockConfirmReservation } = vi.hoisted(() => ({
+  mockConfirmReservation: vi.fn().mockResolvedValue(undefined)
+}))
+
+vi.mock('@/services/reservations', () => ({
+  confirmReservation: (id: string) => mockConfirmReservation(id)
+}))
+
 import { NotificationCenter } from '@/components/common/notification-center'
 import type { AppNotification } from '@/types'
 
@@ -159,6 +167,29 @@ describe('NotificationCenter', () => {
       within(dialog).getByRole('button', { name: 'Marcar todas leídas' })
     )
     expect(markAllRead).toHaveBeenCalledOnce()
+  })
+
+  it('una solicitud pendiente del negocio puede confirmarse inline', async () => {
+    const { dialog } = setup([
+      notification({
+        id: 'a',
+        type: 'reservation_created_business',
+        reservation_status: 'pending'
+      })
+    ])
+    const confirm = within(dialog).getByRole('button', {
+      name: 'Confirmar'
+    })
+    fireEvent.click(confirm)
+    expect(mockConfirmReservation).toHaveBeenCalledWith('r1')
+    await within(dialog).findByRole('button', { name: 'Confirmar' })
+  })
+
+  it('una reserva confirmada no muestra acción de confirmar', () => {
+    const { dialog } = setup([notification({ id: 'a' })])
+    expect(
+      within(dialog).queryByRole('button', { name: 'Confirmar' })
+    ).not.toBeInTheDocument()
   })
 
   it('muestra estado vacío sin notificaciones', () => {

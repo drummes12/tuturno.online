@@ -4,6 +4,8 @@ import type { ReservationStatus } from '@/types'
 interface BadgeProps {
   children: ReactNode
   variant?: 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent'
+  /** Versión compacta para contextos densos (bandejas, metadatos). */
+  compact?: boolean
 }
 
 const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
@@ -19,10 +21,14 @@ const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
     'bg-flood-500/10 text-yellow-700 border-flood-500/40 dark:bg-flood-400/10 dark:text-flood-300 dark:border-flood-400/30'
 }
 
-export function Badge({ children, variant = 'neutral' }: BadgeProps) {
+export function Badge({ children, variant = 'neutral', compact }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border ${variantClasses[variant]}`}
+      className={`inline-flex items-center rounded-full border font-medium ${
+        compact
+          ? 'gap-1 px-2 py-0.5 text-[10px]'
+          : 'gap-1.5 px-2.5 py-1 text-xs'
+      } ${variantClasses[variant]}`}
     >
       {children}
     </span>
@@ -44,10 +50,16 @@ const statusConfig: Record<ReservationStatus, { label: string; variant: BadgePro
   completed: { label: 'Completada', variant: 'info', dot: 'bg-blue-500' },
 }
 
-export function StatusBadge({ status }: { status: ReservationStatus }) {
+export function StatusBadge({
+  status,
+  compact
+}: {
+  status: ReservationStatus
+  compact?: boolean
+}) {
   const config = statusConfig[status]
   return (
-    <Badge variant={config.variant}>
+    <Badge variant={config.variant} compact={compact}>
       <StatusDot className={config.dot} />
       {config.label}
     </Badge>

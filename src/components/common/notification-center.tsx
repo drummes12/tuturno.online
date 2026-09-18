@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'wouter'
-import { format, differenceInMinutes, parseISO } from 'date-fns'
+import {
+  format,
+  differenceInMinutes,
+  isToday,
+  isYesterday,
+  parseISO
+} from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useNotifications } from '@/hooks/use-notifications'
 import {
@@ -10,13 +16,17 @@ import {
   getNotificationUrl,
   isNotificationUnread
 } from '@/lib/notifications'
+import { confirmReservation } from '@/services/reservations'
 import { Alert } from '@/components/common/alert'
-import { Badge } from '@/components/common/badge'
+import { StatusBadge } from '@/components/common/badge'
 import { Skeleton } from '@/components/common/skeleton'
 import {
+  ArrowRightIcon,
   BellIcon,
   CalendarPlusIcon,
   CheckIcon,
+  ChevronRightIcon,
+  SettingsIcon,
   TimerIcon,
   TrashIcon,
   InboxIcon,
@@ -36,12 +46,39 @@ function timeAgo(dateStr: string): string {
   return format(parseISO(dateStr), 'd MMM', { locale: es })
 }
 
+/** Cabecera de grupo por día: "Hoy", "Ayer", "20 sep". */
+function dayLabel(dateStr: string): string {
+  const date = parseISO(dateStr)
+  if (isToday(date)) return 'Hoy'
+  if (isYesterday(date)) return 'Ayer'
+  return format(date, 'd MMM', { locale: es })
+}
+
+function payloadText(n: AppNotification, key: string): string | null {
+  const value = n.payload[key]
+  return typeof value === 'string' && value ? value : null
+}
+
+/** "18:00 – 19:00" desde el payload; null si el evento no trae horario. */
+function slotTime(n: AppNotification): string | null {
+  const start = payloadText(n, 'starts_at')
+  const end = payloadText(n, 'ends_at')
+  if (!start) return null
+  const startDate = parseISO(start)
+  const dateLabel = format(startDate, 'EEE d MMM', { locale: es }).toUpperCase()
+  const range = end
+    ? `${format(startDate, 'HH:mm')} – ${format(parseISO(end), 'HH:mm')}`
+    : format(startDate, 'HH:mm')
+  return `${dateLabel} · ${range}`
+}
+
 type Filter = 'all' | 'unread' | 'pending'
 
 /**
  * Fila deslizable (solo táctil): arrastrar a la izquierda revela la zona
  * de eliminar. El gesto muta transform directamente (sin re-renders);
- * el estado solo cambia al soltar.
+ * el estado solo cambia al soltar. Un flick rápido también elimina,
+ * aunque no supere el umbral de distancia.
  */
 function SwipeableRow({
   onDelete,
@@ -51,14 +88,14 @@ function SwipeableRow({
   children: ReactNode
 }) {
   const rowRef = useRef<HTMLDivElement>(null)
-  const start = useRef({ x: 0, y: 0 })
+  const start = useRef({ x: 0, y: 0, t: 0 })
   const deltaX = useRef(0)
   const swiping = useRef(false)
   const suppressClick = useRef(false)
 
   function handleTouchStart(event: React.TouchEvent<HTMLDivElement>) {
     const touch = event.touches[0]
-    start.current = { x: touch.clientX, y: touch.clientY }
+    start.current = { x: touch.clientX, y: touch.clientY, t: Date.now() }
     deltaX.current = 0
     swiping.current = false
     if (rowRef.current) rowRef.current.style.transition = 'none'
@@ -84,8 +121,10 @@ function SwipeableRow({
     const el = rowRef.current
     if (!swiping.current || !el) return
     suppressClick.current = true
-    el.style.transition = 'transform 0.25s ease'
-    if (deltaX.current < -el.offsetWidth * 0.35) {
+    const elapsed = Date.now() - start.current.t
+    const velocity = Math.abs(deltaX.current) / Math.max(elapsed, 1)
+    el.style.transition = 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+    if (deltaX.current < -el.offsetWidth * 0.35 || velocity > 0.5) {
       el.style.transform = `translateX(-${el.offsetWidth}px)`
       el.addEventListener('transitionend', () => onDelete(), { once: true })
     } else {
@@ -98,7 +137,7 @@ function SwipeableRow({
   return (
     <div className='relative overflow-hidden'>
       <div
-        className='absolute inset-0 flex items-center justify-end gap-2 bg-danger px-5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white'
+        className='absolute inset-0 flex items-center justify-end gap-2 bg-danger px-5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white pointer-fine:hidden'
         aria-hidden='true'
       >
         <TrashIcon size={15} />
@@ -131,59 +170,35 @@ const filterLabels: Record<Filter, string> = {
 }
 
 /**
- * Icono semántico por tipo de evento — el estado (leída/pendiente)
- * se comunica con peso tipográfico y el punto, no con el icono.
+ * Glifo semántico por tipo de evento — inline, sin tile de fondo.
  */
-function TypeIcon({ type }: { type: string }) {
-  const base = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg'
+function TypeGlyph({ type }: { type: string }) {
   if (type === 'reservation_confirmed') {
     return (
-      <span
-        className={`${base} bg-pitch-500/15 text-pitch-700 dark:text-pitch-300`}
-      >
-        <CheckIcon size={16} />
-      </span>
+      <CheckIcon
+        size={15}
+        className='shrink-0 text-pitch-600 dark:text-pitch-300'
+      />
     )
   }
   if (type === 'reservation_rejected') {
-    return (
-      <span
-        className={`${base} bg-signal-red/10 text-signal-red dark:text-red-300`}
-      >
-        <XIcon size={16} />
-      </span>
-    )
+    return <XIcon size={15} className='shrink-0 text-signal-red' />
   }
   if (type.startsWith('reservation_cancelled')) {
-    return (
-      <span className={`${base} bg-surface-inset text-text-muted`}>
-        <XIcon size={16} />
-      </span>
-    )
+    return <XIcon size={15} className='shrink-0 text-text-muted' />
   }
   if (type === 'reservation_expired') {
     return (
-      <span
-        className={`${base} bg-flood-500/15 text-yellow-700 dark:text-flood-300`}
-      >
-        <TimerIcon size={16} />
-      </span>
+      <TimerIcon
+        size={15}
+        className='shrink-0 text-flood-600 dark:text-flood-400'
+      />
     )
   }
   if (type.startsWith('reservation_created')) {
-    return (
-      <span
-        className={`${base} bg-signal-blue/10 text-signal-blue dark:text-blue-300`}
-      >
-        <CalendarPlusIcon size={16} />
-      </span>
-    )
+    return <CalendarPlusIcon size={15} className='shrink-0 text-signal-blue' />
   }
-  return (
-    <span className={`${base} bg-surface-inset text-text-muted`}>
-      <BellIcon size={16} />
-    </span>
-  )
+  return <BellIcon size={15} className='shrink-0 text-text-muted' />
 }
 
 interface NotificationCenterProps {
@@ -200,6 +215,7 @@ export function NotificationCenter({
     unreadCount,
     loading,
     error,
+    refresh,
     markRead,
     markAllRead,
     archive,
@@ -210,6 +226,9 @@ export function NotificationCenter({
   const [anchor, setAnchor] = useState<{ top: number; right: number } | null>(
     null
   )
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const touchActive = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const bellRef = useRef<HTMLButtonElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -235,7 +254,10 @@ export function NotificationCenter({
     }
 
     function handleViewportChange(event: Event) {
-      // Solo cerrar si el scroll ocurre fuera del panel
+      // Solo cerrar si el scroll ocurre fuera del panel y no hay
+      // un gesto táctil en curso (el scroll residual de un swipe
+      // vertical parcial no debe cerrar el centro).
+      if (event.type === 'scroll' && touchActive.current) return
       if (
         event.type === 'scroll' &&
         dialogRef.current?.contains(event.target as Node)
@@ -276,6 +298,18 @@ export function NotificationCenter({
     return notifications
   }, [filter, notifications])
 
+  /** Agrupa la lista filtrada por día para escanear el historial. */
+  const groups = useMemo(() => {
+    const map = new Map<string, AppNotification[]>()
+    for (const n of filtered) {
+      const label = dayLabel(n.created_at)
+      const group = map.get(label)
+      if (group) group.push(n)
+      else map.set(label, [n])
+    }
+    return [...map.entries()]
+  }, [filtered])
+
   const readCount = counts.all - counts.unread
   const badgeLabel =
     unreadCount > 0
@@ -288,6 +322,22 @@ export function NotificationCenter({
     if (url) {
       close()
       navigate(url)
+    }
+  }
+
+  /** Confirmar inline: solo para solicitudes pendientes del negocio. */
+  async function handleConfirm(n: AppNotification) {
+    if (!n.reservation_id) return
+    setActionBusyId(n.id)
+    setActionError(null)
+    try {
+      await confirmReservation(n.reservation_id)
+      if (isNotificationUnread(n)) void markRead(n.id)
+      void refresh()
+    } catch {
+      setActionError('No pudimos confirmar la reserva.')
+    } finally {
+      setActionBusyId(null)
     }
   }
 
@@ -334,13 +384,22 @@ export function NotificationCenter({
               type='button'
               aria-label='Cerrar notificaciones'
               onClick={close}
-              className='fixed inset-0 z-40 cursor-default bg-black/40 sm:hidden'
+              className='fixed inset-0 z-40 cursor-default bg-black/40 animate-backdrop-in sm:hidden'
             />
             <div
               ref={dialogRef}
               role='dialog'
               aria-label='Notificaciones'
-              className='fixed inset-x-0 bottom-0 z-50 flex max-h-[80vh] flex-col overflow-hidden rounded-t-2xl pb-(--bottom-nav-height) sm:pb-0 border border-border bg-surface-elevated text-(--color-text) shadow-(--shadow-md) sm:inset-x-auto sm:max-h-[70vh] sm:w-[min(24rem,calc(100vw-2rem))] sm:rounded-xl animate-sheet-up sm:animate-popover-in'
+              onTouchStart={() => {
+                touchActive.current = true
+              }}
+              onTouchEnd={() => {
+                touchActive.current = false
+              }}
+              onTouchCancel={() => {
+                touchActive.current = false
+              }}
+              className='fixed inset-x-0 bottom-0 z-50 flex max-h-[72vh] flex-col overflow-hidden rounded-t-2xl pb-(--bottom-nav-height) sm:pb-0 border border-border bg-surface-elevated text-(--color-text) shadow-(--shadow-md) sm:inset-x-auto sm:max-h-[62vh] sm:w-[min(24rem,calc(100vw-2rem))] sm:rounded-xl animate-sheet-up sm:animate-popover-in'
               style={
                 anchor && window.matchMedia('(min-width: 640px)').matches
                   ? {
@@ -358,26 +417,30 @@ export function NotificationCenter({
               >
                 <span className='h-1.5 w-12 rounded-full bg-graphite-200 dark:bg-white/15' />
               </div>
-              <div className='flex items-center justify-between gap-2 border-b border-border px-4 py-3'>
+              <div className='flex items-center justify-between gap-2 border-b border-border px-4 py-2.5'>
                 <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary'>
                   Notificaciones
                 </h2>
-                <div className='flex items-center gap-3'>
+                <div className='flex items-center gap-1'>
                   <button
                     type='button'
                     onClick={() => void markAllRead()}
                     disabled={unreadCount === 0}
-                    className='text-xs font-medium text-primary transition-colors hover:underline disabled:cursor-not-allowed disabled:text-text-muted disabled:no-underline'
+                    aria-label='Marcar todas leídas'
+                    title='Marcar todas leídas'
+                    className='flex h-7 w-7 items-center justify-center rounded-lg text-primary transition-[background-color,color,transform] hover:bg-surface-inset active:scale-95 disabled:cursor-not-allowed disabled:text-text-muted/40 disabled:hover:bg-transparent touch-target'
                   >
-                    Marcar todas leídas
+                    <CheckIcon size={14} />
                   </button>
                   <button
                     type='button'
                     onClick={() => void archiveRead()}
                     disabled={readCount === 0}
-                    className='text-xs font-medium text-primary transition-colors hover:underline disabled:cursor-not-allowed disabled:text-text-muted disabled:no-underline'
+                    aria-label='Limpiar leídas'
+                    title='Limpiar leídas'
+                    className='flex h-7 w-7 items-center justify-center rounded-lg text-text-muted transition-[background-color,color,transform] hover:bg-surface-inset hover:text-text active:scale-95 disabled:cursor-not-allowed disabled:text-text-muted/40 disabled:hover:bg-transparent touch-target'
                   >
-                    Limpiar leídas
+                    <TrashIcon size={13} />
                   </button>
                 </div>
               </div>
@@ -389,10 +452,10 @@ export function NotificationCenter({
                     type='button'
                     aria-pressed={filter === key}
                     onClick={() => setFilter(key)}
-                    className={`min-w-max flex items-center justify-center flex-1 whitespace-nowrap rounded-full px-3 py-2 text-center font-mono text-[11px] font-medium uppercase tracking-[0.14em] transition-colors ${
+                    className={`min-w-max flex items-center justify-center flex-1 whitespace-nowrap rounded-full px-2.5 py-1.5 text-center font-mono text-[10px] font-medium uppercase tracking-[0.14em] transition-colors ${
                       filter === key
                         ? 'bg-(--color-primary) text-white'
-                        : 'bg-surface-inset text-text-muted hover:text-text'
+                        : 'text-text-muted hover:text-text'
                     }`}
                   >
                     {filterLabels[key]}
@@ -407,11 +470,16 @@ export function NotificationCenter({
                     <Alert variant='error'>{error}</Alert>
                   </div>
                 )}
+                {actionError && (
+                  <div className='p-3 pb-0'>
+                    <Alert variant='error'>{actionError}</Alert>
+                  </div>
+                )}
                 {loading && notifications.length === 0 ? (
                   <div className='flex flex-col gap-3 p-4'>
-                    <Skeleton className='h-14 w-full' />
-                    <Skeleton className='h-14 w-full' />
-                    <Skeleton className='h-14 w-full' />
+                    <Skeleton className='h-16 w-full' />
+                    <Skeleton className='h-16 w-full' />
+                    <Skeleton className='h-16 w-full' />
                   </div>
                 ) : filtered.length === 0 ? (
                   <div className='flex flex-col items-center gap-2 px-4 py-10 text-center'>
@@ -423,102 +491,171 @@ export function NotificationCenter({
                     </p>
                   </div>
                 ) : (
-                  <ul className='flex flex-col'>
-                    {filtered.map((n) => {
-                      const state = getNotificationState(n)
-                      const { title, body } = describeNotification(n)
-                      const businessName =
-                        typeof n.payload.business_name === 'string'
-                          ? n.payload.business_name
-                          : null
-                      const unread = isNotificationUnread(n)
-                      return (
-                        <li
-                          key={n.id}
-                          className='group border-b border-border/60'
-                        >
-                          <SwipeableRow onDelete={() => void archive(n.id)}>
-                            <div
-                              className={`flex items-stretch gap-0.5 transition-colors ${
-                                unread
-                                  ? 'bg-pitch-100 group-hover:bg-pitch-200 dark:bg-pitch-900 dark:group-hover:bg-pitch-800'
-                                  : 'bg-surface-elevated group-hover:bg-surface-inset'
-                              }`}
+                  groups.map(([label, items]) => (
+                    <section key={label} aria-label={label}>
+                      <h3 className='border-b border-border/60 bg-surface-inset/50 px-4 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-text-muted'>
+                        {label}
+                      </h3>
+                      <ul className='flex flex-col'>
+                        {items.map((n) => {
+                          const state = getNotificationState(n)
+                          const { title, body } = describeNotification(n)
+                          const businessName = payloadText(n, 'business_name')
+                          const resourceName = payloadText(n, 'resource_name')
+                          const reason = payloadText(n, 'reason')
+                          const time = slotTime(n)
+                          const url = getNotificationUrl(n)
+                          const unread = isNotificationUnread(n)
+                          const canConfirm =
+                            n.type === 'reservation_created_business' &&
+                            state === 'pending' &&
+                            Boolean(n.reservation_id)
+                          const busy = actionBusyId === n.id
+                          return (
+                            <li
+                              key={n.id}
+                              className='group border-b border-border/60'
                             >
-                              <button
-                                type='button'
-                                onClick={() => handleItemClick(n)}
-                                className='flex min-w-0 flex-1 items-start gap-3 rounded-l-lg px-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) touch-target'
-                              >
-                                <TypeIcon type={n.type} />
-                                <span className='min-w-0 flex-1'>
-                                  <span className='flex items-baseline justify-between gap-2'>
-                                    <span
-                                      className={`flex min-w-0 items-center gap-1.5 text-sm ${
-                                        unread
-                                          ? 'font-semibold'
-                                          : 'font-medium text-(--color-text)/85'
-                                      }`}
-                                    >
-                                      {unread && (
-                                        <span
-                                          className='h-1.5 w-1.5 shrink-0 rounded-full bg-primary'
-                                          aria-hidden='true'
+                              <SwipeableRow onDelete={() => void archive(n.id)}>
+                                <div className='relative bg-surface-elevated transition-colors hover:bg-surface-inset/70'>
+                                  <button
+                                    type='button'
+                                    onClick={() => handleItemClick(n)}
+                                    className='flex w-full min-w-0 flex-col px-4 pb-3 pt-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) touch-target'
+                                  >
+                                    <span className='flex items-center justify-between gap-2'>
+                                      <span
+                                        className={`flex min-w-0 items-center gap-1.5 text-[13px] ${
+                                          unread
+                                            ? 'font-semibold'
+                                            : 'font-medium text-(--color-text)/75'
+                                        }`}
+                                      >
+                                        <TypeGlyph type={n.type} />
+                                        {unread && (
+                                          <span
+                                            className='h-1.5 w-1.5 shrink-0 rounded-full bg-primary'
+                                            aria-hidden='true'
+                                          />
+                                        )}
+                                        <span className='truncate'>
+                                          {title}
+                                        </span>
+                                      </span>
+                                      <span className='shrink-0 font-mono text-[10px] tracking-wide text-text-muted/70 transition-opacity pointer-fine:group-hover:opacity-0'>
+                                        {timeAgo(n.created_at)}
+                                      </span>
+                                    </span>
+                                    {time && (
+                                      <span className='mt-1.5 flex items-center justify-between gap-2'>
+                                        <span className='font-mono text-[13px] font-semibold tracking-wide text-text'>
+                                          {time}
+                                        </span>
+                                        {n.reservation_status && (
+                                          <StatusBadge
+                                            status={n.reservation_status}
+                                            compact
+                                          />
+                                        )}
+                                      </span>
+                                    )}
+                                    {!time && n.reservation_status && (
+                                      <span className='mt-1.5 block'>
+                                        <StatusBadge
+                                          status={n.reservation_status}
+                                          compact
                                         />
+                                      </span>
+                                    )}
+                                    <span className='mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted'>
+                                      {resourceName && (
+                                        <span className='truncate font-medium text-text/80'>
+                                          {resourceName}
+                                        </span>
                                       )}
-                                      <span className='truncate'>{title}</span>
+                                      {businessName && (
+                                        <span className='truncate'>
+                                          {businessName}
+                                        </span>
+                                      )}
+                                      {n.reservation_number && (
+                                        <span className='font-mono'>
+                                          #{n.reservation_number}
+                                        </span>
+                                      )}
                                     </span>
-                                    <span className='shrink-0 font-mono text-[10px] tracking-wide text-text-muted/70'>
-                                      {timeAgo(n.created_at)}
-                                    </span>
-                                  </span>
-                                  <span className='mt-0.5 line-clamp-2 block text-sm text-text-muted'>
-                                    {body}
-                                  </span>
-                                  <span className='mt-1.5 flex items-center gap-1.5 text-xs text-text-muted'>
-                                    {state === 'pending' && (
-                                      <Badge variant='accent'>Pendiente</Badge>
-                                    )}
-                                    {businessName && (
-                                      <span className='truncate'>
-                                        {businessName}
+                                    {reason && (
+                                      <span className='mt-1.5 block border-l-2 border-border pl-2.5 text-xs italic leading-relaxed text-text-muted'>
+                                        “{reason}”
                                       </span>
                                     )}
-                                    {n.reservation_number && (
-                                      <span className='font-mono'>
-                                        · #{n.reservation_number}
+                                    {!time && (
+                                      <span className='mt-1.5 line-clamp-2 block text-sm leading-relaxed text-text-muted'>
+                                        {body}
                                       </span>
                                     )}
-                                  </span>
-                                </span>
-                              </button>
-                              <button
-                                type='button'
-                                aria-label='Eliminar notificación'
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  void archive(n.id)
-                                }}
-                                className='relative flex w-11 shrink-0 items-center justify-center self-stretch text-text-muted/50 transition-colors duration-300 hover:text-danger focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
-                              >
-                                <XIcon size={15} />
-                              </button>
-                            </div>
-                          </SwipeableRow>
-                        </li>
-                      )
-                    })}
-                  </ul>
+                                  </button>
+                                  {(canConfirm ||
+                                    (url && state === 'pending')) && (
+                                    <div className='flex items-center gap-2.5 px-4 pb-3.5'>
+                                      {canConfirm && (
+                                        <button
+                                          type='button'
+                                          disabled={busy}
+                                          onClick={() => void handleConfirm(n)}
+                                          className='rounded-md bg-primary px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-[background-color,transform] hover:opacity-90 active:scale-95 disabled:cursor-wait disabled:opacity-50'
+                                        >
+                                          {busy ? 'Confirmando…' : 'Confirmar'}
+                                        </button>
+                                      )}
+                                      {url && (
+                                        <button
+                                          type='button'
+                                          onClick={() => handleItemClick(n)}
+                                          className='flex items-center gap-1 px-1 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted transition-[color,transform] hover:text-primary active:scale-95'
+                                        >
+                                          Revisar
+                                          <ArrowRightIcon size={11} />
+                                        </button>
+                                      )}
+                                    </div>
+                                  )}
+                                  <button
+                                    type='button'
+                                    aria-label='Eliminar notificación'
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      void archive(n.id)
+                                    }}
+                                    className='absolute right-2 top-2 hidden h-7 w-7 items-center justify-center rounded-md bg-surface-inset text-text-muted/70 opacity-0 transition-[color,background-color,opacity] hover:text-danger focus-visible:opacity-100 pointer-fine:flex pointer-fine:group-hover:opacity-100'
+                                  >
+                                    <XIcon size={14} />
+                                  </button>
+                                </div>
+                              </SwipeableRow>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    </section>
+                  ))
                 )}
               </div>
 
-              <div className='border-t border-border p-2'>
+              <div className='border-t border-border'>
                 <Link
                   href={settingsHref}
                   onClick={close}
-                  className='flex items-center justify-center rounded-lg p-2 text-center text-xs font-medium text-primary transition-colors hover:bg-surface-inset touch-target'
+                  className='group/link flex items-center justify-between gap-2 px-4 py-2.5 not-sm:mb-4 text-xs font-medium text-text-muted transition-colors hover:bg-surface-inset hover:text-text touch-target'
                 >
-                  Configurar avisos push
+                  <span className='flex items-center gap-2'>
+                    <SettingsIcon size={14} />
+                    Configurar avisos
+                  </span>
+                  <ChevronRightIcon
+                    size={14}
+                    className='transition-transform group-hover/link:translate-x-0.5'
+                  />
                 </Link>
               </div>
             </div>
