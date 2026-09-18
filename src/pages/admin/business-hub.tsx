@@ -54,7 +54,7 @@ const items: HubItem[] = [
  */
 export function AdminBusinessHubPage() {
   return (
-    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
+    <div className='flex flex-col gap-5 w-full max-w-2xl mx-auto'>
       <div>
         <h1 className='text-2xl font-bold tracking-tight'>Negocio</h1>
         <p className='text-sm text-text-muted mt-0.5'>
@@ -63,11 +63,12 @@ export function AdminBusinessHubPage() {
       </div>
 
       <div className='flex flex-col gap-3'>
-        {items.map((item) => (
+        {items.map((item, index) => (
           <Link key={item.href} href={item.href}>
             <Card
               data-tour={item.tourKey}
-              className='group flex items-center gap-4 p-4 hover:border-pitch-600/40 hover:shadow-(--shadow-sm) transition-all cursor-pointer touch-target'
+              className='group flex animate-stagger items-center gap-4 p-4 transition-all duration-200 ease-spring hover:-translate-y-0.5 hover:border-pitch-600/40 hover:shadow-(--shadow-sm) cursor-pointer touch-target'
+              style={{ '--index': index } as React.CSSProperties}
             >
               <div className='flex items-center justify-center w-11 h-11 rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300 shrink-0'>
                 {item.icon}

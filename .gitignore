@@ -30,3 +30,7 @@ dist-ssr
 .kiro/
 .temp/
 deno.lock
+
+.impeccable/
+.playwright-mcp/
+audit-shots/

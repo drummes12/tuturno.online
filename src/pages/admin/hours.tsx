@@ -18,10 +18,14 @@ import {
   ClockIcon,
   SunIcon,
   MoonIcon,
-  CoffeeIcon
+  CoffeeIcon,
+  CopyIcon,
+  RefreshIcon
 } from '@/components/common/icon'
 import type { BusinessHours } from '@/types'
 import { useBusinessId } from '@/hooks/use-business-id'
+import { toZonedTime } from 'date-fns-tz'
+import { BUSINESS_TIMEZONE } from '@/lib/time'
 
 const days = [
   'Domingo',
@@ -37,6 +41,11 @@ interface FranjaState extends BusinessHours {
   _isNew?: boolean
   _isDeleted?: boolean
 }
+
+// La semana laboral empieza en lunes (fixture board)
+const dayOrder = [1, 2, 3, 4, 5, 6, 0]
+
+const dayShort = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 // Convierte "HH:MM" a minutos para comparación
 function toMinutes(time: string): number {
@@ -77,17 +86,23 @@ export function AdminHoursPage() {
   const businessId = useBusinessId()
   const canEdit = useCanEdit()
   const [franjas, setFranjas] = useState<FranjaState[]>([])
+  const [baseline, setBaseline] = useState<FranjaState[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  // "Copiar a": día origen cuyo panel está abierto + destinos seleccionados
+  const [copySource, setCopySource] = useState<number | null>(null)
+  const [copyTargets, setCopyTargets] = useState<Set<number>>(new Set())
 
   const load = useCallback(async () => {
     if (!businessId) return
     setLoading(true)
     try {
       const data = await fetchBusinessHours(businessId)
-      setFranjas(data.map((h) => ({ ...h })))
+      const clean = data.map((h) => ({ ...h }))
+      setFranjas(clean)
+      setBaseline(clean.map((h) => ({ ...h })))
     } catch (err) {
       setError('Error al cargar los horarios: ' + (err as Error).message)
       setFranjas([])
@@ -120,6 +135,28 @@ export function AdminHoursPage() {
   }, [franjasByDay])
 
   const hasOverlaps = Array.from(overlapsByDay.values()).some((v) => v)
+
+  const todayIdx = toZonedTime(new Date(), BUSINESS_TIMEZONE).getDay()
+
+  // Dirty-tracking: compara el estado actual contra el snapshot cargado
+  const isDirty = useMemo(() => {
+    const norm = (list: FranjaState[]) =>
+      list
+        .filter((f) => !f._isDeleted)
+        .map(
+          (f) =>
+            `${f.day_of_week}|${f.open_time}|${f.close_time}|${f.is_active ? 1 : 0}`
+        )
+        .sort()
+        .join(';')
+    return norm(franjas) !== norm(baseline)
+  }, [franjas, baseline])
+
+  function handleReset() {
+    setFranjas(baseline.map((f) => ({ ...f })))
+    setCopySource(null)
+    setCopyTargets(new Set())
+  }
 
   function addFranja(day: number) {
     const dayFranjas = franjasByDay.get(day) ?? []
@@ -154,6 +191,57 @@ export function AdminHoursPage() {
     setFranjas((prev) =>
       prev.map((f, i) => (i === index ? { ...f, _isDeleted: true } : f))
     )
+  }
+
+  function toggleCopy(day: number) {
+    setCopySource((prev) => (prev === day ? null : day))
+    setCopyTargets(new Set())
+  }
+
+  function toggleCopyTarget(day: number) {
+    setCopyTargets((prev) => {
+      const next = new Set(prev)
+      if (next.has(day)) {
+        next.delete(day)
+      } else {
+        next.add(day)
+      }
+      return next
+    })
+  }
+
+  function setCopyPreset(days_: number[]) {
+    if (copySource === null) return
+    setCopyTargets(new Set(days_.filter((d) => d !== copySource)))
+  }
+
+  // Replica las franjas activas del día origen en los destinos:
+  // las franjas previas del destino se marcan como eliminadas y se
+  // insertan copias nuevas (todo queda pendiente hasta Guardar).
+  function applyCopy() {
+    if (copySource === null || copyTargets.size === 0) return
+    const sourceFranjas = (franjasByDay.get(copySource) ?? []).filter(
+      (f) => f.is_active
+    )
+    setFranjas((prev) => [
+      ...prev.map((f) =>
+        copyTargets.has(f.day_of_week) && !f._isDeleted
+          ? { ...f, _isDeleted: true }
+          : f
+      ),
+      ...[...copyTargets].flatMap((day) =>
+        sourceFranjas.map((f) => ({
+          ...f,
+          id: '',
+          day_of_week: day,
+          is_active: true,
+          _isNew: true,
+          _isDeleted: undefined
+        }))
+      )
+    ])
+    setCopySource(null)
+    setCopyTargets(new Set())
   }
 
   function toggleDay(day: number) {
@@ -233,7 +321,7 @@ export function AdminHoursPage() {
   }
 
   return (
-    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
+    <div className='flex flex-col gap-5 w-full max-w-5xl mx-auto'>
       {/* Header */}
       <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
@@ -267,7 +355,8 @@ export function AdminHoursPage() {
 
       {/* Días */}
       <div className='flex flex-col gap-3'>
-        {days.map((dayName, dayIdx) => {
+        {dayOrder.map((dayIdx, position) => {
+          const dayName = days[dayIdx]
           const dayFranjas = franjasByDay.get(dayIdx) ?? []
           const isActive =
             dayFranjas.length > 0 && dayFranjas.some((f) => f.is_active)
@@ -279,53 +368,141 @@ export function AdminHoursPage() {
               key={dayIdx}
               data-tour={dayIdx === 1 ? 'admin-hours-day' : undefined}
               className={`p-0 overflow-hidden animate-fade-up ${hasOverlap ? 'border-danger/60' : ''}`}
-              style={{ animationDelay: `${dayIdx * 20}ms` }}
+              style={{ animationDelay: `${position * 20}ms` }}
             >
               {/* Header del día */}
               <div
-                className={`flex items-center gap-3 px-4 py-3 border-b border-border transition-colors ${
+                className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3 border-b border-border transition-colors ${
                   isActive ? 'bg-surface-inset' : ''
                 }`}
               >
-                <button
-                  onClick={() => canEdit && toggleDay(dayIdx)}
-                  disabled={!canEdit}
-                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
-                    isActive ? 'bg-primary' : 'bg-graphite-300'
-                  } ${!canEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  aria-label={`${isActive ? 'Cerrar' : 'Abrir'} ${dayName}`}
-                  aria-pressed={isActive}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${
-                      isActive ? 'translate-x-5' : ''
-                    }`}
-                  />
-                </button>
-                <span
-                  className={`font-mono text-xs font-medium uppercase tracking-[0.14em] ${
-                    isActive ? 'text-text' : 'text-text-muted'
-                  }`}
-                >
-                  {dayName}
-                </span>
-                {isActive && (
-                  <span className='text-xs text-text-muted nums'>
-                    {activeCount} {activeCount === 1 ? 'franja' : 'franjas'}
-                  </span>
-                )}
-                {isActive && canEdit && (
+                <div className='flex items-center gap-3'>
                   <button
-                    onClick={() => addFranja(dayIdx)}
-                    data-tour={dayIdx === 1 ? 'admin-hours-add' : undefined}
-                    className='ml-auto flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-100 dark:hover:bg-pitch-500/10 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
-                    aria-label={`Agregar franja a ${dayName}`}
+                    onClick={() => canEdit && toggleDay(dayIdx)}
+                    disabled={!canEdit}
+                    className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
+                      isActive ? 'bg-primary' : 'bg-graphite-300'
+                    } ${!canEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    aria-label={`${isActive ? 'Cerrar' : 'Abrir'} ${dayName}`}
+                    aria-pressed={isActive}
                   >
-                    <PlusIcon size={14} />
-                    <span className='hidden sm:inline'>Agregar</span>
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ease-spring ${
+                        isActive ? 'translate-x-5' : ''
+                      }`}
+                    />
                   </button>
+                  <span
+                    className={`font-mono text-xs font-medium uppercase tracking-[0.14em] ${
+                      isActive ? 'text-text' : 'text-text-muted'
+                    }`}
+                  >
+                    {dayName}
+                  </span>
+                  {isActive && (
+                    <span className='whitespace-nowrap text-xs text-text-muted nums'>
+                      {activeCount} {activeCount === 1 ? 'franja' : 'franjas'}
+                    </span>
+                  )}
+                  {dayIdx === todayIdx && (
+                    <span className='rounded-md border border-pitch-500/40 bg-pitch-500/10 px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 dark:border-pitch-400/30 dark:text-pitch-300'>
+                      Hoy
+                    </span>
+                  )}
+                </div>
+                {isActive && canEdit && (
+                  <div className='ml-auto flex items-center justify-end gap-1'>
+                    <button
+                      onClick={() => toggleCopy(dayIdx)}
+                      className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors touch-target ${
+                        copySource === dayIdx
+                          ? 'bg-pitch-500/15 text-pitch-700 dark:text-pitch-300'
+                          : 'text-primary hover:bg-pitch-100 dark:hover:bg-pitch-500/10'
+                      }`}
+                      aria-label={`Copiar horario de ${dayName} a otros días`}
+                      aria-expanded={copySource === dayIdx}
+                    >
+                      <CopyIcon size={14} />
+                      <span className='hidden sm:inline'>Copiar</span>
+                    </button>
+                    <button
+                      onClick={() => addFranja(dayIdx)}
+                      data-tour={dayIdx === 1 ? 'admin-hours-add' : undefined}
+                      className='flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-100 dark:hover:bg-pitch-500/10 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
+                      aria-label={`Agregar franja a ${dayName}`}
+                    >
+                      <PlusIcon size={14} />
+                      <span className='hidden sm:inline'>Agregar</span>
+                    </button>
+                  </div>
                 )}
               </div>
+
+              {/* Panel "Copiar a": destinos para replicar las franjas del día */}
+              {copySource === dayIdx && canEdit && (
+                <div className='border-b border-border bg-surface-inset px-4 py-3 animate-fade-up'>
+                  <p className='mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
+                    Copiar a
+                  </p>
+                  <div className='flex flex-wrap items-center gap-1.5'>
+                    {dayOrder
+                      .filter((d) => d !== dayIdx)
+                      .map((d) => (
+                        <button
+                          key={d}
+                          type='button'
+                          onClick={() => toggleCopyTarget(d)}
+                          aria-pressed={copyTargets.has(d)}
+                          className={`rounded-full border px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors touch-target ${
+                            copyTargets.has(d)
+                              ? 'border-(--color-primary) bg-(--color-primary) text-white'
+                              : 'border-border bg-surface-elevated text-(--color-text-muted) hover:border-graphite-300'
+                          }`}
+                        >
+                          {dayShort[d]}
+                        </button>
+                      ))}
+                    <span className='mx-1 h-4 w-px bg-border' />
+                    <button
+                      type='button'
+                      onClick={() => setCopyPreset([1, 2, 3, 4, 5])}
+                      className='rounded-full border border-border bg-surface-elevated px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-(--color-text-muted) transition-colors hover:border-graphite-300 touch-target'
+                    >
+                      Lun-Vie
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setCopyPreset(dayOrder)}
+                      className='rounded-full border border-border bg-surface-elevated px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-(--color-text-muted) transition-colors hover:border-graphite-300 touch-target'
+                    >
+                      Todos
+                    </button>
+                  </div>
+                  <div className='mt-3 flex items-center gap-2'>
+                    <Button
+                      size='sm'
+                      onClick={applyCopy}
+                      disabled={copyTargets.size === 0}
+                    >
+                      <CopyIcon size={14} />
+                      {copyTargets.size > 0
+                        ? `Copiar a ${copyTargets.size} ${copyTargets.size === 1 ? 'día' : 'días'}`
+                        : 'Elige los días'}
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='ghost'
+                      onClick={() => toggleCopy(dayIdx)}
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                  <p className='mt-2 text-xs text-text-muted'>
+                    Reemplaza las franjas de los días elegidos. Se aplica al
+                    guardar.
+                  </p>
+                </div>
+              )}
 
               {/* Franjas */}
               {isActive && dayFranjas.length === 0 && (
@@ -455,26 +632,44 @@ export function AdminHoursPage() {
       </div>
 
       {/* Footer con guardar */}
-      <div className='sticky bottom-20 md:bottom-4 z-10'>
+      <div className='sticky bottom-22 md:bottom-4 z-10'>
         <Card elevated className='p-3 flex items-center gap-3'>
-          <div className='flex-1 text-xs text-text-muted'>
-            {franjas.filter((f) => !f._isDeleted && f.is_active).length} franjas
-            activas
-            {hasOverlaps && (
-              <span className='text-danger font-medium'>
-                {' '}
-                · solapamientos detectados
+          <div className='flex-1 min-w-0 text-xs nums'>
+            {hasOverlaps ? (
+              <span className='font-medium text-danger'>
+                Solapamientos detectados
+              </span>
+            ) : isDirty ? (
+              <span className='font-medium text-yellow-800 dark:text-flood-300'>
+                Cambios sin guardar
+              </span>
+            ) : (
+              <span className='text-text-muted'>
+                {franjas.filter((f) => !f._isDeleted && f.is_active).length}{' '}
+                franjas activas · sin cambios
               </span>
             )}
           </div>
+          {isDirty && (
+            <Button
+              variant='ghost'
+              size='sm'
+              onClick={handleReset}
+              disabled={saving}
+              aria-label='Reestablecer cambios'
+            >
+              <RefreshIcon size={15} />
+              <span className='hidden sm:inline'>Reestablecer</span>
+            </Button>
+          )}
           <Button
             loading={saving}
             onClick={handleSave}
-            disabled={hasOverlaps || !canEdit}
-            size='lg'
+            disabled={!isDirty || hasOverlaps || !canEdit}
+            size='sm'
             data-tour='admin-hours-save'
           >
-            Guardar horarios
+            Guardar <span className='hidden sm:inline'>horarios</span>
           </Button>
         </Card>
       </div>
