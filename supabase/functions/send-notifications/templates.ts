@@ -41,6 +41,7 @@ export interface TemplatePayload {
   reservation_id?: string
   reservation_number?: number
   starts_at?: string
+  ends_at?: string
   recipient_name?: string | null
   client_name?: string
   client_email?: string
@@ -141,22 +142,33 @@ const detailIcons = {
   }
 } satisfies Record<string, DetailIcon>
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString('es-CO', {
-    timeZone: 'America/Bogota',
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleString('es-CO', {
     timeZone: 'America/Bogota',
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+/** "VIE 20 SEP" — fecha compacta en mayúsculas para el scoreboard. */
+function formatDateShort(iso: string): string {
+  return new Date(iso)
+    .toLocaleString('es-CO', {
+      timeZone: 'America/Bogota',
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short'
+    })
+    .replace(/\./g, '')
+    .toUpperCase()
+}
+
+function durationMinutes(p: TemplatePayload): number | null {
+  if (!p.starts_at || !p.ends_at) return null
+  const mins = Math.round(
+    (new Date(p.ends_at).getTime() - new Date(p.starts_at).getTime()) / 60000
+  )
+  return mins > 0 ? mins : null
 }
 
 /** Escapa caracteres HTML para evitar XSS en campos controlados por el usuario. */
@@ -172,13 +184,24 @@ function escapeHtml(value: string): string {
 /** Mapea un hex de color al sufijo del archivo SVG hosted. */
 function colorSuffix(hex: string): string {
   switch (hex) {
-    case '#087333': return 'green'
-    case '#0a7d3b': return 'green'
-    case '#9a5b00': return 'amber'
-    case '#b91c1c': return 'red'
-    case '#525f56': return 'gray'
-    case '#ffffff': return 'white'
-    default: return 'green'
+    case '#087333':
+      return 'green'
+    case '#0a7d3b':
+      return 'green'
+    case '#9a5b00':
+      return 'amber'
+    case '#b91c1c':
+      return 'red'
+    case '#a52a2a':
+      return 'red'
+    case '#525f56':
+      return 'gray'
+    case '#5c6a60':
+      return 'gray'
+    case '#ffffff':
+      return 'white'
+    default:
+      return 'green'
   }
 }
 
@@ -200,13 +223,13 @@ function inlineIcon(
 
 /** Badge superior de notificación — siempre verde TuTurno, consistente entre todos los correos. */
 function notificationBadge(badge: { label: string; icon: string }): string {
-  return `<span style="display:inline-block;padding:6px 12px;border-radius:8px;background-color:#e7f7ec;color:#087333;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:700;line-height:1.2;">${inlineIcon(badge.icon, 14, 5, '#087333')}${escapeHtml(badge.label)}</span>`
+  return `<span style="display:inline-block;padding:6px 12px;border-radius:8px;background-color:#e7f7ec;color:#087333;font-family:${SANS_FONT};font-size:12px;font-weight:700;line-height:1.2;">${inlineIcon(badge.icon, 14, 5, '#087333')}${escapeHtml(badge.label)}</span>`
 }
 
 /** Badge de estado de la reserva — color sutil según el estado, va dentro de la card. */
 function statusBadge(status: ReservationStatus): string {
   const config = statusConfig[status]
-  return `<span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${config.background};color:${config.color};font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;line-height:1.2;">${inlineIcon(config.icon, 12, 4, config.color)}${escapeHtml(config.label)}</span>`
+  return `<span style="display:inline-block;padding:4px 10px;border-radius:999px;background-color:${config.background};color:${config.color};font-family:${SANS_FONT};font-size:11px;font-weight:700;line-height:1.2;">${inlineIcon(config.icon, 12, 4, config.color)}${escapeHtml(config.label)}</span>`
 }
 
 /** Fila de detalle para la lista de datos de la reserva. */
@@ -238,11 +261,73 @@ function detailTable(rows: string[]): string {
 }
 
 /**
- * Card de reserva con encabezado "[icono] Detalles de la reserva  [StatusBadge]"
- * y filas de detalles debajo. Usada por todos los emails de reserva.
+ * Stacks tipográficos del correo. Geist/Geist Mono se cargan vía @font-face
+ * (hosteadas en /email-fonts) para los clientes que soportan web fonts —
+ * Apple Mail, iOS Mail, Outlook Mac, la mayoría de clientes móviles.
+ * Gmail y Outlook de escritorio caen al fallback del sistema, que ya
+ * comparte la forma geométrica de Geist.
  */
-function reservationCard(status: ReservationStatus, rows: string[]): string {
+const SANS_FONT =
+  "'Geist','Geist Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif"
+const MONO_FONT =
+  "'Geist Mono','SFMono-Regular','Consolas','Courier New',monospace"
+
+/**
+ * Papeleta de la reserva — card pitch-950 con la anatomía del scoreboard
+ * de la app: kicker + badge, fecha + duración, hora protagonista, divisor
+ * y fila de recurso. Es una card independiente, como el panel del sheet.
+ */
+function reservationTicket(
+  p: TemplatePayload,
+  status: ReservationStatus
+): string {
+  const number = p.reservation_number
+    ? `RESERVA #${p.reservation_number}`
+    : 'RESERVA'
+  const date = p.starts_at ? formatDateShort(p.starts_at) : ''
+  const mins = durationMinutes(p)
+  const time = p.starts_at
+    ? p.ends_at
+      ? `${formatTime(p.starts_at)} – ${formatTime(p.ends_at)}`
+      : formatTime(p.starts_at)
+    : ''
+  const resource = p.resource_name ?? ''
+
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="overflow:hidden;border:1px solid #123122;border-radius:14px;background-color:#04210f;border-collapse:separate;border-spacing:0;width:100%;">
+    <tr>
+      <td style="padding:18px 20px 16px;background-color:#04210f;border-radius:13px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr>
+            <td style="font-family:${MONO_FONT};font-size:11px;font-weight:700;letter-spacing:2px;color:#4fd986;vertical-align:middle;">${escapeHtml(number)}</td>
+            <td align="right" style="vertical-align:middle;">${statusBadge(status)}</td>
+          </tr>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin-top:14px;">
+          <tr>
+            <td style="font-family:${MONO_FONT};font-size:11px;letter-spacing:1.2px;color:#9fc9ac;">${escapeHtml(date)}</td>
+            <td align="right" style="font-family:${MONO_FONT};font-size:11px;font-weight:700;letter-spacing:1px;color:#fde047;">${mins ? `(${mins} MIN)` : ''}</td>
+          </tr>
+        </table>
+        <div style="margin:8px 0 10px;text-align:center;font-family:${MONO_FONT};font-size:30px;font-weight:700;letter-spacing:1px;line-height:1.2;color:#f8faf7;text-transform:uppercase;">${escapeHtml(time)}</div>
+        <div style="border-top:1px solid #1c3a28;font-size:0;line-height:0;">&nbsp;</div>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin-top:10px;">
+          <tr>
+            <td style="font-size:14px;font-weight:700;color:#f8faf7;vertical-align:middle;">${inlineIcon(layoutGridIcon(), 15, 6, '#4fd986')}${escapeHtml(resource)}</td>
+            <td align="right" style="font-family:${MONO_FONT};font-size:10px;letter-spacing:1.6px;color:#7fb894;vertical-align:middle;">TURNO</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>`
+}
+
+/**
+ * Card de sección clara bajo la papeleta — equivalente a las secciones
+ * operativas del sheet (detalles, contacto). Header mono + filas.
+ */
+function sectionCard(title: string, rows: string[]): string {
   const visibleRows = rows.filter(Boolean)
+  if (!visibleRows.length) return ''
   const rowsHtml = visibleRows
     .map((row, index) =>
       index === visibleRows.length - 1
@@ -251,23 +336,10 @@ function reservationCard(status: ReservationStatus, rows: string[]): string {
     )
     .join('')
 
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="overflow:hidden;border:1px solid #dfe9e2;border-radius:14px;background-color:#ffffff;border-collapse:separate;border-spacing:0;width:100%;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;border:1px solid #dfe9e2;border-radius:14px;background-color:#f9fbfa;border-collapse:separate;border-spacing:0;width:100%;">
     <tr>
-      <td style="padding:14px 16px;border-bottom:1px solid #e8eeea;background-color:#f3f9f5;border-radius:14px 14px 0 0;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
-          <tr>
-            <td style="vertical-align:middle;">
-              <span style="font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#0a7d3b;letter-spacing:0.2px;">${inlineIcon(calendarIcon(), 16, 6, '#0a7d3b')}Detalles de la reserva</span>
-            </td>
-            <td align="right" style="vertical-align:middle;">
-              ${statusBadge(status)}
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding:8px 16px 16px;">
+      <td style="padding:12px 16px 14px;">
+        <div style="margin-bottom:4px;font-family:${MONO_FONT};font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#5c6a60;">${escapeHtml(title)}</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${rowsHtml}</table>
       </td>
     </tr>
@@ -283,7 +355,7 @@ function ctaButton(href: string, label: string): string {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:340px;margin:0 auto;background-color:#0a7d3b;border-radius:10px;">
             <tr>
               <td align="center" style="padding:14px 24px;border-radius:10px;">
-                <a href="${escapeHtml(href)}" target="_blank" style="display:block;width:100%;font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;box-sizing:border-box;">${inlineIcon(calendarIcon(), 16, 8, '#ffffff')}${escapeHtml(label)}</a>
+                <a href="${escapeHtml(href)}" target="_blank" style="display:block;width:100%;font-family:${SANS_FONT};font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;box-sizing:border-box;">${inlineIcon(calendarIcon(), 16, 8, '#ffffff')}${escapeHtml(label)}</a>
               </td>
             </tr>
           </table>
@@ -297,11 +369,11 @@ function whatsappContact(href: string, label: string): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:14px;background-color:#f5faf7;border-collapse:separate;width:100%;">
       <tr>
         <td style="padding:18px 16px;text-align:center;">
-          <p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#31583d;line-height:1.45;">${escapeHtml(label)}</p>
+          <p style="margin:0 0 14px;font-family:${SANS_FONT};font-size:13px;color:#31583d;line-height:1.45;">${escapeHtml(label)}</p>
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
             <tr>
               <td bgcolor="#25D366" style="border-radius:9px;">
-                <a href="${escapeHtml(href)}" target="_blank" style="display:inline-block;padding:9px 18px;color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;">${inlineIcon(whatsappIcon(), 16, 6, '#ffffff')}Abrir WhatsApp</a>
+                <a href="${escapeHtml(href)}" target="_blank" style="display:inline-block;padding:9px 18px;color:#ffffff;font-family:${SANS_FONT};font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;">${inlineIcon(whatsappIcon(), 16, 6, '#ffffff')}Abrir WhatsApp</a>
               </td>
             </tr>
           </table>
@@ -335,8 +407,47 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${escapeHtml(heading)}</title>
+  <!--[if !mso]><!-->
+  <style>
+    @font-face {
+      font-family: 'Geist';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('${link(appUrl, '/email-fonts/geist-sans-latin-400-normal.woff2')}') format('woff2');
+    }
+    @font-face {
+      font-family: 'Geist';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('${link(appUrl, '/email-fonts/geist-sans-latin-700-normal.woff2')}') format('woff2');
+    }
+    @font-face {
+      font-family: 'Geist';
+      font-style: normal;
+      font-weight: 800;
+      font-display: swap;
+      src: url('${link(appUrl, '/email-fonts/geist-sans-latin-800-normal.woff2')}') format('woff2');
+    }
+    @font-face {
+      font-family: 'Geist Mono';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('${link(appUrl, '/email-fonts/geist-mono-latin-400-normal.woff2')}') format('woff2');
+    }
+    @font-face {
+      font-family: 'Geist Mono';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('${link(appUrl, '/email-fonts/geist-mono-latin-700-normal.woff2')}') format('woff2');
+    }
+  </style>
+  <!--<![endif]-->
 </head>
-<body style="margin:0;padding:0;background-color:#f3f6f4;font-family:Arial,Helvetica,sans-serif;color:#17211b;">
+<body style="margin:0;padding:0;background-color:#f3f6f4;font-family:${SANS_FONT};color:#17211b;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">${escapeHtml(preheader)}</div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f6f4;width:100%;">
@@ -351,8 +462,8 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
                   <img src="${escapeHtml(logoUrl)}" alt="TuTurno" width="36" height="36" style="display:block;border:0;border-radius:9px;background-color:#f8faf7;padding:3px;box-sizing:border-box;">
                 </td>
                 <td style="padding-left:10px;vertical-align:middle;">
-                  <div style="font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:800;letter-spacing:-0.4px;line-height:1.15;color:#ffffff;">TuTurno</div>
-                  <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;letter-spacing:0.2px;line-height:1.3;color:#d9f2e1;margin-top:2px;">Reservas que funcionan</div>
+                  <div style="font-family:${SANS_FONT};font-size:20px;font-weight:800;letter-spacing:-0.4px;line-height:1.15;color:#ffffff;">TuTurno</div>
+                  <div style="font-family:${SANS_FONT};font-size:12px;font-weight:400;letter-spacing:0.2px;line-height:1.3;color:#d9f2e1;margin-top:2px;">Reservas que funcionan</div>
                 </td>
               </tr>
             </table>
@@ -361,8 +472,8 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
           <tr>
             <td style="padding:28px 28px;">
               <div style="margin-bottom:16px;">${notificationBadge(badge)}</div>
-              <h1 style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.25;color:#0a5226;">${escapeHtml(heading)}</h1>
-              ${description ? `<p style="margin:0 0 20px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5b6a60;line-height:1.55;">${description}</p>` : ''}
+              <h1 style="margin:0 0 8px;font-family:${SANS_FONT};font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.25;color:#0a5226;">${escapeHtml(heading)}</h1>
+              ${description ? `<p style="margin:0 0 20px;font-family:${SANS_FONT};font-size:14px;color:#5b6a60;line-height:1.55;">${description}</p>` : ''}
               ${bodyHtml}
             </td>
           </tr>
@@ -370,9 +481,9 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
           ${whatsapp ? `<tr><td style="padding:12px 28px">${whatsappContact(wrapWhatsAppLink(appUrl, whatsapp.href), whatsapp.label)}</td></tr>` : ''}
           <tr>
             <td align="center" style="padding:25px 28px 28px;border-top:1px solid #e8eeea;text-align:center;">
-              <p style="margin:0 auto;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#9aa59d;line-height:1.6;text-align:center;max-width:40ch;">Este correo fue enviado por TuTurno. Si crees que llegó por error, puedes ignorarlo.</p>
-              <a href="${escapeHtml(appUrl)}" style="display:inline-block;margin-top:7px;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#0a7d3b;text-decoration:none;font-weight:700;">tuturno.online</a>
-              <p style="margin:7px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#7b887f;line-height:1.6;text-align:center;">&copy; ${year} TuTurno. Todos los derechos reservados.</p>
+              <p style="margin:0 auto;font-family:${SANS_FONT};font-size:12px;color:#9aa59d;line-height:1.6;text-align:center;max-width:40ch;">Este correo fue enviado por TuTurno. Si crees que llegó por error, puedes ignorarlo.</p>
+              <a href="${escapeHtml(appUrl)}" style="display:inline-block;margin-top:7px;font-family:${SANS_FONT};font-size:12px;color:#0a7d3b;text-decoration:none;font-weight:700;">tuturno.online</a>
+              <p style="margin:7px 0 0;font-family:${SANS_FONT};font-size:12px;color:#7b887f;line-height:1.6;text-align:center;">&copy; ${year} TuTurno. Todos los derechos reservados.</p>
             </td>
           </tr>
         </table>
@@ -423,7 +534,7 @@ function businessReservationLink(
 }
 
 function paragraph(content: string, margin = '0 0 18px'): string {
-  return `<p style="margin:${margin};font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#3c4a41;line-height:1.65;">${content}</p>`
+  return `<p style="margin:${margin};font-family:${SANS_FONT};font-size:15px;color:#3c4a41;line-height:1.65;">${content}</p>`
 }
 
 function clientReservationDetails(
@@ -431,20 +542,13 @@ function clientReservationDetails(
   status: ReservationStatus,
   extraRows = ''
 ): string {
-  return reservationCard(status, [
-    p.reservation_number
-      ? detailRow('Reserva', `#${p.reservation_number}`, detailIcons.business)
-      : '',
-    detailRow('Negocio', p.business_name ?? '', detailIcons.business),
-    detailRow(
-      'Espacio o servicio',
-      p.resource_name ?? '',
-      detailIcons.resource
-    ),
-    detailRow('Fecha', formatDate(p.starts_at ?? ''), detailIcons.date),
-    detailRow('Hora', formatTime(p.starts_at ?? ''), detailIcons.time),
-    extraRows
-  ])
+  return (
+    reservationTicket(p, status) +
+    sectionCard('Detalles de la reserva', [
+      detailRow('Negocio', p.business_name ?? '', detailIcons.business),
+      extraRows
+    ])
+  )
 }
 
 function businessReservationDetails(
@@ -452,21 +556,16 @@ function businessReservationDetails(
   status: ReservationStatus,
   extraRows = ''
 ): string {
-  return reservationCard(status, [
-    p.reservation_number
-      ? detailRow('Reserva', `#${p.reservation_number}`, detailIcons.business)
-      : '',
-    detailRow('Cliente', p.client_name ?? '', detailIcons.client),
-    p.client_email ? detailRow('Email', p.client_email, detailIcons.email) : '',
-    detailRow(
-      'Espacio o servicio',
-      p.resource_name ?? '',
-      detailIcons.resource
-    ),
-    detailRow('Fecha', formatDate(p.starts_at ?? ''), detailIcons.date),
-    detailRow('Hora', formatTime(p.starts_at ?? ''), detailIcons.time),
-    extraRows
-  ])
+  return (
+    reservationTicket(p, status) +
+    sectionCard('Detalles de la reserva', [
+      detailRow('Cliente', p.client_name ?? '', detailIcons.client),
+      p.client_email
+        ? detailRow('Email', p.client_email, detailIcons.email)
+        : '',
+      extraRows
+    ])
+  )
 }
 
 function clientReservationBody(

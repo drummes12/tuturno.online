@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "emails:preview": "node --experimental-strip-types scripts/preview-emails.ts"
   },
   "dependencies": {
     "@fontsource/geist-mono": "5.3.0",
