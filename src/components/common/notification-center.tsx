@@ -499,7 +499,7 @@ export function NotificationCenter({
                                   event.stopPropagation()
                                   void archive(n.id)
                                 }}
-                                className='relative flex w-11 shrink-0 items-center justify-center self-stretch text-text-muted/50 transition-colors duration-300 before:absolute before:inset-0 before:bg-linear-to-l before:from-danger/30 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:text-danger hover:before:opacity-100 focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
+                                className='relative flex w-11 shrink-0 items-center justify-center self-stretch text-text-muted/50 transition-colors duration-300 hover:text-danger focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
                               >
                                 <XIcon size={15} />
                               </button>

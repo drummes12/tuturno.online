@@ -22,6 +22,11 @@ export function useTheme() {
     document.documentElement.classList.toggle('dark', dark)
     document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
     window.localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light')
+    // La selección in-app manda sobre la media query del SO.
+    document
+      .querySelector('meta[name="theme-color"]:not([media])')
+      ?.setAttribute('content', dark ? '#0f1512' : '#0a5226')
+    document.querySelector('meta[name="theme-color"][media]')?.remove()
   }, [dark])
 
   const toggle = useCallback(() => setDark((v) => !v), [])
