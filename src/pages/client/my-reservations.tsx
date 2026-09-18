@@ -243,7 +243,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
 
       {/* Filter chips */}
       <div
-        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-2 -mx-4 px-4 animate-fade-up'
+        className='scrollbar-none flex touch-pan-x overscroll-x-contain gap-2 overflow-x-auto pb-4 -mx-4 px-4 animate-fade-up'
         style={{ animationDelay: '60ms' }}
         data-tour='reservations-filters'
       >

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Alert } from '@/components/common/alert'
 import { BackLink } from '@/components/common/back-link'
+import { Badge } from '@/components/common/badge'
 import { Button } from '@/components/common/button'
 import { Card } from '@/components/common/card'
-import { BellIcon, CheckIcon } from '@/components/common/icon'
+import { BellIcon, MailIcon } from '@/components/common/icon'
 import { savePushSubscription } from '@/services/push'
 import {
   getExistingPushSubscription,
@@ -118,6 +119,30 @@ export function NotificationsPage() {
     }
   }
 
+  const pushState = !supported
+    ? { label: 'No disponible', variant: 'warning' as const }
+    : permission === 'denied'
+      ? { label: 'Bloqueado', variant: 'danger' as const }
+      : permission === 'default'
+        ? { label: 'Inactivo', variant: 'neutral' as const }
+        : checkingSubscription
+          ? { label: 'Comprobando…', variant: 'neutral' as const }
+          : subscription
+            ? { label: 'Activo', variant: 'success' as const }
+            : { label: 'Sin sincronizar', variant: 'accent' as const }
+
+  const pushDescription = !supported
+    ? 'Este navegador no soporta push. Usa Chrome, Brave o Safari con la PWA instalada.'
+    : permission === 'denied'
+      ? 'Bloqueadas en el navegador. Sigue los pasos de abajo.'
+      : permission === 'default'
+        ? 'Todavía sin permiso en este dispositivo.'
+        : checkingSubscription
+          ? 'Verificando el registro de este dispositivo…'
+          : subscription
+            ? 'Este dispositivo está sincronizado con tu cuenta.'
+            : 'Permiso concedido, falta sincronizar este dispositivo.'
+
   return (
     <div className='mx-auto flex w-full max-w-2xl flex-col gap-6'>
       <div>
@@ -130,113 +155,89 @@ export function NotificationsPage() {
         </p>
       </div>
 
-      <Card className='p-5 sm:p-6'>
-        <div className='flex flex-col gap-5'>
-          <div className='flex items-start gap-3'>
-            <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-primary'>
-              <BellIcon size={20} />
-            </span>
-            <div className='min-w-0'>
-              <h2 className='text-base font-semibold'>
-                Estado del dispositivo
-              </h2>
-              <p className='mt-1 text-sm leading-relaxed text-(--color-text-muted)'>
-                Las notificaciones push son complementarias al correo y te
-                avisan cuando cambia el estado de una reserva.
-              </p>
+      <Card className='overflow-hidden p-0 animate-fade-up'>
+        <div className='border-b border-border px-5 py-4 sm:px-6'>
+          <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
+            Canales de aviso
+          </p>
+          <p className='mt-1 text-sm leading-relaxed text-(--color-text-muted)'>
+            Los avisos push complementan el correo: te enteras al momento cuando
+            cambia el estado de una reserva.
+          </p>
+        </div>
+
+        <div className='divide-y divide-border'>
+          <div className='flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+            <div className='flex min-w-0 items-start gap-3'>
+              <span className='mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pitch-500/15 text-pitch-700 dark:text-pitch-300'>
+                <BellIcon size={18} />
+              </span>
+              <div className='min-w-0'>
+                <p className='font-semibold tracking-tight'>
+                  Push · este dispositivo
+                </p>
+                <p className='mt-0.5 text-sm leading-relaxed text-(--color-text-muted)'>
+                  {pushDescription}
+                </p>
+              </div>
+            </div>
+            <div className='flex items-center gap-2 pl-12 sm:shrink-0 sm:pl-0'>
+              <Badge variant={pushState.variant}>{pushState.label}</Badge>
+              {supported && permission === 'default' && (
+                <Button size='sm' loading={requesting} onClick={handleEnable}>
+                  Activar
+                </Button>
+              )}
+              {supported &&
+                permission === 'granted' &&
+                !checkingSubscription &&
+                !subscription && (
+                  <Button
+                    variant='secondary'
+                    size='sm'
+                    loading={subscribing}
+                    onClick={handleSubscribe}
+                  >
+                    Sincronizar
+                  </Button>
+                )}
             </div>
           </div>
 
-          <div className='flex flex-col gap-3'>
-            {success && <Alert variant='success'>{success}</Alert>}
-            {error && <Alert variant='error'>{error}</Alert>}
-
-            {!supported && (
-              <Alert variant='info'>
-                Este navegador no tiene soporte completo para notificaciones
-                push. Abre TuTurno en Chrome, Brave o Safari con la PWA
-                instalada.
-              </Alert>
-            )}
-
-            {supported && permission === 'default' && (
-              <Alert variant='info'>
-                Todavía no has concedido permiso para recibir avisos en este
-                dispositivo.
-              </Alert>
-            )}
-
-            {supported && permission === 'denied' && !error && (
-              <Alert variant='warning'>
-                Las notificaciones están bloqueadas para este sitio o
-                aplicación.
-              </Alert>
-            )}
-
-            {supported &&
-              permission === 'granted' &&
-              !checkingSubscription &&
-              subscription && (
-                <Alert variant='success'>
-                  <div className='flex flex-col gap-1'>
-                    <span className='font-medium'>
-                      Notificaciones activas en este dispositivo.
-                    </span>
-                    <span className='text-xs opacity-80'>
-                      Este dispositivo está sincronizado con tu cuenta.
-                    </span>
-                  </div>
-                </Alert>
-              )}
-
-            {supported &&
-              permission === 'granted' &&
-              !checkingSubscription &&
-              !subscription &&
-              !success && (
-                <Alert variant='warning'>
-                  El permiso está concedido, pero este dispositivo todavía no
-                  está sincronizado con tu cuenta.
-                </Alert>
-              )}
+          <div className='flex items-center justify-between gap-3 px-5 py-4 sm:px-6'>
+            <div className='flex min-w-0 items-start gap-3'>
+              <span className='mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-signal-blue/10 text-signal-blue dark:text-blue-300'>
+                <MailIcon size={18} />
+              </span>
+              <div className='min-w-0'>
+                <p className='font-semibold tracking-tight'>
+                  Correo electrónico
+                </p>
+                <p className='mt-0.5 text-sm leading-relaxed text-(--color-text-muted)'>
+                  Te llega un aviso cuando cambia el estado de una reserva.
+                </p>
+              </div>
+            </div>
+            <Badge variant='success'>Activo</Badge>
           </div>
-
-          {supported && permission === 'default' && (
-            <Button
-              loading={requesting}
-              onClick={handleEnable}
-              className='w-full sm:w-fit'
-            >
-              <BellIcon size={18} />
-              Activar notificaciones
-            </Button>
-          )}
-
-          {supported &&
-            permission === 'granted' &&
-            !checkingSubscription &&
-            !subscription && (
-              <Button
-                variant='secondary'
-                loading={subscribing}
-                onClick={handleSubscribe}
-                className='w-full sm:w-fit'
-              >
-                <BellIcon size={18} />
-                Reintentar sincronización
-              </Button>
-            )}
         </div>
       </Card>
 
+      {(success || error) && (
+        <div className='flex flex-col gap-3 animate-fade-up'>
+          {success && <Alert variant='success'>{success}</Alert>}
+          {error && <Alert variant='error'>{error}</Alert>}
+        </div>
+      )}
+
       {supported && permission === 'denied' && (
-        <Card className='p-5 sm:p-6'>
+        <Card className='p-5 sm:p-6 animate-fade-up'>
           <div className='flex flex-col gap-4'>
             <div>
-              <h2 className='text-base font-semibold'>
+              <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
                 Cómo volver a activarlas
               </h2>
-              <p className='mt-1 text-sm leading-relaxed text-(--color-text-muted)'>
+              <p className='mt-2 text-sm leading-relaxed text-(--color-text-muted)'>
                 El navegador no puede mostrar el permiso nuevamente desde la
                 app. Debes cambiarlo desde la configuración del sitio o del
                 dispositivo.
@@ -257,7 +258,7 @@ export function NotificationsPage() {
                   ]
               ).map((step, index) => (
                 <li key={step} className='flex items-start gap-3 text-sm'>
-                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-pitch-100 text-xs font-semibold text-primary'>
+                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 font-mono text-[11px] font-semibold text-pitch-700 dark:text-pitch-300'>
                     {index + 1}
                   </span>
                   <span className='pt-0.5 leading-relaxed text-(--color-text-muted)'>
@@ -269,24 +270,6 @@ export function NotificationsPage() {
           </div>
         </Card>
       )}
-
-      <Card className='p-5 sm:p-6'>
-        <div className='flex flex-col gap-3'>
-          <h2 className='text-base font-semibold'>Cómo funciona</h2>
-          <ul className='flex flex-col gap-3 text-sm text-(--color-text-muted)'>
-            <li className='flex items-start gap-2.5'>
-              <CheckIcon size={17} className='mt-0.5 shrink-0 text-primary' />
-              <span>
-                Recibes avisos cuando cambia el estado de una reserva.
-              </span>
-            </li>
-            <li className='flex items-start gap-2.5'>
-              <CheckIcon size={17} className='mt-0.5 shrink-0 text-primary' />
-              <span>El correo sigue disponible como canal de respaldo.</span>
-            </li>
-          </ul>
-        </div>
-      </Card>
     </div>
   )
 }
