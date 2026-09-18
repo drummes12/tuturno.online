@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import { useBusinessId } from '@/hooks/use-business-id'
 import { useCanEdit } from '@/hooks/use-can-edit'
 import { useAuthStore } from '@/stores/auth'
@@ -62,8 +62,8 @@ export function AdminTeamPage() {
   }
 
   return (
-    <div className='flex flex-col gap-6'>
-      <div>
+    <div className='flex flex-col gap-6 max-w-2xl mx-auto w-full'>
+      <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
           <BackLink href='/admin/negocio' label='Negocio' />
           <h1 className='text-2xl font-bold tracking-tight'>Equipo</h1>
@@ -80,38 +80,53 @@ export function AdminTeamPage() {
       {!canEdit && <ReadOnlyNotice />}
 
       {canEdit && (
-        <div data-tour='admin-team-invite'>
+        <div
+          data-tour='admin-team-invite'
+          className='animate-fade-up'
+          style={{ animationDelay: '40ms' }}
+        >
           <InviteMemberForm businessId={businessId!} onDone={load} />
         </div>
       )}
 
-      <section className='flex flex-col gap-3' data-tour='admin-team-members'>
+      <section
+        className='flex flex-col gap-3 animate-fade-up'
+        style={{ animationDelay: '60ms' }}
+        data-tour='admin-team-members'
+      >
         <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
           Miembros ({members.length})
         </h2>
-        {(() => {
-          const ownerCount = members.filter((m) => m.role === 'owner').length
-          let firstRemovableMarked = false
-          return members.map((member) => {
-            const isOnlyOwner = member.role === 'owner' && ownerCount === 1
-            const isSelf = member.user_id === user?.id
-            const isRemovable = canEdit && !isOnlyOwner && !isSelf
-            const isFirstRemovable = isRemovable && !firstRemovableMarked
-            if (isFirstRemovable) firstRemovableMarked = true
-            return (
-              <MemberCard
-                key={member.user_id}
-                member={member}
-                isSelf={isSelf}
-                canRemove={canEdit}
-                isOnlyOwner={isOnlyOwner}
-                isFirstRemovable={isFirstRemovable}
-                onRemove={load}
-                onError={setError}
-              />
-            )
-          })
-        })()}
+        <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm)'>
+          <ul className='flex flex-col divide-y divide-border'>
+            {(() => {
+              const ownerCount = members.filter(
+                (m) => m.role === 'owner'
+              ).length
+              let firstRemovableMarked = false
+              return members.map((member, index) => {
+                const isOnlyOwner = member.role === 'owner' && ownerCount === 1
+                const isSelf = member.user_id === user?.id
+                const isRemovable = canEdit && !isOnlyOwner && !isSelf
+                const isFirstRemovable = isRemovable && !firstRemovableMarked
+                if (isFirstRemovable) firstRemovableMarked = true
+                return (
+                  <MemberRow
+                    key={member.user_id}
+                    member={member}
+                    index={index}
+                    isSelf={isSelf}
+                    canRemove={canEdit}
+                    isOnlyOwner={isOnlyOwner}
+                    isFirstRemovable={isFirstRemovable}
+                    onRemove={load}
+                    onError={setError}
+                  />
+                )
+              })
+            })()}
+          </ul>
+        </div>
       </section>
     </div>
   )
@@ -178,7 +193,9 @@ function InviteMemberForm({
 
   return (
     <section className='flex flex-col gap-3'>
-      <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>Añadir manager</h2>
+      <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
+        Añadir manager
+      </h2>
       <Card className='p-4 flex flex-col gap-3'>
         <p className='text-sm text-(--color-text-muted)'>
           Busca a una persona por su email. Debe tener cuenta creada en TuTurno.
@@ -240,8 +257,9 @@ function InviteMemberForm({
   )
 }
 
-function MemberCard({
+function MemberRow({
   member,
+  index,
   isSelf,
   canRemove,
   isOnlyOwner,
@@ -250,6 +268,7 @@ function MemberCard({
   isFirstRemovable
 }: {
   member: BusinessMember
+  index: number
   isSelf: boolean
   canRemove: boolean
   isOnlyOwner: boolean
@@ -286,70 +305,73 @@ function MemberCard({
   const canDelete = canRemove && !isOnlyOwner && !isSelf
 
   return (
-    <Card className='p-4'>
-      <div className='flex items-center gap-3'>
-        <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0'>
-          <UserIcon size={20} />
-        </div>
-        <div className='flex-1 min-w-0'>
-          <div className='flex items-center gap-2'>
-            <p className='font-medium truncate'>
-              {member.full_name ?? 'Sin nombre'}
-            </p>
-            <Badge variant={member.role === 'owner' ? 'info' : 'neutral'}>
-              {member.role}
-            </Badge>
-            {isSelf && (
-              <span className='text-xs text-(--color-text-muted)'>(tú)</span>
-            )}
-          </div>
-          <p className='text-xs text-(--color-text-muted) truncate'>
-            {member.email} · se unió{' '}
-            {formatLocal(member.joined_at, 'd MMM yyyy')}
+    <li
+      className='group relative flex animate-stagger flex-wrap items-center gap-3 px-5 py-3.5 sm:flex-nowrap'
+      style={{ '--index': index } as CSSProperties}
+    >
+      <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary'>
+        <UserIcon size={20} />
+      </span>
+      <div className='min-w-0 flex-1'>
+        <div className='flex flex-wrap items-center gap-x-2 gap-y-1'>
+          <p className='truncate text-sm font-semibold'>
+            {member.full_name ?? 'Sin nombre'}
           </p>
+          <Badge variant={member.role === 'owner' ? 'info' : 'neutral'}>
+            {member.role}
+          </Badge>
+          {isSelf && (
+            <span className='rounded-full bg-surface-inset px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+              Tú
+            </span>
+          )}
         </div>
+        <p className='mt-0.5 truncate text-xs text-(--color-text-muted) nums'>
+          {member.email} · se unió {formatLocal(member.joined_at, 'd MMM yyyy')}
+        </p>
+      </div>
 
-        {canDelete && (
-          <div className='shrink-0'>
-            {!confirming ? (
+      {canDelete && (
+        <div className='ml-auto flex shrink-0 items-center gap-1.5'>
+          {!confirming ? (
+            <button
+              data-tour={isFirstRemovable ? 'admin-team-remove' : undefined}
+              onClick={() => setConfirming(true)}
+              disabled={working}
+              className='flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/10 hover:text-danger touch-target disabled:opacity-50'
+              aria-label={`Eliminar a ${member.full_name ?? member.email}`}
+              title='Eliminar miembro'
+            >
+              <TrashIcon size={17} />
+            </button>
+          ) : (
+            <>
               <Button
                 variant='danger'
                 size='sm'
-                data-tour={isFirstRemovable ? 'admin-team-remove' : undefined}
-                onClick={() => setConfirming(true)}
+                onClick={handleRemove}
+                loading={working}
+              >
+                Confirmar
+              </Button>
+              <Button
+                variant='secondary'
+                size='sm'
+                onClick={() => setConfirming(false)}
                 disabled={working}
               >
-                <TrashIcon size={16} />
+                Cancelar
               </Button>
-            ) : (
-              <div className='flex items-center gap-2'>
-                <Button
-                  variant='danger'
-                  size='sm'
-                  onClick={handleRemove}
-                  loading={working}
-                >
-                  Confirmar
-                </Button>
-                <Button
-                  variant='secondary'
-                  size='sm'
-                  onClick={() => setConfirming(false)}
-                  disabled={working}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
+      )}
 
-        {isOnlyOwner && (
-          <span className='text-xs text-(--color-text-muted) shrink-0 text-right'>
-            Único owner
-          </span>
-        )}
-      </div>
-    </Card>
+      {isOnlyOwner && (
+        <span className='ml-auto shrink-0 rounded-full bg-surface-inset px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+          Único owner
+        </span>
+      )}
+    </li>
   )
 }

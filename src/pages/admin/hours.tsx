@@ -557,7 +557,7 @@ export function AdminHoursPage() {
                                 e.target.value
                               )
                             }
-                            className={`min-w-0 flex-1 rounded-lg border bg-surface-inset px-2.5 py-2 text-sm touch-target nums sm:px-3 ${
+                            className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums sm:px-3 ${
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'
@@ -578,7 +578,7 @@ export function AdminHoursPage() {
                                 e.target.value
                               )
                             }
-                            className={`min-w-0 flex-1 rounded-lg border bg-surface-inset px-2.5 py-2 text-sm touch-target nums sm:px-3 ${
+                            className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums sm:px-3 ${
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'

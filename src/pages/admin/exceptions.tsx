@@ -1,4 +1,10 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  type CSSProperties
+} from 'react'
 import {
   fetchAvailabilityExceptions,
   createAvailabilityException,
@@ -20,7 +26,8 @@ import {
   LockIcon,
   TrashIcon,
   PlusIcon,
-  CalendarIcon
+  CalendarIcon,
+  ChevronDownIcon
 } from '@/components/common/icon'
 import type { AvailabilityException, Resource } from '@/types'
 import { formatLocal, BUSINESS_TIMEZONE } from '@/lib/time'
@@ -78,6 +85,7 @@ export function AdminExceptionsPage() {
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
   // Formulario
   const [scope, setScope] = useState<Scope>('business')
@@ -105,9 +113,7 @@ export function AdminExceptionsPage() {
       ])
       setExceptions(excData)
       setResources(resourceData)
-      setResourceLabelSingular(
-        business?.resource_label_singular || 'Recurso'
-      )
+      setResourceLabelSingular(business?.resource_label_singular || 'Recurso')
       if (resourceData.length > 0 && !selectedResourceId) {
         setSelectedResourceId(resourceData[0].id)
       }
@@ -223,7 +229,6 @@ export function AdminExceptionsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('¿Seguro que quieres eliminar este cierre?')) return
     setDeletingId(id)
     setError(null)
     try {
@@ -233,6 +238,7 @@ export function AdminExceptionsPage() {
       setError('Error al eliminar: ' + (err as Error).message)
     } finally {
       setDeletingId(null)
+      setConfirmingId(null)
     }
   }
 
@@ -243,13 +249,26 @@ export function AdminExceptionsPage() {
 
   function resourceName(resourceId: string | null): string {
     if (!resourceId) return 'Todo el negocio'
-    return resources.find((resource) => resource.id === resourceId)?.name ?? resourceLabelSingular
+    return (
+      resources.find((resource) => resource.id === resourceId)?.name ??
+      resourceLabelSingular
+    )
   }
 
-  function formatRange(start: string, end: string): string {
-    const s = formatLocal(start, "EEE d 'de' MMM, HH:mm")
-    const e = formatLocal(end, "EEE d 'de' MMM, HH:mm")
-    return `${s} → ${e}`
+  function formatPoint(iso: string): string {
+    return formatLocal(iso, 'EEE d MMM · HH:mm').toUpperCase()
+  }
+
+  /** Si el cierre termina a medianoche (rango de día completo), muestra 23:59 del día anterior. */
+  function formatEndPoint(iso: string): string {
+    const d = new Date(iso)
+    const local = new Date(
+      d.toLocaleString('en-US', { timeZone: BUSINESS_TIMEZONE })
+    )
+    const isMidnight = local.getHours() === 0 && local.getMinutes() === 0
+    return formatPoint(
+      isMidnight ? new Date(d.getTime() - 60_000).toISOString() : iso
+    )
   }
 
   if (loading) {
@@ -264,7 +283,7 @@ export function AdminExceptionsPage() {
     (affectedCount === null || affectedCount === 0 || confirmedCreate)
 
   return (
-    <div className='flex flex-col gap-5 max-w-5xl mx-auto'>
+    <div className='flex flex-col gap-5 w-full max-w-5xl mx-auto'>
       {/* Header */}
       <div className='animate-fade-up'>
         <div className='flex items-center gap-1'>
@@ -294,7 +313,9 @@ export function AdminExceptionsPage() {
           <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
             <LockIcon size={18} />
           </div>
-          <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em]'>Nuevo cierre</h2>
+          <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em]'>
+            Nuevo cierre
+          </h2>
         </div>
 
         <div className='flex flex-col gap-4'>
@@ -340,25 +361,31 @@ export function AdminExceptionsPage() {
               >
                 Recurso
               </label>
-              <select
-                id='exception-resource'
-                value={selectedResourceId}
-                onChange={(e) => setSelectedResourceId(e.target.value)}
-                disabled={!canEdit}
-                className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
-              >
-                {resources.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className='relative'>
+                <select
+                  id='exception-resource'
+                  value={selectedResourceId}
+                  onChange={(e) => setSelectedResourceId(e.target.value)}
+                  disabled={!canEdit}
+                  className='w-full appearance-none rounded-xl border border-border bg-surface-inset pl-4 pr-10 py-3 text-sm focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                >
+                  {resources.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDownIcon
+                  size={16}
+                  className='pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted'
+                />
+              </div>
             </div>
           )}
 
           {/* Fechas */}
           <div className='flex flex-wrap gap-3'>
-            <div className='flex-1 flex flex-col gap-2'>
+            <div className='flex-1 min-w-0 flex flex-col gap-2'>
               <label
                 htmlFor='exception-start-date'
                 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
@@ -371,10 +398,10 @@ export function AdminExceptionsPage() {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 disabled={!canEdit}
-                className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               />
             </div>
-            <div className='flex-1 flex flex-col gap-2'>
+            <div className='flex-1 min-w-0 flex flex-col gap-2'>
               <label
                 htmlFor='exception-end-date'
                 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
@@ -387,7 +414,7 @@ export function AdminExceptionsPage() {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 disabled={!canEdit}
-                className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               />
             </div>
           </div>
@@ -408,8 +435,8 @@ export function AdminExceptionsPage() {
 
           {/* Horas (si no es todo el día) */}
           {!allDay && (
-            <div className='grid grid-cols-2 gap-3'>
-              <div className='flex flex-col gap-2'>
+            <div className='flex flex-wrap gap-3'>
+              <div className='flex-1 flex min-w-0 flex-col gap-2'>
                 <label
                   htmlFor='exception-start-time'
                   className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
@@ -422,10 +449,10 @@ export function AdminExceptionsPage() {
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   disabled={!canEdit}
-                  className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
                 />
               </div>
-              <div className='flex flex-col gap-2'>
+              <div className='flex-1 flex min-w-0 flex-col gap-2'>
                 <label
                   htmlFor='exception-end-time'
                   className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
@@ -438,7 +465,7 @@ export function AdminExceptionsPage() {
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   disabled={!canEdit}
-                  className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
                 />
               </div>
             </div>
@@ -525,50 +552,85 @@ export function AdminExceptionsPage() {
             </p>
           </Card>
         ) : (
-          <div className='flex flex-col gap-2'>
-            {upcomingExceptions.map((exc) => (
-              <Card
-                key={exc.id}
-                className='p-4 flex items-start justify-between gap-3'
-              >
-                <div className='min-w-0 flex-1'>
-                  <div className='flex items-center gap-2 mb-1'>
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        exc.resource_id
-                          ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'
-                          : 'bg-signal-blue/10 text-signal-blue dark:bg-signal-blue/20 dark:text-blue-300'
-                      }`}
-                    >
-                      {resourceName(exc.resource_id)}
-                    </span>
-                  </div>
-                  <p className='text-sm font-medium text-(--color-text) nums'>
-                    {formatRange(exc.starts_at, exc.ends_at)}
-                  </p>
-                  {exc.reason && (
-                    <p className='text-xs text-text-muted mt-1 italic'>
-                      {exc.reason}
-                    </p>
-                  )}
-                </div>
-                {canEdit && (
-                  <button
-                    onClick={() => handleDelete(exc.id)}
-                    disabled={deletingId === exc.id}
-                    className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-50'
-                    aria-label='Eliminar cierre'
-                    title='Eliminar cierre'
-                  >
-                    {deletingId === exc.id ? (
-                      <Spinner size='sm' />
-                    ) : (
-                      <TrashIcon size={17} />
+          <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm)'>
+            <ul className='flex flex-col divide-y divide-border'>
+              {upcomingExceptions.map((exc, index) => (
+                <li
+                  key={exc.id}
+                  className='group relative flex animate-stagger flex-wrap items-center gap-3 px-5 py-3.5 sm:flex-nowrap'
+                  style={{ '--index': index } as CSSProperties}
+                >
+                  <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-inset text-text-muted'>
+                    <LockIcon size={16} />
+                  </span>
+                  <div className='min-w-0 flex-1'>
+                    <div className='flex flex-wrap items-center gap-x-2.5 gap-y-1'>
+                      <div className='flex flex-col gap-0.5'>
+                        <p className='font-mono text-[13px] font-semibold nums text-(--color-text)'>
+                          <span className='mr-2 text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+                            Desde
+                          </span>
+                          {formatPoint(exc.starts_at)}
+                        </p>
+                        <p className='font-mono text-[13px] font-semibold nums text-(--color-text)'>
+                          <span className='mr-2 text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+                            Hasta
+                          </span>
+                          {formatEndPoint(exc.ends_at)}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest ${
+                          exc.resource_id
+                            ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'
+                            : 'bg-signal-blue/10 text-signal-blue dark:bg-signal-blue/20 dark:text-blue-300'
+                        }`}
+                      >
+                        {resourceName(exc.resource_id)}
+                      </span>
+                    </div>
+                    {exc.reason && (
+                      <p className='mt-0.5 text-xs italic text-text-muted'>
+                        {exc.reason}
+                      </p>
                     )}
-                  </button>
-                )}
-              </Card>
-            ))}
+                  </div>
+                  {canEdit && (
+                    <div className='ml-auto flex shrink-0 items-center gap-1.5'>
+                      {confirmingId === exc.id ? (
+                        <>
+                          <Button
+                            variant='danger'
+                            size='sm'
+                            onClick={() => handleDelete(exc.id)}
+                            loading={deletingId === exc.id}
+                          >
+                            Confirmar
+                          </Button>
+                          <Button
+                            variant='secondary'
+                            size='sm'
+                            onClick={() => setConfirmingId(null)}
+                            disabled={deletingId === exc.id}
+                          >
+                            Cancelar
+                          </Button>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmingId(exc.id)}
+                          className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0'
+                          aria-label='Eliminar cierre'
+                          title='Eliminar cierre'
+                        >
+                          <TrashIcon size={17} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
@@ -579,37 +641,55 @@ export function AdminExceptionsPage() {
           <summary className='cursor-pointer text-sm font-medium text-text-muted hover:text-text transition-colors py-2'>
             Cierres pasados ({pastExceptions.length})
           </summary>
-          <div className='flex flex-col gap-2 mt-2'>
-            {pastExceptions.map((exc) => (
-              <Card
-                key={exc.id}
-                className='p-3 flex items-start justify-between gap-3 opacity-60'
-              >
-                <div className='min-w-0 flex-1'>
-                  <span className='text-xs font-medium text-text-muted'>
-                    {resourceName(exc.resource_id)}
+          <div className='mt-2 overflow-hidden rounded-2xl border border-border bg-surface-elevated opacity-60'>
+            <ul className='flex flex-col divide-y divide-border'>
+              {pastExceptions.map((exc) => (
+                <li
+                  key={exc.id}
+                  className='group relative flex items-center gap-3 px-5 py-3'
+                >
+                  <span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-inset text-text-muted'>
+                    <LockIcon size={15} />
                   </span>
-                  <p className='text-sm text-text-muted nums'>
-                    {formatRange(exc.starts_at, exc.ends_at)}
-                  </p>
-                  {exc.reason && (
-                    <p className='text-xs text-text-muted mt-0.5 italic'>
-                      {exc.reason}
-                    </p>
+                  <div className='min-w-0 flex-1'>
+                    <div className='flex flex-wrap items-center gap-x-2.5 gap-y-1'>
+                      <div className='flex flex-col gap-0.5'>
+                        <p className='font-mono text-xs font-medium nums text-text-muted'>
+                          <span className='mr-2 text-[10px] uppercase tracking-widest'>
+                            Desde
+                          </span>
+                          {formatPoint(exc.starts_at)}
+                        </p>
+                        <p className='font-mono text-xs font-medium nums text-text-muted'>
+                          <span className='mr-2 text-[10px] uppercase tracking-widest'>
+                            Hasta
+                          </span>
+                          {formatEndPoint(exc.ends_at)}
+                        </p>
+                      </div>
+                      <span className='rounded-full bg-surface-inset px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+                        {resourceName(exc.resource_id)}
+                      </span>
+                    </div>
+                    {exc.reason && (
+                      <p className='mt-0.5 text-xs italic text-text-muted'>
+                        {exc.reason}
+                      </p>
+                    )}
+                  </div>
+                  {canEdit && (
+                    <button
+                      onClick={() => handleDelete(exc.id)}
+                      disabled={deletingId === exc.id}
+                      className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0'
+                      aria-label='Eliminar cierre pasado'
+                    >
+                      <TrashIcon size={16} />
+                    </button>
                   )}
-                </div>
-                {canEdit && (
-                  <button
-                    onClick={() => handleDelete(exc.id)}
-                    disabled={deletingId === exc.id}
-                    className='flex items-center justify-center w-9 h-9 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-50'
-                    aria-label='Eliminar cierre pasado'
-                  >
-                    <TrashIcon size={16} />
-                  </button>
-                )}
-              </Card>
-            ))}
+                </li>
+              ))}
+            </ul>
           </div>
         </details>
       )}
