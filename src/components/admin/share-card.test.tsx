@@ -3,12 +3,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 // Mock de qrcode — no necesitamos generar QR real en tests
-const { mockToCanvas } = vi.hoisted(() => ({
-  mockToCanvas: vi.fn(() => Promise.resolve())
+const { mockCreate } = vi.hoisted(() => ({
+  mockCreate: vi.fn(() => ({
+    modules: { size: 29, get: vi.fn(() => 0) }
+  }))
 }))
 vi.mock('qrcode', () => ({
   default: {
-    toCanvas: mockToCanvas
+    create: mockCreate
   }
 }))
 
@@ -22,12 +24,16 @@ beforeEach(() => {
   )
   HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
     fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 0,
     beginPath: vi.fn(),
     moveTo: vi.fn(),
     lineTo: vi.fn(),
     quadraticCurveTo: vi.fn(),
     closePath: vi.fn(),
     fill: vi.fn(),
+    stroke: vi.fn(),
+    fillRect: vi.fn(),
     drawImage: vi.fn()
   })) as any
   // Mock de Image para que el logo "cargue" inmediatamente
@@ -92,15 +98,12 @@ describe('ShareCard', () => {
     expect(canvas.tagName).toBe('CANVAS')
   })
 
-  it('llama a QRCode.toCanvas con errorCorrectionLevel H (alto)', async () => {
+  it('llama a QRCode.create con errorCorrectionLevel H (alto)', async () => {
     render(<ShareCard slug='test' />)
     await vi.waitFor(() => {
-      expect(mockToCanvas).toHaveBeenCalledWith(
-        expect.anything(),
+      expect(mockCreate).toHaveBeenCalledWith(
         'https://tuturno.online/b/test',
         expect.objectContaining({
-          width: 256,
-          margin: 2,
           errorCorrectionLevel: 'H'
         })
       )

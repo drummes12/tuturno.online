@@ -17,18 +17,44 @@ interface ShareCardProps {
   businessName?: string
 }
 
+// Lado del PNG generado. A 2048px el download sirve para impresión y el
+// preview (~200px CSS) queda nítido en pantallas de alta densidad.
+const QR_CANVAS_SIZE = 2048
+// Zona silenciosa mínima de la spec QR (módulos vacíos alrededor).
+const QUIET_MODULES = 4
+// Radio de los módulos como fracción del módulo (look "dots" premium).
+const DOT_RADIUS = 0.4
+
 /**
- * Carga el logo de TuTurno como HTMLImageElement.
+ * Carga el logo de TuTurno como HTMLImageElement, forzando al SVG a
+ * rasterizarse en alta resolución. Si no, algunos navegadores lo
+ * rasterizan a su tamaño intrínseco (300px) y escala borroso.
  * Devuelve null si no se puede cargar (el QR se genera sin logo).
  */
-function loadLogo(): Promise<HTMLImageElement | null> {
-  return new Promise((resolve) => {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => resolve(img)
-    img.onerror = () => resolve(null)
-    img.src = '/logo-clock.svg'
-  })
+async function loadLogo(px: number): Promise<HTMLImageElement | null> {
+  try {
+    const response = await fetch('/logo-clock.svg')
+    if (!response.ok) return null
+    const svg = (await response.text()).replace(
+      /<svg\b/,
+      `<svg width="${px}" height="${px}"`
+    )
+    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
+    return await new Promise<HTMLImageElement | null>((resolve) => {
+      const img = new Image()
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        resolve(img)
+      }
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        resolve(null)
+      }
+      img.src = url
+    })
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -56,6 +82,34 @@ function roundedRect(
 }
 
 /**
+ * Dibuja un "ojo" del QR (finder pattern): anillo redondeado de 7×7
+ * módulos con pupila de 3×3 centrada.
+ */
+function drawEye(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  module: number
+): void {
+  const outer = module * 7
+  ctx.lineWidth = module
+  roundedRect(
+    ctx,
+    x + module / 2,
+    y + module / 2,
+    outer - module,
+    outer - module,
+    module * 1.5
+  )
+  ctx.stroke()
+
+  const pupil = module * 3
+  const pupilOffset = (outer - pupil) / 2
+  roundedRect(ctx, x + pupilOffset, y + pupilOffset, pupil, pupil, module * 0.9)
+  ctx.fill()
+}
+
+/**
  * Tarjeta de "Compartir tu página" para el panel admin.
  * Muestra un QR code de la página pública de reservas, permite copiar
  * el link y descargar el QR como PNG.
@@ -71,64 +125,85 @@ export function ShareCard({ slug, businessName }: ShareCardProps) {
 
   const publicUrl = `${window.location.origin}/b/${slug}`
 
-  // Generar QR en un canvas y dibujar el logo de TuTurno en el centro.
-  // Se usa errorCorrectionLevel 'H' (alto, ~30% de redundancia) para que
-  // el QR siga siendo escaneable aunque el logo tape parte del código.
+  // Generar QR estilizado: módulos redondeados, ojos custom y el logo de
+  // TuTurno centrado. Se usa errorCorrectionLevel 'H' (alto, ~30% de
+  // redundancia) para que siga escaneable aunque el logo tape módulos.
+  // El contenido es solo la URL — compatible con los QR ya impresos.
   useEffect(() => {
     let cancelled = false
     async function generate() {
       const canvas = canvasRef.current
       if (!canvas) return
       try {
-        // 1. Generar el QR base con alta corrección de errores
-        await QRCode.toCanvas(canvas, publicUrl, {
-          width: 256,
-          margin: 2,
-          color: {
-            dark: '#04210f', // pitch-900
-            light: '#ffffff'
-          },
-          errorCorrectionLevel: 'H'
-        })
-        if (cancelled) return
+        const qr = QRCode.create(publicUrl, { errorCorrectionLevel: 'H' })
+        const moduleCount = qr.modules.size
 
-        // 2. Cargar el logo de TuTurno
-        const logo = await loadLogo()
-        if (cancelled || !logo) {
-          // Si el logo no carga, el QR ya está listo sin logo
-          const url = canvas.toDataURL('image/png')
-          setQrDataUrl(url)
-          return
-        }
-
-        // 3. Dibujar el logo en el centro con fondo blanco para contraste
+        canvas.width = QR_CANVAS_SIZE
+        canvas.height = QR_CANVAS_SIZE
         const ctx = canvas.getContext('2d')
         if (!ctx) {
-          const url = canvas.toDataURL('image/png')
-          setQrDataUrl(url)
+          if (!cancelled) setQrDataUrl(canvas.toDataURL('image/png'))
           return
         }
 
-        const size = canvas.width
-        const logoSize = Math.round(size * 0.26) // 26% del QR
-        const padding = Math.round(logoSize * 0.1)
-        const boxSize = logoSize + padding * 2
-        const boxX = (size - boxSize) / 2
-        const boxY = (size - boxSize) / 2
-        const logoX = boxX + padding
-        const logoY = boxY + padding
+        // Escala entera: cada módulo cae en píxeles exactos. Sin esto los
+        // bordes antialiased dificultan la binarización de los lectores.
+        const scale = Math.floor(
+          QR_CANVAS_SIZE / (moduleCount + QUIET_MODULES * 2)
+        )
+        const offset = Math.floor((QR_CANVAS_SIZE - scale * moduleCount) / 2)
+        const inEye = (row: number, col: number) =>
+          (row < 7 && col < 7) ||
+          (row < 7 && col >= moduleCount - 7) ||
+          (row >= moduleCount - 7 && col < 7)
 
-        // Fondo blanco redondeado detrás del logo para contraste
-        const radius = Math.round(boxSize * 0.22)
         ctx.fillStyle = '#ffffff'
-        roundedRect(ctx, boxX, boxY, boxSize, boxSize, radius)
-        ctx.fill()
+        ctx.fillRect(0, 0, QR_CANVAS_SIZE, QR_CANVAS_SIZE)
+        ctx.fillStyle = '#04210f' // pitch-900
+        ctx.strokeStyle = '#04210f'
 
-        // Logo (reloj sin cuadro verde)
-        ctx.drawImage(logo, logoX, logoY, logoSize, logoSize)
+        // Módulos de datos a tamaño completo con esquinas redondeadas:
+        // se fusionan donde se tocan (look fluido) sin dejar huecos que
+        // rompan la lectura. Un gap entre módulos hace fallar a jsQR.
+        for (let row = 0; row < moduleCount; row++) {
+          for (let col = 0; col < moduleCount; col++) {
+            if (!qr.modules.get(row, col) || inEye(row, col)) continue
+            roundedRect(
+              ctx,
+              offset + col * scale,
+              offset + row * scale,
+              scale,
+              scale,
+              scale * DOT_RADIUS
+            )
+            ctx.fill()
+          }
+        }
 
-        const url = canvas.toDataURL('image/png')
-        setQrDataUrl(url)
+        drawEye(ctx, offset, offset, scale)
+        drawEye(ctx, offset + (moduleCount - 7) * scale, offset, scale)
+        drawEye(ctx, offset, offset + (moduleCount - 7) * scale, scale)
+
+        // Logo centrado con fondo blanco para contraste
+        const logo = await loadLogo(Math.round(QR_CANVAS_SIZE * 0.24))
+        if (cancelled) return
+        if (logo) {
+          const box = QR_CANVAS_SIZE * 0.26
+          const boxX = (QR_CANVAS_SIZE - box) / 2
+          const padding = box * 0.09
+          ctx.fillStyle = '#ffffff'
+          roundedRect(ctx, boxX, boxX, box, box, box * 0.22)
+          ctx.fill()
+          ctx.drawImage(
+            logo,
+            boxX + padding,
+            boxX + padding,
+            box - padding * 2,
+            box - padding * 2
+          )
+        }
+
+        if (!cancelled) setQrDataUrl(canvas.toDataURL('image/png'))
       } catch {
         if (!cancelled) {
           setError('No se pudo generar el código QR.')
