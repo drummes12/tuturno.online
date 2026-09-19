@@ -1,8 +1,12 @@
 import type { ReactNode } from 'react'
 
 /**
- * Papeleta del turno — la pieza de marca: panel pitch siempre nocturno
- * con líneas de cancha, kicker mono, hora protagonista y beam opcional.
+ * Papeleta del turno — la pieza de marca: panel pitch con líneas de
+ * cancha, kicker mono, hora protagonista y beam opcional.
+ *
+ * Sigue el tema de la app: papel claro con líneas pitch de día,
+ * cancha nocturna en dark mode. El acento cambia con el tema porque
+ * el flood no pasa contraste sobre claro (pitch de día, flood de noche).
  *
  * Reservar para "un turno concreto": éxito al reservar, la próxima
  * reserva, el resumen antes de confirmar. No usar como fondo genérico.
@@ -51,13 +55,14 @@ export function PitchTicket({
     <>
       {/* Líneas de cancha — decorativas */}
       <div aria-hidden='true' className='pointer-events-none absolute inset-0'>
-        <span className='absolute top-0 left-1/2 h-full w-px -translate-x-1/2 bg-chalk/5' />
-        <span className='absolute top-1/2 left-1/2 size-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-chalk/5' />
-        <span className='absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-chalk/15' />
+        <span className='absolute top-0 left-1/2 h-full w-px -translate-x-1/2 bg-pitch-900/6 dark:bg-chalk/5' />
+        <span className='absolute top-1/2 left-1/2 size-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-pitch-900/8 dark:border-chalk/5' />
+        <span className='absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pitch-700/30 dark:bg-chalk/15' />
+        <div className='absolute inset-x-0 top-0 h-20 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.08),transparent)] dark:bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.13),transparent)]' />
       </div>
 
       <div className='relative flex items-center justify-between gap-3'>
-        <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-300'>
+        <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-700 dark:text-pitch-300'>
           {kicker}
         </span>
         {badge}
@@ -65,13 +70,13 @@ export function PitchTicket({
 
       {/* Scoreboard — misma anatomía que el panel del sheet de detalle:
           fecha + meta en fila, hora protagonista, recurso con icono. */}
-      <div className={`relative mt-5 ${contentClassName}`}>
-        <div className='flex items-center justify-between gap-3'>
-          <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-chalk-dim/70'>
+      <div className={`relative mt-2 ${contentClassName}`}>
+        <div className='flex items-start justify-between gap-3'>
+          <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-graphite-500 dark:text-chalk-dim/70'>
             {dateLabel}
           </p>
           {meta && (
-            <p className='nums shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-flood-400'>
+            <p className='nums shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-yellow-600 dark:text-flood-400'>
               {meta}
             </p>
           )}
@@ -84,15 +89,17 @@ export function PitchTicket({
         </p>
 
         {resourceName && (
-          <div className='mt-3 flex items-center gap-2 border-t border-chalk/10 pt-3'>
+          <div className='mt-3 flex items-center gap-2 border-t border-pitch-900/10 pt-3 dark:border-chalk/10'>
             {resourceIcon && (
-              <span className='shrink-0 text-pitch-400'>{resourceIcon}</span>
+              <span className='shrink-0 text-pitch-600 dark:text-pitch-400'>
+                {resourceIcon}
+              </span>
             )}
             <div className='min-w-0 flex-1 truncate text-base font-semibold tracking-tight'>
               {resourceName}
             </div>
             {resourceLabel && (
-              <span className='shrink-0 font-mono text-xs uppercase tracking-[0.14em] text-chalk-dim/60'>
+              <span className='shrink-0 font-mono text-xs uppercase tracking-[0.14em] text-graphite-500 dark:text-chalk-dim/60'>
                 {resourceLabel}
               </span>
             )}
@@ -101,14 +108,14 @@ export function PitchTicket({
       </div>
 
       {note && (
-        <div className='relative mt-5 border-t border-chalk/10 pt-4 text-center text-xs leading-relaxed text-chalk-dim/60'>
+        <div className='relative mt-3 border-t border-pitch-900/10 pt-4 text-center text-xs leading-relaxed text-graphite-500 dark:border-chalk/10 dark:text-chalk-dim/60'>
           {note}
         </div>
       )}
     </>
   )
 
-  const panelClass = `dark relative overflow-hidden rounded-2xl bg-pitch-950 px-6 py-5 text-chalk shadow-(--shadow-lg) ${panelClassName}`
+  const panelClass = `relative overflow-hidden rounded-2xl bg-white px-6 py-5 text-graphite-900 shadow-(--shadow-lg) dark:bg-pitch-950 dark:text-chalk ${panelClassName}`
 
   return (
     <div
@@ -118,7 +125,7 @@ export function PitchTicket({
         <button
           type='button'
           onClick={onOpen}
-          className={`${panelClass} group w-full cursor-pointer text-left transition-transform duration-200 ease-spring hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flood-400 focus-visible:ring-offset-2`}
+          className={`${panelClass} group w-full cursor-pointer text-left transition-transform duration-200 ease-spring hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pitch-600 focus-visible:ring-offset-2 dark:focus-visible:ring-flood-400`}
         >
           {body}
         </button>

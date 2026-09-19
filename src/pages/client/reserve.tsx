@@ -341,8 +341,8 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${
                 isAdmin
-                  ? 'border-pitch-400/40 bg-pitch-400/10 text-pitch-300'
-                  : 'border-orange-400/40 bg-orange-400/10 text-orange-300'
+                  ? 'border-pitch-600/30 bg-pitch-100 text-pitch-800 dark:border-pitch-400/40 dark:bg-pitch-400/10 dark:text-pitch-300'
+                  : 'border-orange-500/30 bg-orange-500/10 text-orange-700 dark:border-orange-400/40 dark:bg-orange-400/10 dark:text-orange-300'
               }`}
             >
               {isAdmin ? <CheckIcon size={12} /> : <HourglassIcon size={12} />}

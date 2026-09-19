@@ -202,8 +202,8 @@ export function ReservationDetailsSheet({
           <span className='h-1 w-10 rounded-full bg-graphite-200' />
         </div>
 
-        {/* Panel pitch — siempre de noche: la papeleta del turno.
-            En mobile es la cabecera del sheet; en desktop es la
+        {/* Panel pitch — la papeleta del turno, sigue el tema de la
+            app. En mobile es la cabecera del sheet; en desktop es la
             columna de contexto, como el panel del landing. */}
         {/* Border-beam solo en mobile: un arco de luz pitch recorre
             el borde de la papeleta. En desktop el panel es full-bleed
@@ -214,10 +214,10 @@ export function ReservationDetailsSheet({
             full-bleed; el beam queda solo en mobile. */}
         <PitchTicket
           kicker={
-            <span className='flex items-baseline gap-2 text-chalk-dim/70'>
+            <span className='flex items-baseline gap-2 text-graphite-500 dark:text-chalk-dim/70'>
               Reserva
               {reservation.reservation_number && (
-                <span className='text-chalk'>
+                <span className='text-graphite-900 dark:text-chalk'>
                   #{reservation.reservation_number}
                 </span>
               )}
@@ -230,7 +230,7 @@ export function ReservationDetailsSheet({
                 ref={closeButtonRef}
                 type='button'
                 onClick={onClose}
-                className='touch-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-chalk-dim/70 transition-all duration-150 ease-out hover:bg-white/10 hover:text-chalk active:scale-[0.92]'
+                className='touch-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-graphite-500 transition-all duration-150 ease-out hover:bg-graphite-900/5 hover:text-graphite-900 active:scale-[0.92] dark:text-chalk-dim/70 dark:hover:bg-white/10 dark:hover:text-chalk'
                 aria-label='Cerrar detalle de reserva'
               >
                 <XIcon size={20} />
@@ -244,7 +244,9 @@ export function ReservationDetailsSheet({
           timeLabel={
             <>
               {formatLocal(reservation.starts_at, 'HH:mm')}
-              <span className='mx-1.5 text-chalk/40'>–</span>
+              <span className='mx-1.5 text-graphite-400 dark:text-chalk/40'>
+                –
+              </span>
               {formatLocal(reservation.ends_at, 'HH:mm')}
             </>
           }
@@ -257,16 +259,16 @@ export function ReservationDetailsSheet({
           resourceLabel={resourceLabel}
           meta={`(${duration})`}
           note={
-            <dl className='flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-chalk-dim/50 sm:h-11 sm:items-center'>
+            <dl className='flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-graphite-500 sm:h-11 sm:items-center dark:text-chalk-dim/50'>
               <div className='flex items-baseline gap-1.5'>
                 <dt>Creada</dt>
-                <dd className='nums text-chalk-dim/80'>
+                <dd className='nums text-graphite-700 dark:text-chalk-dim/80'>
                   {formatLocal(reservation.created_at, 'd MMM yyyy, HH:mm')}
                 </dd>
               </div>
               <div className='flex items-baseline gap-1.5'>
                 <dt>Actualizada</dt>
-                <dd className='nums text-chalk-dim/80'>
+                <dd className='nums text-graphite-700 dark:text-chalk-dim/80'>
                   {formatLocal(reservation.updated_at, 'd MMM yyyy, HH:mm')}
                 </dd>
               </div>
