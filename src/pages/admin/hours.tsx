@@ -633,7 +633,7 @@ export function AdminHoursPage() {
       </div>
 
       {/* Footer con guardar */}
-      <div className='sticky bottom-22 md:bottom-4 z-10'>
+      <div className='sticky bottom-[calc(var(--bottom-nav-height)+0.5rem)] md:bottom-4 z-10'>
         <Card elevated className='p-3 flex items-center gap-3'>
           <div className='flex-1 min-w-0 text-xs nums'>
             {hasOverlaps ? (

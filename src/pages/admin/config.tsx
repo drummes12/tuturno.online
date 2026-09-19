@@ -705,7 +705,7 @@ export function AdminConfigPage() {
         </fieldset>
 
         {/* Guardar — barra de estado + acciones */}
-        <div className='sticky bottom-22 z-10 md:bottom-4'>
+        <div className='sticky bottom-[calc(var(--bottom-nav-height)+0.5rem)] z-10 md:bottom-4'>
           <Card
             elevated
             className='flex items-center justify-between gap-3 p-3'

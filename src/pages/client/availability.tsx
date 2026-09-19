@@ -248,7 +248,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
   const reserveHrefBase = `/b/${slug}/reservar`
 
   return (
-    <Page>
+    <Page className='gap-2!'>
       {/* Demo banner */}
       {isDemo && (
         <div
@@ -272,25 +272,25 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
       )}
 
       {/* Header */}
-      <div className='flex items-start justify-between gap-3 animate-fade-up'>
-        <div>
+      <div className='flex flex-col'>
+        <div className='flex items-start justify-between gap-2 animate-fade-up'>
           <h1 className='text-2xl font-bold text-(--color-text) tracking-tight text-balance'>
             {business.name}
           </h1>
-          <div className='mt-1 flex items-center gap-2'>
-            <p className='text-sm text-(--color-text-muted) capitalize'>
-              {dateLabel}
-            </p>
-            <span className='flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-pitch-600 dark:text-pitch-400'>
-              <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-500 dark:bg-pitch-400' />
-              En vivo
-            </span>
+          <div className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted bg-surface-inset px-3 py-1.5 rounded-full'>
+            <CalendarIcon size={14} />
+            <span className='nums'>{resources.length}</span>
+            <span>{resourceLabels.plural.toLowerCase()}</span>
           </div>
         </div>
-        <div className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted bg-surface-inset px-3 py-1.5 rounded-full'>
-          <CalendarIcon size={14} />
-          <span className='nums'>{resources.length}</span>
-          <span>{resourceLabels.plural.toLowerCase()}</span>
+        <div className='mt-1 flex items-center justify-between gap-2'>
+          <p className='flex-1 text-sm text-(--color-text-muted) capitalize'>
+            {dateLabel}
+          </p>
+          <span className='flex items-center gap-1.5 font-mono text-[10px] whitespace-nowrap font-medium uppercase tracking-[0.14em] text-pitch-600 dark:text-pitch-400'>
+            <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-500 dark:bg-pitch-400' />
+            En vivo
+          </span>
         </div>
       </div>
 
@@ -356,7 +356,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
         <DatePickerSkeleton />
       ) : resources.length > 0 ? (
         <div
-          className='flex gap-2 overflow-x-auto py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 snap-x snap-mandatory animate-fade-up scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
+          className='flex gap-2 overflow-x-auto py-4 px-4 sm:-mx-6 sm:px-6 snap-x snap-mandatory animate-fade-up scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden'
           style={{ animationDelay: '60ms' }}
           data-tour='availability-date-picker'
         >
