@@ -10,6 +10,7 @@ import {
 import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
 import { isPwaInstalled } from '@/lib/pwa-install'
+import { getRecentBusinesses } from '@/lib/recent-businesses'
 import { Page } from '@/components/layout/page'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -105,6 +106,37 @@ function HomeRow({
   )
 }
 
+// Accesos directos a los negocios que el usuario ya visitó en este
+// dispositivo — evita reescribir el slug o volver a escanear el QR.
+function RecentBusinesses() {
+  const [recents] = useState(getRecentBusinesses)
+  if (recents.length === 0) return null
+
+  return (
+    <div className='flex flex-col gap-1.5'>
+      <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+        Visitados recientemente
+      </span>
+      {recents.map((business) => (
+        <Link
+          key={business.slug}
+          href={`/b/${business.slug}`}
+          className='group flex items-center gap-3 rounded-xl border border-border bg-surface px-3.5 py-2.5 transition-[border-color,background-color] duration-150 hover:border-border-strong hover:bg-surface-inset touch-target'
+        >
+          <StoreIcon size={16} className='shrink-0 text-text-muted' />
+          <span className='min-w-0 flex-1 truncate text-sm font-medium text-(--color-text)'>
+            {business.name}
+          </span>
+          <ArrowRightIcon
+            size={14}
+            className='shrink-0 text-(--color-text-muted) transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
+          />
+        </Link>
+      ))}
+    </div>
+  )
+}
+
 export function LandingPage() {
   const { user, memberships, activeBusinessId } = useAuthStore()
   const [slug, setSlug] = useState('')
@@ -131,6 +163,21 @@ export function LandingPage() {
 
   const orgForm = (
     <form onSubmit={handleGoToOrg} className='flex flex-col gap-3'>
+      {pwaInstalled && (
+        <>
+          <Button type='button' size='md' onClick={() => setScannerOpen(true)}>
+            <QrIcon size={18} />
+            Escanear QR del negocio
+          </Button>
+          <div className='flex items-center gap-3' aria-hidden='true'>
+            <span className='h-px flex-1 bg-border' />
+            <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+              o ingresa el identificador
+            </span>
+            <span className='h-px flex-1 bg-border' />
+          </div>
+        </>
+      )}
       <Input
         label='Identificador del negocio'
         placeholder='mi-negocio'
@@ -144,16 +191,6 @@ export function LandingPage() {
         Ver disponibilidad
         <ArrowRightIcon size={18} />
       </Button>
-      {pwaInstalled && (
-        <button
-          type='button'
-          onClick={() => setScannerOpen(true)}
-          className='inline-flex touch-target items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-(--color-text) transition-colors hover:bg-surface-inset'
-        >
-          <QrIcon size={18} />
-          Escanear QR del negocio
-        </button>
-      )}
     </form>
   )
 
@@ -247,6 +284,7 @@ export function LandingPage() {
                     Ir a un negocio
                   </span>
                   {orgForm}
+                  <RecentBusinesses />
                 </section>
                 <Link
                   href='/crear-negocio'
@@ -473,7 +511,10 @@ export function LandingPage() {
                 directo a qué horarios tiene libres.
               </p>
             </div>
-            {orgForm}
+            <div className='flex flex-col gap-4'>
+              {orgForm}
+              <RecentBusinesses />
+            </div>
           </section>
         </Reveal>
 

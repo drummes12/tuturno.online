@@ -192,7 +192,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
 
   return createPortal(
     <div
-      className='fixed inset-0 z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm animate-backdrop-in sm:items-center sm:p-6'
+      className='fixed inset-x-0 top-0 -bottom-[env(safe-area-inset-bottom)] z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm animate-backdrop-in sm:items-center sm:p-6'
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -238,7 +238,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
           </button>
         </div>
 
-        <div className='relative mx-5 mb-5 aspect-square overflow-hidden rounded-2xl bg-pitch-950'>
+        <div className='relative mx-5 mb-[max(1.25rem,env(safe-area-inset-bottom))] aspect-square overflow-hidden rounded-2xl bg-pitch-950'>
           {error ? (
             <div className='flex h-full flex-col items-center justify-center gap-3 px-8 text-center'>
               <AlertIcon size={28} className='text-flood-400' />

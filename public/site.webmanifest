@@ -6,15 +6,41 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0a5226",
+  "background_color": "#f8faf7",
   "theme_color": "#0a5226",
   "lang": "es",
   "shortcuts": [
+    {
+      "name": "Mis reservas",
+      "short_name": "Reservas",
+      "description": "Reservas próximas, pendientes y pasadas",
+      "url": "/mis-reservas",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
     {
       "name": "Mostrar mi QR",
       "short_name": "Mi QR",
       "description": "Abre el código QR del negocio para mostrarlo al cliente",
       "url": "/admin?qr=1",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Panel de administración",
+      "short_name": "Panel",
+      "description": "Operación del negocio: reservas del día y pendientes",
+      "url": "/admin",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",

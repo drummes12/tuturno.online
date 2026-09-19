@@ -418,7 +418,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             type='button'
             onClick={() => setQrOpen(true)}
             className='flex h-12 w-12 items-center justify-center rounded-full bg-pitch-600 text-white shadow-lg transition-all duration-200 ease-spring hover:bg-pitch-700 hover:shadow-xl active:scale-95 md:hidden'
-            aria-label='Mostrar mi código QR'
+            aria-label='Mostrar el código QR de mi negocio'
             title='Mostrar mi QR'
           >
             <QrIcon size={22} />

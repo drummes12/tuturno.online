@@ -64,7 +64,7 @@ export function QrShowSheet({ slug, businessName, onClose }: QrShowSheetProps) {
       role='dialog'
       aria-modal='true'
       aria-label={`Código QR de ${businessName ?? 'tu negocio'}`}
-      className='fixed inset-0 z-50 flex flex-col bg-white animate-backdrop-in'
+      className='fixed inset-x-0 top-0 -bottom-[env(safe-area-inset-bottom)] z-50 flex flex-col bg-white animate-backdrop-in'
       onClick={onClose}
     >
       <button

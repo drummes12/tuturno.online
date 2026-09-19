@@ -197,6 +197,10 @@ html {
   overscroll-behavior: none;
   /* Sin flash gris/azul al tocar — el feedback lo da :active */
   -webkit-tap-highlight-color: transparent;
+  /* iOS standalone pinta la franja del home-indicator y el overscroll
+     con el fondo del documento — sin esto asoma el background_color
+     verde del manifest. */
+  background-color: var(--color-surface);
 }
 
 body {

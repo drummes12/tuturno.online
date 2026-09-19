@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchBusinessBySlug } from '@/services/business'
+import { recordBusinessVisit } from '@/lib/recent-businesses'
 import type { Business } from '@/types'
 
 export type TenantState = {
@@ -36,6 +37,7 @@ export function useTenant(slug: string | undefined): TenantState {
           setError('Negocio no encontrado')
         } else {
           setBusiness(data)
+          recordBusinessVisit(data.slug, data.name)
         }
       } catch {
         if (cancelled) return
