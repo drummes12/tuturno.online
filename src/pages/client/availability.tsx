@@ -19,11 +19,13 @@ import {
   MapPinIcon,
   ExternalLinkIcon,
   InfoIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  CheckIcon,
+  XIcon
 } from '@/components/common/icon'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
 import type { Resource, AvailabilitySlot } from '@/types'
-import { format, parseISO } from 'date-fns'
+import { differenceInMinutes, format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { BUSINESS_TIMEZONE } from '@/lib/time'
 import { toZonedTime } from 'date-fns-tz'
@@ -170,6 +172,12 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
     }
   }, [selectedDate])
 
+  // Resumen del día — cuántos turnos quedan libres en total
+  const availableTotal = useMemo(
+    () => slots.filter((s) => s.status === 'available').length,
+    [slots]
+  )
+
   // Agrupar slots por turno (Mañana / Tarde / Noche)
   const slotGroups = useMemo(() => {
     const groups: {
@@ -277,10 +285,24 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
           <h1 className='text-2xl font-bold text-(--color-text) tracking-tight text-balance'>
             {business.name}
           </h1>
-          <div className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted bg-surface-inset px-3 py-1.5 rounded-full'>
-            <CalendarIcon size={14} />
-            <span className='nums'>{resources.length}</span>
-            <span>{resourceLabels.plural.toLowerCase()}</span>
+          <div className='flex gap-2'>
+            <div className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted bg-surface-inset px-3 py-1.5 rounded-full'>
+              <CalendarIcon size={14} />
+              <span className='nums'>{resources.length}</span>
+              <span>{resourceLabels.plural.toLowerCase()}</span>
+            </div>
+            {!loading &&
+              slots.length > 0 &&
+              (availableTotal > 0 ? (
+                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-pitch-500/40 bg-pitch-500/10 px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 nums dark:border-pitch-400/30 dark:text-pitch-300'>
+                  <CheckIcon size={12} />
+                  {availableTotal}
+                </span>
+              ) : (
+                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-border bg-surface-inset px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted'>
+                  <XIcon size={12} />-
+                </span>
+              ))}
           </div>
         </div>
         <div className='mt-1 flex items-center justify-between gap-2'>
@@ -510,9 +532,12 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                           <span className='nums w-12 font-mono text-sm font-semibold text-(--color-text) dark:text-chalk'>
                             {time}
                           </span>
-                          <span className='flex-1 truncate text-sm text-(--color-text-muted) dark:text-chalk-dim/70'>
-                            {resources.find((r) => r.id === slot.resource_id)
-                              ?.name ?? ''}
+                          <span className='flex-1 text-sm text-(--color-text-muted) nums dark:text-chalk-dim/70'>
+                            {differenceInMinutes(
+                              parseISO(slot.ends_at),
+                              parseISO(slot.starts_at)
+                            )}{' '}
+                            min
                           </span>
                           <span
                             className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-medium ${chipClass}`}
@@ -551,7 +576,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                       ) : (
                         <li
                           key={`${slot.resource_id}-${slot.starts_at}`}
-                          className='flex animate-stagger items-center gap-4 px-5 py-3.5 opacity-50'
+                          className='flex animate-stagger items-center gap-4 bg-surface-inset/70 px-5 py-3.5 opacity-60 dark:bg-white/3'
                           style={
                             {
                               '--index': groupIndex * 10 + index
