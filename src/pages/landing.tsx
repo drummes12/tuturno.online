@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -8,9 +9,11 @@ import {
 } from 'react'
 import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
+import { isPwaInstalled } from '@/lib/pwa-install'
 import { Page } from '@/components/layout/page'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
+import { QrScannerSheet } from '@/components/common/qr-scanner-sheet'
 import {
   CalendarIcon,
   ClockIcon,
@@ -20,7 +23,8 @@ import {
   LogInIcon,
   CheckIcon,
   WhatsAppIcon,
-  BellIcon
+  BellIcon,
+  QrIcon
 } from '@/components/common/icon'
 
 const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/
@@ -105,7 +109,10 @@ export function LandingPage() {
   const { user, memberships, activeBusinessId } = useAuthStore()
   const [slug, setSlug] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [scannerOpen, setScannerOpen] = useState(false)
   const [, navigate] = useLocation()
+  const pwaInstalled = isPwaInstalled()
+  const closeScanner = useCallback(() => setScannerOpen(false), [])
 
   function handleGoToOrg(e: SubmitEvent) {
     e.preventDefault()
@@ -137,6 +144,16 @@ export function LandingPage() {
         Ver disponibilidad
         <ArrowRightIcon size={18} />
       </Button>
+      {pwaInstalled && (
+        <button
+          type='button'
+          onClick={() => setScannerOpen(true)}
+          className='inline-flex touch-target items-center justify-center gap-2 rounded-xl border border-border px-4 py-3 text-sm font-medium text-(--color-text) transition-colors hover:bg-surface-inset'
+        >
+          <QrIcon size={18} />
+          Escanear QR del negocio
+        </button>
+      )}
     </form>
   )
 
@@ -243,6 +260,7 @@ export function LandingPage() {
             )}
           </div>
         </div>
+        {scannerOpen && <QrScannerSheet onClose={closeScanner} />}
       </Page>
     )
   }
@@ -535,6 +553,7 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+      {scannerOpen && <QrScannerSheet onClose={closeScanner} />}
     </div>
   )
 }
