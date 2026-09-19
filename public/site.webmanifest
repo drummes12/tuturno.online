@@ -9,6 +9,21 @@
   "background_color": "#0a5226",
   "theme_color": "#0a5226",
   "lang": "es",
+  "shortcuts": [
+    {
+      "name": "Mostrar mi QR",
+      "short_name": "Mi QR",
+      "description": "Abre el código QR del negocio para mostrarlo al cliente",
+      "url": "/admin?qr=1",
+      "icons": [
+        {
+          "src": "/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

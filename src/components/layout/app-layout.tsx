@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
 import {
@@ -12,9 +12,11 @@ import {
   BellIcon,
   CheckIcon,
   XIcon,
-  HelpIcon
+  HelpIcon,
+  QrIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
+import { QrShowSheet } from '@/components/common/qr-show-sheet'
 import { PwaInstallPrompt } from '@/components/common/pwa-install-prompt'
 import { PwaNotificationPrompt } from '@/components/common/pwa-notification-prompt'
 import { PwaUpdatePrompt } from '@/components/common/pwa-update-prompt'
@@ -104,6 +106,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
     signOut
   } = useAuthStore()
   const [location] = useLocation()
+  // '?qr' abre el sheet del QR directo — lo usa el shortcut del manifest.
+  const [qrOpen, setQrOpen] = useState(() =>
+    new URLSearchParams(window.location.search).has('qr')
+  )
   const clientTutorial = useClientTutorial()
   const adminTutorial = useAdminTutorial()
   const { dark, toggle: toggleTheme } = useTheme()
@@ -150,6 +156,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const nav = isAdmin ? adminNav : clientNav
   const hasBottomNav = Boolean(user) && nav.length > 0
 
+  const activeMembership =
+    memberships.find((m) => m.businessId === activeBusinessId) ??
+    memberships[0] ??
+    null
+
   // "Negocio" queda activo también en sus sub-rutas agrupadas (horarios,
   // cierres, equipo, configuración), no solo en /admin/negocio exacto.
   function isNavItemActive(href: string): boolean {
@@ -164,6 +175,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const showTutorialButton =
     (isAdmin && location.startsWith('/admin')) ||
     (!isAdmin && (Boolean(tenantBase) || location === '/mis-reservas'))
+  
+  const showQrOpen =
+    isAdmin &&
+    activeMembership &&
+    !['/admin/horarios', '/admin/configuracion'].includes(location)
 
   return (
     <div
@@ -392,7 +408,31 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         {/* FAB de ubicación — disponible en la página pública tenant */}
         {location.startsWith('/b/') && <GoogleMapsFab />}
+
+        {/* FAB de QR — miembros del negocio: muestra su QR al cliente
+            sin navegar a configuración. Oculto en el hub de negocio,
+            donde las barras sticky de "Guardar" ocuparían su lugar
+            (además el QR ya vive en ShareCard en esa sección). */}
+        {showQrOpen && (
+          <button
+            type='button'
+            onClick={() => setQrOpen(true)}
+            className='flex h-12 w-12 items-center justify-center rounded-full bg-pitch-600 text-white shadow-lg transition-all duration-200 ease-spring hover:bg-pitch-700 hover:shadow-xl active:scale-95 md:hidden'
+            aria-label='Mostrar mi código QR'
+            title='Mostrar mi QR'
+          >
+            <QrIcon size={22} />
+          </button>
+        )}
       </div>
+
+      {qrOpen && activeMembership && (
+        <QrShowSheet
+          slug={activeMembership.slug}
+          businessName={activeMembership.businessName}
+          onClose={() => setQrOpen(false)}
+        />
+      )}
 
       <div className='fixed inset-x-0 bottom-4 z-50 flex flex-col gap-2 px-4 sm:inset-x-auto sm:right-4 sm:w-[min(100%-2rem,28rem)] sm:px-0'>
         <PwaInstallPrompt />
