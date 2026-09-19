@@ -4,6 +4,7 @@ import {
   initializePwaInstallPrompt,
   isIosDevice,
   isPwaInstalled,
+  isPwaInstalledElsewhere,
   promptPwaInstall,
   subscribeToPwaInstall,
   type PwaInstallOutcome
@@ -31,6 +32,7 @@ export function usePwaInstall() {
 
   return {
     canInstall: !installed && canPromptPwaInstall(),
+    installedElsewhere: isPwaInstalledElsewhere(),
     iosGuide,
     install
   }

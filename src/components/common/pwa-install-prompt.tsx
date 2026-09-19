@@ -1,25 +1,30 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/common/button'
-import { DownloadIcon, XIcon } from '@/components/common/icon'
+import { CheckIcon, DownloadIcon, XIcon } from '@/components/common/icon'
 import { usePwaInstall } from '@/hooks/use-pwa-install'
 
 export function PwaInstallPrompt() {
-  const { canInstall, iosGuide, install } = usePwaInstall()
+  const { canInstall, installedElsewhere, iosGuide, install } = usePwaInstall()
   const [dismissed, setDismissed] = useState(false)
   const [installing, setInstalling] = useState(false)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    if (!canInstall && !iosGuide) {
+    if (!canInstall && !installedElsewhere && !iosGuide) {
       setVisible(false)
       return
     }
 
     const timeout = window.setTimeout(() => setVisible(true), 1500)
     return () => window.clearTimeout(timeout)
-  }, [canInstall, iosGuide])
+  }, [canInstall, installedElsewhere, iosGuide])
 
-  if (dismissed || !visible || (!canInstall && !iosGuide)) return null
+  if (
+    dismissed ||
+    !visible ||
+    (!canInstall && !installedElsewhere && !iosGuide)
+  )
+    return null
 
   async function handleInstall() {
     setInstalling(true)
@@ -32,16 +37,24 @@ export function PwaInstallPrompt() {
     <div className='w-full' role='dialog' aria-label='Instalar TuTurno'>
       <div className='flex items-center gap-3 rounded-2xl border border-border-strong bg-surface-elevated p-3 shadow-(--shadow-lg)'>
         <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white'>
-          <DownloadIcon size={20} />
+          {installedElsewhere ? (
+            <CheckIcon size={20} />
+          ) : (
+            <DownloadIcon size={20} />
+          )}
         </span>
         <div className='min-w-0 flex-1'>
           <p className='text-sm font-semibold text-(--color-text)'>
-            Instala TuTurno
+            {installedElsewhere
+              ? 'Ya tienes TuTurno instalada'
+              : 'Instala TuTurno'}
           </p>
           <p className='text-xs text-(--color-text-muted) mt-0.5'>
-            {iosGuide
-              ? 'En Safari, toca Compartir y luego “Añadir a pantalla de inicio”.'
-              : 'Ten acceso rápido desde tu pantalla de inicio.'}
+            {installedElsewhere
+              ? 'Ábrela desde tu pantalla de inicio para usar tu sesión.'
+              : iosGuide
+                ? 'En Safari, toca Compartir y luego “Añadir a pantalla de inicio”.'
+                : 'Ten acceso rápido desde tu pantalla de inicio.'}
           </p>
         </div>
         <div className='flex shrink-0 items-center gap-1.5'>

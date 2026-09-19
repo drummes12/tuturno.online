@@ -7,7 +7,16 @@ type BeforeInstallPromptEvent = Event & {
 
 type PwaInstallListener = () => void
 
+type RelatedApplication = {
+  platform?: string
+}
+
+type NavigatorWithRelatedApps = Navigator & {
+  getInstalledRelatedApps?: () => Promise<RelatedApplication[]>
+}
+
 let deferredPrompt: BeforeInstallPromptEvent | null = null
+let installedElsewhere = false
 let initialized = false
 const listeners = new Set<PwaInstallListener>()
 
@@ -25,6 +34,25 @@ export function initializePwaInstallPrompt() {
     deferredPrompt = null
     listeners.forEach((listener) => listener())
   })
+
+  void detectPwaInstalledElsewhere()
+}
+
+async function detectPwaInstalledElsewhere() {
+  if (isPwaInstalled()) return
+
+  const relatedAppsNavigator = navigator as NavigatorWithRelatedApps
+  if (typeof relatedAppsNavigator.getInstalledRelatedApps !== 'function') return
+
+  try {
+    const apps = await relatedAppsNavigator.getInstalledRelatedApps()
+    installedElsewhere = apps.some((app) => app.platform === 'webapp')
+  } catch {
+    installedElsewhere = false
+  }
+  if (installedElsewhere) {
+    listeners.forEach((listener) => listener())
+  }
 }
 
 export function subscribeToPwaInstall(listener: PwaInstallListener) {
@@ -55,6 +83,10 @@ export function isPwaInstalled() {
     window.matchMedia('(display-mode: standalone)').matches ||
     safariNavigator.standalone === true
   )
+}
+
+export function isPwaInstalledElsewhere() {
+  return installedElsewhere && !isPwaInstalled()
 }
 
 export function isIosDevice() {
