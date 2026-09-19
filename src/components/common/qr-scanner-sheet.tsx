@@ -192,7 +192,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
 
   return createPortal(
     <div
-      className='fixed inset-x-0 top-0 -bottom-[env(safe-area-inset-bottom)] z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm animate-backdrop-in sm:items-center sm:p-6'
+      className='fixed inset-0 z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm animate-backdrop-in sm:items-center sm:p-6'
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
@@ -224,7 +224,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
               Escanea el QR del negocio
             </h2>
             <p className='mt-0.5 text-xs text-(--color-text-muted)'>
-              Apunta la cámara al código impreso o en pantalla
+              Apunta la cámara al código
             </p>
           </div>
           <button
@@ -250,7 +250,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
                 ref={videoRef}
                 playsInline
                 muted
-                className='h-full w-full object-cover'
+                className='absolute inset-0 h-full w-full object-cover'
               />
               <div
                 aria-hidden='true'

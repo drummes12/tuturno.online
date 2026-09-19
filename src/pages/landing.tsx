@@ -9,7 +9,6 @@ import {
 } from 'react'
 import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
-import { isPwaInstalled } from '@/lib/pwa-install'
 import { getRecentBusinesses } from '@/lib/recent-businesses'
 import { Page } from '@/components/layout/page'
 import { Button } from '@/components/common/button'
@@ -143,7 +142,6 @@ export function LandingPage() {
   const [error, setError] = useState<string | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
   const [, navigate] = useLocation()
-  const pwaInstalled = isPwaInstalled()
   const closeScanner = useCallback(() => setScannerOpen(false), [])
 
   function handleGoToOrg(e: SubmitEvent) {
@@ -163,21 +161,17 @@ export function LandingPage() {
 
   const orgForm = (
     <form onSubmit={handleGoToOrg} className='flex flex-col gap-3'>
-      {pwaInstalled && (
-        <>
-          <Button type='button' size='md' onClick={() => setScannerOpen(true)}>
-            <QrIcon size={18} />
-            Escanear QR del negocio
-          </Button>
-          <div className='flex items-center gap-3' aria-hidden='true'>
-            <span className='h-px flex-1 bg-border' />
-            <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
-              o ingresa el identificador
-            </span>
-            <span className='h-px flex-1 bg-border' />
-          </div>
-        </>
-      )}
+      <Button type='button' size='md' onClick={() => setScannerOpen(true)}>
+        <QrIcon size={18} />
+        Escanear QR del negocio
+      </Button>
+      <div className='flex items-center gap-3' aria-hidden='true'>
+        <span className='h-px flex-1 bg-border' />
+        <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+          o ingresa el identificador
+        </span>
+        <span className='h-px flex-1 bg-border' />
+      </div>
       <Input
         label='Identificador del negocio'
         placeholder='mi-negocio'
