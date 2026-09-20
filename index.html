@@ -3,6 +3,11 @@
 
 <head>
   <meta charset="UTF-8" />
+  <script>
+    // Marca el inicio de la carga: main.tsx lo usa para el mínimo
+    // de permanencia del splash (evita el destello con red rápida).
+    window.__bootStart = performance.now()
+  </script>
   <!-- Favicons: .ico for legacy, .png for Google, SVG for modern browsers -->
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -222,24 +227,44 @@
 </head>
 
 <body>
-  <div id="root">
-    <!-- Boot loader de marca: visible solo hasta que React monta y
-             reemplaza el contenido de #root. Colores fijos del sistema. -->
-    <div id="boot" role="status" aria-label="Cargando">
+  <!-- Boot loader de marca: vive FUERA de #root para sobrevivir al
+                     montaje de React; main.tsx lo retira tras un mínimo visible con
+                     crossfade (View Transitions, o fade CSS de respaldo). -->
+  <div id="boot" role="status" aria-label="Cargando">
+    <span class="boot-logo">
       <img src="/logo-mark.svg" alt="" width="72" height="72" />
-      <span class="boot-ring"></span>
-    </div>
+      <span class="boot-check" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#07351f" stroke-width="3.5" stroke-linecap="round"
+          stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </span>
+      </span>
+      <span class="boot-clock" aria-hidden="true"></span>
+      </div>
     <style>
       #boot {
         position: fixed;
         inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 24px;
-        background: #f7faf8;
-      }
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      background: #f7faf8;
+      transition: opacity 0.35s ease;
+    }
+
+    #boot.boot-out {
+      opacity: 0;
+    }
+
+    /* Sin scroll mientras el splash cubre la pantalla — se libera
+       solo al remover #boot del DOM. */
+    body:has(> #boot) {
+      overflow: hidden;
+    }
     
       .dark #boot {
         background: #071510;
@@ -250,23 +275,108 @@
         animation: boot-pulse 1.6s ease-in-out infinite;
       }
     
-      .boot-ring {
-        width: 28px;
-        height: 28px;
+      .boot-logo {
+        position: relative;
+        display: block;
+      }
+    
+      /* Beat de éxito: al completar la carga, los dígitos se clavan
+         en 12:12 y un check mint aparece en la esquina del logo —
+         la metáfora de "turno confirmado". */
+      .boot-check {
+        position: absolute;
+        right: -7px;
+        bottom: -7px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
-        border: 3px solid rgba(15, 122, 74, 0.2);
-        border-top-color: #0f7a4a;
-        animation: boot-spin 0.8s linear infinite;
+        background: #34d399;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: scale(0);
       }
     
-      .dark .boot-ring {
-        border-color: rgba(52, 211, 153, 0.2);
-        border-top-color: #34d399;
+      .boot-check svg {
+        width: 14px;
+        height: 14px;
       }
     
-      @keyframes boot-spin {
+      .boot-done .boot-check {
+        animation: boot-check-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+    
+      .boot-done .boot-clock::before,
+      .boot-done .boot-clock::after {
+        animation: none;
+        content: '12';
+      }
+    
+      @keyframes boot-check-pop {
         to {
-          transform: rotate(360deg);
+          transform: scale(1);
+        }
+      }
+    
+      .boot-clock {
+        display: inline-flex;
+        border: 2px solid #0f7a4a;
+        border-radius: 8px;
+        --boot-dot: no-repeat linear-gradient(#0f7a4a 0 0) 50%;
+        background:
+          var(--boot-dot) calc(50% - 5px) / 5px 5px,
+          var(--boot-dot) calc(50% + 5px) / 5px 5px;
+      }
+    
+      .boot-clock::before,
+      .boot-clock::after {
+        content: '12 13 14 15 16 17 18 19 20 21 22 23 00 06 07 08 09 10 11 05';
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1em;
+        height: 1em;
+        width: 2ch;
+        color: transparent;
+        text-shadow: 0 0 0 #0f7a4a;
+        overflow: hidden;
+        margin: 6px 10px;
+        animation: boot-scroll 1s steps(20) infinite;
+      }
+    
+      .boot-clock::after {
+        content: '12 00 15 30 45 05 20 35 50 10 25 40 55 08 18 28 38 48 58 03';
+        animation-duration: 1.5s;
+      }
+    
+      .dark .boot-clock {
+        border-color: #34d399;
+        --boot-dot: no-repeat linear-gradient(#34d399 0 0) 50%;
+      }
+    
+      .dark .boot-clock::before,
+      .dark .boot-clock::after {
+        text-shadow: 0 0 0 #34d399;
+      }
+    
+      .dark .boot-clock::before {
+        animation-name: boot-scroll-dark;
+      }
+    
+      .dark .boot-clock::after {
+        animation-name: boot-scroll-dark;
+      }
+    
+      @keyframes boot-scroll {
+        to {
+          text-shadow: 0 -20em 0 #0f7a4a;
+        }
+      }
+    
+      @keyframes boot-scroll-dark {
+        to {
+          text-shadow: 0 -20em 0 #34d399;
         }
       }
     
@@ -284,17 +394,39 @@
     
       @media (prefers-reduced-motion: reduce) {
     
-        #boot img,
-        .boot-ring {
+        #boot img {
           animation: none;
+        }
+    
+        .boot-clock::before,
+        .boot-clock::after {
+          animation: none;
+          content: '12';
+        }
+    
+        .boot-done .boot-check {
+          animation: none;
+          transform: scale(1);
         }
       }
     </style>
+  <div id="root">
     <!-- Static H1 fallback for crawlers/auditors that don't execute JS. React replaces this on hydration. -->
     <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">TuTurno — Turnos y reservas para
       tu negocio</h1>
   </div>
   <noscript>
+    <!-- Sin JS no hay quién retire el splash: se oculta directo y se
+             libera el scroll que :has(#boot) mantiene bloqueado. -->
+    <style>
+      #boot {
+        display: none !important;
+      }
+    
+      body {
+        overflow: auto !important;
+      }
+    </style>
     <h1>TuTurno — Turnos y reservas para tu negocio</h1>
     <p>Plataforma de reservas online para negocios de espacios. Tus clientes ven disponibilidad en tiempo real y solicitan
       su turno en segundos.</p>

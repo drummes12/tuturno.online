@@ -1,36 +1,43 @@
+import type { CSSProperties } from 'react'
+
+/**
+ * Loader de marca: reloj de solapas HH:MM (definido en `.digit-clock`,
+ * index.css). Pensado para estados de carga a nivel página — boot,
+ * Suspense, sesión. Para contextos inline/botones usar `Spinner`.
+ */
+export function ClockLoader({
+  size = 'lg',
+  label = 'Cargando'
+}: {
+  size?: 'md' | 'lg'
+  label?: string
+}) {
+  return (
+    <span role='status' aria-label={label} className='inline-flex'>
+      <span
+        className='digit-clock'
+        aria-hidden='true'
+        style={
+          { '--clock-fs': size === 'lg' ? '30px' : '22px' } as CSSProperties
+        }
+      />
+    </span>
+  )
+}
+
+/**
+ * Loader compacto: arco giratorio (definido en `.arc-loader`, index.css).
+ * Para carga a nivel página usar `ClockLoader`, el loader de marca.
+ */
 export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
-  const sizeClass = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-10 w-10',
-  }[size]
+  const px = { sm: 16, md: 24, lg: 40 }[size]
 
   return (
-    <div
-      className='flex items-center justify-center'
+    <span
       role='status'
       aria-label='Cargando'
-    >
-      <svg
-        className={`animate-spin ${sizeClass} text-(--color-primary)`}
-        xmlns='http://www.w3.org/2000/svg'
-        fill='none'
-        viewBox='0 0 24 24'
-      >
-        <circle
-          className='opacity-25'
-          cx='12'
-          cy='12'
-          r='10'
-          stroke='currentColor'
-          strokeWidth='4'
-        />
-        <path
-          className='opacity-75'
-          fill='currentColor'
-          d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z'
-        />
-      </svg>
-    </div>
+      className='arc-loader text-primary'
+      style={{ '--arc-size': `${px / 48}px` } as CSSProperties}
+    />
   )
 }

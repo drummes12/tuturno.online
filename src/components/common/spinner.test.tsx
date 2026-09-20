@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { Spinner } from '@/components/common/spinner'
+import { Spinner, ClockLoader } from '@/components/common/spinner'
 
 describe('Spinner', () => {
   it('renders with role="status"', () => {
@@ -13,30 +13,54 @@ describe('Spinner', () => {
     expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Cargando')
   })
 
-  it('applies correct size class for sm (h-4 w-4)', () => {
+  it('usa el arco loader con el tamaño correcto para sm', () => {
     render(<Spinner size='sm' />)
-    expect(screen.getByRole('status').querySelector('svg')).toHaveClass('h-4', 'w-4')
+    const el = screen.getByRole('status')
+    expect(el).toHaveClass('arc-loader')
+    expect(el.style.getPropertyValue('--arc-size')).toBe(`${16 / 48}px`)
   })
 
-  it('applies correct size class for md (h-6 w-6)', () => {
+  it('usa el tamaño correcto para md', () => {
     render(<Spinner size='md' />)
-    expect(screen.getByRole('status').querySelector('svg')).toHaveClass('h-6', 'w-6')
+    expect(
+      screen.getByRole('status').style.getPropertyValue('--arc-size')
+    ).toBe(`${24 / 48}px`)
   })
 
-  it('applies correct size class for lg (h-10 w-10)', () => {
+  it('usa el tamaño correcto para lg', () => {
     render(<Spinner size='lg' />)
-    expect(screen.getByRole('status').querySelector('svg')).toHaveClass('h-10', 'w-10')
+    expect(
+      screen.getByRole('status').style.getPropertyValue('--arc-size')
+    ).toBe(`${40 / 48}px`)
   })
 
   it('defaults to md size', () => {
     render(<Spinner />)
-    expect(screen.getByRole('status').querySelector('svg')).toHaveClass('h-6', 'w-6')
+    expect(
+      screen.getByRole('status').style.getPropertyValue('--arc-size')
+    ).toBe(`${24 / 48}px`)
+  })
+})
+
+describe('ClockLoader', () => {
+  it('renders el reloj de dígitos con role="status"', () => {
+    render(<ClockLoader />)
+    const status = screen.getByRole('status')
+    expect(status.querySelector('.digit-clock')).toBeInTheDocument()
   })
 
-  it('renders an SVG element', () => {
-    render(<Spinner />)
-    const svg = screen.getByRole('status').querySelector('svg')
-    expect(svg).toBeInTheDocument()
-    expect(svg?.tagName).toBe('svg')
+  it('los dígitos son decorativos (aria-hidden)', () => {
+    render(<ClockLoader />)
+    expect(
+      screen.getByRole('status').querySelector('.digit-clock')
+    ).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('usa el tamaño lg por defecto', () => {
+    render(<ClockLoader />)
+    const clock = screen
+      .getByRole('status')
+      .querySelector('.digit-clock') as HTMLElement
+    expect(clock.style.getPropertyValue('--clock-fs')).toBe('30px')
   })
 })

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1'
+const CACHE_VERSION = 'v2'
 const STATIC_CACHE = `tuturno-static-${CACHE_VERSION}`
 const PAGE_CACHE = `tuturno-pages-${CACHE_VERSION}`
 const OFFLINE_URL = '/offline.html'

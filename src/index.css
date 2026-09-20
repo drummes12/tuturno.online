@@ -397,6 +397,99 @@ body {
   background-size: 200% 100%;
 }
 
+/* Reloj de solapas — loader de marca. Dos columnas mono (horas y
+   minutos) se desplazan por text-shadow; los dos puntos centrales son
+   cuadrados dibujados con background. En reposo muestra "12:12" y en
+   prefers-reduced-motion queda estático con ese valor. */
+@keyframes digit-scroll {
+  to {
+    text-shadow: 0 -20em 0 var(--color-primary);
+  }
+}
+
+.digit-clock {
+  display: inline-flex;
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  --digit-dot: no-repeat linear-gradient(var(--color-primary) 0 0) 50%;
+  background:
+    var(--digit-dot) calc(50% - 5px) / 5px 5px,
+    var(--digit-dot) calc(50% + 5px) / 5px 5px;
+}
+
+.digit-clock::before,
+.digit-clock::after {
+  font-family: var(--font-mono);
+  font-size: var(--clock-fs, 30px);
+  font-weight: 700;
+  line-height: 1em;
+  height: 1em;
+  width: 2ch;
+  color: transparent;
+  text-shadow: 0 0 0 var(--color-primary);
+  overflow: hidden;
+  margin: 6px 10px;
+  animation: digit-scroll 1s steps(20) infinite;
+}
+
+.digit-clock::before {
+  content: '12 13 14 15 16 17 18 19 20 21 22 23 00 06 07 08 09 10 11 05';
+}
+
+.digit-clock::after {
+  content: '12 00 15 30 45 05 20 35 50 10 25 40 55 08 18 28 38 48 58 03';
+  animation-duration: 1.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .digit-clock::before,
+  .digit-clock::after {
+    animation: none;
+    content: '12';
+  }
+}
+
+/* Arco giratorio — loader compacto para botones e inline. El tamaño
+   se deriva de --arc-size (el ancho total es 48× su valor). */
+@keyframes arc-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.arc-loader {
+  --arc-size: 1px;
+  display: inline-block;
+  box-sizing: border-box;
+  width: calc(48 * var(--arc-size));
+  height: calc(48 * var(--arc-size));
+  border-radius: 50%;
+  border-top: calc(3 * var(--arc-size)) solid currentColor;
+  border-right: calc(3 * var(--arc-size)) solid transparent;
+  animation: arc-rotate 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc-loader {
+    animation: none;
+  }
+}
+
+/* Crossfade del splash de boot → app (View Transitions API). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+/* El logo del splash viaja hasta el nav. El vuelo es más largo que
+   el crossfade del fondo (que ya terminó) y con ease-out marcado:
+   arranca con energía y aterriza suave — dinámico sin sentirse
+   apurado ni hacer esperar al usuario. */
+::view-transition-group(app-logo) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Transición suave al cambiar de tema */
 body {
   transition: background-color 0.25s ease, color 0.25s ease;

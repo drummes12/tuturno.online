@@ -27,6 +27,12 @@ import {
 } from '@/components/common/business-selector'
 import { HeaderMenu } from '@/components/common/header-menu'
 import { NotificationCenter } from '@/components/common/notification-center'
+import {
+  ConnectivityIndicator,
+  OfflineScreen
+} from '@/components/common/connectivity'
+import { Spinner } from '@/components/common/spinner'
+import { useConnectivity } from '@/hooks/use-connectivity'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { useTheme } from '@/hooks/use-theme'
@@ -114,6 +120,27 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const adminTutorial = useAdminTutorial()
   const { dark, toggle: toggleTheme } = useTheme()
   const pushNotificationState = usePushNotifications(user?.id ?? null)
+  const { status, hardOffline, recheck } = useConnectivity()
+  const [signingOut, setSigningOut] = useState(false)
+  // Escape hatch: si el detector se equivoca, el usuario puede cerrar
+  // la pantalla offline; se reactiva en el siguiente ciclo offline.
+  const [offlineDismissed, setOfflineDismissed] = useState(false)
+
+  useEffect(() => {
+    if (!hardOffline) setOfflineDismissed(false)
+  }, [hardOffline])
+
+  const handleSignOut = async () => {
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      await signOut()
+    } catch (error) {
+      console.warn('[TuTurno] No se pudo cerrar sesión:', error)
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   const startTour = isAdmin ? adminTutorial.startTour : clientTutorial.startTour
   const isStarting = isAdmin
@@ -195,7 +222,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             El contenido siempre vive en la columna max-w-5xl, así al
             zoom-out los controles no se van a los bordes de pantalla. */}
         <div
-          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900 sm:bg-pitch-900/10 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
+          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-(--header-pill-bg) shadow-(--shadow-lg) backdrop-blur-md dark:border-white/10 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
             <Link
@@ -205,6 +232,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <img
                 src='/logo-mark.svg'
                 alt='TuTurno'
+                data-nav-logo
                 className='w-8 h-8 rounded-lg'
               />
               <span>
@@ -305,7 +333,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                         ? 'Notificaciones bloqueadas'
                         : 'Configurar notificaciones'
                   }
-                  onSignOut={signOut}
+                  onSignOut={handleSignOut}
                   themeToggle={{ dark, onToggle: toggleTheme }}
                 />
               ) : (
@@ -434,6 +462,26 @@ export function AppLayout({ children }: { children: ReactNode }) {
           businessName={activeMembership.businessName}
           onClose={() => setQrOpen(false)}
         />
+      )}
+
+      <ConnectivityIndicator status={status} />
+      {hardOffline && !offlineDismissed && (
+        <OfflineScreen
+          onRetry={recheck}
+          onDismiss={() => setOfflineDismissed(true)}
+        />
+      )}
+
+      {signingOut && (
+        <div
+          role='alert'
+          className='fixed inset-0 z-80 flex items-center justify-center bg-black/55 backdrop-blur-sm animate-backdrop-in'
+        >
+          <div className='flex items-center gap-3 rounded-xl border border-border bg-surface-elevated px-5 py-4 shadow-(--shadow-lg)'>
+            <Spinner size='sm' />
+            <span className='text-sm font-medium'>Cerrando sesión…</span>
+          </div>
+        </div>
       )}
 
       <div className='fixed inset-x-0 bottom-4 z-50 flex flex-col gap-2 px-4 sm:inset-x-auto sm:right-4 sm:w-[min(100%-2rem,28rem)] sm:px-0'>

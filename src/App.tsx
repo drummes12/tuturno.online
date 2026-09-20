@@ -2,7 +2,7 @@ import { Route, Switch, Redirect } from 'wouter'
 import { lazy, Suspense } from 'react'
 import { useSession } from '@/hooks/use-session'
 import { AppLayout } from '@/components/layout/app-layout'
-import { Spinner } from '@/components/common/spinner'
+import { ClockLoader } from '@/components/common/spinner'
 import { useAuthStore } from '@/stores/auth'
 
 // Auth pages
@@ -135,7 +135,7 @@ export default function App() {
   if (loading) {
     return (
       <div className='min-h-dvh flex items-center justify-center'>
-        <Spinner size='lg' />
+        <ClockLoader />
       </div>
     )
   }
@@ -145,7 +145,7 @@ export default function App() {
       <Suspense
         fallback={
           <div className='min-h-dvh flex items-center justify-center'>
-            <Spinner size='lg' />
+            <ClockLoader />
           </div>
         }
       >

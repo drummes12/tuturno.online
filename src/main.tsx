@@ -72,3 +72,71 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// Retiro del splash de boot: con red rápida React monta en un
+// instante y el splash sería un destello, así que se garantiza un
+// mínimo visible y luego se retira con crossfade — View Transitions
+// donde hay soporte, fade CSS como respaldo. El logo del splash se
+// convierte en el logo del nav (elemento compartido 'app-logo').
+const MIN_BOOT_MS = 300
+// Beat de "carga satisfactoria": los dígitos se clavan en 12:12 y un
+// check mint aparece en el logo antes de que viaje al nav.
+const BOOT_BEAT_MS = 320
+const bootStart =
+  (window as unknown as { __bootStart?: number }).__bootStart ??
+  performance.now()
+
+interface ViewTransitionLike {
+  finished: Promise<void>
+}
+
+function dismissBoot() {
+  const boot = document.getElementById('boot')
+  if (!boot) return
+
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const startViewTransition = (
+    document as Document & {
+      startViewTransition?: (update: () => void) => ViewTransitionLike
+    }
+  ).startViewTransition
+
+  const finish = () => {
+    if (!startViewTransition || reduced) {
+      boot.classList.add('boot-out')
+      setTimeout(() => boot.remove(), 400)
+      return
+    }
+
+    // El view-transition-name se asigna en caliente: si ambos logos lo
+    // tuvieran a la vez en el DOM, Chrome abortaría la transición por
+    // nombre duplicado. El boot img lo lleva en el snapshot viejo y el
+    // nav img en el nuevo → morph de splash al nav.
+    const bootImg = boot.querySelector('img')
+    const navLogo = document.querySelector<HTMLElement>('[data-nav-logo]')
+    const canMorph = Boolean(bootImg && navLogo)
+    if (canMorph) bootImg!.style.viewTransitionName = 'app-logo'
+
+    const transition = startViewTransition.call(document, () => {
+      boot.remove()
+      if (canMorph) navLogo!.style.viewTransitionName = 'app-logo'
+    })
+
+    // Al terminar se limpia el nombre para no chocar con futuras VTs.
+    const cleanup = () => {
+      if (navLogo) navLogo.style.viewTransitionName = ''
+    }
+    transition.finished.then(cleanup, cleanup)
+  }
+
+  if (reduced) {
+    finish()
+    return
+  }
+
+  boot.classList.add('boot-done')
+  setTimeout(finish, BOOT_BEAT_MS)
+}
+
+const remaining = Math.max(0, MIN_BOOT_MS - (performance.now() - bootStart))
+setTimeout(dismissBoot, remaining)

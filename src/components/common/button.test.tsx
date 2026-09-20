@@ -59,9 +59,9 @@ describe('Button', () => {
     render(<Button loading>Loading</Button>)
     const button = screen.getByRole('button')
     expect(button).toBeDisabled()
-    const svg = button.querySelector('svg')
-    expect(svg).toBeInTheDocument()
-    expect(svg).toHaveClass('animate-spin')
+    const loader = button.querySelector('.arc-loader')
+    expect(loader).toBeInTheDocument()
+    expect(loader).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('is disabled when disabled prop is true', () => {

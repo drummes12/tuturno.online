@@ -82,11 +82,25 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   signOut: async () => {
     try {
-      await removeCurrentPushSubscription()
+      // La revocación push es best-effort: con mala red no debe
+      // bloquear el cierre de sesión.
+      await Promise.race([
+        removeCurrentPushSubscription(),
+        new Promise((resolve) => setTimeout(resolve, 4000))
+      ])
     } catch (error) {
       console.warn('[TuTurno] No se pudo revocar la suscripción push:', error)
     }
-    await signOutService()
+    try {
+      // Igual con el signOut remoto: si la red no responde, se limpia
+      // la sesión local de todas formas.
+      await Promise.race([
+        signOutService(),
+        new Promise((resolve) => setTimeout(resolve, 5000))
+      ])
+    } catch (error) {
+      console.warn('[TuTurno] signOut remoto falló:', error)
+    }
     set({
       session: null,
       user: null,
