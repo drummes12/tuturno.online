@@ -4,7 +4,7 @@ import { useSession } from '@/hooks/use-session'
 import { useConnectivityStore } from '@/hooks/use-connectivity'
 import { AppLayout } from '@/components/layout/app-layout'
 import { RouteErrorBoundary } from '@/components/common/route-error-boundary'
-import { ClockLoader } from '@/components/common/spinner'
+import { ClockLoader, PageLoader } from '@/components/common/spinner'
 import { useAuthStore } from '@/stores/auth'
 
 // Auth pages
@@ -175,9 +175,9 @@ export default function App() {
           React — ahora cae en un fallback con reintento. */}
       <Suspense
         fallback={
-          <div className='min-h-dvh flex items-center justify-center'>
+          <PageLoader>
             <ClockLoader />
-          </div>
+          </PageLoader>
         }
       >
         <RouteErrorBoundary>

@@ -20,7 +20,7 @@ import { useIsOffline } from '@/hooks/use-connectivity'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Alert } from '@/components/common/alert'
-import { Spinner } from '@/components/common/spinner'
+import { PageLoader } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { BackLink } from '@/components/common/back-link'
 import {
@@ -275,7 +275,7 @@ export function AdminExceptionsPage() {
   }
 
   if (loading) {
-    return <Spinner size='lg' />
+    return <PageLoader />
   }
 
   const canSubmit =

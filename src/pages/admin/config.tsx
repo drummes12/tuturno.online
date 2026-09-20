@@ -6,7 +6,7 @@ import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { PhoneInput } from '@/components/common/phone-input'
 import { Alert } from '@/components/common/alert'
-import { Spinner } from '@/components/common/spinner'
+import { PageLoader } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { BackLink } from '@/components/common/back-link'
 import { useCanEdit } from '@/hooks/use-can-edit'
@@ -140,7 +140,7 @@ export function AdminConfigPage() {
   }
 
   if (loading) {
-    return <Spinner size='lg' />
+    return <PageLoader />
   }
 
   if (!business) {

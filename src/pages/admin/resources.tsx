@@ -11,7 +11,7 @@ import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Alert } from '@/components/common/alert'
-import { Spinner } from '@/components/common/spinner'
+import { PageLoader } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { useCanEdit } from '@/hooks/use-can-edit'
 import { useIsOffline } from '@/hooks/use-connectivity'
@@ -140,7 +140,7 @@ export function AdminResourcesPage() {
     }
   }
 
-  if (loading) return <Spinner size='lg' />
+  if (loading) return <PageLoader />
 
   return (
     <Page width='narrow'>

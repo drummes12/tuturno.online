@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 /**
  * Loader de marca: reloj de solapas HH:MM (definido en `.digit-clock`,
@@ -39,5 +39,19 @@ export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
       className='arc-loader text-primary'
       style={{ '--arc-size': `${px / 48}px` } as CSSProperties}
     />
+  )
+}
+
+/**
+ * Carga de página centrada en el área de contenido — misma posición que
+ * el fallback de Suspense, así el handoff reloj → arco no "salta" por
+ * la pantalla. Por defecto muestra el arco; `children` permite el reloj
+ * de marca para cargas de ruta.
+ */
+export function PageLoader({ children }: { children?: ReactNode }) {
+  return (
+    <div className='flex flex-1 items-center justify-center py-20 min-h-[40dvh]'>
+      {children ?? <Spinner size='lg' />}
+    </div>
   )
 }

@@ -7,7 +7,7 @@ import {
 } from '@/services/business-hours'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
-import { Spinner } from '@/components/common/spinner'
+import { PageLoader } from '@/components/common/spinner'
 import { Alert } from '@/components/common/alert'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { BackLink } from '@/components/common/back-link'
@@ -320,7 +320,7 @@ export function AdminHoursPage() {
   }
 
   if (loading) {
-    return <Spinner size='lg' />
+    return <PageLoader />
   }
 
   return (

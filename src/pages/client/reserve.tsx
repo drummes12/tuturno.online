@@ -19,7 +19,7 @@ import { Card } from '@/components/common/card'
 import { PitchTicket } from '@/components/common/pitch-ticket'
 import { Alert } from '@/components/common/alert'
 import { Skeleton } from '@/components/common/skeleton'
-import { Spinner } from '@/components/common/spinner'
+import { Spinner, PageLoader } from '@/components/common/spinner'
 import { MarkdownContent } from '@/components/common/markdown-content'
 import {
   ClientSelector,
@@ -141,10 +141,12 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   // Tenant loading
   if (tenantLoading) {
     return (
-      <div className='flex flex-col items-center justify-center py-20 gap-3'>
-        <Spinner size='lg' />
-        <p className='text-sm text-(--color-text-muted)'>Cargando negocio…</p>
-      </div>
+      <PageLoader>
+        <span className='flex flex-col items-center gap-3'>
+          <Spinner size='lg' />
+          <p className='text-sm text-(--color-text-muted)'>Cargando negocio…</p>
+        </span>
+      </PageLoader>
     )
   }
 

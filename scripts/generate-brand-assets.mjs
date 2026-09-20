@@ -82,17 +82,19 @@ const GLYPH = `<path d="M179.57 119v33.35M316.11 119v33.35" stroke="#ffffff" str
 <circle cx="328.373" cy="315.949" r="82" fill="#ffffff" mask="url(#hands)"/>`
 
 const SPLASH_SIZES = [
-  [1290, 2796], // iPhone 14/15/16 Pro Max
-  [1206, 2622], // iPhone 16 Pro
-  [1179, 2556], // iPhone 14/15 Pro
-  [1284, 2778], // iPhone 12/13/14 Pro Max, 14 Plus
-  [1170, 2532], // iPhone 12/13/14
-  [1125, 2436], // iPhone X/XS/11 Pro
-  [828, 1792], // iPhone XR/11
-  [750, 1334], // iPhone SE/8
+  [1290, 2796], // iPhone 15 Pro Max / 16 Plus (430×932 @3)
+  [1320, 2868], // iPhone 16/17 Pro Max (440×956 @3)
+  [1206, 2622], // iPhone 16 Pro / 17 / 17 Pro (402×874 @3)
+  [1260, 2736], // iPhone Air (420×912 @3)
+  [1179, 2556], // iPhone 14 Pro / 15 / 15 Pro / 16 (393×852 @3)
+  [1284, 2778], // iPhone 12/13/14 Pro Max, 14 Plus (428×926 @3)
+  [1170, 2532], // iPhone 12/13/14, 16e (390×844 @3)
+  [1125, 2436], // iPhone X/XS/11 Pro/12 mini/13 mini (375×812 @3)
+  [828, 1792], // iPhone XR/11 (414×896 @2)
+  [750, 1334], // iPhone SE/8 (375×667 @2)
   [1536, 2048], // iPad 9.7"
   [1668, 2388], // iPad Pro 11"
-  [2048, 2732], // iPad Pro 12.9"
+  [2048, 2732] // iPad Pro 12.9"
 ]
 
 for (const [w, h] of SPLASH_SIZES) {

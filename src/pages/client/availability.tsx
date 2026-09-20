@@ -5,7 +5,7 @@ import { fetchAvailability } from '@/services/availability'
 import { fetchBusinessContactById } from '@/services/business'
 import { useTenant } from '@/hooks/use-tenant'
 import { Card } from '@/components/common/card'
-import { Spinner } from '@/components/common/spinner'
+import { Spinner, PageLoader } from '@/components/common/spinner'
 import {
   SlotGridSkeleton,
   DatePickerSkeleton
@@ -223,10 +223,12 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
   // Tenant loading or not found
   if (tenantLoading) {
     return (
-      <div className='flex flex-col items-center justify-center py-20 gap-3'>
-        <Spinner size='lg' />
-        <p className='text-sm text-(--color-text-muted)'>Cargando negocio…</p>
-      </div>
+      <PageLoader>
+        <span className='flex flex-col items-center gap-3'>
+          <Spinner size='lg' />
+          <p className='text-sm text-(--color-text-muted)'>Cargando negocio…</p>
+        </span>
+      </PageLoader>
     )
   }
 

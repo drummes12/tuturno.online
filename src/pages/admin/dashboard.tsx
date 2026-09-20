@@ -34,6 +34,7 @@ import {
 import { toZonedTime } from 'date-fns-tz'
 import { useReservationsRealtime } from '@/hooks/use-reservations-realtime'
 import { useBusinessId } from '@/hooks/use-business-id'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import { sortReservationsByPriority } from '@/lib/sort'
 import { parseISO, isAfter, differenceInMinutes } from 'date-fns'
 import {
@@ -177,6 +178,7 @@ function TodayGroup({
 
 export function AdminDashboardPage() {
   const businessId = useBusinessId()
+  const offline = useIsOffline()
   const [pending, setPending] = useState<Reservation[]>([])
   const [today, setToday] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
@@ -420,6 +422,7 @@ export function AdminDashboardPage() {
                           variant='danger'
                           size='sm'
                           loading={actingId === r.id}
+                          disabled={offline}
                           onClick={() => handleReject(r.id)}
                         >
                           Confirmar rechazo
@@ -456,6 +459,7 @@ export function AdminDashboardPage() {
                           size='sm'
                           data-tour='admin-confirm-btn'
                           loading={actingId === r.id}
+                          disabled={offline}
                           onClick={() => handleConfirm(r.id)}
                         >
                           <CheckIcon size={16} />
@@ -465,6 +469,7 @@ export function AdminDashboardPage() {
                           variant='danger'
                           size='sm'
                           data-tour='admin-reject-btn'
+                          disabled={offline}
                           onClick={() => setRejectingId(r.id)}
                         >
                           <XIcon size={16} />

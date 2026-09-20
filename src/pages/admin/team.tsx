@@ -15,7 +15,7 @@ import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Alert } from '@/components/common/alert'
 import { Badge } from '@/components/common/badge'
-import { Spinner } from '@/components/common/spinner'
+import { PageLoader } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { BackLink } from '@/components/common/back-link'
 import {
@@ -56,11 +56,7 @@ export function AdminTeamPage() {
   }, [load])
 
   if (loading) {
-    return (
-      <div className='flex justify-center py-12'>
-        <Spinner size='lg' />
-      </div>
-    )
+    return <PageLoader />
   }
 
   return (

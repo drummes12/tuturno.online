@@ -14,7 +14,7 @@ import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Alert } from '@/components/common/alert'
 import { Badge } from '@/components/common/badge'
-import { Spinner } from '@/components/common/spinner'
+import { PageLoader } from '@/components/common/spinner'
 import { PhoneInput } from '@/components/common/phone-input'
 import { CheckIcon, XIcon } from '@/components/common/icon'
 import type { SignupRequest, SlugAvailability } from '@/types'
@@ -140,11 +140,7 @@ export function CreateBusinessPage() {
   }
 
   if (loading) {
-    return (
-      <div className='flex justify-center py-12'>
-        <Spinner size='lg' />
-      </div>
-    )
+    return <PageLoader />
   }
 
   if (request && request.status === 'pending') {

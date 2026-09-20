@@ -11,7 +11,7 @@ import { Card } from '@/components/common/card'
 import { BackLink } from '@/components/common/back-link'
 import { Button } from '@/components/common/button'
 import { Alert } from '@/components/common/alert'
-import { Spinner } from '@/components/common/spinner'
+import { Spinner, PageLoader } from '@/components/common/spinner'
 import { CheckIcon, MailIcon } from '@/components/common/icon'
 import { Page } from '@/components/layout/page'
 
@@ -87,10 +87,12 @@ export function PrivacyPreferencesPage() {
 
   if (loading) {
     return (
-      <div className='flex flex-col items-center justify-center py-20 gap-3'>
-        <Spinner size='lg' />
-        <p className='text-sm text-(--color-text-muted)'>Cargando…</p>
-      </div>
+      <PageLoader>
+        <span className='flex flex-col items-center gap-3'>
+          <Spinner size='lg' />
+          <p className='text-sm text-(--color-text-muted)'>Cargando…</p>
+        </span>
+      </PageLoader>
     )
   }
 
