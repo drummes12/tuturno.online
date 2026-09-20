@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { useConnectivity } from './use-connectivity'
+import { useConnectivity, useConnectivityStore } from './use-connectivity'
 
 describe('useConnectivity', () => {
   beforeEach(() => {
@@ -8,6 +8,7 @@ describe('useConnectivity', () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(null, { status: 200 })
     )
+    useConnectivityStore.setState({ status: 'online', hardOffline: false })
   })
 
   afterEach(() => {

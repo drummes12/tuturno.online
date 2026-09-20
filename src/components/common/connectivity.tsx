@@ -65,6 +65,35 @@ export function ConnectivityIndicator({ status }: { status: Connectivity }) {
 }
 
 /**
+ * Aviso persistente para usuarios autenticados sin conexión: la app sigue
+ * visible con la última data cacheada, en modo solo lectura. Se renderiza
+ * dentro del flujo del contenido (no overlay) para que el contexto sea
+ * claro sin tapar la información.
+ */
+export function OfflineNotice() {
+  return (
+    <div
+      role='status'
+      className='mb-4 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 animate-fade-up'
+    >
+      <WifiOffIcon
+        size={18}
+        className='mt-0.5 shrink-0 text-warning'
+        aria-hidden='true'
+      />
+      <div className='flex flex-col gap-0.5'>
+        <p className='text-sm font-semibold'>Modo sin conexión</p>
+        <p className='text-xs text-(--color-text-muted) leading-relaxed'>
+          Estás viendo la última información guardada — puede no estar
+          actualizada. Solo lectura: no puedes crear, editar ni eliminar
+          hasta que vuelva la conexión.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/**
  * Pantalla completa para cuando definitivamente no hay conexión. Es un
  * overlay (no reemplaza la vista), así el estado de la página se
  * conserva y reaparece solo al volver la red.

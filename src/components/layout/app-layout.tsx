@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
 import {
@@ -29,6 +29,7 @@ import { HeaderMenu } from '@/components/common/header-menu'
 import { NotificationCenter } from '@/components/common/notification-center'
 import {
   ConnectivityIndicator,
+  OfflineNotice,
   OfflineScreen
 } from '@/components/common/connectivity'
 import { Spinner } from '@/components/common/spinner'
@@ -130,6 +131,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
     if (!hardOffline) setOfflineDismissed(false)
   }, [hardOffline])
 
+  // Al recuperar de un offline sostenido, remontar el contenido para
+  // que cada página refetchee data fresca — lo mostrado pudo ser caché
+  // del service worker. Los microcortes (sin hardOffline) no remontan:
+  // no interrumpen lo que el usuario esté haciendo.
+  const refreshKey = useRef(0)
+  const prevHardOffline = useRef(hardOffline)
+  useEffect(() => {
+    if (prevHardOffline.current && !hardOffline) refreshKey.current += 1
+    prevHardOffline.current = hardOffline
+  }, [hardOffline])
+
   const handleSignOut = async () => {
     if (signingOut) return
     setSigningOut(true)
@@ -202,7 +214,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const showTutorialButton =
     (isAdmin && location.startsWith('/admin')) ||
     (!isAdmin && (Boolean(tenantBase) || location === '/mis-reservas'))
-  
+
   const showQrOpen =
     isAdmin &&
     activeMembership &&
@@ -393,8 +405,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </nav>
       )}
 
-      {/* Content */}
-      <main className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-8'>
+      {/* Content — la key remonta las páginas al recuperar de un
+          offline sostenido para refrescar la data cacheada. */}
+      <main
+        key={refreshKey.current}
+        className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-8'
+      >
+        {user && hardOffline && <OfflineNotice />}
         {children}
       </main>
 
@@ -465,7 +482,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
       )}
 
       <ConnectivityIndicator status={status} />
-      {hardOffline && !offlineDismissed && (
+      {/* Pantalla completa solo para visitantes: sin sesión no hay data
+          cacheada que valga la pena mostrar. El autenticado conserva la
+          app en solo lectura con el aviso de información desactualizada. */}
+      {hardOffline && !user && !offlineDismissed && (
         <OfflineScreen
           onRetry={recheck}
           onDismiss={() => setOfflineDismissed(true)}

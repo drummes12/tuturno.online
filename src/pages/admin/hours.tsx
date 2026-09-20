@@ -12,6 +12,7 @@ import { Alert } from '@/components/common/alert'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { BackLink } from '@/components/common/back-link'
 import { useCanEdit } from '@/hooks/use-can-edit'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import {
   PlusIcon,
   TrashIcon,
@@ -86,6 +87,7 @@ function franjaLabel(open: string): { text: string; icon: typeof SunIcon } {
 export function AdminHoursPage() {
   const businessId = useBusinessId()
   const canEdit = useCanEdit()
+  const offline = useIsOffline()
   const [franjas, setFranjas] = useState<FranjaState[]>([])
   const [baseline, setBaseline] = useState<FranjaState[]>([])
   const [loading, setLoading] = useState(true)
@@ -379,8 +381,8 @@ export function AdminHoursPage() {
               >
                 <div className='flex items-center gap-3'>
                   <button
-                    onClick={() => canEdit && toggleDay(dayIdx)}
-                    disabled={!canEdit}
+                    onClick={() => canEdit && !offline && toggleDay(dayIdx)}
+                    disabled={!canEdit || offline}
                     className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${
                       isActive ? 'bg-primary' : 'bg-graphite-300'
                     } ${!canEdit ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -550,7 +552,7 @@ export function AdminHoursPage() {
                           <input
                             type='time'
                             value={f.open_time}
-                            disabled={!canEdit}
+                            disabled={!canEdit || offline}
                             onChange={(e) =>
                               updateFranja(
                                 globalIdx,
@@ -571,7 +573,7 @@ export function AdminHoursPage() {
                           <input
                             type='time'
                             value={f.close_time}
-                            disabled={!canEdit}
+                            disabled={!canEdit || offline}
                             onChange={(e) =>
                               updateFranja(
                                 globalIdx,
@@ -666,7 +668,7 @@ export function AdminHoursPage() {
           <Button
             loading={saving}
             onClick={handleSave}
-            disabled={!isDirty || hasOverlaps || !canEdit}
+            disabled={!isDirty || hasOverlaps || !canEdit || offline}
             size='sm'
             data-tour='admin-hours-save'
           >

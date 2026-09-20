@@ -10,6 +10,7 @@ import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { BackLink } from '@/components/common/back-link'
 import { useCanEdit } from '@/hooks/use-can-edit'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
 import { resolveWhatsAppLink, buildGeneralInquiryMessage } from '@/lib/whatsapp'
 import { ShareCard } from '@/components/admin/share-card'
@@ -34,6 +35,7 @@ const INSTRUCTIONS_TEMPLATE =
 
 export function AdminConfigPage() {
   const canEdit = useCanEdit()
+  const offline = useIsOffline()
   const businessId = useBusinessId()
   const [business, setBusiness] = useState<Business | null>(null)
   const [loading, setLoading] = useState(true)
@@ -190,7 +192,7 @@ export function AdminConfigPage() {
 
       <form onSubmit={handleSave} className='flex flex-col gap-4'>
         <fieldset
-          disabled={!canEdit}
+          disabled={!canEdit || offline}
           className='flex min-w-0 flex-col gap-4 border-0 p-0 m-0 md:grid md:grid-cols-2 md:items-start'
         >
           <div className='contents md:order-1 md:flex md:flex-col md:gap-4'>
@@ -369,7 +371,7 @@ export function AdminConfigPage() {
                     title='Abrir en Google Maps'
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors touch-target ${
                       fullAddress
-                        ? 'bg-(--color-primary) text-on-primary hover:bg-(--color-primary-hover)'
+                        ? 'bg-(--color-primary) text-on-primary hover:bg-primary-hover'
                         : 'pointer-events-none bg-surface-inset text-text-muted opacity-60'
                     }`}
                   >
@@ -666,7 +668,7 @@ export function AdminConfigPage() {
                     })
                   }
                   maxLength={1000}
-                  disabled={!canEdit}
+                  disabled={!canEdit || offline}
                   placeholder={INSTRUCTIONS_TEMPLATE}
                   rows={8}
                   className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y disabled:opacity-60'
@@ -735,7 +737,7 @@ export function AdminConfigPage() {
               <Button
                 type='submit'
                 loading={saving}
-                disabled={!canEdit || !isDirty}
+                disabled={!canEdit || !isDirty || offline}
                 data-tour='admin-config-save'
               >
                 Guardar cambios

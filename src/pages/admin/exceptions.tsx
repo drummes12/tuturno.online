@@ -16,6 +16,7 @@ import { fetchBusinessById } from '@/services/business'
 import { useAuthStore } from '@/stores/auth'
 import { useBusinessId } from '@/hooks/use-business-id'
 import { useCanEdit } from '@/hooks/use-can-edit'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Alert } from '@/components/common/alert'
@@ -76,6 +77,7 @@ function fullDayRange(dateStr: string): { start: string; end: string } {
 export function AdminExceptionsPage() {
   const businessId = useBusinessId()
   const canEdit = useCanEdit()
+  const offline = useIsOffline()
   const { user } = useAuthStore()
 
   const [exceptions, setExceptions] = useState<AvailabilityException[]>([])
@@ -329,7 +331,7 @@ export function AdminExceptionsPage() {
               <button
                 type='button'
                 onClick={() => setScope('business')}
-                disabled={!canEdit}
+                disabled={!canEdit || offline}
                 className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all touch-target ${
                   scope === 'business'
                     ? 'bg-(--color-primary) text-on-primary border-(--color-primary)'
@@ -341,7 +343,7 @@ export function AdminExceptionsPage() {
               <button
                 type='button'
                 onClick={() => setScope('resource')}
-                disabled={!canEdit || resources.length === 0}
+                disabled={!canEdit || resources.length === 0 || offline}
                 className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all touch-target ${
                   scope === 'resource'
                     ? 'bg-(--color-primary) text-on-primary border-(--color-primary)'
@@ -367,7 +369,7 @@ export function AdminExceptionsPage() {
                   id='exception-resource'
                   value={selectedResourceId}
                   onChange={(e) => setSelectedResourceId(e.target.value)}
-                  disabled={!canEdit}
+                  disabled={!canEdit || offline}
                   className='w-full appearance-none rounded-xl border border-border bg-surface-inset pl-4 pr-10 py-3 text-sm focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
                 >
                   {resources.map((c) => (
@@ -398,7 +400,7 @@ export function AdminExceptionsPage() {
                 type='date'
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                disabled={!canEdit}
+                disabled={!canEdit || offline}
                 className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               />
             </div>
@@ -414,7 +416,7 @@ export function AdminExceptionsPage() {
                 type='date'
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                disabled={!canEdit}
+                disabled={!canEdit || offline}
                 className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               />
             </div>
@@ -426,7 +428,7 @@ export function AdminExceptionsPage() {
               type='checkbox'
               checked={allDay}
               onChange={(e) => setAllDay(e.target.checked)}
-              disabled={!canEdit}
+              disabled={!canEdit || offline}
               className='w-5 h-5 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15 disabled:opacity-60'
             />
             <span className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
@@ -449,7 +451,7 @@ export function AdminExceptionsPage() {
                   type='time'
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  disabled={!canEdit}
+                  disabled={!canEdit || offline}
                   className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
                 />
               </div>
@@ -465,7 +467,7 @@ export function AdminExceptionsPage() {
                   type='time'
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  disabled={!canEdit}
+                  disabled={!canEdit || offline}
                   className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
                 />
               </div>
@@ -485,7 +487,7 @@ export function AdminExceptionsPage() {
               type='text'
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              disabled={!canEdit}
+              disabled={!canEdit || offline}
               placeholder='Ej: Festivo, mantenimiento, evento privado'
               maxLength={200}
               className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
@@ -515,7 +517,7 @@ export function AdminExceptionsPage() {
                     type='checkbox'
                     checked={confirmedCreate}
                     onChange={(e) => setConfirmedCreate(e.target.checked)}
-                    disabled={!canEdit}
+                    disabled={!canEdit || offline}
                     className='w-4 h-4 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15'
                   />
                   <span className='text-sm'>
@@ -530,7 +532,7 @@ export function AdminExceptionsPage() {
           <Button
             onClick={handleCreate}
             loading={saving}
-            disabled={!canSubmit}
+            disabled={!canSubmit || offline}
             size='lg'
             className='w-full'
           >
@@ -605,6 +607,7 @@ export function AdminExceptionsPage() {
                             size='sm'
                             onClick={() => handleDelete(exc.id)}
                             loading={deletingId === exc.id}
+                            disabled={offline}
                           >
                             Confirmar
                           </Button>
@@ -620,7 +623,8 @@ export function AdminExceptionsPage() {
                       ) : (
                         <button
                           onClick={() => setConfirmingId(exc.id)}
-                          className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0'
+                          disabled={offline}
+                          className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-40'
                           aria-label='Eliminar cierre'
                           title='Eliminar cierre'
                         >
@@ -681,8 +685,8 @@ export function AdminExceptionsPage() {
                   {canEdit && (
                     <button
                       onClick={() => handleDelete(exc.id)}
-                      disabled={deletingId === exc.id}
-                      className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0'
+                      disabled={deletingId === exc.id || offline}
+                      className='flex items-center justify-center w-10 h-10 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors touch-target shrink-0 disabled:opacity-40'
                       aria-label='Eliminar cierre pasado'
                     >
                       <TrashIcon size={16} />

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import {
   cancelMySignupRequest,
   checkSlugAvailability,
@@ -27,6 +28,7 @@ const SLUG_MESSAGES: Record<string, string> = {
 
 export function CreateBusinessPage() {
   const { user, memberships, refreshMemberships } = useAuthStore()
+  const offline = useIsOffline()
 
   const [request, setRequest] = useState<SignupRequest | null>(null)
   const [loading, setLoading] = useState(true)
@@ -156,6 +158,7 @@ export function CreateBusinessPage() {
           variant='secondary'
           onClick={handleCancel}
           loading={submitting}
+          disabled={offline}
           className='w-full'
         >
           Retirar solicitud
@@ -367,7 +370,7 @@ export function CreateBusinessPage() {
                 type='submit'
                 size='lg'
                 loading={submitting}
-                disabled={!slugStatus?.available}
+                disabled={!slugStatus?.available || offline}
                 className='w-full'
               >
                 Enviar solicitud

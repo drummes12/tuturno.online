@@ -14,6 +14,7 @@ import { Alert } from '@/components/common/alert'
 import { Spinner } from '@/components/common/spinner'
 import { ReadOnlyNotice } from '@/components/common/read-only-notice'
 import { useCanEdit } from '@/hooks/use-can-edit'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import {
   StoreIcon,
   PlusIcon,
@@ -26,6 +27,7 @@ import { Page } from '@/components/layout/page'
 
 export function AdminResourcesPage() {
   const canEdit = useCanEdit()
+  const offline = useIsOffline()
   const businessId = useBusinessId()
   const [resources, setResources] = useState<Resource[]>([])
   const [label, setLabel] = useState('recursos')
@@ -201,7 +203,12 @@ export function AdminResourcesPage() {
               placeholder='Características que ayuden a identificarlo'
             />
             <div className='flex gap-2'>
-              <Button type='submit' loading={saving} size='sm'>
+              <Button
+                type='submit'
+                loading={saving}
+                disabled={offline}
+                size='sm'
+              >
                 <CheckIcon size={16} />
                 {editingResource ? 'Guardar cambios' : 'Crear recurso'}
               </Button>

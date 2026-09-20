@@ -15,6 +15,7 @@ import { Alert } from '@/components/common/alert'
 import { Badge } from '@/components/common/badge'
 import { Spinner } from '@/components/common/spinner'
 import { CheckIcon, XIcon, StoreIcon, SearchIcon } from '@/components/common/icon'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import { formatLocal } from '@/lib/time'
 import type {
   BusinessRole,
@@ -191,6 +192,7 @@ function PendingRequestCard({
   onDone: () => Promise<void>
   onError: (message: string | null) => void
 }) {
+  const offline = useIsOffline()
   const [slug, setSlug] = useState(request.desired_slug)
   const [labelSingular, setLabelSingular] = useState('Espacio')
   const [labelPlural, setLabelPlural] = useState('Espacios')
@@ -239,7 +241,10 @@ function PendingRequestCard({
               .join(' · ') || 'Sin detalles adicionales'}
           </p>
           <p className='text-xs text-(--color-text-muted)'>
-            Solicitada <span className='font-mono'>{formatLocal(request.created_at, 'd MMM yyyy, HH:mm')}</span>
+            Solicitada{' '}
+            <span className='font-mono'>
+              {formatLocal(request.created_at, 'd MMM yyyy, HH:mm')}
+            </span>
           </p>
         </div>
         <Badge variant='warning'>Pendiente</Badge>
@@ -281,7 +286,7 @@ function PendingRequestCard({
         <Button
           onClick={approve}
           loading={working}
-          disabled={confirmSlug !== slug}
+          disabled={confirmSlug !== slug || offline}
           className='flex-1'
         >
           <CheckIcon size={16} /> Aprobar y crear negocio
@@ -299,7 +304,7 @@ function PendingRequestCard({
           variant='danger'
           onClick={reject}
           loading={working}
-          disabled={reason.trim().length < 3}
+          disabled={reason.trim().length < 3 || offline}
           className='sm:self-end'
         >
           <XIcon size={16} /> Rechazar
@@ -316,6 +321,7 @@ function PromoteMemberSection({
   businesses: PlatformBusinessOverview[]
   onDone: () => Promise<void>
 }) {
+  const offline = useIsOffline()
   const [email, setEmail] = useState('')
   const [found, setFound] = useState<PlatformUser | null>(null)
   const [searched, setSearched] = useState(false)
@@ -377,7 +383,7 @@ function PromoteMemberSection({
             variant='secondary'
             onClick={search}
             loading={working}
-            disabled={!email}
+            disabled={!email || offline}
           >
             <SearchIcon size={16} /> Buscar
           </Button>
@@ -427,7 +433,7 @@ function PromoteMemberSection({
             <Button
               onClick={promote}
               loading={working}
-              disabled={!businessId}
+              disabled={!businessId || offline}
               variant='secondary'
             >
               Asignar rol

@@ -242,6 +242,17 @@
       </span>
       <span class="boot-clock" aria-hidden="true"></span>
       </div>
+    <script>
+      // Watchdog: si React no monta en ~10s (red cortada con assets sin
+      // cachear), el splash deja de cargar al infinito y ofrece reintento.
+      window.__bootWatchdog = setTimeout(function () {
+        var clock = document.querySelector('#boot .boot-clock')
+        if (!clock) return
+        clock.outerHTML =
+          '<p class="boot-stuck-msg" style="margin:0;color:#4a6b5a;font:500 14px/1.5 Inter,system-ui,sans-serif;text-align:center">No pudimos conectar con el servidor.<br>Revisa tu red e intenta de nuevo.</p>' +
+          '<button onclick="location.reload()" style="margin-top:4px;padding:12px 24px;min-height:44px;border:0;border-radius:12px;background:#0f7a4a;color:#fff;font:600 14px Inter,system-ui,sans-serif;cursor:pointer">Reintentar</button>'
+      }, 10000)
+    </script>
     <style>
       #boot {
         position: fixed;
@@ -266,6 +277,10 @@
       overflow: hidden;
     }
     
+      .dark #boot .boot-stuck-msg {
+        color: #9fb8ab;
+      }
+
       .dark #boot {
         background: #071510;
       }

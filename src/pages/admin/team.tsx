@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import { useBusinessId } from '@/hooks/use-business-id'
 import { useCanEdit } from '@/hooks/use-can-edit'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import { useAuthStore } from '@/stores/auth'
 import {
   fetchBusinessMembers,
@@ -140,6 +141,7 @@ function InviteMemberForm({
   businessId: string
   onDone: () => Promise<void>
 }) {
+  const offline = useIsOffline()
   const [email, setEmail] = useState('')
   const [found, setFound] = useState<{
     user_id: string
@@ -216,7 +218,7 @@ function InviteMemberForm({
             variant='secondary'
             onClick={search}
             loading={working}
-            disabled={!email.trim()}
+            disabled={!email.trim() || offline}
             className='sm:self-end'
           >
             <SearchIcon size={16} /> Buscar
@@ -245,7 +247,7 @@ function InviteMemberForm({
                 </p>
               </div>
             </div>
-            <Button onClick={invite} loading={working}>
+            <Button onClick={invite} loading={working} disabled={offline}>
               <PlusIcon size={16} /> Añadir como manager
             </Button>
           </div>
@@ -277,6 +279,7 @@ function MemberRow({
   onError: (message: string | null) => void
   isFirstRemovable?: boolean
 }) {
+  const offline = useIsOffline()
   const [working, setWorking] = useState(false)
   const [confirming, setConfirming] = useState(false)
 
@@ -338,7 +341,7 @@ function MemberRow({
             <button
               data-tour={isFirstRemovable ? 'admin-team-remove' : undefined}
               onClick={() => setConfirming(true)}
-              disabled={working}
+              disabled={working || offline}
               className='flex h-10 w-10 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/10 hover:text-danger touch-target disabled:opacity-50'
               aria-label={`Eliminar a ${member.full_name ?? member.email}`}
               title='Eliminar miembro'
@@ -352,6 +355,7 @@ function MemberRow({
                 size='sm'
                 onClick={handleRemove}
                 loading={working}
+                disabled={offline}
               >
                 Confirmar
               </Button>

@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import type { Reservation } from '@/types'
 import { canClientCancelReservation } from '@/lib/reservation-status'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Alert } from '@/components/common/alert'
@@ -43,6 +44,9 @@ export function ReservationActionControls({
   const [reasonMode, setReasonMode] = useState<ReasonMode>(null)
   const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
+  // Sin conexión el modo es solo lectura: ninguna acción puede llegar
+  // al servidor, así que se deshabilitan en vez de fallar en silencio.
+  const offline = useIsOffline()
 
   const canClientCancel = canClientCancelReservation(
     reservation,
@@ -122,6 +126,7 @@ export function ReservationActionControls({
             variant='danger'
             size='sm'
             loading={acting}
+            disabled={offline}
             onClick={() => {
               if (!requireReason(reasonMode)) return
               const trimmed = reason.trim()
@@ -165,6 +170,7 @@ export function ReservationActionControls({
             variant='danger'
             size='sm'
             loading={acting}
+            disabled={offline}
             data-tour={cancelTourKey}
             onClick={() => {
               if (
@@ -188,6 +194,7 @@ export function ReservationActionControls({
               variant='success'
               size='sm'
               loading={acting}
+              disabled={offline}
               onClick={() =>
                 void run(
                   () => confirmReservation(reservation.id),
@@ -201,6 +208,7 @@ export function ReservationActionControls({
             <Button
               variant='danger'
               size='sm'
+              disabled={offline}
               onClick={() => setReasonMode('reject')}
             >
               <XIcon size={16} />
@@ -213,6 +221,7 @@ export function ReservationActionControls({
           <Button
             variant='danger'
             size='sm'
+            disabled={offline}
             data-tour={cancelTourKey}
             onClick={() => setReasonMode('cancel')}
           >

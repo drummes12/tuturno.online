@@ -93,6 +93,9 @@ interface ViewTransitionLike {
 function dismissBoot() {
   const boot = document.getElementById('boot')
   if (!boot) return
+  clearTimeout(
+    (window as unknown as { __bootWatchdog?: number }).__bootWatchdog
+  )
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const startViewTransition = (

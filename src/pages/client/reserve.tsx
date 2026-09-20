@@ -10,6 +10,7 @@ import { fetchBusinessId } from '@/services/profiles'
 import { fetchBusinessContactById } from '@/services/business'
 import { setMarketingConsent } from '@/services/privacy'
 import { useTenant } from '@/hooks/use-tenant'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
@@ -47,6 +48,7 @@ type ReservePageProps = {
 export function ReservePage({ slug }: ReservePageProps = {}) {
   const { user, profile, isAdmin } = useAuthStore()
   const { business, loading: tenantLoading } = useTenant(slug)
+  const offline = useIsOffline()
   const businessId = business?.id ?? null
   const isDemo = business?.is_demo ?? false
 
@@ -542,6 +544,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
             <Button
               type='submit'
               loading={submitting}
+              disabled={offline}
               size='lg'
               className='w-full'
             >

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
+import { useIsOffline } from '@/hooks/use-connectivity'
 import {
   fetchMyMarketingConsents,
   withdrawMarketingConsent,
@@ -25,6 +26,7 @@ interface ConsentRow {
 
 export function PrivacyPreferencesPage() {
   const { user } = useAuthStore()
+  const offline = useIsOffline()
   const requestedReturnPath = new URLSearchParams(window.location.search).get(
     'next'
   )
@@ -170,6 +172,7 @@ export function PrivacyPreferencesPage() {
                       variant='secondary'
                       size='sm'
                       loading={busyId === c.business_id}
+                      disabled={offline}
                       onClick={() => handleWithdraw(c.business_id)}
                     >
                       Dar de baja
@@ -179,6 +182,7 @@ export function PrivacyPreferencesPage() {
                       variant='secondary'
                       size='sm'
                       loading={busyId === c.business_id}
+                      disabled={offline}
                       onClick={() => handleReaccept(c.business_id)}
                     >
                       <CheckIcon size={16} />

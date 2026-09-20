@@ -33,23 +33,30 @@ export function useSession() {
     let mounted = true
 
     // Cargar sesión inicial
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!mounted) return
-      setSession(data.session)
+    supabase.auth
+      .getSession()
+      .then(async ({ data }) => {
+        if (!mounted) return
+        setSession(data.session)
 
-      if (data.session?.user) {
-        await loadProfileAndRole(
-          data.session.user.id,
-          setProfile,
-          setIsAdmin,
-          setIsOwner,
-          setIsPlatformAdmin,
-          setMemberships
-        )
-      }
+        if (data.session?.user) {
+          await loadProfileAndRole(
+            data.session.user.id,
+            setProfile,
+            setIsAdmin,
+            setIsOwner,
+            setIsPlatformAdmin,
+            setMemberships
+          )
+        }
 
-      setLoading(false)
-    })
+        setLoading(false)
+      })
+      // Sin red: la sesión local pudo no resolverse; libera el loading
+      // para que la app no quede en el loader infinito.
+      .catch(() => {
+        if (mounted) setLoading(false)
+      })
 
     // Escuchar cambios de auth
     const {
@@ -115,12 +122,18 @@ async function loadProfileAndRole(
   setIsPlatformAdmin: (v: boolean) => void,
   setMemberships: (m: BusinessMembership[]) => void
 ) {
-  const profileData = await fetchProfile(userId)
-  setProfile(profileData)
+  try {
+    const profileData = await fetchProfile(userId)
+    setProfile(profileData)
 
-  const memberships = await fetchBusinessMemberships(userId)
-  setMemberships(memberships)
-  setIsAdmin(memberships.length > 0)
-  setIsOwner(memberships.some((m) => m.role === 'owner'))
-  setIsPlatformAdmin(await fetchIsPlatformAdmin())
+    const memberships = await fetchBusinessMemberships(userId)
+    setMemberships(memberships)
+    setIsAdmin(memberships.length > 0)
+    setIsOwner(memberships.some((m) => m.role === 'owner'))
+    setIsPlatformAdmin(await fetchIsPlatformAdmin())
+  } catch {
+    // Offline u otro fallo de red: la sesión local sigue siendo válida.
+    // Sin perfil/roles la app degrada a cliente y el modo offline
+    // muestra la última data cacheada en solo lectura.
+  }
 }

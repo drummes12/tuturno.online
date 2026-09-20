@@ -18,6 +18,7 @@ vi.mock('@/services/reservations', () => ({
 }))
 
 import { ReservationActionControls } from '@/components/common/reservation-action-controls'
+import { useConnectivityStore } from '@/hooks/use-connectivity'
 import { canClientCancelReservation } from '@/lib/reservation-status'
 
 const futureStart = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
@@ -42,6 +43,13 @@ const baseReservation: Reservation = {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // El sondeo de conectividad usa fetch — en jsdom '/?probe=' no
+  // resuelve y marcaría offline, deshabilitando los botones del
+  // componente. Se mockea online y se fija la store a estado sano.
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(null, { status: 200 })
+  )
+  useConnectivityStore.setState({ status: 'online', hardOffline: false })
 })
 
 describe('canClientCancelReservation', () => {

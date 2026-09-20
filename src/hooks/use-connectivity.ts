@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
+import { create } from 'zustand'
 
 export type Connectivity = 'online' | 'degraded' | 'offline'
 
 // Latencia del sondeo a partir de la cual la conexión se reporta "lenta".
 const DEGRADED_MS = 3000
-// Tiempo offline sostenido antes de tomar la pantalla completa — filtra
-// microcortes de WiFi/datos que se resuelven solos en segundos.
+// Tiempo offline sostenido antes de declarar "sin conexión" duro —
+// filtra microcortes de WiFi/datos que se resuelven solos en segundos.
 const OFFLINE_GRACE_MS = 3000
 // Intervalo de sondeo (solo con pestaña visible). Cubre la recuperación
 // cuando el evento 'online' no dispara — frecuente en iOS/Safari — y
 // detecta degradación de red estando nominalmente online. Offline se
-// re-sondea más rápido para que la pantalla se quite pronto al volver.
+// re-sondea más rápido para que la UI se restaure pronto al volver.
 const PROBE_INTERVAL_MS = 20_000
 const RECHECK_OFFLINE_MS = 5_000
 const PROBE_TIMEOUT_MS = 5000
@@ -40,7 +41,7 @@ function connectionIsSlow() {
 // worker lo deja pasar a red. Mide si el servidor responde y con qué
 // latencia — navigator.onLine NO se consulta aquí a propósito: puede
 // quedarse en false con VPNs o tras suspender el equipo, y vetar el
-// sondeo dejaría la pantalla offline pegada con red funcionando.
+// sondeo dejaría el estado pegado en offline con red funcionando.
 async function probe(): Promise<Connectivity> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS)
@@ -60,67 +61,88 @@ async function probe(): Promise<Connectivity> {
   }
 }
 
-export function useConnectivity() {
-  const [status, setStatus] = useState<Connectivity>(() =>
-    navigator.onLine ? 'online' : 'offline'
-  )
-  // offline sostenido: es lo que dispara la pantalla completa.
-  const [hardOffline, setHardOffline] = useState(false)
-  const graceTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+interface ConnectivityStore {
+  status: Connectivity
+  // offline sostenido: lo usa AppLayout para decidir pantalla completa
+  // (visitante) vs modo solo-lectura (autenticado).
+  hardOffline: boolean
+}
 
-  const apply = useCallback((next: Connectivity) => {
-    setStatus(next)
-    if (next === 'offline') {
-      graceTimer.current ??= setTimeout(
-        () => setHardOffline(true),
-        OFFLINE_GRACE_MS
-      )
-    } else {
-      clearTimeout(graceTimer.current)
-      graceTimer.current = undefined
-      setHardOffline(false)
-    }
-  }, [])
+// Store singleton: varios componentes consumen el estado sin duplicar
+// listeners ni sondeos.
+export const useConnectivityStore = create<ConnectivityStore>(() => ({
+  status: navigator.onLine ? 'online' : 'offline',
+  hardOffline: false
+}))
 
-  const recheck = useCallback(async () => {
-    apply(await probe())
-  }, [apply])
+let graceTimer: ReturnType<typeof setTimeout> | undefined
+let probeTimer: ReturnType<typeof setTimeout> | undefined
+let initialized = false
 
-  // Listeners + sondeo inicial — solo al montar. El evento 'offline'
-  // muestra el indicador de inmediato, pero se confirma con un sondeo
-  // porque navigator.onLine puede mentir.
-  useEffect(() => {
-    const handleOffline = () => {
-      apply('offline')
-      void recheck()
-    }
-    const handleOnline = () => void recheck()
-
-    window.addEventListener('offline', handleOffline)
-    window.addEventListener('online', handleOnline)
-    const conn = getConnection()
-    conn?.addEventListener?.('change', handleOnline)
-
-    void recheck()
-
-    return () => {
-      clearTimeout(graceTimer.current)
-      window.removeEventListener('offline', handleOffline)
-      window.removeEventListener('online', handleOnline)
-      conn?.removeEventListener?.('change', handleOnline)
-    }
-  }, [apply, recheck])
-
-  // Sondeo periódico — cadencia según el estado actual.
-  useEffect(() => {
-    const interval = setInterval(
-      () => {
-        if (document.visibilityState === 'visible') void recheck()
-      },
-      status === 'offline' ? RECHECK_OFFLINE_MS : PROBE_INTERVAL_MS
+function apply(next: Connectivity) {
+  if (next === 'offline') {
+    graceTimer ??= setTimeout(
+      () => useConnectivityStore.setState({ hardOffline: true }),
+      OFFLINE_GRACE_MS
     )
-    return () => clearInterval(interval)
-  }, [recheck, status])
+  } else {
+    clearTimeout(graceTimer)
+    graceTimer = undefined
+    useConnectivityStore.setState({ hardOffline: false })
+  }
+  useConnectivityStore.setState({ status: next })
+  scheduleProbe()
+}
 
-  return { status, hardOffline, recheck }
+export async function recheckConnectivity() {
+  apply(await probe())
+}
+
+// Sondeo periódico auto-reprogramado: cadencia rápida mientras esté
+// offline, normal cuando está sano.
+function scheduleProbe() {
+  clearTimeout(probeTimer)
+  const { status } = useConnectivityStore.getState()
+  probeTimer = setTimeout(
+    tick,
+    status === 'offline' ? RECHECK_OFFLINE_MS : PROBE_INTERVAL_MS
+  )
+}
+
+async function tick() {
+  if (document.visibilityState === 'visible') await recheckConnectivity()
+  else scheduleProbe()
+}
+
+function initConnectivity() {
+  if (initialized) return
+  initialized = true
+
+  // El evento 'offline' muestra el indicador de inmediato, pero se
+  // confirma con un sondeo — navigator.onLine puede mentir.
+  window.addEventListener('offline', () => {
+    apply('offline')
+    void recheckConnectivity()
+  })
+  window.addEventListener('online', () => void recheckConnectivity())
+  getConnection()?.addEventListener?.(
+    'change',
+    () => void recheckConnectivity()
+  )
+
+  // Sondeo inicial + ciclo periódico.
+  void recheckConnectivity()
+  scheduleProbe()
+}
+
+export function useConnectivity() {
+  const state = useConnectivityStore()
+  useEffect(() => initConnectivity(), [])
+  return { ...state, recheck: recheckConnectivity }
+}
+
+/** Solo lectura del flag — para deshabilitar mutaciones mientras no haya red. */
+export function useIsOffline() {
+  useEffect(() => initConnectivity(), [])
+  return useConnectivityStore((s) => s.status === 'offline')
 }
