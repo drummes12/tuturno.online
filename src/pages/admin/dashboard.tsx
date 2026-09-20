@@ -146,15 +146,15 @@ function TodayGroup({
             {icon}
           </span>
           <div>
-            <h3 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+            <h3 className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text)'>
               {label}
             </h3>
-            <p className='text-[11px] text-text-muted nums'>
+            <p className='text-[11px] text-text-muted nums font-mono'>
               {first} – {last}
             </p>
           </div>
         </div>
-        <span className='rounded-full border border-border bg-surface-inset px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted nums dark:border-white/10 dark:bg-white/5'>
+        <span className='rounded-full border border-border bg-surface-inset px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted nums dark:border-white/10 dark:bg-white/5'>
           {reservations.length} turno{reservations.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -326,7 +326,7 @@ export function AdminDashboardPage() {
     <Page>
       {/* Header */}
       <div className='animate-fade-up'>
-        <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
+        <p className='text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
           {formatLocal(new Date().toISOString(), "EEEE d 'de' MMMM")}
         </p>
         <h1 className='text-2xl font-bold tracking-tight mt-1'>Operación</h1>
@@ -345,12 +345,12 @@ export function AdminDashboardPage() {
       <section data-tour='admin-pending-section'>
         <div className='flex items-center gap-2 mb-3'>
           <ClockIcon size={16} className='text-text-muted' />
-          <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
+          <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
             Solicitudes pendientes
           </h2>
           {sortedPending.length > 0 && (
-            <span className='flex items-center gap-1.5 ml-auto px-2.5 py-1 rounded-full bg-flood-500/15 text-yellow-800 dark:text-flood-300 font-mono text-[11px] font-medium uppercase tracking-[0.14em] border border-flood-500/40 nums whitespace-nowrap'>
-              <span className='w-1.5 h-1.5 rounded-full bg-flood-500 animate-pulse' />
+            <span className='flex items-center gap-1.5 ml-auto px-2.5 py-1 rounded-full bg-orange-500/15 text-orange-800 dark:text-orange-300 text-[11px] font-medium uppercase tracking-[0.14em] border border-orange-500/40 nums whitespace-nowrap'>
+              <span className='w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse' />
               {sortedPending.length}
             </span>
           )}
@@ -378,7 +378,7 @@ export function AdminDashboardPage() {
                 index={index}
                 tourKey={index === 0 ? 'admin-pending-card' : undefined}
                 meta={
-                  <span className='flex items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-yellow-800 dark:text-flood-300 nums'>
+                  <span className='flex items-center gap-1 text-[11px] font-medium uppercase tracking-[0.12em] text-orange-800 dark:text-orange-300 nums'>
                     <ClockIcon size={12} />
                     {waitLabel(r.created_at)}
                   </span>
@@ -484,7 +484,7 @@ export function AdminDashboardPage() {
       <section data-tour='admin-today-section'>
         <div className='flex items-center gap-2 mb-3'>
           <CalendarIcon size={16} className='text-text-muted' />
-          <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
+          <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
             Reservas de hoy
           </h2>
         </div>

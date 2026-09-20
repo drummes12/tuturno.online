@@ -95,7 +95,7 @@ export function AdminTeamPage() {
         style={{ animationDelay: '60ms' }}
         data-tour='admin-team-members'
       >
-        <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
+        <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
           Miembros ({members.length})
         </h2>
         <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm)'>
@@ -194,7 +194,7 @@ function InviteMemberForm({
 
   return (
     <section className='flex flex-col gap-3'>
-      <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
+      <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>
         Añadir manager
       </h2>
       <Card className='p-4 flex flex-col gap-3'>
@@ -322,7 +322,7 @@ function MemberRow({
             {member.role}
           </Badge>
           {isSelf && (
-            <span className='rounded-full bg-surface-inset px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+            <span className='rounded-full bg-surface-inset px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest text-text-muted'>
               Tú
             </span>
           )}
@@ -369,7 +369,7 @@ function MemberRow({
       )}
 
       {isOnlyOwner && (
-        <span className='ml-auto shrink-0 rounded-full bg-surface-inset px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+        <span className='ml-auto shrink-0 rounded-full bg-surface-inset px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest text-text-muted'>
           Único owner
         </span>
       )}

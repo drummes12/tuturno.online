@@ -339,7 +339,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
           kicker='Tu turno'
           badge={
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] ${
                 isAdmin
                   ? 'border-pitch-600/30 bg-pitch-100 text-pitch-800 dark:border-pitch-400/40 dark:bg-pitch-400/10 dark:text-pitch-300'
                   : 'border-orange-500/30 bg-orange-500/10 text-orange-700 dark:border-orange-400/40 dark:bg-orange-400/10 dark:text-orange-300'
@@ -411,7 +411,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
       <div className='flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start'>
         <Link
           href={slug ? `/b/${slug}` : '/'}
-          className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target rounded-lg'
+          className='flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target rounded-lg'
         >
           <ArrowLeftIcon size={14} />
           Disponibilidad
@@ -433,7 +433,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         <PitchTicket
           kicker='Tu turno'
           badge={
-            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-yellow-700 dark:border-flood-400/40 dark:text-flood-300'>
+            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 text-[11px] font-medium text-pitch-700 dark:border-flood-400/40 dark:text-flood-300'>
               Seleccionado
             </span>
           }
@@ -626,7 +626,7 @@ function DemoReservePreview({
       <div className='flex flex-col gap-4 lg:sticky lg:top-24 lg:self-start'>
         <Link
           href={slug ? `/b/${slug}` : '/'}
-          className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target rounded-lg'
+          className='flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors w-fit touch-target rounded-lg'
         >
           <ArrowLeftIcon size={14} />
           Disponibilidad
@@ -663,7 +663,7 @@ function DemoReservePreview({
         <PitchTicket
           kicker='Tu turno'
           badge={
-            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-yellow-700 dark:border-flood-400/40 dark:text-flood-300'>
+            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 text-[11px] font-medium text-pitch-700 dark:border-flood-400/40 dark:text-flood-300'>
               Seleccionado
             </span>
           }

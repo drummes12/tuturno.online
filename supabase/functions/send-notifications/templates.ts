@@ -90,55 +90,55 @@ const statusConfig: Record<
   pending: {
     label: 'Pendiente',
     icon: clockIcon(),
-    color: '#9a5b00',
-    background: '#fff5d8'
+    color: '#c2410c',
+    background: '#ffedd5'
   },
   confirmed: {
     label: 'Confirmada',
     icon: circleCheckIcon(),
-    color: '#087333',
-    background: '#e7f7ec'
+    color: '#0f7a4a',
+    background: '#d1fae5'
   },
   rejected: {
     label: 'Rechazada',
     icon: xIcon(),
-    color: '#a52a2a',
-    background: '#fdecec'
+    color: '#dc2626',
+    background: '#fee2e2'
   },
   cancelled: {
     label: 'Cancelada',
     icon: minusIcon(),
-    color: '#5c6a60',
-    background: '#eef2ef'
+    color: '#5f7168',
+    background: '#eef5f1'
   },
   expired: {
     label: 'Expirada',
     icon: clockIcon(),
-    color: '#5c6a60',
-    background: '#eef2ef'
+    color: '#5f7168',
+    background: '#eef5f1'
   }
 }
 
 const detailIcons = {
   business: {
     icon: buildingStoreIcon(),
-    color: '#087333',
-    background: '#e7f7ec'
+    color: '#0f7a4a',
+    background: '#d1fae5'
   },
-  resource: { icon: layoutGridIcon(), color: '#087333', background: '#e7f7ec' },
-  date: { icon: calendarIcon(), color: '#087333', background: '#e7f7ec' },
-  time: { icon: clockIcon(), color: '#087333', background: '#e7f7ec' },
-  client: { icon: userCircleIcon(), color: '#087333', background: '#e7f7ec' },
-  email: { icon: mailIcon(), color: '#087333', background: '#e7f7ec' },
-  reason: { icon: alertCircleIcon(), color: '#9a5b00', background: '#fff5d8' },
-  type: { icon: categoryIcon(), color: '#087333', background: '#e7f7ec' },
-  city: { icon: mapPinIcon(), color: '#087333', background: '#e7f7ec' },
-  phone: { icon: phoneIcon(), color: '#087333', background: '#e7f7ec' },
-  notes: { icon: noteIcon(), color: '#087333', background: '#e7f7ec' },
+  resource: { icon: layoutGridIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  date: { icon: calendarIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  time: { icon: clockIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  client: { icon: userCircleIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  email: { icon: mailIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  reason: { icon: alertCircleIcon(), color: '#c2410c', background: '#ffedd5' },
+  type: { icon: categoryIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  city: { icon: mapPinIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  phone: { icon: phoneIcon(), color: '#0f7a4a', background: '#d1fae5' },
+  notes: { icon: noteIcon(), color: '#0f7a4a', background: '#d1fae5' },
   publicLink: {
     icon: externalLinkIcon(),
-    color: '#087333',
-    background: '#e7f7ec'
+    color: '#0f7a4a',
+    background: '#d1fae5'
   }
 } satisfies Record<string, DetailIcon>
 
@@ -146,7 +146,8 @@ function formatTime(iso: string): string {
   return new Date(iso).toLocaleString('es-CO', {
     timeZone: 'America/Bogota',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    hour12: false
   })
 }
 
@@ -184,19 +185,15 @@ function escapeHtml(value: string): string {
 /** Mapea un hex de color al sufijo del archivo SVG hosted. */
 function colorSuffix(hex: string): string {
   switch (hex) {
-    case '#087333':
+    case '#0f7a4a':
       return 'green'
-    case '#0a7d3b':
+    case '#34d399':
       return 'green'
-    case '#9a5b00':
+    case '#c2410c':
       return 'amber'
-    case '#b91c1c':
+    case '#dc2626':
       return 'red'
-    case '#a52a2a':
-      return 'red'
-    case '#525f56':
-      return 'gray'
-    case '#5c6a60':
+    case '#5f7168':
       return 'gray'
     case '#ffffff':
       return 'white'
@@ -223,7 +220,7 @@ function inlineIcon(
 
 /** Badge superior de notificación — siempre verde TuTurno, consistente entre todos los correos. */
 function notificationBadge(badge: { label: string; icon: string }): string {
-  return `<span style="display:inline-block;padding:6px 12px;border-radius:8px;background-color:#e7f7ec;color:#087333;font-family:${SANS_FONT};font-size:12px;font-weight:700;line-height:1.2;">${inlineIcon(badge.icon, 14, 5, '#087333')}${escapeHtml(badge.label)}</span>`
+  return `<span style="display:inline-block;padding:6px 12px;border-radius:8px;background-color:#d1fae5;color:#0f7a4a;font-family:${SANS_FONT};font-size:12px;font-weight:700;line-height:1.2;">${inlineIcon(badge.icon, 14, 5, '#0f7a4a')}${escapeHtml(badge.label)}</span>`
 }
 
 /** Badge de estado de la reserva — color sutil según el estado, va dentro de la card. */
@@ -240,9 +237,9 @@ function detailRow(
 ): string {
   return `
     <tr>
-      <td width="38" style="padding:13px 0;border-bottom:1px solid #e8eeea;vertical-align:center;">${iconMarkup(icon, 26)}</td>
-      <td style="padding:13px 10px 13px 10px;border-bottom:1px solid #e8eeea;color:#718078;font-size:13px;line-height:1.45;width:36%;vertical-align:center;">${escapeHtml(label)}</td>
-      <td style="padding:13px 0;border-bottom:1px solid #e8eeea;color:#17211b;font-size:14px;font-weight:700;line-height:1.45;vertical-align:center;">${escapeHtml(value)}</td>
+      <td width="38" style="padding:13px 0;border-bottom:1px solid #e8f1ec;vertical-align:center;">${iconMarkup(icon, 26)}</td>
+      <td style="padding:13px 10px 13px 10px;border-bottom:1px solid #e8f1ec;color:#5f7168;font-size:13px;line-height:1.45;width:36%;vertical-align:center;">${escapeHtml(label)}</td>
+      <td style="padding:13px 0;border-bottom:1px solid #e8f1ec;color:#0b1f17;font-size:14px;font-weight:700;line-height:1.45;vertical-align:center;">${escapeHtml(value)}</td>
     </tr>`
 }
 
@@ -252,25 +249,23 @@ function detailTable(rows: string[]): string {
   const rowsHtml = visibleRows
     .map((row, index) =>
       index === visibleRows.length - 1
-        ? row.replaceAll('border-bottom:1px solid #e8eeea;', '')
+        ? row.replaceAll('border-bottom:1px solid #e8f1ec;', '')
         : row
     )
     .join('')
 
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dfe9e2;border-radius:14px;background-color:#f9fbfa;border-collapse:separate;border-spacing:0;width:100%;"><tr><td style="padding:4px 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${rowsHtml}</table></td></tr></table>`
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #dce7e1;border-radius:14px;background-color:#f7faf8;border-collapse:separate;border-spacing:0;width:100%;"><tr><td style="padding:4px 16px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${rowsHtml}</table></td></tr></table>`
 }
 
 /**
- * Stacks tipográficos del correo. Geist/Geist Mono se cargan vía @font-face
- * (hosteadas en /email-fonts) para los clientes que soportan web fonts —
+ * Stack tipográfico del correo. Inter se carga vía @font-face
+ * (hosteada en /email-fonts) para los clientes que soportan web fonts —
  * Apple Mail, iOS Mail, Outlook Mac, la mayoría de clientes móviles.
- * Gmail y Outlook de escritorio caen al fallback del sistema, que ya
- * comparte la forma geométrica de Geist.
+ * Gmail y Outlook de escritorio caen al fallback del sistema.
  */
 const SANS_FONT =
-  "'Geist','Geist Sans',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif"
-const MONO_FONT =
-  "'Geist Mono','SFMono-Regular','Consolas','Courier New',monospace"
+  "'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif"
+const MONO_FONT = "'SF Mono', 'Monaco', 'Courier New', monospace"
 
 /**
  * Papeleta de la reserva — card pitch-950 con la anatomía del scoreboard
@@ -293,27 +288,27 @@ function reservationTicket(
     : ''
   const resource = p.resource_name ?? ''
 
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="overflow:hidden;border:1px solid #123122;border-radius:14px;background-color:#04210f;border-collapse:separate;border-spacing:0;width:100%;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="overflow:hidden;border:1px solid #143326;border-radius:14px;background-color:#071510;border-collapse:separate;border-spacing:0;width:100%;">
     <tr>
-      <td style="padding:18px 20px 16px;background-color:#04210f;border-radius:13px;">
+      <td style="padding:18px 20px 16px;background-color:#071510;border-radius:13px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
           <tr>
-            <td style="font-family:${MONO_FONT};font-size:11px;font-weight:700;letter-spacing:2px;color:#4fd986;vertical-align:middle;">${escapeHtml(number)}</td>
+            <td style="font-family:${SANS_FONT};font-size:11px;font-weight:700;letter-spacing:2px;color:#34d399;vertical-align:middle;">${escapeHtml(number)}</td>
             <td align="right" style="vertical-align:middle;">${statusBadge(status)}</td>
           </tr>
         </table>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin-top:14px;">
           <tr>
-            <td style="font-family:${MONO_FONT};font-size:11px;letter-spacing:1.2px;color:#9fc9ac;">${escapeHtml(date)}</td>
-            <td align="right" style="font-family:${MONO_FONT};font-size:11px;font-weight:700;letter-spacing:1px;color:#fde047;">${mins ? `(${mins} MIN)` : ''}</td>
+            <td style="font-family:${SANS_FONT};font-size:11px;letter-spacing:1.2px;color:#9bafa5;">${escapeHtml(date)}</td>
+            <td align="right" style="font-family:${SANS_FONT};font-size:11px;font-weight:700;letter-spacing:1px;color:#6ee7b7;">${mins ? `(${mins} MIN)` : ''}</td>
           </tr>
         </table>
-        <div style="margin:8px 0 10px;text-align:center;font-family:${MONO_FONT};font-size:30px;font-weight:700;letter-spacing:1px;line-height:1.2;color:#f8faf7;text-transform:uppercase;">${escapeHtml(time)}</div>
-        <div style="border-top:1px solid #1c3a28;font-size:0;line-height:0;">&nbsp;</div>
+        <div style="margin:8px 0 10px;text-align:center;font-family:${MONO_FONT};font-size:30px;font-weight:800;letter-spacing:1px;line-height:1.2;color:#f2f8f5;text-transform:uppercase;font-variant-numeric:tabular-nums;">${escapeHtml(time)}</div>
+        <div style="border-top:1px solid #244136;font-size:0;line-height:0;">&nbsp;</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin-top:10px;">
           <tr>
-            <td style="font-size:14px;font-weight:700;color:#f8faf7;vertical-align:middle;">${inlineIcon(layoutGridIcon(), 15, 6, '#4fd986')}${escapeHtml(resource)}</td>
-            <td align="right" style="font-family:${MONO_FONT};font-size:10px;letter-spacing:1.6px;color:#7fb894;vertical-align:middle;">TURNO</td>
+            <td style="font-size:14px;font-weight:700;color:#f2f8f5;vertical-align:middle;">${inlineIcon(layoutGridIcon(), 15, 6, '#34d399')}${escapeHtml(resource)}</td>
+            <td align="right" style="font-family:${SANS_FONT};font-size:10px;font-weight:700;letter-spacing:1.6px;color:#9bafa5;vertical-align:middle;">TURNO</td>
           </tr>
         </table>
       </td>
@@ -331,15 +326,15 @@ function sectionCard(title: string, rows: string[]): string {
   const rowsHtml = visibleRows
     .map((row, index) =>
       index === visibleRows.length - 1
-        ? row.replaceAll('border-bottom:1px solid #e8eeea;', '')
+        ? row.replaceAll('border-bottom:1px solid #e8f1ec;', '')
         : row
     )
     .join('')
 
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;border:1px solid #dfe9e2;border-radius:14px;background-color:#f9fbfa;border-collapse:separate;border-spacing:0;width:100%;">
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;border:1px solid #dce7e1;border-radius:14px;background-color:#f7faf8;border-collapse:separate;border-spacing:0;width:100%;">
     <tr>
       <td style="padding:12px 16px 14px;">
-        <div style="margin-bottom:4px;font-family:${MONO_FONT};font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#5c6a60;">${escapeHtml(title)}</div>
+        <div style="margin-bottom:4px;font-family:${SANS_FONT};font-size:10px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#5f7168;">${escapeHtml(title)}</div>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;">${rowsHtml}</table>
       </td>
     </tr>
@@ -352,7 +347,7 @@ function ctaButton(href: string, label: string): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
       <tr>
         <td style="padding:0 8px;">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:340px;margin:0 auto;background-color:#0a7d3b;border-radius:10px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:340px;margin:0 auto;background-color:#0f7a4a;border-radius:10px;">
             <tr>
               <td align="center" style="padding:14px 24px;border-radius:10px;">
                 <a href="${escapeHtml(href)}" target="_blank" style="display:block;width:100%;font-family:${SANS_FONT};font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;box-sizing:border-box;">${inlineIcon(calendarIcon(), 16, 8, '#ffffff')}${escapeHtml(label)}</a>
@@ -366,10 +361,10 @@ function ctaButton(href: string, label: string): string {
 
 function whatsappContact(href: string, label: string): string {
   return `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:14px;background-color:#f5faf7;border-collapse:separate;width:100%;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-radius:14px;background-color:#eef5f1;border-collapse:separate;width:100%;">
       <tr>
         <td style="padding:18px 16px;text-align:center;">
-          <p style="margin:0 0 14px;font-family:${SANS_FONT};font-size:13px;color:#31583d;line-height:1.45;">${escapeHtml(label)}</p>
+          <p style="margin:0 0 14px;font-family:${SANS_FONT};font-size:13px;color:#0f7a4a;line-height:1.45;">${escapeHtml(label)}</p>
           <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto;">
             <tr>
               <td bgcolor="#25D366" style="border-radius:9px;">
@@ -399,7 +394,7 @@ function wrapWhatsAppLink(appUrl: string, href: string): string {
 function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
   const { preheader, badge, heading, description, bodyHtml, cta, whatsapp } =
     opts
-  const logoUrl = link(appUrl, '/logo-mark.svg')
+  const logoUrl = link(appUrl, '/android-chrome-192x192.png')
   const year = new Date().getFullYear()
   return `<!DOCTYPE html>
 <html lang="es">
@@ -410,60 +405,46 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
   <!--[if !mso]><!-->
   <style>
     @font-face {
-      font-family: 'Geist';
+      font-family: 'Inter';
       font-style: normal;
       font-weight: 400;
       font-display: swap;
-      src: url('${link(appUrl, '/email-fonts/geist-sans-latin-400-normal.woff2')}') format('woff2');
+      src: url('${link(appUrl, '/email-fonts/inter-latin-400-normal.woff2')}') format('woff2');
     }
     @font-face {
-      font-family: 'Geist';
+      font-family: 'Inter';
       font-style: normal;
       font-weight: 700;
       font-display: swap;
-      src: url('${link(appUrl, '/email-fonts/geist-sans-latin-700-normal.woff2')}') format('woff2');
+      src: url('${link(appUrl, '/email-fonts/inter-latin-700-normal.woff2')}') format('woff2');
     }
     @font-face {
-      font-family: 'Geist';
+      font-family: 'Inter';
       font-style: normal;
       font-weight: 800;
       font-display: swap;
-      src: url('${link(appUrl, '/email-fonts/geist-sans-latin-800-normal.woff2')}') format('woff2');
-    }
-    @font-face {
-      font-family: 'Geist Mono';
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url('${link(appUrl, '/email-fonts/geist-mono-latin-400-normal.woff2')}') format('woff2');
-    }
-    @font-face {
-      font-family: 'Geist Mono';
-      font-style: normal;
-      font-weight: 700;
-      font-display: swap;
-      src: url('${link(appUrl, '/email-fonts/geist-mono-latin-700-normal.woff2')}') format('woff2');
+      src: url('${link(appUrl, '/email-fonts/inter-latin-800-normal.woff2')}') format('woff2');
     }
   </style>
   <!--<![endif]-->
 </head>
-<body style="margin:0;padding:0;background-color:#f3f6f4;font-family:${SANS_FONT};color:#17211b;">
+<body style="margin:0;padding:0;background-color:#f7faf8;font-family:${SANS_FONT};color:#0b1f17;">
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">${escapeHtml(preheader)}</div>
 
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f3f6f4;width:100%;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7faf8;width:100%;">
     <tr>
       <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #e1e9e3;border-radius:16px;overflow:hidden;">
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid #dce7e1;border-radius:16px;overflow:hidden;">
         <tr>
-          <td style="padding:26px 28px;background-color:#0a7d3b;background-image:linear-gradient(135deg,#0a7d3b 0%,#0d9c4a 100%);">
+          <td style="padding:26px 28px;background-color:#0f7a4a;background-image:linear-gradient(135deg,#34d399 0%,#0f7a4a 100%);">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
               <tr>
                 <td width="40" style="vertical-align:middle;">
-                  <img src="${escapeHtml(logoUrl)}" alt="TuTurno" width="36" height="36" style="display:block;border:0;border-radius:9px;background-color:#f8faf7;padding:3px;box-sizing:border-box;">
+                  <img src="${escapeHtml(logoUrl)}" alt="TuTurno" width="36" height="36" style="display:block;border:0;border-radius:9px;background-color:#f2f8f5;padding:3px;box-sizing:border-box;">
                 </td>
                 <td style="padding-left:10px;vertical-align:middle;">
                   <div style="font-family:${SANS_FONT};font-size:20px;font-weight:800;letter-spacing:-0.4px;line-height:1.15;color:#ffffff;">TuTurno</div>
-                  <div style="font-family:${SANS_FONT};font-size:12px;font-weight:400;letter-spacing:0.2px;line-height:1.3;color:#d9f2e1;margin-top:2px;">Reservas que funcionan</div>
+                  <div style="font-family:${SANS_FONT};font-size:12px;font-weight:400;letter-spacing:0.2px;line-height:1.3;color:#d1fae5;margin-top:2px;">Reservas que funcionan</div>
                 </td>
               </tr>
             </table>
@@ -472,18 +453,18 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
           <tr>
             <td style="padding:28px 28px;">
               <div style="margin-bottom:16px;">${notificationBadge(badge)}</div>
-              <h1 style="margin:0 0 8px;font-family:${SANS_FONT};font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.25;color:#0a5226;">${escapeHtml(heading)}</h1>
-              ${description ? `<p style="margin:0 0 20px;font-family:${SANS_FONT};font-size:14px;color:#5b6a60;line-height:1.55;">${description}</p>` : ''}
+              <h1 style="margin:0 0 8px;font-family:${SANS_FONT};font-size:22px;font-weight:800;letter-spacing:-0.5px;line-height:1.25;color:#07321f;">${escapeHtml(heading)}</h1>
+              ${description ? `<p style="margin:0 0 20px;font-family:${SANS_FONT};font-size:14px;color:#5f7168;line-height:1.55;">${description}</p>` : ''}
               ${bodyHtml}
             </td>
           </tr>
           ${cta ? `<tr><td align="center" style="padding:8px 12px 28px;"><table role="presentation" align="center" cellpadding="0" cellspacing="0" style="width:100%;"><tr><td align="center">${ctaButton(cta.href, cta.label)}</td></tr></table></td></tr>` : ''}
           ${whatsapp ? `<tr><td style="padding:12px 28px">${whatsappContact(wrapWhatsAppLink(appUrl, whatsapp.href), whatsapp.label)}</td></tr>` : ''}
           <tr>
-            <td align="center" style="padding:25px 28px 28px;border-top:1px solid #e8eeea;text-align:center;">
-              <p style="margin:0 auto;font-family:${SANS_FONT};font-size:12px;color:#9aa59d;line-height:1.6;text-align:center;max-width:40ch;">Este correo fue enviado por TuTurno. Si crees que llegó por error, puedes ignorarlo.</p>
-              <a href="${escapeHtml(appUrl)}" style="display:inline-block;margin-top:7px;font-family:${SANS_FONT};font-size:12px;color:#0a7d3b;text-decoration:none;font-weight:700;">tuturno.online</a>
-              <p style="margin:7px 0 0;font-family:${SANS_FONT};font-size:12px;color:#7b887f;line-height:1.6;text-align:center;">&copy; ${year} TuTurno. Todos los derechos reservados.</p>
+            <td align="center" style="padding:25px 28px 28px;border-top:1px solid #e8f1ec;text-align:center;">
+              <p style="margin:0 auto;font-family:${SANS_FONT};font-size:12px;color:#82968c;line-height:1.6;text-align:center;max-width:40ch;">Este correo fue enviado por TuTurno. Si crees que llegó por error, puedes ignorarlo.</p>
+              <a href="${escapeHtml(appUrl)}" style="display:inline-block;margin-top:7px;font-family:${SANS_FONT};font-size:12px;color:#0f7a4a;text-decoration:none;font-weight:700;">tuturno.online</a>
+              <p style="margin:7px 0 0;font-family:${SANS_FONT};font-size:12px;color:#5f7168;line-height:1.6;text-align:center;">&copy; ${year} TuTurno. Todos los derechos reservados.</p>
             </td>
           </tr>
         </table>

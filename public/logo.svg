@@ -1,30 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" fill="none">
-  <!-- Logo mark: clock in rounded square -->
-  <rect x="40" y="40" width="240" height="240" rx="56" fill="#0a5226"/>
+  <defs>
+    <mask id="hands" maskUnits="userSpaceOnUse" x="238.373" y="225.949" width="180" height="180">
+      <circle cx="328.373" cy="315.949" r="82" fill="#fff"/>
+      <path d="M328.373 315.949v-43M328.373 315.949l36.373-21" stroke="#000" stroke-width="13" stroke-linecap="round"/>
+    </mask>
+  </defs>
 
-  <!-- Clock face -->
-  <circle cx="160" cy="160" r="72" fill="#f8faf7"/>
-  <circle cx="160" cy="160" r="66" fill="none" stroke="#e2e8e0" stroke-width="3"/>
-
-  <!-- Hour marks -->
-  <rect x="157" y="100" width="6" height="12" rx="2" fill="#2c342f"/>
-  <rect x="208" y="157" width="12" height="6" rx="2" fill="#2c342f"/>
-  <rect x="157" y="208" width="6" height="12" rx="2" fill="#2c342f"/>
-  <rect x="100" y="157" width="12" height="6" rx="2" fill="#2c342f"/>
-
-  <!-- Hands -->
-  <line x1="160" y1="160" x2="128" y2="128" stroke="#0a5226" stroke-width="8" stroke-linecap="round"/>
-  <line x1="160" y1="160" x2="204" y2="136" stroke="#0a7d3b" stroke-width="6" stroke-linecap="round"/>
-
-  <!-- Center dot -->
-  <circle cx="160" cy="160" r="10" fill="#facc15"/>
-  <circle cx="160" cy="160" r="5" fill="#0a5226"/>
+  <!-- Logo mark: glifo calendario + reloj (500×500 → 240) -->
+  <g transform="translate(40 40) scale(0.48)">
+    <path d="M179.57 119v33.35M316.11 119v33.35" stroke="#0f7a4a" stroke-width="26" stroke-linecap="round"/>
+    <path fill="#0f7a4a" d="M127.59 140h18.98a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h70.54a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h18.98a30 30 0 0 1 30 30v63.465a108 108 0 0 0-69.717-25.516H154.59a14 14 0 0 0-14 14V333.5a14 14 0 0 0 14 14h64.734a8 8 0 0 1 7.52 5.272 108 108 0 0 0 13.071 25.138 8 8 0 0 1-6.552 12.59H127.59a30 30 0 0 1-30-30V170a30 30 0 0 1 30-30"/>
+    <circle cx="328.373" cy="315.949" r="82" fill="#0f7a4a" mask="url(#hands)"/>
+  </g>
 
   <!-- Wordmark: TuTurno -->
-  <text x="320" y="180" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="96" font-weight="800" fill="#0a5226" letter-spacing="-3">
-    Tu<tspan fill="#0a7d3b">Turno</tspan>
+  <text x="330" y="198" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="104" font-weight="800" fill="#0b1f17" letter-spacing="-4">
+    Tu<tspan fill="#0f7a4a">Turno</tspan>
   </text>
-
-  <!-- Accent dot after the name -->
-  <circle cx="760" cy="150" r="10" fill="#facc15"/>
 </svg>

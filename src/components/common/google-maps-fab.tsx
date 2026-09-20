@@ -61,7 +61,7 @@ export function GoogleMapsFab({ businessId }: GoogleMapsFabProps = {}) {
       href={googleMapsLink(address)}
       target='_blank'
       rel='noopener noreferrer'
-      className='flex items-center justify-center w-12 h-12 rounded-full bg-(--color-primary) text-white shadow-lg hover:bg-(--color-primary-hover) hover:shadow-xl active:scale-95 transition-all duration-200 ease-spring md:hidden'
+      className='flex items-center justify-center w-12 h-12 rounded-full bg-primary text-on-primary shadow-lg hover:bg-primary-hover hover:shadow-xl active:scale-95 transition-all duration-200 ease-spring md:hidden'
       aria-label='Abrir ubicación en Google Maps'
       title='Cómo llegar'
     >

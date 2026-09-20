@@ -8,82 +8,87 @@
 
 /* ─────────────────────────────────────────────────────────────
    Design tokens — TuTurno
-   Mundo de color: cancha de fútbol, líneas blancas, iluminación
-   nocturna, señales de juego. No es un dashboard SaaS genérico.
+   Identidad: calendario + reloj, verde como color principal,
+   profundidad por fondo + borde + contraste (sombras muy leves).
+   Rampa pitch anclada en la spec: #0F7A4A (primary), #22B978
+   (primary strong dark) y #34D399 (primary light / dark primary).
    ───────────────────────────────────────────────────────────── */
 @theme {
-  /* Surfaces */
-  --color-pitch-950: #04210f;
-  --color-pitch-900: #063b1c;
-  --color-pitch-800: #0a5226;
-  --color-pitch-700: #0a7d3b;
-  --color-pitch-600: #109e4e;
-  --color-pitch-500: #1bbf63;
-  --color-pitch-400: #4fd986;
-  --color-pitch-300: #8eebb1;
-  --color-pitch-200: #c4f5d8;
-  --color-pitch-100: #e3faec;
+  /* Brand green ramp */
+  --color-pitch-950: #03140d;
+  --color-pitch-900: #07321f;
+  --color-pitch-800: #0a4a30;
+  --color-pitch-700: #0f7a4a;
+  --color-pitch-600: #15975c;
+  --color-pitch-500: #22b978;
+  --color-pitch-400: #34d399;
+  --color-pitch-300: #6ee7b7;
+  --color-pitch-200: #a7f3d0;
+  --color-pitch-100: #d1fae5;
 
-  /* Lines / chalk */
-  --color-chalk: #f8faf7;
-  --color-chalk-dim: #e2e8e0;
+  /* Chalk — texto claro sobre paneles oscuros */
+  --color-chalk: #f2f8f5;
+  --color-chalk-dim: #9bafa5;
 
-  /* Night floodlight */
-  --color-flood-500: #facc15;
-  --color-flood-400: #fde047;
-  --color-flood-300: #fef08a;
+  /* Accent mint — highlights de marca (beams, glows, focus) */
+  --color-flood-500: #34d399;
+  --color-flood-400: #6ee7b7;
+  --color-flood-300: #a7f3d0;
 
-  /* Play signals */
+  /* Señales funcionales — rojo solo para errores/destructivo */
   --color-signal-red: #dc2626;
   --color-signal-orange: #ea580c;
   --color-signal-blue: #2563eb;
 
-  /* Graphite / dark surfaces — warm-tinted, not pure gray */
-  --color-graphite-900: #141817;
-  --color-graphite-800: #1f2522;
-  --color-graphite-700: #2c342f;
-  --color-graphite-600: #3d4640;
-  --color-graphite-500: #5a655d;
-  --color-graphite-400: #828c84;
-  --color-graphite-300: #aab3ab;
-  --color-graphite-200: #cdd5cd;
-  --color-graphite-100: #e6eae5;
+  /* Neutros con tinte verde */
+  --color-graphite-900: #0b1f17;
+  --color-graphite-800: #163025;
+  --color-graphite-700: #2c4a3c;
+  --color-graphite-600: #476358;
+  --color-graphite-500: #5f7168;
+  --color-graphite-400: #82968c;
+  --color-graphite-300: #aabcb2;
+  --color-graphite-200: #cedbd3;
+  --color-graphite-100: #e8f1ec;
 
   /* Semantic */
-  --color-surface: var(--color-chalk);
+  --color-surface: #f7faf8;
   --color-surface-elevated: #ffffff;
-  --color-surface-inset: #f1f5f1;
+  --color-surface-inset: #eef5f1;
   --color-text: var(--color-graphite-900);
   --color-text-muted: var(--color-graphite-500);
-  --color-border: rgba(20, 24, 23, 0.08);
-  --color-border-strong: rgba(20, 24, 23, 0.16);
+  --color-border: #dce7e1;
+  --color-border-strong: #bfd2c7;
   --color-primary: var(--color-pitch-700);
-  --color-primary-hover: var(--color-pitch-800);
+  --color-primary-hover: #0c633c;
+  --color-on-primary: #ffffff;
   --color-accent: var(--color-flood-500);
-  --color-success: var(--color-pitch-600);
+  --color-success: var(--color-pitch-700);
   --color-warning: var(--color-signal-orange);
   --color-danger: var(--color-signal-red);
   --color-info: var(--color-signal-blue);
 
-  /* Typography — Geist: geometric, characterful, not generic AI Inter */
-  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* Typography — Inter, familia principal de la marca */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Radius — varied, not uniform */
+  /* Radius — escala del design system: cards/contenedores 1.25rem,
+     modales 1.25–1.5rem, botones 0.75–1rem, inputs 0.75rem,
+     pills 9999px, FAB circular */
   --radius-xs: 0.25rem;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
   --radius-xl: 1.25rem;
-  --radius-2xl: 1.75rem;
+  --radius-2xl: 1.5rem;
 
-  /* Shadows — tinted with graphite hue, not pure black */
-  --shadow-xs: 0 1px 2px rgba(20, 24, 23, 0.04);
-  --shadow-sm: 0 1px 3px rgba(20, 24, 23, 0.06), 0 1px 2px rgba(20, 24, 23, 0.03);
-  --shadow-md: 0 4px 12px rgba(20, 24, 23, 0.08), 0 2px 4px rgba(20, 24, 23, 0.04);
-  --shadow-lg: 0 10px 28px rgba(20, 24, 23, 0.10), 0 4px 8px rgba(20, 24, 23, 0.05);
-  --shadow-pitch: 0 4px 16px rgba(10, 125, 59, 0.18);
-  --shadow-flood: 0 4px 16px rgba(250, 204, 21, 0.20);
+  /* Shadows — muy ligeras: la profundidad viene de fondo + borde */
+  --shadow-xs: 0 1px 2px rgba(11, 31, 23, 0.05);
+  --shadow-sm: 0 1px 2px rgba(11, 31, 23, 0.05), 0 1px 3px rgba(11, 31, 23, 0.04);
+  --shadow-md: 0 4px 12px rgba(11, 31, 23, 0.06), 0 1px 3px rgba(11, 31, 23, 0.04);
+  --shadow-lg: 0 12px 32px rgba(11, 31, 23, 0.08), 0 4px 10px rgba(11, 31, 23, 0.04);
+  --shadow-pitch: 0 4px 14px rgba(15, 122, 74, 0.2);
+  --shadow-flood: 0 4px 16px rgba(52, 211, 153, 0.25);
 
   /* Motion — spring physics, not linear */
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
@@ -92,28 +97,29 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Tema oscuro — la misma cancha, de noche. Superficies grafito
-   cálidas, el pitch sube a acento luminoso, el floodlight gana
-   peso como señal. Nada de negro puro.
+   Tema oscuro — superficies verde-grafito profundas, el primario
+   sube a mint luminoso (#34D399) y el texto on-primary pasa a
+   oscuro. Nada de negro puro.
    ───────────────────────────────────────────────────────────── */
 .dark {
-  --color-surface: #0f1512;
-  --color-surface-elevated: #18201b;
-  --color-surface-inset: #121a15;
-  --color-text: #edf1ea;
-  --color-text-muted: #93a096;
-  --color-border: rgba(237, 241, 234, 0.09);
-  --color-border-strong: rgba(237, 241, 234, 0.18);
-  --color-primary: var(--color-pitch-500);
-  --color-primary-hover: var(--color-pitch-400);
+  --color-surface: #071510;
+  --color-surface-elevated: #0d2119;
+  --color-surface-inset: #143326;
+  --color-text: #f2f8f5;
+  --color-text-muted: #9bafa5;
+  --color-border: #244136;
+  --color-border-strong: #35574a;
+  --color-primary: var(--color-pitch-400);
+  --color-primary-hover: var(--color-pitch-500);
+  --color-on-primary: #071510;
   --color-success: var(--color-pitch-500);
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.45), 0 4px 8px rgba(0, 0, 0, 0.3);
-  --shadow-pitch: 0 4px 16px rgba(27, 191, 99, 0.22);
-  --shadow-flood: 0 4px 16px rgba(250, 204, 21, 0.18);
+  --shadow-pitch: 0 4px 16px rgba(52, 211, 153, 0.22);
+  --shadow-flood: 0 4px 16px rgba(52, 211, 153, 0.18);
 
   color-scheme: dark;
 }
@@ -124,7 +130,7 @@
    (Safari estable) el header queda siempre como píldora.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --header-pill-bg: rgb(6 59 28 / 0.8);
+  --header-pill-bg: rgb(7 50 31 / 0.95);
   --header-pill-border: rgb(255 255 255 / 0.12);
   /* Debe coincidir con el max-w-5xl del contenido: la animación
      sobrescribe la clase (así funciona scroll-driven), el valor no. */
@@ -132,7 +138,7 @@
 }
 
 .dark {
-  --header-pill-bg: rgb(20 24 23 / 0.75);
+  --header-pill-bg: rgb(11 31 23 / 0.8);
   --header-pill-border: rgb(255 255 255 / 0.1);
 }
 
@@ -243,10 +249,11 @@ body {
   }
 }
 
-/* Utility: touch target minimum */
+/* Utility: touch target minimum + tap sin delay ni zoom accidental */
 .touch-target {
   min-width: 44px;
   min-height: 44px;
+  touch-action: manipulation;
 }
 
 /* Altura del bottom nav de mobile — la define el layout y la consumen
@@ -505,7 +512,7 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background-color: var(--color-surface-inset);
   padding: 0.75rem 1rem;
@@ -590,7 +597,7 @@ body {
 
 /* ─────────────────────────────────────────────────────────────
    Tutorial guiado — Driver.js overrides
-   Coherente con la identidad TuTurno (pitch green, Geist)
+   Coherente con la identidad TuTurno (verde de marca, Inter)
    ───────────────────────────────────────────────────────────── */
 .tuturno-tutorial-popover {
   --driver-popover-color: var(--color-text);
@@ -600,7 +607,7 @@ body {
   box-sizing: border-box;
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg);
   font-family: var(--font-sans);
 }
@@ -658,7 +665,7 @@ body {
   width: auto;
   min-height: 44px;
   min-width: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   font-weight: 600;
   font-size: 0.875rem;
   line-height: 1.2;

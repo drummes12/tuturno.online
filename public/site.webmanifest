@@ -1,13 +1,13 @@
 {
-  "name": "TuTurno — Reservas online",
+  "name": "TuTurno — Turnos y reservas para tu negocio",
   "short_name": "TuTurno",
-  "description": "Plataforma de reservas online para canchas, salas, consultorios y más.",
+  "description": "Gestiona tus turnos y reservas de forma simple, rápida y eficiente.",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f8faf7",
-  "theme_color": "#0a5226",
+  "background_color": "#f7faf8",
+  "theme_color": "#0f7a4a",
   "lang": "es",
   "shortcuts": [
     {
@@ -67,9 +67,9 @@
       "type": "image/png"
     },
     {
-      "src": "/android-chrome-maskable.svg",
+      "src": "/android-chrome-maskable-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ]

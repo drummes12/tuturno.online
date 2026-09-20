@@ -1,4 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
-  <circle cx="48" cy="48" r="31" stroke="#ffffff" stroke-width="8" />
-  <path d="M48 28v21l14 9" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Badge monocromático para notificaciones push: silueta blanca
+       del glifo (Android solo usa el canal alfa; las agujas quedan
+       en negativo). Glifo 500×500 escalado a 96. -->
+  <defs>
+    <mask id="hands" maskUnits="userSpaceOnUse" x="45.8" y="43.4" width="34.6" height="34.6">
+      <circle cx="63.1" cy="60.7" r="15.7" fill="#fff"/>
+      <path d="M63.1 60.7v-8.26M63.1 60.7l6.98-4.03" stroke="#000" stroke-width="2.5" stroke-linecap="round"/>
+    </mask>
+  </defs>
+
+  <g transform="scale(0.192)">
+    <path d="M179.57 119v33.35M316.11 119v33.35" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <path fill="#ffffff" d="M127.59 140h18.98a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h70.54a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h18.98a30 30 0 0 1 30 30v63.465a108 108 0 0 0-69.717-25.516H154.59a14 14 0 0 0-14 14V333.5a14 14 0 0 0 14 14h64.734a8 8 0 0 1 7.52 5.272 108 108 0 0 0 13.071 25.138 8 8 0 0 1-6.552 12.59H127.59a30 30 0 0 1-30-30V170a30 30 0 0 1 30-30"/>
+  </g>
+  <circle cx="63.07" cy="60.66" r="15.74" fill="#ffffff" mask="url(#hands)"/>
 </svg>

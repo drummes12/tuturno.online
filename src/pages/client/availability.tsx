@@ -286,7 +286,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             {business.name}
           </h1>
           <div className='flex gap-2'>
-            <div className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted bg-surface-inset px-3 py-1.5 rounded-full'>
+            <div className='flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-text-muted bg-surface-inset px-3 py-1.5 rounded-full'>
               <CalendarIcon size={14} />
               <span className='nums'>{resources.length}</span>
               <span>{resourceLabels.plural.toLowerCase()}</span>
@@ -294,12 +294,12 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             {!loading &&
               slots.length > 0 &&
               (availableTotal > 0 ? (
-                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-pitch-500/40 bg-pitch-500/10 px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 nums dark:border-pitch-400/30 dark:text-pitch-300'>
+                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-pitch-500/40 bg-pitch-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 nums dark:border-pitch-400/30 dark:text-pitch-300'>
                   <CheckIcon size={12} />
                   {availableTotal}
                 </span>
               ) : (
-                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-border bg-surface-inset px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted'>
+                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-border bg-surface-inset px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted'>
                   <XIcon size={12} />-
                 </span>
               ))}
@@ -309,7 +309,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
           <p className='flex-1 text-sm text-(--color-text-muted) capitalize'>
             {dateLabel}
           </p>
-          <span className='flex items-center gap-1.5 font-mono text-[10px] whitespace-nowrap font-medium uppercase tracking-[0.14em] text-pitch-600 dark:text-pitch-400'>
+          <span className='flex items-center gap-1.5 text-[10px] whitespace-nowrap font-medium uppercase tracking-[0.14em] text-pitch-600 dark:text-pitch-400'>
             <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-500 dark:bg-pitch-400' />
             En vivo
           </span>
@@ -332,7 +332,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                 <MapPinIcon size={18} />
               </div>
               <div className='flex-1 min-w-0'>
-                <h3 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) mb-0.5'>
+                <h3 className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) mb-0.5'>
                   Cómo llegar
                 </h3>
                 <p className='truncate text-sm font-medium'>
@@ -394,17 +394,17 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                 onClick={() => setSelectedDate(dateStr)}
                 className={`flex flex-col items-center justify-center min-w-16 py-2.5 px-3 rounded-xl border transition-all duration-200 ease-spring touch-target snap-start ${
                   isSelected
-                    ? 'bg-(--color-primary) text-white border-transparent shadow-(--shadow-pitch) scale-105 dark:text-pitch-950'
+                    ? 'bg-(--color-primary) text-on-primary border-transparent shadow-(--shadow-pitch) scale-105'
                     : 'bg-surface-elevated text-(--color-text) border-border hover:border-border-strong hover:shadow-sm'
                 }`}
               >
-                <span className='font-mono text-[10px] font-medium uppercase tracking-[0.14em] opacity-80'>
+                <span className='text-[10px] font-medium uppercase tracking-[0.14em] opacity-80'>
                   {isToday ? 'Hoy' : format(d, 'EEE', { locale: es })}
                 </span>
                 <span className='text-lg font-bold nums mt-0.5'>
                   {format(d, 'd')}
                 </span>
-                <span className='font-mono text-[10px] uppercase tracking-wider opacity-70'>
+                <span className='text-[10px] uppercase tracking-wider opacity-70'>
                   {format(d, 'MMM', { locale: es })}
                 </span>
               </button>
@@ -426,9 +426,9 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
               <button
                 key={resource.id}
                 onClick={() => setSelectedResource(resource.id)}
-                className={`px-4 py-2 rounded-full font-mono text-xs uppercase tracking-[0.12em] border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
+                className={`px-4 py-2 rounded-full text-xs uppercase tracking-[0.12em] border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
                   isSelected
-                    ? 'bg-(--color-primary) text-white border-transparent shadow-(--shadow-pitch) dark:text-pitch-950'
+                    ? 'bg-(--color-primary) text-on-primary border-transparent shadow-(--shadow-pitch)'
                     : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-border-strong hover:text-(--color-text)'
                 }`}
               >
@@ -476,7 +476,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                       {group.icon}
                     </span>
                     <div>
-                      <h3 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+                      <h3 className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text)'>
                         {group.label}
                       </h3>
                       <p className='text-[11px] text-text-muted nums'>
@@ -485,7 +485,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                     </div>
                   </div>
                   {availableCount > 0 && (
-                    <span className='rounded-full border border-pitch-500/40 bg-pitch-500/10 px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 nums dark:border-pitch-400/30 dark:text-pitch-300'>
+                    <span className='rounded-full border border-pitch-500/40 bg-pitch-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 nums dark:border-pitch-400/30 dark:text-pitch-300'>
                       {availableCount} libre{availableCount !== 1 ? 's' : ''}
                     </span>
                   )}
@@ -514,7 +514,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                       const chipClass = {
                         available:
                           'border-pitch-500/40 bg-pitch-500/10 text-pitch-700 dark:border-pitch-400/40 dark:bg-pitch-400/10 dark:text-pitch-300',
-                        held: 'border-flood-500/40 bg-flood-500/10 text-yellow-700 dark:border-flood-400/40 dark:text-flood-300',
+                        held: 'border-orange-500/40 bg-orange-500/10 text-orange-700 dark:border-orange-400/40 dark:text-orange-300',
                         reserved:
                           'border-border bg-surface-inset text-text-muted dark:border-white/10 dark:bg-white/5 dark:text-white/40',
                         blocked:
@@ -529,10 +529,10 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
 
                       const row = (
                         <>
-                          <span className='nums w-12 font-mono text-sm font-semibold text-(--color-text) dark:text-chalk'>
+                          <span className='nums font-mono w-12 text-sm font-semibold text-(--color-text) dark:text-chalk'>
                             {time}
                           </span>
-                          <span className='flex-1 text-sm text-(--color-text-muted) nums dark:text-chalk-dim/70'>
+                          <span className='flex-1 text-sm text-(--color-text-muted) nums font-mono dark:text-chalk-dim/70'>
                             {differenceInMinutes(
                               parseISO(slot.ends_at),
                               parseISO(slot.starts_at)
@@ -540,7 +540,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                             min
                           </span>
                           <span
-                            className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-medium ${chipClass}`}
+                            className={`rounded-md border px-2 py-0.5 text-[11px] font-medium ${chipClass}`}
                           >
                             {chipLabel}
                           </span>

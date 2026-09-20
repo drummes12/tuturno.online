@@ -360,10 +360,10 @@ describe('Email templates', () => {
       for (const name of templateNames) {
         const { html } = templates[name](validPayload)
         expect(html).toContain('TuTurno')
-        expect(html).toContain(`${APP_URL}/logo-mark.svg`)
+        expect(html).toContain(`${APP_URL}/android-chrome-192x192.png`)
         expect(html).not.toContain('Reservas simples')
         expect(html).not.toContain('Tu tiempo, en orden.')
-        expect(html).toContain('#0a5226') // TuTurno name + heading color
+        expect(html).toContain('#07321f') // TuTurno heading color
       }
     })
 
@@ -371,8 +371,8 @@ describe('Email templates', () => {
       for (const name of templateNames) {
         const { html } = templates[name](validPayload)
         // El badge siempre usa el verde TuTurno como base
-        expect(html).toContain('background-color:#e7f7ec')
-        expect(html).toContain('color:#087333')
+        expect(html).toContain('background-color:#d1fae5')
+        expect(html).toContain('color:#0f7a4a')
       }
     })
 
@@ -395,8 +395,8 @@ describe('Email templates', () => {
     it('cada plantilla incluye al menos un botón CTA', () => {
       for (const name of templateNames) {
         const { html } = templates[name](validPayload)
-        // El botón CTA usa background-color:#0a7d3b (pitch-700)
-        expect(html).toContain('#0a7d3b')
+        // El botón CTA usa background-color:#0f7a4a (primario de marca)
+        expect(html).toContain('#0f7a4a')
         expect(html).toContain('target="_blank"')
         expect(html).toMatch(
           /<a href="[^"]+" target="_blank"[^>]*>\s*<img[^>]+src="[^"]*\/email-icons\//
@@ -406,7 +406,7 @@ describe('Email templates', () => {
 
     it('usa una card dividida con iconos para los datos', () => {
       const { html } = templates.reservation_confirmed(validPayload)
-      expect(html).toContain('border:1px solid #dfe9e2')
+      expect(html).toContain('border:1px solid #dce7e1')
       expect(html).toContain('/email-icons/')
     })
 
@@ -439,7 +439,7 @@ describe('Email templates', () => {
       expect(lastRow).toBeDefined()
       for (const cell of lastRow?.querySelectorAll('td') ?? []) {
         const style = cell.getAttribute('style') ?? ''
-        expect(style).not.toContain('border-bottom:1px solid #e8eeea')
+        expect(style).not.toContain('border-bottom:1px solid #e8f1ec')
       }
     })
 
@@ -463,11 +463,11 @@ describe('Email templates', () => {
 
     it('los emails de reserva incluyen un StatusBadge con color por estado', () => {
       const cases: Array<[string, string]> = [
-        ['reservation_created_client', '#9a5b00'], // pending
-        ['reservation_confirmed', '#087333'], // confirmed
-        ['reservation_rejected', '#a52a2a'], // rejected
-        ['reservation_cancelled_client', '#5c6a60'], // cancelled
-        ['reservation_expired', '#5c6a60'] // expired
+        ['reservation_created_client', '#c2410c'], // pending
+        ['reservation_confirmed', '#0f7a4a'], // confirmed
+        ['reservation_rejected', '#dc2626'], // rejected
+        ['reservation_cancelled_client', '#5f7168'], // cancelled
+        ['reservation_expired', '#5f7168'] // expired
       ]
       for (const [name, color] of cases) {
         const { html } = templates[name](validPayload)

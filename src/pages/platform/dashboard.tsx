@@ -147,7 +147,7 @@ export function PlatformDashboardPage() {
                   <p className='font-medium'>{request.business_name}</p>
                   <p className='text-xs text-(--color-text-muted)'>
                     /b/{request.desired_slug} ·{' '}
-                    {formatLocal(request.created_at, 'd MMM yyyy, HH:mm')}
+                    <span className='font-mono'>{formatLocal(request.created_at, 'd MMM yyyy, HH:mm')}</span>
                   </p>
                   {request.rejection_reason && (
                     <p className='text-xs text-(--color-text-muted)'>
@@ -172,7 +172,7 @@ export function PlatformDashboardPage() {
               <p key={entry.id} className='text-xs text-(--color-text-muted)'>
                 <span className='font-mono'>{entry.action}</span> ·{' '}
                 {entry.target_type} ·{' '}
-                {formatLocal(entry.created_at, 'd MMM yyyy, HH:mm')}
+                <span className='font-mono'>{formatLocal(entry.created_at, 'd MMM yyyy, HH:mm')}</span>
               </p>
             ))}
           </Card>
@@ -239,7 +239,7 @@ function PendingRequestCard({
               .join(' · ') || 'Sin detalles adicionales'}
           </p>
           <p className='text-xs text-(--color-text-muted)'>
-            Solicitada {formatLocal(request.created_at, 'd MMM yyyy, HH:mm')}
+            Solicitada <span className='font-mono'>{formatLocal(request.created_at, 'd MMM yyyy, HH:mm')}</span>
           </p>
         </div>
         <Badge variant='warning'>Pendiente</Badge>
@@ -394,7 +394,7 @@ function PromoteMemberSection({
           <>
             <p className='text-sm'>
               {found.full_name ?? 'Sin nombre'} ·{' '}
-              <span className='font-mono text-xs'>{found.email}</span>
+              <span className='text-xs'>{found.email}</span>
             </p>
             <div className='grid gap-3 sm:grid-cols-2'>
               <label className='flex flex-col gap-1.5'>

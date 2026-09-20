@@ -196,16 +196,15 @@ export function CreateBusinessPage() {
         bordered
         className='grid w-full max-w-md overflow-hidden p-0 animate-fade-up lg:max-w-5xl lg:grid-cols-[1fr_1.2fr]'
       >
-        {/* Panel de cancha — solo desktop */}
+        {/* Panel de marca — solo desktop */}
         <aside className='relative hidden flex-col justify-between overflow-hidden bg-pitch-950 p-10 text-chalk lg:flex'>
           <div
             aria-hidden='true'
             className='pointer-events-none absolute inset-0'
           >
-            <div className='absolute left-0 top-1/2 h-px w-full bg-white/10' />
-            <div className='absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15' />
             <div className='absolute -top-24 right-0 h-72 w-72 rounded-full bg-flood-400/15 blur-3xl' />
             <div className='absolute bottom-0 left-0 h-40 w-40 rounded-full bg-pitch-500/20 blur-3xl' />
+            <div className='absolute -bottom-28 -right-28 h-72 w-72 rounded-full border-26 border-white/6' />
           </div>
 
           <div className='relative flex items-center gap-2.5 font-bold tracking-tight'>
@@ -218,7 +217,7 @@ export function CreateBusinessPage() {
           </div>
 
           <div className='relative'>
-            <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
+            <p className='text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
               Alta de negocio
             </p>
             <p className='mt-3 text-2xl font-bold leading-snug tracking-tight text-balance'>
@@ -226,8 +225,8 @@ export function CreateBusinessPage() {
               <br />
               con agenda propia.
             </p>
-            {/* Los pasos reales del alta, en formato fixture */}
-            <div className='mt-6 flex flex-col divide-y divide-white/10 rounded-xl border border-white/15 bg-white/5 font-mono text-[11px] backdrop-blur-sm'>
+            {/* Los pasos reales del alta, en formato agenda */}
+            <div className='mt-6 flex flex-col divide-y divide-white/10 rounded-xl border border-white/15 bg-white/5 text-[11px] backdrop-blur-sm'>
               {[
                 'Envías la solicitud',
                 'La revisamos a mano · < 24 h',
@@ -248,7 +247,7 @@ export function CreateBusinessPage() {
 
         {/* Formulario */}
         <div className='flex flex-col'>
-          {/* Banda de cancha compacta — solo mobile */}
+          {/* Banda de marca compacta — solo mobile */}
           <div className='relative overflow-hidden bg-pitch-950 px-6 py-5 text-chalk lg:hidden'>
             <div
               aria-hidden='true'
@@ -258,7 +257,7 @@ export function CreateBusinessPage() {
               <div className='absolute bottom-0 left-1/3 h-px w-2/3 bg-white/10' />
             </div>
             <div className='relative flex items-center justify-between gap-3'>
-              <p className='font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
+              <p className='text-[10px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
                 Alta de negocio
               </p>
               <p className='text-xs text-chalk/70'>Revisión en &lt; 24 h.</p>
@@ -349,7 +348,7 @@ export function CreateBusinessPage() {
               />
 
               <label className='flex flex-col gap-1.5'>
-                <span className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
+                <span className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
                   Cuéntanos más
                 </span>
                 <textarea
@@ -398,7 +397,7 @@ function StatusCard({
         bordered
         className='w-full max-w-md overflow-hidden p-0 animate-fade-up'
       >
-        {/* Banda cancha — misma familia que el shell del formulario */}
+        {/* Banda de marca — misma familia que el shell del formulario */}
         <div className='relative overflow-hidden bg-pitch-950 px-6 py-5 text-chalk'>
           <div
             aria-hidden='true'
@@ -407,7 +406,7 @@ function StatusCard({
             <div className='absolute -top-16 right-0 h-40 w-40 rounded-full bg-flood-400/15 blur-3xl' />
             <div className='absolute bottom-0 left-1/3 h-px w-2/3 bg-white/10' />
           </div>
-          <p className='relative font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
+          <p className='relative text-[10px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
             Alta de negocio
           </p>
         </div>

@@ -86,7 +86,7 @@ function ContactRow({
         {icon}
       </span>
       <span className='min-w-0 flex-1'>
-        <span className='block font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-text-muted'>
+        <span className='block text-[10.5px] font-medium uppercase tracking-[0.14em] text-text-muted'>
           {label}
         </span>
         {value}
@@ -207,7 +207,7 @@ export function ReservationDetailsSheet({
             columna de contexto, como el panel del landing. */}
         {/* Border-beam solo en mobile: un arco de luz pitch recorre
             el borde de la papeleta. En desktop el panel es full-bleed
-            y la cancha habla por sí sola. */}
+            y el turno habla por sí solo. */}
         {/* Papeleta pitch — el mismo PitchTicket del sistema, con los
             extras del sheet: #reserva + cerrar en la barra, acta de
             metadata en el pie. En desktop es la columna de contexto
@@ -259,16 +259,16 @@ export function ReservationDetailsSheet({
           resourceLabel={resourceLabel}
           meta={`(${duration})`}
           note={
-            <dl className='flex flex-wrap items-center justify-center gap-x-5 gap-y-1 font-mono text-[10.5px] uppercase tracking-[0.12em] text-graphite-500 sm:h-11 sm:items-center dark:text-chalk-dim/50'>
+            <dl className='flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[10.5px] uppercase tracking-[0.12em] text-graphite-500 sm:h-11 sm:items-center dark:text-chalk-dim/50'>
               <div className='flex items-baseline gap-1.5'>
                 <dt>Creada</dt>
-                <dd className='nums text-graphite-700 dark:text-chalk-dim/80'>
+                <dd className='nums font-mono text-graphite-700 dark:text-chalk-dim/80'>
                   {formatLocal(reservation.created_at, 'd MMM yyyy, HH:mm')}
                 </dd>
               </div>
               <div className='flex items-baseline gap-1.5'>
                 <dt>Actualizada</dt>
-                <dd className='nums text-graphite-700 dark:text-chalk-dim/80'>
+                <dd className='nums font-mono text-graphite-700 dark:text-chalk-dim/80'>
                   {formatLocal(reservation.updated_at, 'd MMM yyyy, HH:mm')}
                 </dd>
               </div>
@@ -289,10 +289,10 @@ export function ReservationDetailsSheet({
           {/* Contacto — el negocio ve al cliente; el cliente ve al negocio */}
           <section className='mt-4 overflow-hidden rounded-2xl border border-border'>
             <div className='flex items-center justify-between border-b border-border bg-surface-inset/50 px-4 py-2.5'>
-              <h3 className='font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-text-muted'>
+              <h3 className='text-[10.5px] font-semibold uppercase tracking-[0.16em] text-text-muted'>
                 {isBusinessViewer ? 'Cliente' : 'Negocio'}
               </h3>
-              <span className='font-mono text-[10.5px] uppercase tracking-[0.12em] text-text-muted/70'>
+              <span className='text-[10.5px] uppercase tracking-[0.12em] text-text-muted/70'>
                 {isBusinessViewer
                   ? hasAccount
                     ? 'Cuenta registrada'
@@ -353,7 +353,7 @@ export function ReservationDetailsSheet({
 
           {(reservation.notes || reservation.decision_reason) && (
             <section className='mt-4 rounded-2xl border border-border p-4'>
-              <h3 className='flex items-center gap-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-text-muted'>
+              <h3 className='flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-text-muted'>
                 <MessageIcon size={13} />
                 Notas
               </h3>

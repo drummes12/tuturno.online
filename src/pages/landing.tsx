@@ -61,7 +61,7 @@ const STATUS_STYLE: Record<SlotStatus, { chip: string; label: string }> = {
     label: 'Reservado'
   },
   ultimo: {
-    chip: 'border-flood-400/40 bg-flood-400/10 text-flood-300',
+    chip: 'border-orange-400/40 bg-orange-400/10 text-orange-300',
     label: 'En espera'
   }
 }
@@ -90,7 +90,7 @@ function HomeRow({
         {icon}
       </span>
       <span className='min-w-0 flex-1'>
-        <span className='block font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
+        <span className='block text-[11px] font-semibold uppercase tracking-[0.15em] text-(--color-text)'>
           {title}
         </span>
         <span className='mt-0.5 block truncate text-sm text-(--color-text-muted)'>
@@ -113,7 +113,7 @@ function RecentBusinesses() {
 
   return (
     <div className='flex flex-col gap-1.5'>
-      <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+      <span className='text-[10px] font-semibold uppercase tracking-[0.15em] text-(--color-text-muted)'>
         Visitados recientemente
       </span>
       {recents.map((business) => (
@@ -167,7 +167,7 @@ export function LandingPage() {
       </Button>
       <div className='flex items-center gap-3' aria-hidden='true'>
         <span className='h-px flex-1 bg-border' />
-        <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+        <span className='text-[10px] font-semibold uppercase tracking-[0.15em] text-(--color-text-muted)'>
           o ingresa el identificador
         </span>
         <span className='h-px flex-1 bg-border' />
@@ -197,17 +197,18 @@ export function LandingPage() {
     return (
       <Page width='full' className='flex-1 items-center'>
         <div className='grid w-full max-w-md grid-cols-1 gap-4 lg:max-w-5xl lg:grid-cols-[1fr_1.15fr] lg:gap-5'>
-          {/* Panel cancha — izquierda en desktop, banda arriba en mobile */}
+          {/* Panel de marca — izquierda en desktop, banda arriba en mobile */}
           <section className='relative overflow-hidden rounded-2xl bg-pitch-950 px-6 py-6 text-chalk shadow-(--shadow-lg) animate-fade-up lg:flex lg:flex-col lg:justify-between lg:p-8'>
             <div
               aria-hidden='true'
               className='pointer-events-none absolute inset-0'
             >
-              <div className='absolute inset-x-0 top-0 h-24 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.12),transparent)]' />
+              <div className='absolute inset-x-0 top-0 h-24 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(52,211,153,0.14),transparent)]' />
               <div className='absolute inset-y-0 left-1/2 w-px bg-white/10' />
-              <div className='absolute left-1/2 top-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10' />
+              <div className='absolute left-1/2 top-1/2 size-20 lg:size-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10' />
+              <div className='absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10' />
             </div>
-            <span className='relative font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-300'>
+            <span className='relative text-[10px] font-semibold uppercase tracking-[0.15em] text-pitch-300'>
               {business ? business.businessName : 'Tu turno'}
             </span>
             <div className='relative mt-4 lg:mt-0'>
@@ -216,7 +217,7 @@ export function LandingPage() {
                   <>
                     ¿Cómo va tu
                     <br />
-                    cancha?
+                    negocio?
                   </>
                 ) : (
                   <>
@@ -274,7 +275,7 @@ export function LandingPage() {
                   className='flex flex-col gap-3 rounded-2xl border border-border bg-surface-elevated p-4 shadow-(--shadow-xs) animate-fade-up'
                   style={{ animationDelay: '120ms' }}
                 >
-                  <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-(--color-text-muted)'>
+                  <span className='text-[10px] font-semibold uppercase tracking-[0.15em] text-(--color-text-muted)'>
                     Ir a un negocio
                   </span>
                   {orgForm}
@@ -282,7 +283,7 @@ export function LandingPage() {
                 </section>
                 <Link
                   href='/crear-negocio'
-                  className='flex items-center justify-center gap-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target animate-fade-up'
+                  className='flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-(--color-text-muted) transition-colors hover:text-(--color-text) touch-target animate-fade-up'
                   style={{ animationDelay: '180ms' }}
                 >
                   <StoreIcon size={15} />
@@ -298,19 +299,20 @@ export function LandingPage() {
   }
 
   return (
-    <div className='-mt-23 -mb-6 flex flex-col'>
-      {/* Hero — el tablero de esta noche. Cancha oscura a ancho completo,
-          floodlight, la disponibilidad como pieza central, no promesa. */}
+    <div className='-mt-23 -mb-4 sm:-mb-8 flex flex-col'>
+      {/* Hero — el tablero de esta noche. Panel verde profundo a ancho
+          completo, halo mint, la disponibilidad como pieza central. */}
       <section className='relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-pitch-950 text-chalk dark:bg-[#050f09]'>
-        {/* Líneas de cancha: franja central y círculo, pura geometría */}
+        {/* Decoración: halo mint + anillo de reloj gigante */}
+
         <div
           aria-hidden='true'
           className='pointer-events-none absolute inset-0'
         >
-          <div className='absolute inset-y-0 left-1/2 w-px bg-white/15 dark:bg-white/6' />
-          <div className='absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/15 dark:border-white/6' />
-          <div className='absolute inset-x-0 bottom-0 h-px bg-white/10 dark:bg-white/5' />
-          <div className='absolute inset-x-0 top-0 h-48 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.08),transparent)] dark:bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.13),transparent)]' />
+          <div className='absolute inset-x-0 top-0 h-24 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(52,211,153,0.14),transparent)]' />
+          <div className='absolute inset-y-0 left-1/2 w-px bg-black/10 dark:bg-white/10' />
+          <div className='absolute left-1/2 top-1/2 size-80 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 dark:border-white/10' />
+          <div className='absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full  bg-black/10 dark:bg-white/10' />
         </div>
 
         <div className='relative mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 pt-28 pb-16 sm:pt-32 sm:pb-20 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-16 lg:pb-24'>
@@ -356,10 +358,10 @@ export function LandingPage() {
               className='group block rounded-2xl bg-pitch-950 shadow-(--shadow-lg) backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-spring'
             >
               <div className='flex items-center justify-between border-b border-white/15 px-5 py-3.5 dark:border-white/10'>
-                <span className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-chalk-dim/70'>
+                <span className='text-xs font-semibold uppercase tracking-[0.15em] text-chalk-dim/70'>
                   Esta noche · 4 espacios
                 </span>
-                <span className='flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
+                <span className='flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-pitch-300'>
                   <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-400' />
                   En vivo
                 </span>
@@ -373,14 +375,14 @@ export function LandingPage() {
                       className='animate-stagger flex items-center gap-4 px-5 py-3 transition-[transform,background-color] duration-200 ease-spring hover:translate-x-0.5 hover:bg-white/8 dark:hover:bg-white/6'
                       style={{ '--index': i } as CSSProperties}
                     >
-                      <span className='nums w-12 font-mono text-sm font-semibold text-chalk'>
+                      <span className='nums font-mono w-12 text-sm font-semibold text-chalk'>
                         {slot.time}
                       </span>
                       <span className='flex-1 truncate text-sm text-chalk-dim/70'>
                         {slot.court}
                       </span>
                       <span
-                        className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-medium ${status.chip}`}
+                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${status.chip}`}
                       >
                         {status.label}
                       </span>
@@ -423,7 +425,7 @@ export function LandingPage() {
                 }
               ].map((step, i) => (
                 <li key={step.title} className='flex flex-col gap-2'>
-                  <span className='font-mono text-sm font-semibold text-pitch-600 dark:text-pitch-400'>
+                  <span className='text-sm font-semibold text-pitch-600 dark:text-pitch-400'>
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <h3 className='text-base font-semibold tracking-tight text-(--color-text)'>
@@ -551,7 +553,7 @@ export function LandingPage() {
           aria-hidden='true'
           className='pointer-events-none absolute inset-0'
         >
-          <div className='absolute inset-x-0 bottom-0 h-48 bg-[radial-gradient(60%_100%_at_50%_100%,rgba(250,204,21,0.08),transparent)]' />
+          <div className='absolute bottom-0 left-0 right-0 h-48 bg-[radial-gradient(60%_100%_at_50%_100%,rgba(52,211,153,0.10),transparent)]' />
         </div>
         <div className='relative mx-auto flex w-full max-w-3xl flex-col items-center gap-8 px-6 text-center'>
           <h2 className='text-balance text-3xl font-bold tracking-[-0.02em] sm:text-4xl'>

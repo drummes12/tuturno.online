@@ -158,7 +158,7 @@ export function NotificationsPage() {
 
       <Card className='overflow-hidden p-0 animate-fade-up'>
         <div className='border-b border-border px-5 py-4 sm:px-6'>
-          <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
+          <p className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
             Canales de aviso
           </p>
           <p className='mt-1 text-sm leading-relaxed text-(--color-text-muted)'>
@@ -235,7 +235,7 @@ export function NotificationsPage() {
         <Card className='p-5 sm:p-6 animate-fade-up'>
           <div className='flex flex-col gap-4'>
             <div>
-              <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
+              <h2 className='text-[11px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
                 Cómo volver a activarlas
               </h2>
               <p className='mt-2 text-sm leading-relaxed text-(--color-text-muted)'>
@@ -259,7 +259,7 @@ export function NotificationsPage() {
                   ]
               ).map((step, index) => (
                 <li key={step} className='flex items-start gap-3 text-sm'>
-                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 font-mono text-[11px] font-semibold text-pitch-700 dark:text-pitch-300'>
+                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 text-[11px] font-semibold text-pitch-700 dark:text-pitch-300'>
                     {index + 1}
                   </span>
                   <span className='pt-0.5 leading-relaxed text-(--color-text-muted)'>

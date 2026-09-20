@@ -44,7 +44,7 @@ function NotificationStatusIcon({
   const active = permission === 'granted' && registered
   const blocked = permission === 'denied'
   const badgeClass = active
-    ? 'bg-success text-white'
+    ? 'bg-success text-on-primary'
     : blocked
       ? 'bg-danger text-white'
       : 'bg-warning text-white'
@@ -195,7 +195,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             El contenido siempre vive en la columna max-w-5xl, así al
             zoom-out los controles no se van a los bordes de pantalla. */}
         <div
-          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900 sm:bg-pitch-900/90 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
+          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-pitch-900 sm:bg-pitch-900/10 shadow-(--shadow-lg) backdrop-blur-sm dark:border-white/10 dark:bg-graphite-900/80 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
             <Link
@@ -207,7 +207,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 alt='TuTurno'
                 className='w-8 h-8 rounded-lg'
               />
-              <span>TuTurno</span>
+              <span>
+                Tu<span className='text-flood-400'>Turno</span>
+              </span>
             </Link>
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
               {user && showTutorialButton && (
@@ -346,9 +348,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                           ? 'admin-nav-business'
                           : undefined
                   }
-                  className={`flex items-center gap-2 rounded-full px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                  className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                     active
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-on-primary'
                       : 'text-text-muted hover:bg-surface-inset hover:text-text'
                   }`}
                 >
@@ -364,7 +366,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Content */}
-      <main className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-8'>
+      <main className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-8'>
         {children}
       </main>
 
@@ -389,8 +391,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       ? 'admin-nav-business'
                       : undefined
                   }
-                  className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2 font-mono text-[10px] font-semibold uppercase tracking-wide transition-colors touch-target ${
-                    active ? 'bg-primary text-white' : 'text-text-muted'
+                  className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-semibold uppercase tracking-wide transition-colors touch-target select-none ${
+                    active ? 'bg-primary text-on-primary' : 'text-text-muted'
                   }`}
                 >
                   {item.icon}
@@ -417,7 +419,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <button
             type='button'
             onClick={() => setQrOpen(true)}
-            className='flex h-12 w-12 items-center justify-center rounded-full bg-pitch-600 text-white shadow-lg transition-all duration-200 ease-spring hover:bg-pitch-700 hover:shadow-xl active:scale-95 md:hidden'
+            className='flex h-12 w-12 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg transition-all duration-200 ease-spring hover:bg-primary-hover hover:shadow-xl active:scale-95 md:hidden'
             aria-label='Mostrar el código QR de mi negocio'
             title='Mostrar mi QR'
           >

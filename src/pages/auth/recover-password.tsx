@@ -218,7 +218,7 @@ export function RecoverPasswordPage() {
 
         <Link
           href='/'
-          className='flex items-center justify-center gap-1.5 mt-6 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) hover:text-(--color-text) transition-colors'
+          className='flex items-center justify-center gap-1.5 mt-6 text-[11px] font-semibold uppercase tracking-[0.15em] text-(--color-text-muted) hover:text-(--color-text) transition-colors'
         >
           <ArrowLeftIcon size={14} />
           Volver al inicio

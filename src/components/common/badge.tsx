@@ -18,7 +18,7 @@ const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
     'bg-signal-red/10 text-signal-red border-signal-red/40 dark:bg-red-400/10 dark:text-red-300 dark:border-red-400/30',
   info: 'bg-signal-blue/10 text-signal-blue border-signal-blue/40 dark:bg-blue-400/10 dark:text-blue-300 dark:border-blue-400/30',
   accent:
-    'bg-flood-500/10 text-yellow-700 border-flood-500/40 dark:bg-flood-400/10 dark:text-flood-300 dark:border-flood-400/30'
+    'bg-flood-500/10 text-pitch-700 border-flood-500/40 dark:bg-flood-400/10 dark:text-flood-300 dark:border-flood-400/30'
 }
 
 export function Badge({ children, variant = 'neutral', compact }: BadgeProps) {

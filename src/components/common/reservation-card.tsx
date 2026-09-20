@@ -52,19 +52,19 @@ export function ReservationCard({
   const content = (
     <>
       <div className='flex items-center justify-between gap-2'>
-        <p className='font-mono text-[11px] font-medium tracking-[0.14em] text-(--color-text-muted)'>
+        <p className='text-[11px] font-medium tracking-[0.14em] text-(--color-text-muted)'>
           {kicker ?? formatLocal(r.starts_at, "EEE d 'de' MMM")}
         </p>
         {meta ??
           (r.reservation_number ? (
-            <span className='font-mono text-[11px] uppercase tracking-wider text-text-muted/70'>
+            <span className='text-[11px] uppercase tracking-wider text-text-muted/70'>
               #{r.reservation_number}
             </span>
           ) : null)}
       </div>
       <div className='mt-1 flex flex-col'>
         <div className='min-w-0 flex items-start justify-between gap-3'>
-          <p className='font-mono text-[26px] font-bold leading-none tracking-tight'>
+          <p className='nums font-mono text-[26px] font-bold leading-none tracking-tight'>
             {formatLocal(r.starts_at, 'HH:mm')}
           </p>
           {showStatus && <StatusBadge status={r.status} />}
@@ -139,20 +139,6 @@ export function ReservationCard({
       {body}
     </Card>
   )
-
-  // Pendiente: un arco de luz flood recorre el borde — el estado de
-  // espera pide atención sin competir con el contenido del ticket.
-  if (isPending) {
-    return (
-      <div
-        className='border-beam h-full animate-stagger rounded-xl'
-        style={{ '--index': index } as React.CSSProperties}
-        data-tour={tourKey}
-      >
-        {card}
-      </div>
-    )
-  }
 
   return card
 }

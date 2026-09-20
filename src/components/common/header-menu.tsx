@@ -83,7 +83,7 @@ export function HeaderMenu({
         >
           {userEmail && (
             <div className='border-b border-border px-3 pb-2 pt-1.5'>
-              <span className='block truncate font-mono text-[11px] text-(--color-text-muted)'>
+              <span className='block truncate text-[11px] text-(--color-text-muted)'>
                 {userEmail}
               </span>
             </div>
@@ -91,7 +91,7 @@ export function HeaderMenu({
 
           {businessSelector && (
             <div className='flex flex-col gap-1.5 border-b border-border px-2 pb-2'>
-              <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-text-muted'>
+              <span className='text-[10px] font-semibold uppercase tracking-[0.15em] text-text-muted'>
                 Organización activa
               </span>
               {businessSelector(close)}

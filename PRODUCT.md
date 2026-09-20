@@ -39,8 +39,8 @@ Real-time availability + manual approval flow, mobile-first, in Spanish, with a 
 ## Brand Commitments
 
 - Name: TuTurno. Voice: Spanish, direct, informal-professional (tuteo).
-- Existing visual world (app): "cancha nocturna" — pitch green `#0a7d3b` family, chalk surfaces, floodlight yellow `#facc15` accent, Geist/Geist Mono, warm graphite neutrals.
-- Logo: calendar-check glyph (see app header / index.html).
+- Visual identity (app, v2): calendar + clock mark on a rounded square, brand green `#0f7a4a` with mint accent `#34d399`, Inter typography, depth via surface + border (very light shadows). See `tuturno-design-system.md`.
+- Logo: calendar + clock glyph (see `public/logo-mark.svg` / app header).
 
 ## Evidence on Hand
 
