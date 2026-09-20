@@ -137,7 +137,7 @@ function SwipeableRow({
   return (
     <div className='relative overflow-hidden'>
       <div
-        className='absolute inset-0 flex items-center justify-end gap-2 bg-danger px-5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-white pointer-fine:hidden'
+        className='absolute inset-0 flex items-center justify-end gap-2 bg-danger px-5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white pointer-fine:hidden'
         aria-hidden='true'
       >
         <TrashIcon size={15} />
@@ -418,7 +418,7 @@ export function NotificationCenter({
                 <span className='h-1.5 w-12 rounded-full bg-graphite-200 dark:bg-white/15' />
               </div>
               <div className='flex items-center justify-between gap-2 border-b border-border px-4 py-2.5'>
-                <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-primary'>
+                <h2 className='text-[11px] font-semibold uppercase tracking-[0.14em] text-primary'>
                   Notificaciones
                 </h2>
                 <div className='flex items-center gap-1'>
@@ -452,9 +452,9 @@ export function NotificationCenter({
                     type='button'
                     aria-pressed={filter === key}
                     onClick={() => setFilter(key)}
-                    className={`min-w-max flex items-center justify-center flex-1 whitespace-nowrap rounded-full px-2.5 py-1.5 text-center font-mono text-[10px] font-medium uppercase tracking-[0.14em] transition-colors ${
+                    className={`min-w-max flex items-center justify-center flex-1 whitespace-nowrap rounded-full px-2.5 py-1.5 text-center text-[10px] font-medium uppercase tracking-[0.14em] transition-colors ${
                       filter === key
-                        ? 'bg-(--color-primary) text-white'
+                        ? 'bg-(--color-primary) text-on-primary'
                         : 'text-text-muted hover:text-text'
                     }`}
                   >
@@ -493,7 +493,7 @@ export function NotificationCenter({
                 ) : (
                   groups.map(([label, items]) => (
                     <section key={label} aria-label={label}>
-                      <h3 className='border-b border-border/60 bg-surface-inset/50 px-4 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-text-muted'>
+                      <h3 className='border-b border-border/60 bg-surface-inset/50 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-text-muted'>
                         {label}
                       </h3>
                       <ul className='flex flex-col'>
@@ -542,13 +542,13 @@ export function NotificationCenter({
                                           {title}
                                         </span>
                                       </span>
-                                      <span className='shrink-0 font-mono text-[10px] tracking-wide text-text-muted/70 transition-opacity pointer-fine:group-hover:opacity-0'>
+                                      <span className='shrink-0 text-[10px] tracking-wide text-text-muted/70 transition-opacity pointer-fine:group-hover:opacity-0'>
                                         {timeAgo(n.created_at)}
                                       </span>
                                     </span>
                                     {time && (
                                       <span className='mt-1.5 flex items-center justify-between gap-2'>
-                                        <span className='font-mono text-[13px] font-semibold tracking-wide text-text'>
+                                        <span className='text-[13px] font-semibold font-mono tracking-wide text-text'>
                                           {time}
                                         </span>
                                         {n.reservation_status && (
@@ -603,7 +603,7 @@ export function NotificationCenter({
                                           type='button'
                                           disabled={busy}
                                           onClick={() => void handleConfirm(n)}
-                                          className='rounded-md bg-primary px-3 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-sm transition-[background-color,transform] hover:opacity-90 active:scale-95 disabled:cursor-wait disabled:opacity-50'
+                                          className='rounded-md bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-on-primary shadow-sm transition-[background-color,transform] hover:opacity-90 active:scale-95 disabled:cursor-wait disabled:opacity-50'
                                         >
                                           {busy ? 'Confirmando…' : 'Confirmar'}
                                         </button>
@@ -612,7 +612,7 @@ export function NotificationCenter({
                                         <button
                                           type='button'
                                           onClick={() => handleItemClick(n)}
-                                          className='flex items-center gap-1 px-1 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted transition-[color,transform] hover:text-primary active:scale-95'
+                                          className='flex items-center gap-1 px-1 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted transition-[color,transform] hover:text-primary active:scale-95'
                                         >
                                           Revisar
                                           <ArrowRightIcon size={11} />

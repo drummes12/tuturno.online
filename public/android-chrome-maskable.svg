@@ -1,21 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <rect width="512" height="512" fill="#0a5226" />
-  <circle cx="256" cy="256" r="150" fill="#f8faf7" />
-  <circle cx="256" cy="256" r="138" fill="none" stroke="#e2e8e0" stroke-width="4" />
-  <rect x="252" y="130" width="8" height="22" rx="3" fill="#2c342f" />
-  <rect x="360" y="252" width="22" height="8" rx="3" fill="#2c342f" />
-  <rect x="252" y="360" width="8" height="22" rx="3" fill="#2c342f" />
-  <rect x="130" y="252" width="22" height="8" rx="3" fill="#2c342f" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(30 256 256)" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(60 256 256)" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(120 256 256)" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(150 256 256)" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(210 256 256)" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(240 256 256)" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(300 256 256)" />
-  <rect x="252" y="134" width="5" height="12" rx="2" fill="#5a655d" opacity="0.5" transform="rotate(330 256 256)" />
-  <line x1="256" y1="256" x2="190" y2="190" stroke="#0a5226" stroke-width="16" stroke-linecap="round" />
-  <line x1="256" y1="256" x2="346" y2="200" stroke="#0a7d3b" stroke-width="12" stroke-linecap="round" />
-  <circle cx="256" cy="256" r="18" fill="#facc15" />
-  <circle cx="256" cy="256" r="9" fill="#0a5226" />
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#0f7a4a"/>
+    </linearGradient>
+    <mask id="hands" maskUnits="userSpaceOnUse" x="238.373" y="225.949" width="180" height="180">
+      <circle cx="328.373" cy="315.949" r="82" fill="#fff"/>
+      <path d="M328.373 315.949v-43M328.373 315.949l36.373-21" stroke="#000" stroke-width="13" stroke-linecap="round"/>
+    </mask>
+  </defs>
+
+  <!-- Maskable: fondo a sangre completa, glifo dentro de la zona
+       segura (~78%). Centro óptico del glifo ≈ (254, 258) en 500. -->
+  <rect width="512" height="512" fill="url(#brand)"/>
+
+  <g transform="translate(256 256) scale(0.78) translate(-254 -258)">
+    <path d="M179.57 119v33.35M316.11 119v33.35" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+    <path fill="#ffffff" d="M127.59 140h18.98a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h70.54a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h18.98a30 30 0 0 1 30 30v63.465a108 108 0 0 0-69.717-25.516H154.59a14 14 0 0 0-14 14V333.5a14 14 0 0 0 14 14h64.734a8 8 0 0 1 7.52 5.272 108 108 0 0 0 13.071 25.138 8 8 0 0 1-6.552 12.59H127.59a30 30 0 0 1-30-30V170a30 30 0 0 1 30-30"/>
+    <circle cx="328.373" cy="315.949" r="82" fill="#ffffff" mask="url(#hands)"/>
+  </g>
 </svg>

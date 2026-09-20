@@ -200,7 +200,7 @@ export function AdminConfigPage() {
                 <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
                   <StoreIcon size={18} />
                 </div>
-                <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+                <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
                   Datos del negocio
                 </h2>
               </div>
@@ -300,7 +300,7 @@ export function AdminConfigPage() {
                 <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
                   <MapPinIcon size={18} />
                 </div>
-                <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+                <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
                   Ubicación
                 </h2>
               </div>
@@ -369,7 +369,7 @@ export function AdminConfigPage() {
                     title='Abrir en Google Maps'
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors touch-target ${
                       fullAddress
-                        ? 'bg-(--color-primary) text-white hover:bg-(--color-primary-hover)'
+                        ? 'bg-(--color-primary) text-on-primary hover:bg-(--color-primary-hover)'
                         : 'pointer-events-none bg-surface-inset text-text-muted opacity-60'
                     }`}
                   >
@@ -389,14 +389,14 @@ export function AdminConfigPage() {
                 <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
                   <ClockIcon size={18} />
                 </div>
-                <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+                <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
                   Turnos
                 </h2>
               </div>
               <div className='flex flex-col gap-4'>
                 {/* Duración del turno — selector visual */}
                 <div data-tour='admin-config-slot'>
-                  <label className='block font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) mb-2'>
+                  <label className='block text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) mb-2'>
                     Duración del turno
                   </label>
                   <PresetGrid
@@ -422,7 +422,7 @@ export function AdminConfigPage() {
                           slot_duration_minutes: parseInt(e.target.value) || 60
                         })
                       }
-                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums focus:outline-none focus:border-primary'
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono focus:outline-none focus:border-primary'
                       aria-label='Duración personalizada'
                     />
                     <span className='text-xs text-text-muted'>
@@ -433,7 +433,7 @@ export function AdminConfigPage() {
 
                 {/* Gap entre turnos */}
                 <div data-tour='admin-config-gap'>
-                  <label className='mb-2 flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
+                  <label className='mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
                     <TimerIcon size={14} />
                     Gap entre turnos
                   </label>
@@ -461,7 +461,7 @@ export function AdminConfigPage() {
                           gap_minutes: parseInt(e.target.value) || 0
                         })
                       }
-                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums focus:outline-none focus:border-primary'
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono focus:outline-none focus:border-primary'
                       aria-label='Gap personalizado'
                     />
                     <span className='text-xs text-text-muted'>
@@ -472,7 +472,7 @@ export function AdminConfigPage() {
 
                 {/* Preview de cómo quedan los turnos */}
                 <div className='bg-surface-inset rounded-lg p-3 border border-border'>
-                  <p className='mb-2 flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
+                  <p className='mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
                     <ClockIcon size={12} />
                     Vista previa
                   </p>
@@ -493,7 +493,7 @@ export function AdminConfigPage() {
                       }
                       return slots.map((s, i) => (
                         <span key={i} className='flex items-center gap-1.5'>
-                          <span className='nums text-sm font-medium bg-surface px-2.5 py-1 rounded-md border border-border'>
+                          <span className='nums font-mono text-sm font-medium bg-surface px-2.5 py-1 rounded-md border border-border'>
                             {s}
                           </span>
                           {i < slots.length - 1 && (
@@ -518,7 +518,7 @@ export function AdminConfigPage() {
                 <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
                   <CalendarIcon size={18} />
                 </div>
-                <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+                <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
                   Reglas de operación
                 </h2>
               </div>
@@ -590,7 +590,7 @@ export function AdminConfigPage() {
               <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
                 <CheckIcon size={18} />
               </div>
-              <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+              <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-(--color-text)'>
                 Confirmación y abono
               </h2>
               {canEdit &&
@@ -604,7 +604,7 @@ export function AdminConfigPage() {
                         reservation_instructions_md: INSTRUCTIONS_TEMPLATE
                       })
                     }
-                    className='ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-pitch-700 transition-colors hover:bg-pitch-500/10 dark:text-pitch-300 touch-target'
+                    className='ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-pitch-700 transition-colors hover:bg-pitch-500/10 dark:text-pitch-300 touch-target'
                   >
                     <SparklesIcon size={13} />
                     <span className='hidden sm:inline'>Usar plantilla</span>
@@ -623,7 +623,7 @@ export function AdminConfigPage() {
                     key={tab}
                     type='button'
                     onClick={() => setShowPreview(tab === 'preview')}
-                    className={`rounded-md px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-[background-color,color] duration-200 ${
+                    className={`rounded-md px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] transition-[background-color,color] duration-200 ${
                       (tab === 'preview') === showPreview
                         ? 'bg-surface-elevated text-text shadow-(--shadow-sm)'
                         : 'text-text-muted hover:text-text'
@@ -669,7 +669,7 @@ export function AdminConfigPage() {
                   disabled={!canEdit}
                   placeholder={INSTRUCTIONS_TEMPLATE}
                   rows={8}
-                  className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y font-mono disabled:opacity-60'
+                  className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y disabled:opacity-60'
                   aria-describedby='reservation-instructions-hint'
                 />
               )}
@@ -695,7 +695,7 @@ export function AdminConfigPage() {
 
           {/* Info read-only */}
           <div
-            className='order-6 flex animate-fade-up items-center gap-2 px-1 font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted md:col-span-2'
+            className='order-6 flex animate-fade-up items-center gap-2 px-1 text-[11px] uppercase tracking-[0.12em] text-text-muted md:col-span-2'
             style={{ animationDelay: '120ms' }}
           >
             <MapPinIcon size={14} className='shrink-0' />
@@ -711,9 +711,9 @@ export function AdminConfigPage() {
             className='flex items-center justify-between gap-3 p-3'
           >
             <p
-              className={`whitespace-nowrap font-mono text-[11px] font-medium uppercase tracking-[0.12em] ${
+              className={`whitespace-nowrap text-[11px] font-medium uppercase tracking-[0.12em] ${
                 isDirty
-                  ? 'text-yellow-800 dark:text-flood-300'
+                  ? 'text-orange-800 dark:text-orange-300'
                   : 'text-text-muted'
               }`}
             >
@@ -776,9 +776,7 @@ function PresetGrid({
             }`}
             aria-pressed={active}
           >
-            <span className='nums font-mono text-base font-bold'>
-              {opt.top}
-            </span>
+            <span className='nums text-base font-bold'>{opt.top}</span>
             <span className='text-xs'>{opt.bottom}</span>
           </button>
         )

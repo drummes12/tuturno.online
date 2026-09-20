@@ -23,7 +23,7 @@ export function Input({
     <div className={`flex flex-col gap-1.5 ${wrapperClassName}`}>
       <label
         htmlFor={inputId}
-        className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
+        className='text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)'
       >
         {label}
       </label>
@@ -35,7 +35,7 @@ export function Input({
         )}
         <input
           id={inputId}
-          className={`w-full min-w-0 rounded-xl border bg-surface-inset px-4 py-3 text-base text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring ${
+          className={`w-full min-w-0 rounded-md border bg-surface-inset px-4 py-3 text-base text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring ${
             icon ? 'pl-11' : ''
           } ${error ? 'border-(--color-danger) focus:border-(--color-danger) focus:ring-(--color-danger)/15' : 'border-border'} ${className}`}
           aria-invalid={!!error}

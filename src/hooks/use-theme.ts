@@ -25,7 +25,7 @@ export function useTheme() {
     // La selección in-app manda sobre la media query del SO.
     document
       .querySelector('meta[name="theme-color"]:not([media])')
-      ?.setAttribute('content', dark ? '#0f1512' : '#0a5226')
+      ?.setAttribute('content', dark ? '#071510' : '#0f7a4a')
     document.querySelector('meta[name="theme-color"][media]')?.remove()
   }, [dark])
 

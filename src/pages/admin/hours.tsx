@@ -43,7 +43,7 @@ interface FranjaState extends BusinessHours {
   _isDeleted?: boolean
 }
 
-// La semana laboral empieza en lunes (fixture board)
+// La semana laboral empieza en lunes
 const dayOrder = [1, 2, 3, 4, 5, 6, 0]
 
 const dayShort = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
@@ -394,7 +394,7 @@ export function AdminHoursPage() {
                     />
                   </button>
                   <span
-                    className={`font-mono text-xs font-medium uppercase tracking-[0.14em] ${
+                    className={`text-xs font-medium uppercase tracking-[0.14em] ${
                       isActive ? 'text-text' : 'text-text-muted'
                     }`}
                   >
@@ -406,7 +406,7 @@ export function AdminHoursPage() {
                     </span>
                   )}
                   {dayIdx === todayIdx && (
-                    <span className='rounded-md border border-pitch-500/40 bg-pitch-500/10 px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 dark:border-pitch-400/30 dark:text-pitch-300'>
+                    <span className='rounded-md border border-pitch-500/40 bg-pitch-500/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 dark:border-pitch-400/30 dark:text-pitch-300'>
                       Hoy
                     </span>
                   )}
@@ -442,7 +442,7 @@ export function AdminHoursPage() {
               {/* Panel "Copiar a": destinos para replicar las franjas del día */}
               {copySource === dayIdx && canEdit && (
                 <div className='border-b border-border bg-surface-inset px-4 py-3 animate-fade-up'>
-                  <p className='mb-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
+                  <p className='mb-2 text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted'>
                     Copiar a
                   </p>
                   <div className='flex flex-wrap items-center gap-1.5'>
@@ -454,9 +454,9 @@ export function AdminHoursPage() {
                           type='button'
                           onClick={() => toggleCopyTarget(d)}
                           aria-pressed={copyTargets.has(d)}
-                          className={`rounded-full border px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] transition-colors touch-target ${
+                          className={`rounded-full border px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] transition-colors touch-target ${
                             copyTargets.has(d)
-                              ? 'border-(--color-primary) bg-(--color-primary) text-white'
+                              ? 'border-(--color-primary) bg-(--color-primary) text-on-primary'
                               : 'border-border bg-surface-elevated text-(--color-text-muted) hover:border-graphite-300'
                           }`}
                         >
@@ -467,14 +467,14 @@ export function AdminHoursPage() {
                     <button
                       type='button'
                       onClick={() => setCopyPreset([1, 2, 3, 4, 5])}
-                      className='rounded-full border border-border bg-surface-elevated px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-(--color-text-muted) transition-colors hover:border-graphite-300 touch-target'
+                      className='rounded-full border border-border bg-surface-elevated px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-(--color-text-muted) transition-colors hover:border-graphite-300 touch-target'
                     >
                       Lun-Vie
                     </button>
                     <button
                       type='button'
                       onClick={() => setCopyPreset(dayOrder)}
-                      className='rounded-full border border-border bg-surface-elevated px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-(--color-text-muted) transition-colors hover:border-graphite-300 touch-target'
+                      className='rounded-full border border-border bg-surface-elevated px-3 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-(--color-text-muted) transition-colors hover:border-graphite-300 touch-target'
                     >
                       Todos
                     </button>
@@ -537,7 +537,7 @@ export function AdminHoursPage() {
                       >
                         {/* Etiqueta de franja */}
                         <div
-                          className={`col-span-2 flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.12em] sm:w-20 sm:shrink-0 ${
+                          className={`col-span-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.12em] sm:w-20 sm:shrink-0 ${
                             franjaOverlap ? 'text-danger' : 'text-text-muted'
                           }`}
                         >
@@ -558,7 +558,7 @@ export function AdminHoursPage() {
                                 e.target.value
                               )
                             }
-                            className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums sm:px-3 ${
+                            className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums font-mono sm:px-3 ${
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'
@@ -579,7 +579,7 @@ export function AdminHoursPage() {
                                 e.target.value
                               )
                             }
-                            className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums sm:px-3 ${
+                            className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums font-mono sm:px-3 ${
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'
@@ -589,7 +589,7 @@ export function AdminHoursPage() {
                         </div>
 
                         {/* Duración calculada */}
-                        <span className='text-xs text-text-muted nums justify-self-start rounded-md bg-surface-inset px-2 py-1 h-fit sm:w-16 sm:justify-self-auto sm:bg-transparent sm:px-0 sm:py-0 sm:text-right'>
+                        <span className='text-xs text-text-muted nums font-mono justify-self-start rounded-md bg-surface-inset px-2 py-1 h-fit sm:w-16 sm:justify-self-auto sm:bg-transparent sm:px-0 sm:py-0 sm:text-right'>
                           <span className='sm:hidden'>Duración: </span>
                           {Math.floor(
                             (toMinutes(f.close_time) - toMinutes(f.open_time)) /
@@ -641,7 +641,7 @@ export function AdminHoursPage() {
                 Solapamientos detectados
               </span>
             ) : isDirty ? (
-              <span className='font-medium text-yellow-800 dark:text-flood-300'>
+              <span className='font-medium text-orange-800 dark:text-orange-300'>
                 Cambios sin guardar
               </span>
             ) : (

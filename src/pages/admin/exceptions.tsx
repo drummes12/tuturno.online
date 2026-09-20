@@ -314,7 +314,7 @@ export function AdminExceptionsPage() {
           <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
             <LockIcon size={18} />
           </div>
-          <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em]'>
+          <h2 className='text-xs font-medium uppercase tracking-[0.14em]'>
             Nuevo cierre
           </h2>
         </div>
@@ -322,7 +322,7 @@ export function AdminExceptionsPage() {
         <div className='flex flex-col gap-4'>
           {/* Alcance */}
           <div className='flex flex-col gap-2'>
-            <label className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
+            <label className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
               Alcance
             </label>
             <div className='flex gap-2'>
@@ -332,7 +332,7 @@ export function AdminExceptionsPage() {
                 disabled={!canEdit}
                 className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all touch-target ${
                   scope === 'business'
-                    ? 'bg-(--color-primary) text-white border-(--color-primary)'
+                    ? 'bg-(--color-primary) text-on-primary border-(--color-primary)'
                     : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
                 } disabled:opacity-60`}
               >
@@ -344,7 +344,7 @@ export function AdminExceptionsPage() {
                 disabled={!canEdit || resources.length === 0}
                 className={`flex-1 rounded-xl border px-4 py-3 text-sm font-medium transition-all touch-target ${
                   scope === 'resource'
-                    ? 'bg-(--color-primary) text-white border-(--color-primary)'
+                    ? 'bg-(--color-primary) text-on-primary border-(--color-primary)'
                     : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
                 } disabled:opacity-60`}
               >
@@ -358,7 +358,7 @@ export function AdminExceptionsPage() {
             <div className='flex flex-col gap-2'>
               <label
                 htmlFor='exception-resource'
-                className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
+                className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
               >
                 Recurso
               </label>
@@ -389,7 +389,7 @@ export function AdminExceptionsPage() {
             <div className='flex-1 min-w-0 flex flex-col gap-2'>
               <label
                 htmlFor='exception-start-date'
-                className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
+                className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
               >
                 Fecha inicio
               </label>
@@ -399,13 +399,13 @@ export function AdminExceptionsPage() {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 disabled={!canEdit}
-                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               />
             </div>
             <div className='flex-1 min-w-0 flex flex-col gap-2'>
               <label
                 htmlFor='exception-end-date'
-                className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
+                className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
               >
                 Fecha fin
               </label>
@@ -415,7 +415,7 @@ export function AdminExceptionsPage() {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 disabled={!canEdit}
-                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
               />
             </div>
           </div>
@@ -429,7 +429,7 @@ export function AdminExceptionsPage() {
               disabled={!canEdit}
               className='w-5 h-5 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15 disabled:opacity-60'
             />
-            <span className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
+            <span className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
               Todo el día
             </span>
           </label>
@@ -440,7 +440,7 @@ export function AdminExceptionsPage() {
               <div className='flex-1 flex min-w-0 flex-col gap-2'>
                 <label
                   htmlFor='exception-start-time'
-                  className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
+                  className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
                 >
                   Hora inicio
                 </label>
@@ -450,13 +450,13 @@ export function AdminExceptionsPage() {
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   disabled={!canEdit}
-                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
                 />
               </div>
               <div className='flex-1 flex min-w-0 flex-col gap-2'>
                 <label
                   htmlFor='exception-end-time'
-                  className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
+                  className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
                 >
                   Hora fin
                 </label>
@@ -466,7 +466,7 @@ export function AdminExceptionsPage() {
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   disabled={!canEdit}
-                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
                 />
               </div>
             </div>
@@ -476,7 +476,7 @@ export function AdminExceptionsPage() {
           <div className='flex flex-col gap-2'>
             <label
               htmlFor='exception-reason'
-              className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
+              className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'
             >
               Motivo (opcional)
             </label>
@@ -542,7 +542,7 @@ export function AdminExceptionsPage() {
 
       {/* Excepciones activas/futuras */}
       <div className='animate-fade-up' style={{ animationDelay: '60ms' }}>
-        <h2 className='font-mono text-xs font-medium uppercase tracking-[0.14em] text-text-muted mb-3 flex items-center gap-2'>
+        <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-text-muted mb-3 flex items-center gap-2'>
           <CalendarIcon size={16} className='text-text-muted' />
           Cierres programados ({upcomingExceptions.length})
         </h2>
@@ -567,13 +567,13 @@ export function AdminExceptionsPage() {
                   <div className='min-w-0 flex-1'>
                     <div className='flex flex-wrap items-center gap-x-2.5 gap-y-1'>
                       <div className='flex flex-col gap-0.5'>
-                        <p className='font-mono text-[13px] font-semibold nums text-(--color-text)'>
+                        <p className='text-[13px] font-semibold nums font-mono text-(--color-text)'>
                           <span className='mr-2 text-[10px] font-medium uppercase tracking-widest text-text-muted'>
                             Desde
                           </span>
                           {formatPoint(exc.starts_at)}
                         </p>
-                        <p className='font-mono text-[13px] font-semibold nums text-(--color-text)'>
+                        <p className='text-[13px] font-semibold nums font-mono text-(--color-text)'>
                           <span className='mr-2 text-[10px] font-medium uppercase tracking-widest text-text-muted'>
                             Hasta
                           </span>
@@ -581,7 +581,7 @@ export function AdminExceptionsPage() {
                         </p>
                       </div>
                       <span
-                        className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest ${
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest ${
                           exc.resource_id
                             ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'
                             : 'bg-signal-blue/10 text-signal-blue dark:bg-signal-blue/20 dark:text-blue-300'
@@ -655,20 +655,20 @@ export function AdminExceptionsPage() {
                   <div className='min-w-0 flex-1'>
                     <div className='flex flex-wrap items-center gap-x-2.5 gap-y-1'>
                       <div className='flex flex-col gap-0.5'>
-                        <p className='font-mono text-xs font-medium nums text-text-muted'>
+                        <p className='text-xs font-medium nums font-mono text-text-muted'>
                           <span className='mr-2 text-[10px] uppercase tracking-widest'>
                             Desde
                           </span>
                           {formatPoint(exc.starts_at)}
                         </p>
-                        <p className='font-mono text-xs font-medium nums text-text-muted'>
+                        <p className='text-xs font-medium nums font-mono text-text-muted'>
                           <span className='mr-2 text-[10px] uppercase tracking-widest'>
                             Hasta
                           </span>
                           {formatEndPoint(exc.ends_at)}
                         </p>
                       </div>
-                      <span className='rounded-full bg-surface-inset px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-widest text-text-muted'>
+                      <span className='rounded-full bg-surface-inset px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest text-text-muted'>
                         {resourceName(exc.resource_id)}
                       </span>
                     </div>

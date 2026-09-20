@@ -21,7 +21,7 @@ const variantConfig: Record<
   },
   warning: {
     container:
-      'border-flood-500/40 bg-flood-500/10 text-yellow-700 dark:border-flood-400/30 dark:bg-flood-400/10 dark:text-flood-300',
+      'border-orange-500/40 bg-orange-500/10 text-orange-700 dark:border-orange-400/30 dark:bg-orange-400/10 dark:text-orange-300',
     icon: <AlertIcon size={18} />
   },
   info: {

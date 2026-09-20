@@ -30,7 +30,7 @@ export function PwaNotificationPrompt({ state }: PwaNotificationPromptProps) {
   return (
     <div className='w-full' role='alert' aria-live='polite'>
       <div className='flex items-center gap-3 rounded-2xl border border-border-strong bg-surface-elevated p-3 shadow-(--shadow-lg)'>
-        <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white'>
+        <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary'>
           <BellIcon size={20} />
         </span>
         <div className='min-w-0 flex-1'>
@@ -49,7 +49,7 @@ export function PwaNotificationPrompt({ state }: PwaNotificationPromptProps) {
             <Link
               href='/notificaciones'
               onClick={dismiss}
-              className='inline-flex h-11 items-center justify-center rounded-lg bg-primary px-3.5 text-sm font-medium text-white touch-target'
+              className='inline-flex h-11 items-center justify-center rounded-lg bg-primary px-3.5 text-sm font-medium text-on-primary touch-target'
             >
               Ver instrucciones
             </Link>

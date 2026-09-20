@@ -204,7 +204,7 @@ export function AdminReservationsPage() {
             <button
               type='button'
               onClick={() => setSelectedDate(todayStr)}
-              className='shrink-0 border-l border-pitch-500/40 bg-pitch-500/10 px-4 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-700 transition-colors hover:bg-pitch-500/20 dark:border-pitch-400/30 dark:text-pitch-300 touch-target'
+              className='shrink-0 border-l border-pitch-500/40 bg-pitch-500/10 px-4 text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-700 transition-colors hover:bg-pitch-500/20 dark:border-pitch-400/30 dark:text-pitch-300 touch-target'
             >
               Hoy
             </button>
@@ -222,9 +222,9 @@ export function AdminReservationsPage() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`shrink-0 px-4 py-2.5 rounded-full font-mono text-[11px] font-medium uppercase tracking-[0.14em] border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
+            className={`shrink-0 px-4 py-2.5 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
               filter === f.key
-                ? 'bg-(--color-primary) text-white border-(--color-primary) shadow-(--shadow-pitch)'
+                ? 'bg-(--color-primary) text-on-primary border-(--color-primary) shadow-(--shadow-pitch)'
                 : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
             }`}
           >
@@ -262,7 +262,7 @@ export function AdminReservationsPage() {
           </Card>
         ) : (
           <div className='flex flex-col gap-3'>
-            <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted nums'>
+            <p className='text-[11px] font-medium uppercase tracking-[0.14em] text-text-muted nums'>
               {formatLocal(`${selectedDate}T12:00:00Z`, "EEEE d 'de' MMMM")} ·{' '}
               {sortedReservations.length} reserva
               {sortedReservations.length !== 1 ? 's' : ''}
@@ -289,7 +289,7 @@ export function AdminReservationsPage() {
                           'Cliente sin nombre'}
                       </span>
                       {!r.client?.user_id && !r.profile && (
-                        <span className='font-mono text-[11px] font-medium uppercase tracking-wide text-yellow-800 bg-flood-500/15 dark:text-flood-300 px-1.5 py-0.5 rounded-full shrink-0'>
+                        <span className='text-[11px] font-medium uppercase tracking-wide text-orange-800 bg-orange-500/15 dark:text-orange-300 px-1.5 py-0.5 rounded-full shrink-0'>
                           Invitado
                         </span>
                       )}

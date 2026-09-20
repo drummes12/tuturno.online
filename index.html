@@ -10,9 +10,36 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
+<!-- Splash iOS: Safari no usa el manifest — una imagen por tamaño de pantalla -->
+<link rel="apple-touch-startup-image" href="/splash-1290x2796.png"
+  media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-1290x2796.png"
+  media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-1206x2622.png"
+  media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-1179x2556.png"
+  media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-1284x2778.png"
+  media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-1170x2532.png"
+  media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-1125x2436.png"
+  media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-1170x2532.png"
+  media="(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3)" />
+<link rel="apple-touch-startup-image" href="/splash-828x1792.png"
+  media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" />
+<link rel="apple-touch-startup-image" href="/splash-750x1334.png"
+  media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+<link rel="apple-touch-startup-image" href="/splash-1536x2048.png"
+  media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)" />
+<link rel="apple-touch-startup-image" href="/splash-1668x2388.png"
+  media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" />
+<link rel="apple-touch-startup-image" href="/splash-2048x2732.png"
+  media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a5226" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f1512" />
+  <meta name="theme-color" content="#0f7a4a" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#071510" />
   <script>
     // Aplica el tema antes del primer paint para evitar flash.
     (function () {
@@ -23,17 +50,17 @@
         // Preferencia in-app explícita: manda sobre la del SO.
         document
           .querySelector('meta[name="theme-color"]:not([media])')
-          .setAttribute('content', dark ? '#0f1512' : '#0a5226');
+          .setAttribute('content', dark ? '#071510' : '#0f7a4a');
         var media = document.querySelector('meta[name="theme-color"][media]');
         if (media) media.remove();
       }
     })();
   </script>
 <!-- Primary Meta Tags -->
-<title>TuTurno — Reservas online para canchas, salas y consultorios</title>
-<meta name="title" content="TuTurno — Reservas online para canchas, salas y consultorios" />
+<title>TuTurno | Turnos y reservas para tu negocio</title>
+<meta name="title" content="TuTurno | Turnos y reservas para tu negocio" />
   <meta name="description"
-    content="Plataforma de reservas online para canchas, salas, consultorios y más. Tus clientes ven disponibilidad en tiempo real y solicitan su turno en segundos." />
+    content="Gestiona tus turnos y reservas de forma simple, rápida y eficiente. Canchas, salas, consultorios y más, con disponibilidad en tiempo real." />
   <meta name="keywords"
     content="reservas online, turnos online, reservar cancha, reservar sala, reservar consultorio, sistema de reservas, agenda online, TuTurno, reservas deportivas, reservas en tiempo real" />
   <meta name="author" content="TuTurno" />
@@ -43,25 +70,25 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://tuturno.online/" />
-  <meta property="og:title" content="TuTurno — Reservas online para tu negocio" />
+  <meta property="og:title" content="TuTurno | Turnos y reservas para tu negocio" />
   <meta property="og:description"
-    content="Plataforma de reservas online para canchas, salas, consultorios y más. Disponibilidad en tiempo real, confirmación manual y notificaciones automáticas." />
+    content="Gestiona tus turnos y reservas de forma simple, rápida y eficiente." />
   <meta property="og:image" content="https://tuturno.online/og-image.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt"
-    content="TuTurno — Reservas online para tu negocio. Canchas, salas, consultorios y más." />
+    content="TuTurno — Más que turnos, son oportunidades." />
   <meta property="og:site_name" content="TuTurno" />
   <meta property="og:locale" content="es_CO" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@TuTurnoApp" />
-  <meta name="twitter:title" content="TuTurno — Reservas online para tu negocio" />
+  <meta name="twitter:title" content="TuTurno | Turnos y reservas para tu negocio" />
   <meta name="twitter:description"
-    content="Plataforma de reservas online para canchas, salas, consultorios y más. Disponibilidad en tiempo real." />
+    content="Gestiona tus turnos y reservas de forma simple, rápida y eficiente." />
   <meta name="twitter:image" content="https://tuturno.online/og-image.png" />
-  <meta name="twitter:image:alt" content="TuTurno — Reservas online para tu negocio" />
+  <meta name="twitter:image:alt" content="TuTurno — Más que turnos, son oportunidades." />
 
   <!-- JSON-LD: Organization -->
   <script type="application/ld+json">
@@ -196,12 +223,79 @@
 
 <body>
   <div id="root">
+    <!-- Boot loader de marca: visible solo hasta que React monta y
+             reemplaza el contenido de #root. Colores fijos del sistema. -->
+    <div id="boot" role="status" aria-label="Cargando">
+      <img src="/logo-mark.svg" alt="" width="72" height="72" />
+      <span class="boot-ring"></span>
+    </div>
+    <style>
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: #f7faf8;
+      }
+    
+      .dark #boot {
+        background: #071510;
+      }
+    
+      #boot img {
+        border-radius: 18px;
+        animation: boot-pulse 1.6s ease-in-out infinite;
+      }
+    
+      .boot-ring {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 3px solid rgba(15, 122, 74, 0.2);
+        border-top-color: #0f7a4a;
+        animation: boot-spin 0.8s linear infinite;
+      }
+    
+      .dark .boot-ring {
+        border-color: rgba(52, 211, 153, 0.2);
+        border-top-color: #34d399;
+      }
+    
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    
+      @keyframes boot-pulse {
+    
+        0%,
+        100% {
+          transform: scale(1);
+        }
+    
+        50% {
+          transform: scale(1.05);
+        }
+      }
+    
+      @media (prefers-reduced-motion: reduce) {
+    
+        #boot img,
+        .boot-ring {
+          animation: none;
+        }
+      }
+    </style>
     <!-- Static H1 fallback for crawlers/auditors that don't execute JS. React replaces this on hydration. -->
-    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">TuTurno — Reservas online para
-      canchas, salas y consultorios</h1>
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">TuTurno — Turnos y reservas para
+      tu negocio</h1>
   </div>
   <noscript>
-    <h1>TuTurno — Reservas online para canchas, salas y consultorios</h1>
+    <h1>TuTurno — Turnos y reservas para tu negocio</h1>
     <p>Plataforma de reservas online para negocios de espacios. Tus clientes ven disponibilidad en tiempo real y solicitan
       su turno en segundos.</p>
     <p>Para usar TuTurno, habilita JavaScript en tu navegador.</p>

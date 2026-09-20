@@ -179,7 +179,7 @@ export function AdminResourcesPage() {
                 <PlusIcon size={16} />
               )}
             </div>
-            <h2 className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text)'>
+            <h2 className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text)'>
               {editingResource
                 ? `Editando "${editingResource.name}"`
                 : `Nuevo ${singularLabel}`}
@@ -249,7 +249,7 @@ export function AdminResourcesPage() {
                 className={`flex animate-stagger flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 sm:flex-nowrap sm:px-5 ${!resource.is_active ? 'opacity-60' : ''}`}
                 style={{ '--index': index } as React.CSSProperties}
               >
-                <span className='w-6 shrink-0 font-mono text-[11px] font-medium text-text-muted/70 nums'>
+                <span className='w-6 shrink-0 text-[11px] font-medium text-text-muted/70 nums'>
                   {String(resource.sort_order).padStart(2, '0')}
                 </span>
                 <div
@@ -269,7 +269,7 @@ export function AdminResourcesPage() {
                 </div>
                 <div className='flex w-full shrink-0 items-center justify-end gap-2.5 pl-9 sm:w-auto sm:pl-0'>
                   <span
-                    className={`rounded-md border px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${
+                    className={`rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] ${
                       resource.is_active
                         ? 'border-pitch-500/40 bg-pitch-500/10 text-pitch-700 dark:border-pitch-400/30 dark:text-pitch-300'
                         : 'border-border bg-surface-inset text-text-muted'

@@ -266,16 +266,16 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`shrink-0 px-4 py-2.5 rounded-full font-mono text-xs uppercase tracking-wider font-medium border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
+            className={`shrink-0 px-4 py-2.5 rounded-full text-xs uppercase tracking-wider font-medium border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
               filter === f.key
-                ? 'bg-(--color-primary) text-white border-(--color-primary) shadow-(--shadow-pitch)'
+                ? 'bg-(--color-primary) text-on-primary border-(--color-primary) shadow-(--shadow-pitch)'
                 : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-strong hover:text-(--color-text)'
             }`}
           >
             {f.label}
             <span
               className={
-                filter === f.key ? 'text-white/70' : 'text-text-muted/60'
+                filter === f.key ? 'text-on-primary/70' : 'text-text-muted/60'
               }
             >
               {' '}
@@ -376,7 +376,7 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                         {!slug && r.business && (
                           <Link
                             href={`/b/${r.business.slug}`}
-                            className='flex min-w-0 items-center gap-1 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-primary hover:underline'
+                            className='flex min-w-0 items-center gap-1 text-[11px] font-medium uppercase tracking-[0.14em] text-primary hover:underline'
                           >
                             <span className='shrink-0'>Reservar de nuevo</span>
                             <span className='shrink-0'>&bull;</span>

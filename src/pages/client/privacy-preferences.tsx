@@ -116,7 +116,7 @@ export function PrivacyPreferencesPage() {
             <MailIcon size={16} />
           </span>
           <div className='min-w-0'>
-            <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
+            <h2 className='text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text)'>
               Promociones por correo
             </h2>
             <p className='text-xs text-(--color-text-muted) mt-0.5'>
@@ -150,7 +150,7 @@ export function PrivacyPreferencesPage() {
                       {c.business_name}
                     </span>
                     <span
-                      className={`flex items-center gap-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] ${
+                      className={`flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] ${
                         accepted
                           ? 'text-pitch-700 dark:text-pitch-300'
                           : 'text-(--color-text-muted)'
@@ -193,7 +193,7 @@ export function PrivacyPreferencesPage() {
       </Card>
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '120ms' }}>
-        <h2 className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text) mb-2'>
+        <h2 className='text-[11px] font-semibold uppercase tracking-[0.14em] text-(--color-text) mb-2'>
           Tus derechos
         </h2>
         <p className='text-xs text-(--color-text-muted) leading-relaxed'>

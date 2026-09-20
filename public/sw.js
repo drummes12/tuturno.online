@@ -1,4 +1,14 @@
-self.addEventListener('install', () => {})
+const CACHE_VERSION = 'v1'
+const STATIC_CACHE = `tuturno-static-${CACHE_VERSION}`
+const PAGE_CACHE = `tuturno-pages-${CACHE_VERSION}`
+const OFFLINE_URL = '/offline.html'
+const PRECACHE = [OFFLINE_URL, '/logo-mark.svg', '/favicon.svg']
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE))
+  )
+})
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {
@@ -7,13 +17,73 @@ self.addEventListener('message', (event) => {
 })
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys
+            .filter((key) => key !== STATIC_CACHE && key !== PAGE_CACHE)
+            .map((key) => caches.delete(key))
+        )
+      )
+      .then(() => self.clients.claim())
+  )
 })
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.mode !== 'navigate') return
+  const { request } = event
+  if (request.method !== 'GET') return
 
-  event.respondWith(fetch(event.request))
+  const url = new URL(request.url)
+  if (url.origin !== self.location.origin) return
+
+  // Navegación: network-first; sin red sirve la página cacheada y,
+  // en último caso, la pantalla offline de marca.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone()
+            caches.open(PAGE_CACHE).then((cache) => cache.put(request, copy))
+          }
+          return response
+        })
+        .catch(async () => {
+          const cached = await caches.match(request)
+          return (
+            cached ??
+            (await caches.match('/')) ??
+            (await caches.match(OFFLINE_URL))
+          )
+        })
+    )
+    return
+  }
+
+  // Assets estáticos: cache-first con relleno de red (JS/CSS hasheados,
+  // iconos, fuentes). El resto (Supabase, APIs) pasa directo.
+  if (
+    url.pathname.startsWith('/assets/') ||
+    /\.(?:svg|png|ico|woff2?)$/.test(url.pathname)
+  ) {
+    event.respondWith(
+      caches.match(request).then(
+        (cached) =>
+          cached ??
+          fetch(request).then((response) => {
+            if (response.ok) {
+              const copy = response.clone()
+              caches
+                .open(STATIC_CACHE)
+                .then((cache) => cache.put(request, copy))
+            }
+            return response
+          })
+      )
+    )
+  }
 })
 
 self.addEventListener('push', (event) => {

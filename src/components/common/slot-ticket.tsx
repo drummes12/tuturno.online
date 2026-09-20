@@ -23,10 +23,10 @@ export function SlotTicket({
       data-tour='reservation-summary'
     >
       <div className='flex items-center justify-between border-b border-border px-5 py-3 dark:border-white/10'>
-        <span className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) dark:text-chalk-dim/70'>
+        <span className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted) dark:text-chalk-dim/70'>
           Tu turno
         </span>
-        <span className='font-mono text-[11px] capitalize text-(--color-text-muted) dark:text-chalk-dim/70'>
+        <span className='text-[11px] capitalize text-(--color-text-muted) dark:text-chalk-dim/70'>
           {dateLabel}
         </span>
       </div>
@@ -41,7 +41,7 @@ export function SlotTicket({
           </p>
         </div>
         {badge ?? (
-          <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 font-mono text-[11px] font-medium text-yellow-700 dark:border-flood-400/40 dark:text-flood-300'>
+          <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 text-[11px] font-medium text-pitch-700 dark:border-flood-400/40 dark:text-flood-300'>
             Seleccionado
           </span>
         )}

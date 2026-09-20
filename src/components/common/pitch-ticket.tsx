@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
 
 /**
- * Papeleta del turno — la pieza de marca: panel pitch con líneas de
- * cancha, kicker mono, hora protagonista y beam opcional.
+ * Papeleta del turno — la pieza de marca: kicker, hora protagonista,
+ * recurso con icono y beam opcional.
  *
- * Sigue el tema de la app: papel claro con líneas pitch de día,
- * cancha nocturna en dark mode. El acento cambia con el tema porque
- * el flood no pasa contraste sobre claro (pitch de día, flood de noche).
+ * Sigue el tema de la app: papel claro de día, panel verde profundo
+ * en dark mode. El acento cambia con el tema porque el mint no pasa
+ * contraste sobre claro (verde de día, mint de noche).
  *
  * Reservar para "un turno concreto": éxito al reservar, la próxima
  * reserva, el resumen antes de confirmar. No usar como fondo genérico.
@@ -46,23 +46,26 @@ export function PitchTicket({
   className?: string
   /** Clases extra del panel interno (p.ej. full-bleed en desktop). */
   panelClassName?: string
-  /** Clases extra del bloque scoreboard (centrado vertical, etc.). */
+  /** Clases extra del bloque principal (centrado vertical, etc.). */
   contentClassName?: string
   /** Clases extra de la hora protagonista. */
   timeClassName?: string
 }) {
   const body = (
     <>
-      {/* Líneas de cancha — decorativas */}
+      {/* Decoración: halo mint suave + anillo de reloj tenue */}
       <div aria-hidden='true' className='pointer-events-none absolute inset-0'>
-        <span className='absolute top-0 left-1/2 h-full w-px -translate-x-1/2 bg-pitch-900/6 dark:bg-chalk/5' />
-        <span className='absolute top-1/2 left-1/2 size-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-pitch-900/8 dark:border-chalk/5' />
-        <span className='absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pitch-700/30 dark:bg-chalk/15' />
-        <div className='absolute inset-x-0 top-0 h-20 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.08),transparent)] dark:bg-[radial-gradient(60%_100%_at_50%_0%,rgba(250,204,21,0.13),transparent)]' />
+        <div className='absolute inset-x-0 top-0 h-24 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(52,211,153,0.14),transparent)]' />
+        <div className='absolute inset-y-0 left-1/2 w-px bg-black/10 dark:bg-white/10' />
+        <div className='absolute left-1/2 top-1/2 size-30 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 dark:border-white/10' />
+        <div
+          className='absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full 
+bg-black/10 dark:bg-white/10'
+        />
       </div>
 
       <div className='relative flex items-center justify-between gap-3'>
-        <span className='font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-700 dark:text-pitch-300'>
+        <span className='text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-700 dark:text-pitch-300'>
           {kicker}
         </span>
         {badge}
@@ -72,11 +75,11 @@ export function PitchTicket({
           fecha + meta en fila, hora protagonista, recurso con icono. */}
       <div className={`relative mt-2 ${contentClassName}`}>
         <div className='flex items-start justify-between gap-3'>
-          <p className='font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-graphite-500 dark:text-chalk-dim/70'>
+          <p className='text-[11px] font-medium uppercase tracking-[0.14em] text-graphite-500 dark:text-chalk-dim/70'>
             {dateLabel}
           </p>
           {meta && (
-            <p className='nums shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-yellow-600 dark:text-flood-400'>
+            <p className='nums shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-700 dark:text-flood-400'>
               {meta}
             </p>
           )}
@@ -99,7 +102,7 @@ export function PitchTicket({
               {resourceName}
             </div>
             {resourceLabel && (
-              <span className='shrink-0 font-mono text-xs uppercase tracking-[0.14em] text-graphite-500 dark:text-chalk-dim/60'>
+              <span className='shrink-0 text-xs uppercase tracking-[0.14em] text-graphite-500 dark:text-chalk-dim/60'>
                 {resourceLabel}
               </span>
             )}

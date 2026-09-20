@@ -80,7 +80,7 @@ export function QrShowSheet({ slug, businessName, onClose }: QrShowSheetProps) {
       <div className='flex min-w-0 flex-1 flex-col items-center justify-center gap-5 px-6 pb-[env(safe-area-inset-bottom)]'>
         <div className='flex items-center gap-2 text-graphite-500'>
           <StoreIcon size={17} />
-          <span className='font-mono text-[11px] font-semibold uppercase tracking-[0.14em]'>
+          <span className='text-[11px] font-semibold uppercase tracking-[0.14em]'>
             {businessName ?? 'Mi negocio'}
           </span>
         </div>

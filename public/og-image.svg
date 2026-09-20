@@ -1,73 +1,65 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
-  <!-- Background: deep green gradient (generic, no pitch lines) -->
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#0a5226"/>
-      <stop offset="1" stop-color="#063819"/>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#0f7a4a"/>
     </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#22b978" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#22b978" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="hands" maskUnits="userSpaceOnUse" x="238.373" y="225.949" width="180" height="180">
+      <circle cx="328.373" cy="315.949" r="82" fill="#fff"/>
+      <path d="M328.373 315.949v-43M328.373 315.949l36.373-21" stroke="#000" stroke-width="13" stroke-linecap="round"/>
+    </mask>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
 
-  <!-- Subtle dot-grid decoration (generic, not sport-specific) -->
-  <g fill="#0a7d3b" opacity="0.12">
-    <circle cx="100" cy="80" r="3"/>
-    <circle cx="160" cy="80" r="3"/>
-    <circle cx="220" cy="80" r="3"/>
-    <circle cx="100" cy="140" r="3"/>
-    <circle cx="160" cy="140" r="3"/>
-    <circle cx="220" cy="140" r="3"/>
-    <circle cx="980" cy="490" r="3"/>
-    <circle cx="1040" cy="490" r="3"/>
-    <circle cx="1100" cy="490" r="3"/>
-    <circle cx="980" cy="550" r="3"/>
-    <circle cx="1040" cy="550" r="3"/>
-    <circle cx="1100" cy="550" r="3"/>
+  <!-- Fondo: verde oscuro de marca -->
+  <rect width="1200" height="630" fill="#071510"/>
+
+  <!-- Motivo del "pitch": halo mint + línea central + anillo-reloj,
+       el mismo lenguaje decorativo del hero y las papeletas. -->
+  <circle cx="1080" cy="560" r="420" fill="url(#glow)"/>
+
+  <!-- Reloj marcando 12:12: anillo doble, marcas cardinales,
+       horaria al 12 y minutero al minuto 12. -->
+  <circle cx="1052" cy="470" r="190" fill="none" stroke="#143326" stroke-width="26"/>
+  <circle cx="1052" cy="470" r="190" fill="none" stroke="#244136" stroke-width="2"/>
+  <g fill="#2d5c46">
+    <rect x="1046" y="307" width="12" height="26" rx="6"/>
+    <rect x="1189" y="464" width="26" height="12" rx="6"/>
+    <rect x="1046" y="607" width="12" height="26" rx="6"/>
+    <rect x="889" y="464" width="26" height="12" rx="6"/>
+  </g>
+  <line x1="1052" y1="470" x2="1060" y2="391" stroke="#34d399" stroke-width="20" stroke-linecap="round"/>
+  <line x1="1052" y1="470" x2="1166" y2="433" stroke="#34d399" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="1052" cy="470" r="12" fill="#34d399"/>
+
+  <!-- Icono de marca: glifo calendario + reloj -->
+  <g transform="translate(96 108) scale(0.3125)">
+    <rect width="512" height="512" rx="112" fill="url(#brand)"/>
+    <g transform="scale(1.024)">
+      <path d="M179.57 119v33.35M316.11 119v33.35" stroke="#ffffff" stroke-width="26" stroke-linecap="round"/>
+      <path fill="#ffffff" d="M127.59 140h18.98a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h70.54a6 6 0 0 1 6 6v6.35a27 27 0 0 0 54 0V146a6 6 0 0 1 6-6h18.98a30 30 0 0 1 30 30v63.465a108 108 0 0 0-69.717-25.516H154.59a14 14 0 0 0-14 14V333.5a14 14 0 0 0 14 14h64.734a8 8 0 0 1 7.52 5.272 108 108 0 0 0 13.071 25.138 8 8 0 0 1-6.552 12.59H127.59a30 30 0 0 1-30-30V170a30 30 0 0 1 30-30"/>
+      <circle cx="328.373" cy="315.949" r="82" fill="#ffffff" mask="url(#hands)"/>
+    </g>
   </g>
 
-  <!-- Logo mark: clock in rounded square -->
-  <rect x="80" y="180" width="180" height="180" rx="40" fill="#0a7d3b"/>
-  <circle cx="170" cy="270" r="60" fill="#f8faf7"/>
-  <circle cx="170" cy="270" r="55" fill="none" stroke="#e2e8e0" stroke-width="3"/>
-  <rect x="167" y="222" width="6" height="14" rx="2" fill="#2c342f"/>
-  <rect x="216" y="267" width="14" height="6" rx="2" fill="#2c342f"/>
-  <rect x="167" y="304" width="6" height="14" rx="2" fill="#2c342f"/>
-  <rect x="110" y="267" width="14" height="6" rx="2" fill="#2c342f"/>
-  <line x1="170" y1="270" x2="140" y2="240" stroke="#0a5226" stroke-width="7" stroke-linecap="round"/>
-  <line x1="170" y1="270" x2="205" y2="248" stroke="#0a7d3b" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="170" cy="270" r="9" fill="#facc15"/>
-  <circle cx="170" cy="270" r="4.5" fill="#0a5226"/>
-
-  <!-- Wordmark: TuTurno -->
-  <text x="300" y="260" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="72" font-weight="800" fill="#f8faf7" letter-spacing="-2">
-    Tu<tspan fill="#4ade80">Turno</tspan>
+  <!-- Wordmark -->
+  <text x="278" y="222" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="64" font-weight="800" fill="#f2f8f5" letter-spacing="-2">
+    Tu<tspan fill="#34d399">Turno</tspan>
   </text>
 
-  <!-- Tagline -->
-  <text x="300" y="310" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="28" font-weight="500" fill="#a3b8a8">
-    Reservas online para tu negocio
+  <!-- Headline: slogan de marca -->
+  <text x="96" y="372" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="82" font-weight="800" fill="#f2f8f5" letter-spacing="-3">
+    Más que turnos,
+  </text>
+  <text x="96" y="466" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="82" font-weight="800" fill="#34d399" letter-spacing="-3">
+    son oportunidades.
   </text>
 
-  <!-- Feature pills: sized to fit text with padding -->
-  <g font-family="Inter, system-ui, -apple-system, sans-serif" font-size="20" font-weight="600">
-    <!-- Pill 1: Tiempo real -->
-    <rect x="80" y="400" width="200" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
-    <text x="180" y="431" fill="#f8faf7" text-anchor="middle">Tiempo real</text>
-
-    <!-- Pill 2: Confirmación manual -->
-    <rect x="300" y="400" width="280" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
-    <text x="440" y="431" fill="#f8faf7" text-anchor="middle">Confirmación manual</text>
-
-    <!-- Pill 3: Multi-espacio -->
-    <rect x="600" y="400" width="220" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
-    <text x="710" y="431" fill="#f8faf7" text-anchor="middle">Multi-espacio</text>
-
-    <!-- Pill 4: Notificaciones -->
-    <rect x="840" y="400" width="260" height="50" rx="25" fill="#0a7d3b" opacity="0.9"/>
-    <text x="970" y="431" fill="#f8faf7" text-anchor="middle">Notificaciones auto.</text>
-  </g>
-
-  <!-- URL -->
-  <text x="600" y="560" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="24" font-weight="500" fill="#5a8a6e" text-anchor="middle">
-    tuturno.online
+  <!-- Texto de apoyo -->
+  <text x="96" y="540" font-family="Inter, system-ui, -apple-system, sans-serif" font-size="30" font-weight="500" fill="#9bafa5" letter-spacing="-0.5">
+    Gestiona tus reservas de forma simple, rápida y eficiente.
   </text>
 </svg>

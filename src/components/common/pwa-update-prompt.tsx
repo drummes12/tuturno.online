@@ -11,7 +11,7 @@ export function PwaUpdatePrompt() {
   return (
     <div className='w-full' role='alert' aria-live='polite'>
       <div className='flex items-center gap-3 rounded-2xl border border-border-strong bg-surface-elevated p-3 shadow-(--shadow-lg)'>
-        <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white'>
+        <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary'>
           <RefreshIcon size={20} />
         </span>
         <div className='min-w-0 flex-1'>
