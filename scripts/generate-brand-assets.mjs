@@ -2,22 +2,24 @@
 // Uso: node scripts/generate-brand-assets.mjs
 // Requiere devDependency: @resvg/resvg-js
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { Resvg } from '@resvg/resvg-js'
 
 const PUBLIC = new URL('../public/', import.meta.url)
-const FONT_DIR = new URL(
-  '../node_modules/@fontsource/inter/files/',
-  import.meta.url
-)
+// resvg solo lee TTF/OTF — los .woff2 de @fontsource se ignoran
+// silenciosamente y el texto cae a una fuente del sistema.
+// Inter (OFL) vendorizada en scripts/fonts/ desde Google Fonts.
+const FONT_DIR = new URL('./fonts/', import.meta.url)
 
 const fontOptions = {
   fontFiles: [
-    'inter-latin-500-normal.woff2',
-    'inter-latin-800-normal.woff2',
+    'Inter-400.ttf',
+    'Inter-500.ttf',
+    'Inter-700.ttf',
+    'Inter-800.ttf'
   ].map((f) => new URL(f, FONT_DIR).pathname),
   loadSystemFonts: true,
-  defaultFontFamily: 'Inter',
+  defaultFontFamily: 'Inter'
 }
 
 function render(svgName, pngName, width) {
@@ -133,3 +135,117 @@ const og = new Resvg(readFileSync(new URL('og-image.svg', PUBLIC)), {
 })
 writeFileSync(new URL('og-image.png', PUBLIC), og.render().asPng())
 console.log('✓ og-image.png (1200×630)')
+
+// ─────────────────────────────────────────────────────────────
+// Assets para redes sociales → social/ (no son assets de la app)
+// ─────────────────────────────────────────────────────────────
+const SOCIAL = new URL('../social/', import.meta.url)
+mkdirSync(SOCIAL, { recursive: true })
+
+const SOCIAL_DEFS = `
+  <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#0f7a4a"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#22b978" stop-opacity="0.35"/><stop offset="1" stop-color="#22b978" stop-opacity="0"/>
+  </radialGradient>
+  <mask id="hands" maskUnits="userSpaceOnUse" x="238.373" y="225.949" width="180" height="180">
+    <circle cx="328.373" cy="315.949" r="82" fill="#fff"/>
+    <path d="M328.373 315.949v-43M328.373 315.949l36.373-21" stroke="#000" stroke-width="13" stroke-linecap="round"/>
+  </mask>`
+
+// Ícono de marca: glifo blanco sobre cuadrado redondeado con gradiente.
+const icon = (x, y, size) => `<g transform="translate(${x} ${y}) scale(${size / 512})">
+  <rect width="512" height="512" rx="112" fill="url(#brand)"/>
+  <g transform="scale(1.024)">${GLYPH}</g>
+</g>`
+
+// Reloj decorativo marcando 12:12 (mismo motivo del OG image).
+const clock = (cx, cy, r) => {
+  const s = r / 190
+  const t = (dx, dy, w, h) =>
+    `<rect x="${cx + dx * s - (w * s) / 2}" y="${cy + dy * s - (h * s) / 2}" width="${w * s}" height="${h * s}" rx="${6 * s}"/>`
+  return `
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#143326" stroke-width="${26 * s}"/>
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#244136" stroke-width="${2 * s}"/>
+  <g fill="#2d5c46">${t(0, -163, 12, 26)}${t(163, 0, 26, 12)}${t(0, 163, 12, 26)}${t(-163, 0, 26, 12)}</g>
+  <line x1="${cx}" y1="${cy}" x2="${cx + 8 * s}" y2="${cy - 79 * s}" stroke="#34d399" stroke-width="${20 * s}" stroke-linecap="round"/>
+  <line x1="${cx}" y1="${cy}" x2="${cx + 114 * s}" y2="${cy - 37 * s}" stroke="#34d399" stroke-width="${16 * s}" stroke-linecap="round"/>
+  <circle cx="${cx}" cy="${cy}" r="${12 * s}" fill="#34d399"/>`
+}
+
+const wordmark = (x, y, size, anchor = 'start') =>
+  `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Inter, system-ui, sans-serif" font-size="${size}" font-weight="800" fill="#f2f8f5" letter-spacing="${(-size * 0.03).toFixed(2)}">Tu<tspan fill="#34d399">Turno</tspan></text>`
+
+const line = (x, y, size, fill, text, anchor = 'start', weight = 500) =>
+  `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="Inter, system-ui, sans-serif" font-size="${size}" font-weight="${weight}" fill="${fill}">${text}</text>`
+
+function renderSocial(name, w, h, body) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <defs>${SOCIAL_DEFS}</defs>
+  <rect width="${w}" height="${h}" fill="#071510"/>
+  ${body}
+</svg>`
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: 'width', value: w },
+    font: fontOptions,
+    background: '#071510',
+  })
+  writeFileSync(new URL(name, SOCIAL), resvg.render().asPng())
+  console.log(`✓ social/${name} (${w}×${h})`)
+}
+
+// Avatar 1:1 — ícono de app sobre pitch (seguro en recorte circular)
+renderSocial('avatar.png', 1024, 1024, `
+  <circle cx="512" cy="512" r="620" fill="url(#glow)"/>
+  ${icon(146, 146, 732)}`)
+
+// Facebook cover 820×312 @2x — composición centrada (móvil recorta lados)
+renderSocial('cover-facebook.png', 1640, 624, `
+  <circle cx="820" cy="300" r="480" fill="url(#glow)"/>
+  ${icon(735, 70, 170)}
+  ${wordmark(820, 345, 100, 'middle')}
+  ${line(820, 430, 38, '#9bafa5', 'Más que turnos, son oportunidades.', 'middle')}
+  ${line(820, 510, 30, '#34d399', 'tuturno.online', 'middle')}`)
+
+// LinkedIn banner 1584×396 — texto a la izquierda, reloj a la derecha
+renderSocial('banner-linkedin.png', 1584, 396, `
+  <circle cx="1340" cy="198" r="420" fill="url(#glow)"/>
+  ${clock(1330, 198, 150)}
+  ${icon(110, 113, 170)}
+  ${wordmark(310, 232, 92)}
+  ${line(112, 340, 36, '#9bafa5', 'Más que turnos, son oportunidades.')}`)
+
+// X/Twitter header 1500×500
+renderSocial('header-x.png', 1500, 500, `
+  <circle cx="1290" cy="250" r="420" fill="url(#glow)"/>
+  ${clock(1290, 250, 165)}
+  ${icon(140, 150, 190)}
+  ${wordmark(360, 292, 105)}
+  ${line(142, 410, 38, '#9bafa5', 'Más que turnos, son oportunidades.')}`)
+
+// YouTube banner 2560×1440 — contenido dentro del área segura 1546×423
+renderSocial('banner-youtube.png', 2560, 1440, `
+  <circle cx="2180" cy="720" r="640" fill="url(#glow)"/>
+  ${clock(2180, 720, 300)}
+  ${icon(830, 610, 220)}
+  ${wordmark(1090, 748, 120)}
+  ${line(1090, 835, 44, '#9bafa5', 'Más que turnos, son oportunidades.')}`)
+
+// Post de lanzamiento 1080×1080 (feed IG/Facebook/LinkedIn)
+renderSocial('post-launch.png', 1080, 1080, `
+  <circle cx="540" cy="420" r="540" fill="url(#glow)"/>
+  ${icon(390, 140, 300)}
+  ${line(540, 660, 82, '#f2f8f5', 'Más que turnos,', 'middle', 800)}
+  ${line(540, 762, 82, '#34d399', 'son oportunidades.', 'middle', 800)}
+  ${line(540, 860, 33, '#9bafa5', 'Reservas online para tu negocio.', 'middle')}
+  ${line(540, 960, 36, '#34d399', 'tuturno.online', 'middle')}`)
+
+// Story/reel cover 1080×1920
+renderSocial('story-launch.png', 1080, 1920, `
+  <circle cx="540" cy="720" r="640" fill="url(#glow)"/>
+  ${icon(370, 540, 340)}
+  ${line(540, 1140, 92, '#f2f8f5', 'Más que turnos,', 'middle', 800)}
+  ${line(540, 1255, 92, '#34d399', 'son oportunidades.', 'middle', 800)}
+  ${line(540, 1380, 40, '#9bafa5', 'Reservas online para tu negocio.', 'middle')}
+  ${line(540, 1700, 40, '#34d399', 'tuturno.online', 'middle')}`)
