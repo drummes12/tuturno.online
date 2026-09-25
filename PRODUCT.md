@@ -34,7 +34,7 @@ Real-time availability + manual approval flow, mobile-first, in Spanish, with a 
 - Email notifications (Resend), WhatsApp FAB, PWA install prompt.
 - Multi-resource (multiple courts/spaces), schedules, exceptions/closures.
 - Supabase backend; claims must not invent features beyond what exists.
-- **Pricing:** undecided. Landing may show a generic "desde $X/mes" placeholder; real number to be confirmed by owner.
+- **Pricing:** no checkout or automatic billing. The landing presents COP $49,900/month as a non-binding reference; each plan's final price and terms are agreed in writing before activation.
 
 ## Brand Commitments
 
@@ -46,7 +46,7 @@ Real-time availability + manual approval flow, mobile-first, in Spanish, with a 
 
 - Live demo at `/b/demo` (2 courts, seeded data) — real product truth for screenshots/comp references.
 - Real FAQ and feature list already in `src/pages/landing.tsx` — reusable copy.
-- No testimonials, no customer logos, no real pricing — must not be fabricated.
+- No testimonials, no customer logos, no fixed final pricing — must not be fabricated.
 
 ## Product Principles
 

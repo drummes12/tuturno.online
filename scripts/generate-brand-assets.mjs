@@ -35,6 +35,16 @@ function render(svgName, pngName, width) {
   return png
 }
 
+function renderOgImage() {
+  const og = new Resvg(readFileSync(new URL('og-image.svg', PUBLIC)), {
+    fitTo: { mode: 'width', value: 1200 },
+    font: fontOptions,
+    background: '#071510'
+  })
+  writeFileSync(new URL('og-image.png', PUBLIC), og.render().asPng())
+  console.log('✓ og-image.png (1200×630)')
+}
+
 // ICO: empaqueta PNGs 16/32 en contenedor ICO válido (PNG-compressed entries).
 function makeIco(entries) {
   const header = Buffer.alloc(6)
@@ -58,6 +68,11 @@ function makeIco(entries) {
   })
 
   return Buffer.concat([header, ...dir, ...entries.map((e) => e.png)])
+}
+
+if (process.argv.includes('--og-only')) {
+  renderOgImage()
+  process.exit(0)
 }
 
 const fav16 = render('logo-mark.svg', 'favicon-16x16.png', 16)
@@ -127,14 +142,7 @@ for (const [w, h] of SPLASH_SIZES) {
   console.log(`✓ splash-${w}x${h}.png`)
 }
 
-// OG image: texto Inter renderizado con fontFiles
-const og = new Resvg(readFileSync(new URL('og-image.svg', PUBLIC)), {
-  fitTo: { mode: 'width', value: 1200 },
-  font: fontOptions,
-  background: '#071510',
-})
-writeFileSync(new URL('og-image.png', PUBLIC), og.render().asPng())
-console.log('✓ og-image.png (1200×630)')
+renderOgImage()
 
 // ─────────────────────────────────────────────────────────────
 // Assets para redes sociales → social/ (no son assets de la app)
