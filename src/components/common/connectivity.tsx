@@ -131,7 +131,7 @@ export function OfflineScreen({
       />
       <img
         src='/logo-mark.svg'
-        alt='TuTurno'
+        alt=''
         className='h-20 w-20 rounded-2xl shadow-(--shadow-lg)'
       />
       <div className='relative flex flex-col items-center gap-2'>

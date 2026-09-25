@@ -619,7 +619,8 @@ body {
 .tuturno-phone-input:focus-within {
   background-color: var(--color-surface-elevated);
   border-color: var(--color-primary);
-  outline: none;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 
@@ -675,7 +676,6 @@ body {
   flex: 1 1 auto;
   min-width: 0;
   border: none;
-  outline: none;
   background: transparent;
   padding: 0;
   color: var(--color-text);

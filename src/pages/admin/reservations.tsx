@@ -187,9 +187,10 @@ export function AdminReservationsPage() {
             />
             <input
               type='date'
+              aria-label='Fecha de la reserva'
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className='w-full min-w-0 appearance-none bg-transparent px-4 py-3 pl-11 text-base text-(--color-text) focus:outline-none touch-target'
+              className='w-full min-w-0 appearance-none bg-transparent px-4 py-3 pl-11 text-base text-(--color-text) touch-target'
             />
           </div>
           <button

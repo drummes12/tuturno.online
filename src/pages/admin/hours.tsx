@@ -564,7 +564,7 @@ export function AdminHoursPage() {
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'
-                            } focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
+                            }  transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Apertura ${dayName} ${label.text}`}
                           />
                           <span className='text-text-muted text-xs shrink-0'>
@@ -585,7 +585,7 @@ export function AdminHoursPage() {
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
                                 : 'border-border focus:border-primary'
-                            } focus:outline-none transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
+                            } transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Cierre ${dayName} ${label.text}`}
                           />
                         </div>

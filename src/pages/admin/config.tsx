@@ -424,7 +424,7 @@ export function AdminConfigPage() {
                           slot_duration_minutes: parseInt(e.target.value) || 60
                         })
                       }
-                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono focus:outline-none focus:border-primary'
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-primary'
                       aria-label='Duración personalizada'
                     />
                     <span className='text-xs text-text-muted'>
@@ -463,7 +463,7 @@ export function AdminConfigPage() {
                           gap_minutes: parseInt(e.target.value) || 0
                         })
                       }
-                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono focus:outline-none focus:border-primary'
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-primary'
                       aria-label='Gap personalizado'
                     />
                     <span className='text-xs text-text-muted'>
@@ -671,7 +671,7 @@ export function AdminConfigPage() {
                   disabled={!canEdit || offline}
                   placeholder={INSTRUCTIONS_TEMPLATE}
                   rows={8}
-                  className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary) focus:outline-none focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y disabled:opacity-60'
+                  className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary)  focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y disabled:opacity-60'
                   aria-describedby='reservation-instructions-hint'
                 />
               )}

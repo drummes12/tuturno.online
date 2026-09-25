@@ -370,7 +370,7 @@ export function AdminExceptionsPage() {
                   value={selectedResourceId}
                   onChange={(e) => setSelectedResourceId(e.target.value)}
                   disabled={!canEdit || offline}
-                  className='w-full appearance-none rounded-xl border border-border bg-surface-inset pl-4 pr-10 py-3 text-sm focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                  className='w-full appearance-none rounded-xl border border-border bg-surface-inset pl-4 pr-10 py-3 text-sm focus:border-(--color-primary)  disabled:opacity-60 touch-target'
                 >
                   {resources.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -401,7 +401,7 @@ export function AdminExceptionsPage() {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 disabled={!canEdit || offline}
-                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
               />
             </div>
             <div className='flex-1 min-w-0 flex flex-col gap-2'>
@@ -417,7 +417,7 @@ export function AdminExceptionsPage() {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 disabled={!canEdit || offline}
-                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
               />
             </div>
           </div>
@@ -452,7 +452,7 @@ export function AdminExceptionsPage() {
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   disabled={!canEdit || offline}
-                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
                 />
               </div>
               <div className='flex-1 flex min-w-0 flex-col gap-2'>
@@ -468,7 +468,7 @@ export function AdminExceptionsPage() {
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   disabled={!canEdit || offline}
-                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
                 />
               </div>
             </div>
@@ -490,7 +490,7 @@ export function AdminExceptionsPage() {
               disabled={!canEdit || offline}
               placeholder='Ej: Festivo, mantenimiento, evento privado'
               maxLength={200}
-              className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm focus:border-(--color-primary) focus:outline-none disabled:opacity-60 touch-target'
+              className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm focus:border-(--color-primary)  disabled:opacity-60 touch-target'
             />
           </div>
 

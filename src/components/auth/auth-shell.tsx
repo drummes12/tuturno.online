@@ -26,11 +26,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className='relative flex items-center gap-2.5 font-bold tracking-tight'>
-            <img
-              src='/logo-mark.svg'
-              alt='TuTurno'
-              className='h-9 w-9 rounded-xl'
-            />
+            <img src='/logo-mark.svg' alt='' className='h-9 w-9 rounded-xl' />
             <span className='text-lg'>TuTurno</span>
           </div>
 
@@ -39,9 +35,9 @@ export function AuthShell({ children }: { children: ReactNode }) {
               Acceso
             </p>
             <p className='mt-3 text-2xl font-bold leading-snug tracking-tight text-balance'>
-              Más que turnos,
+              Reservas y horarios,
               <br />
-              son oportunidades.
+              en un mismo lugar.
             </p>
             {/* Mini agenda decorativa */}
             <div className='mt-6 flex flex-col divide-y divide-white/10 rounded-xl border border-white/15 bg-white/5 text-[11px] backdrop-blur-sm'>
@@ -83,7 +79,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
                 Acceso
               </p>
               <p className='text-xs text-chalk/70'>
-                Más que turnos, son oportunidades.
+                Reservas y horarios en TuTurno.
               </p>
             </div>
           </div>
