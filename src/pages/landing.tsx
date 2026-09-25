@@ -29,9 +29,6 @@ import {
 
 const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/
 
-// TODO(pricing): placeholder hasta confirmar el precio real de lanzamiento.
-const PRICE_FROM = '49.900'
-
 type SlotStatus = 'libre' | 'reservado' | 'ultimo'
 
 interface BoardSlot {
@@ -57,7 +54,7 @@ const STATUS_STYLE: Record<SlotStatus, { chip: string; label: string }> = {
     label: 'Libre'
   },
   reservado: {
-    chip: 'border-white/20 bg-white/8 text-white/55 dark:border-white/10 dark:bg-white/5 dark:text-white/40',
+    chip: 'border-white/20 bg-white/8 text-white/55 dark:border-white/10 dark:bg-white/5 dark:text-white/70',
     label: 'Reservado'
   },
   ultimo: {
@@ -354,7 +351,7 @@ export function LandingPage() {
           >
             <Link
               href='/b/demo'
-              aria-label='Ver la demostración en vivo'
+              aria-label='Ver la demostración'
               className='group block rounded-2xl bg-pitch-950 shadow-(--shadow-lg) backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-spring'
             >
               <div className='flex items-center justify-between border-b border-white/15 px-5 py-3.5 dark:border-white/10'>
@@ -362,8 +359,11 @@ export function LandingPage() {
                   Esta noche · 4 espacios
                 </span>
                 <span className='flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-pitch-300'>
-                  <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-400' />
-                  En vivo
+                  <span
+                    aria-hidden='true'
+                    className='h-1.5 w-1.5 rounded-full bg-pitch-400'
+                  />
+                  Demo
                 </span>
               </div>
               <ul className='flex flex-col divide-y divide-white/10 dark:divide-white/6'>
@@ -425,7 +425,7 @@ export function LandingPage() {
                 }
               ].map((step, i) => (
                 <li key={step.title} className='flex flex-col gap-2'>
-                  <span className='text-sm font-semibold text-pitch-600 dark:text-pitch-400'>
+                  <span className='text-sm font-semibold text-pitch-700 dark:text-pitch-400'>
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <h3 className='text-base font-semibold tracking-tight text-(--color-text)'>
@@ -460,7 +460,8 @@ export function LandingPage() {
                   </Button>
                 </Link>
                 <p className='text-sm text-(--color-text-muted)'>
-                  Desde ${PRICE_FROM} COP/mes por negocio.
+                  Desde $49.900 COP/mes por negocio. El precio final se acuerda
+                  por escrito antes de activar; no hay cobros automáticos.
                 </p>
               </div>
             </div>
@@ -541,6 +542,10 @@ export function LandingPage() {
                 question='¿Funciona en el celular?'
                 answer='Sí, TuTurno está diseñado mobile-first. Tanto la página pública como el panel de administración funcionan perfectamente en dispositivos móviles, con navegación adaptada al pulgar.'
               />
+              <FAQItem
+                question='¿Cómo empiezo a usar TuTurno en mi negocio?'
+                answer='Envía una solicitud con el nombre del negocio y el enlace público que prefieres. Revisamos la solicitud y te respondemos por correo.'
+              />
             </div>
           </section>
         </Reveal>
@@ -573,11 +578,12 @@ export function LandingPage() {
               Ver la demostración
             </Link>
           </div>
-          <p className='text-sm text-chalk-dim/70'>
-            Desde ${PRICE_FROM} COP/mes por negocio.
+          <p className='max-w-xl text-sm text-chalk-dim/70'>
+            Desde $49.900 COP/mes por negocio. El precio final se acuerda por
+            escrito antes de activar; no hay cobros automáticos.
           </p>
           <div className='flex flex-col items-center gap-1'>
-            <p className='text-xs text-chalk-dim/50'>
+            <p className='text-xs text-chalk-dim/70'>
               ¿Ya administras un negocio?
             </p>
             <Link

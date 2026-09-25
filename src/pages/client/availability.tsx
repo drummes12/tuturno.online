@@ -307,14 +307,10 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
               ))}
           </div>
         </div>
-        <div className='mt-1 flex items-center justify-between gap-2'>
-          <p className='flex-1 text-sm text-(--color-text-muted) capitalize'>
+        <div className='mt-1 flex items-center gap-2'>
+          <p className='text-sm text-(--color-text-muted) capitalize'>
             {dateLabel}
           </p>
-          <span className='flex items-center gap-1.5 text-[10px] whitespace-nowrap font-medium uppercase tracking-[0.14em] text-pitch-600 dark:text-pitch-400'>
-            <span className='live-dot h-1.5 w-1.5 rounded-full bg-pitch-500 dark:bg-pitch-400' />
-            En vivo
-          </span>
         </div>
       </div>
 
