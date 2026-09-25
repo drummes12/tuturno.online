@@ -3,6 +3,7 @@ import { Link } from 'wouter'
 import { Card } from '@/components/common/card'
 import { ArrowLeftIcon } from '@/components/common/icon'
 import { CURRENT_POLICY_VERSION } from '@/types'
+import { LEGAL_UPDATED_AT } from '@/lib/legal'
 import { Page } from '@/components/layout/page'
 
 interface LegalPageProps {
@@ -11,10 +12,6 @@ interface LegalPageProps {
   children: ReactNode
 }
 
-/**
- * Layout común para páginas legales públicas (privacidad, términos).
- * Muestra la versión vigente del documento para evidencia de consentimiento.
- */
 export function LegalPage({ title, subtitle, children }: LegalPageProps) {
   return (
     <Page width='default'>
@@ -34,7 +31,7 @@ export function LegalPage({ title, subtitle, children }: LegalPageProps) {
           <p className='text-sm text-(--color-text-muted) mt-1'>{subtitle}</p>
         )}
         <p className='text-xs text-(--color-text-muted) mt-2'>
-          Versión: {CURRENT_POLICY_VERSION}
+          Actualizada: {LEGAL_UPDATED_AT} · Versión: {CURRENT_POLICY_VERSION}
         </p>
       </div>
 

@@ -381,6 +381,7 @@ describe('Email templates', () => {
         const { html } = templates[name](validPayload)
         expect(html).toContain(APP_URL)
         expect(html).toContain('tuturno.online')
+        expect(html).toContain(`${APP_URL}/privacidad`)
       }
     })
 

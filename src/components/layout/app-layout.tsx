@@ -38,6 +38,7 @@ import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { useTheme } from '@/hooks/use-theme'
 import { extractSlugFromPath } from '@/lib/slug'
+import { LEGAL_ENTITY } from '@/lib/legal'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import type { NotificationPermissionState } from '@/lib/push'
 
@@ -224,6 +225,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <div
       className={`min-h-dvh flex flex-col bg-surface overflow-clip ${hasBottomNav ? 'has-bottom-nav' : ''}`}
     >
+      <a
+        href='#main'
+        className='sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-100 focus:rounded-lg focus:bg-surface-elevated focus:px-4 focus:py-3 focus:text-(--color-text) focus:shadow-lg'
+      >
+        Saltar al contenido
+      </a>
+
       {/* Top bar — píldora flotante. En la landing arranca embebida a
           ancho completo sobre el hero y se contrae a píldora al scroll
           (scroll-driven CSS; sin soporte queda píldora siempre). */}
@@ -243,7 +251,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             >
               <img
                 src='/logo-mark.svg'
-                alt='TuTurno'
+                alt=''
                 data-nav-logo
                 className='w-8 h-8 rounded-lg'
               />
@@ -408,7 +416,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* Content — la key remonta las páginas al recuperar de un
           offline sostenido para refrescar la data cacheada. */}
       <main
+        id='main'
         key={refreshKey.current}
+        tabIndex={-1}
         className='flex-1 flex flex-col mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-8'
       >
         {user && hardOffline && <OfflineNotice />}
@@ -504,28 +514,47 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <div className='fixed inset-x-0 bottom-4 z-50 flex flex-col gap-2 px-4 sm:inset-x-auto sm:right-4 sm:w-[min(100%-2rem,28rem)] sm:px-0'>
+      <div className='fixed inset-x-0 bottom-[calc(max(var(--bottom-nav-height),env(safe-area-inset-bottom))+1rem)] z-50 flex flex-col gap-2 px-4 sm:inset-x-auto sm:right-4 sm:w-[min(100%-2rem,28rem)] sm:px-0'>
         <PwaInstallPrompt />
         <PwaNotificationPrompt state={pushNotificationState} />
         <PwaUpdatePrompt />
       </div>
 
-      {/* Footer — enlaces legales públicos */}
-      <footer className='border-t border-border bg-surface-elevated mt-auto pb-[max(var(--bottom-nav-height),env(safe-area-inset-bottom))]'>
-        <div className='mx-auto max-w-5xl px-4 py-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-(--color-text-muted)'>
+      <footer className='border-t border-border bg-surface-elevated mt-auto pb-[calc(max(var(--bottom-nav-height),env(safe-area-inset-bottom))+1rem)]'>
+        <div className='mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2 text-xs text-(--color-text-muted)'>
           <span>© {new Date().getFullYear()} TuTurno</span>
-          <Link
-            href='/privacidad'
-            className='hover:text-(--color-text) transition-colors'
+          <nav
+            aria-label='Enlaces legales'
+            className='flex flex-wrap items-center justify-center gap-x-3'
           >
-            Política de datos
-          </Link>
-          <Link
-            href='/terminos'
-            className='hover:text-(--color-text) transition-colors'
-          >
-            Términos
-          </Link>
+            <Link
+              href='/privacidad'
+              className='touch-target -my-2 inline-flex items-center hover:text-(--color-text) transition-colors'
+            >
+              Privacidad
+            </Link>
+            <Link
+              href='/terminos'
+              className='touch-target -my-2 inline-flex items-center hover:text-(--color-text) transition-colors'
+            >
+              Términos
+            </Link>
+            <Link
+              href='/cookies'
+              className='touch-target -my-2 inline-flex items-center hover:text-(--color-text) transition-colors'
+            >
+              Cookies
+            </Link>
+            <Link
+              href='/reembolsos'
+              className='touch-target -my-2 inline-flex items-center hover:text-(--color-text) transition-colors'
+            >
+              Reembolsos
+            </Link>
+          </nav>
+          <a href={`mailto:${LEGAL_ENTITY.email}`} className='underline'>
+            {LEGAL_ENTITY.email}
+          </a>
         </div>
       </footer>
     </div>

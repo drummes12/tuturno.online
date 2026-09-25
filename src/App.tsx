@@ -77,6 +77,8 @@ import { WhatsAppRedirectPage } from '@/pages/whatsapp-redirect'
 // Páginas legales
 import { PrivacyPage } from '@/pages/legal/privacy'
 import { TermsPage } from '@/pages/legal/terms'
+import { CookiesPage } from '@/pages/legal/cookies'
+import { RefundsPage } from '@/pages/legal/refunds'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -188,6 +190,8 @@ export default function App() {
             {/* Páginas legales — públicas */}
             <Route path='/privacidad' component={PrivacyPage} />
             <Route path='/terminos' component={TermsPage} />
+            <Route path='/cookies' component={CookiesPage} />
+            <Route path='/reembolsos' component={RefundsPage} />
 
             {/* Redirect a WhatsApp — los correos usan este enlace para
             evitar links a wa.me que no matchean el dominio de envío */}

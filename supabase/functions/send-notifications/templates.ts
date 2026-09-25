@@ -440,7 +440,7 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
               <tr>
                 <td width="40" style="vertical-align:middle;">
-                  <img src="${escapeHtml(logoUrl)}" alt="TuTurno" width="36" height="36" style="display:block;border:0;border-radius:9px;background-color:#f2f8f5;padding:3px;box-sizing:border-box;">
+                  <img src="${escapeHtml(logoUrl)}" alt="" width="36" height="36" style="display:block;border:0;border-radius:9px;background-color:#f2f8f5;padding:3px;box-sizing:border-box;">
                 </td>
                 <td style="padding-left:10px;vertical-align:middle;">
                   <div style="font-family:${SANS_FONT};font-size:20px;font-weight:800;letter-spacing:-0.4px;line-height:1.15;color:#ffffff;">TuTurno</div>
@@ -464,7 +464,8 @@ function emailWrapper(appUrl: string, opts: EmailWrapperOptions): string {
             <td align="center" style="padding:25px 28px 28px;border-top:1px solid #e8f1ec;text-align:center;">
               <p style="margin:0 auto;font-family:${SANS_FONT};font-size:12px;color:#82968c;line-height:1.6;text-align:center;max-width:40ch;">Este correo fue enviado por TuTurno. Si crees que llegó por error, puedes ignorarlo.</p>
               <a href="${escapeHtml(appUrl)}" style="display:inline-block;margin-top:7px;font-family:${SANS_FONT};font-size:12px;color:#0f7a4a;text-decoration:none;font-weight:700;">tuturno.online</a>
-              <p style="margin:7px 0 0;font-family:${SANS_FONT};font-size:12px;color:#5f7168;line-height:1.6;text-align:center;">&copy; ${year} TuTurno. Todos los derechos reservados.</p>
+              <a href="${escapeHtml(link(appUrl, '/privacidad'))}" style="display:inline-block;margin:7px 0 0;font-family:${SANS_FONT};font-size:12px;color:#0f7a4a;text-decoration:underline;">Política de datos</a>
+              <p style="margin:7px 0 0;font-family:${SANS_FONT};font-size:12px;color:#5f7168;line-height:1.6;text-align:center;">&copy; ${year} TuTurno.</p>
             </td>
           </tr>
         </table>
