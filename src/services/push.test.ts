@@ -78,8 +78,7 @@ describe('savePushSubscription', () => {
       p_endpoint: subscription.endpoint,
       p_p256dh: 'p256dh-key',
       p_auth: 'auth-key',
-      p_expiration_time: null,
-      p_user_agent: navigator.userAgent
+      p_expiration_time: null
     })
   })
 

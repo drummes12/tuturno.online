@@ -4,12 +4,14 @@ const {
   mockSignOut,
   mockRemoveCurrentPushSubscription,
   mockFetchBusinessMemberships,
-  mockFetchIsPlatformAdmin
+  mockFetchIsPlatformAdmin,
+  mockClearPrivateOfflineCache
 } = vi.hoisted(() => ({
   mockSignOut: vi.fn(),
   mockRemoveCurrentPushSubscription: vi.fn(),
   mockFetchBusinessMemberships: vi.fn(),
-  mockFetchIsPlatformAdmin: vi.fn()
+  mockFetchIsPlatformAdmin: vi.fn(),
+  mockClearPrivateOfflineCache: vi.fn()
 }))
 
 vi.mock('@/services/auth', () => ({
@@ -26,6 +28,10 @@ vi.mock('@/services/profiles', () => ({
 
 vi.mock('@/services/platform', () => ({
   fetchIsPlatformAdmin: mockFetchIsPlatformAdmin
+}))
+
+vi.mock('@/lib/offline-cache', () => ({
+  clearPrivateOfflineCache: mockClearPrivateOfflineCache
 }))
 
 import { useAuthStore } from '@/stores/auth'
@@ -114,6 +120,7 @@ describe('useAuthStore', () => {
 
     expect(mockSignOut).toHaveBeenCalledTimes(1)
     expect(mockRemoveCurrentPushSubscription).toHaveBeenCalledTimes(1)
+    expect(mockClearPrivateOfflineCache).toHaveBeenCalledTimes(1)
     const state = useAuthStore.getState()
     expect(state.session).toBeNull()
     expect(state.user).toBeNull()

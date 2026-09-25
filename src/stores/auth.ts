@@ -6,6 +6,7 @@ import { fetchIsPlatformAdmin } from '@/services/platform'
 import { removeCurrentPushSubscription } from '@/services/push'
 import type { Profile } from '@/types'
 import type { BusinessMembership } from '@/services/profiles'
+import { clearPrivateOfflineCache } from '@/lib/offline-cache'
 
 interface AuthState {
   session: Session | null
@@ -81,6 +82,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     }))
   },
   signOut: async () => {
+    try {
+      await clearPrivateOfflineCache()
+    } catch {
+      // El cierre de sesión debe continuar aunque falle el borrado de caché.
+    }
     try {
       // La revocación push es best-effort: con mala red no debe
       // bloquear el cierre de sesión.

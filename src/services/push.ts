@@ -16,8 +16,7 @@ export async function savePushSubscription(
     p_endpoint: subscription.endpoint,
     p_p256dh: p256dh,
     p_auth: auth,
-    p_expiration_time: subscription.expirationTime,
-    p_user_agent: navigator.userAgent
+    p_expiration_time: subscription.expirationTime
   })
 
   if (error) throw error

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v3'
+const CACHE_VERSION = 'v4'
 const STATIC_CACHE = `tuturno-static-${CACHE_VERSION}`
 const PAGE_CACHE = `tuturno-pages-${CACHE_VERSION}`
 const DATA_CACHE = `tuturno-data-${CACHE_VERSION}`
@@ -46,10 +46,9 @@ self.addEventListener('fetch', (event) => {
   // respuesta conocida, lo que permite ver reservas/datos en modo
   // offline de solo lectura. Las mutaciones (POST/PATCH/DELETE) no se
   // interceptan ni se cachean.
-  // Nota: la caché se clavea por URL (las cabeceras Authorization no
-  // forman parte de la clave), así que dos usuarios distintos en el
-  // mismo dispositivo compartirían respuestas cacheadas — es la última
-  // data conocida de ESE dispositivo, aceptable para el modo offline.
+  // La caché varía por Authorization para no reutilizar respuestas
+  // autenticadas entre usuarios del mismo dispositivo; el cierre de sesión
+  // también elimina la caché de datos.
   if (
     (url.hostname.endsWith('.supabase.co') ||
       // Supabase local en dev (127.0.0.1:55321) — los paths /rest/v1
@@ -62,9 +61,27 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response.ok) {
+          if (response.ok && response.headers.get('Vary') !== '*') {
             const copy = response.clone()
-            caches.open(DATA_CACHE).then((cache) => cache.put(request, copy))
+            const headers = new Headers(copy.headers)
+            const vary = (headers.get('Vary') ?? '')
+              .split(',')
+              .map((value) => value.trim())
+              .filter(Boolean)
+            if (
+              !vary.some((value) => value.toLowerCase() === 'authorization')
+            ) {
+              vary.push('Authorization')
+            }
+            headers.set('Vary', vary.join(', '))
+            const scopedCopy = new Response(copy.body, {
+              status: copy.status,
+              statusText: copy.statusText,
+              headers
+            })
+            caches
+              .open(DATA_CACHE)
+              .then((cache) => cache.put(request, scopedCopy))
           }
           return response
         })
