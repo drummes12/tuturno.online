@@ -61,7 +61,7 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
       await setAuthContext(client, REAL_USER_ID)
 
       const result = await client.query(
-        `select * from public.record_registration_consent('2026-12-08-v1', 'registration')`
+        `select * from public.record_registration_consent('2026-09-25-v2', 'registration')`
       )
       expect(result.rows[0]).toBeTruthy()
 
@@ -72,7 +72,7 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
         [REAL_USER_ID]
       )
       expect(consent.rows[0].status).toBe('accepted')
-      expect(consent.rows[0].policy_version).toBe('2026-12-08-v1')
+      expect(consent.rows[0].policy_version).toBe('2026-09-25-v2')
       expect(consent.rows[0].business_id).toBeNull()
     })
   })
@@ -82,10 +82,10 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
       await setAuthContext(client, REAL_USER_ID)
 
       const r1 = await client.query(
-        `select * from public.record_registration_consent('2026-12-08-v1', 'registration')`
+        `select * from public.record_registration_consent('2026-09-25-v2', 'registration')`
       )
       const r2 = await client.query(
-        `select * from public.record_registration_consent('2026-12-08-v1', 'registration')`
+        `select * from public.record_registration_consent('2026-09-25-v2', 'registration')`
       )
       expect(r1.rows[0].record_registration_consent).toBe(
         r2.rows[0].record_registration_consent
@@ -94,7 +94,7 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
       const count = await client.query(
         `select count(*)::int as n from public.privacy_consents
          where subject_user_id = $1 and purpose = 'terms_and_privacy'
-           and policy_version = '2026-12-08-v1'`,
+           and policy_version = '2026-09-25-v2'`,
         [REAL_USER_ID]
       )
       expect(count.rows[0].n).toBe(1)
@@ -106,7 +106,7 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
       await setAuthContext(client, REAL_USER_ID)
 
       await client.query(
-        `select * from public.set_marketing_consent($1, '2026-12-08-v1', true, 'reservation')`,
+        `select * from public.set_marketing_consent($1, '2026-09-25-v2', true, 'reservation')`,
         [REAL_BUSINESS_ID]
       )
 
@@ -128,7 +128,7 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
 
       // Aceptar primero
       await client.query(
-        `select * from public.set_marketing_consent($1, '2026-12-08-v1', true, 'test')`,
+        `select * from public.set_marketing_consent($1, '2026-09-25-v2', true, 'test')`,
         [REAL_BUSINESS_ID]
       )
 
@@ -166,7 +166,7 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
       await setAuthContext(client, REAL_USER_ID)
 
       await client.query(
-        `select * from public.set_marketing_consent($1, '2026-12-08-v1', true, 'test')`,
+        `select * from public.set_marketing_consent($1, '2026-09-25-v2', true, 'test')`,
         [REAL_BUSINESS_ID]
       )
 
@@ -183,7 +183,7 @@ describe.skipIf(!RUN_TESTS)('privacy_consents RPCs', () => {
       await setAuthContext(client, REAL_USER_ID)
 
       await client.query(
-        `select * from public.set_marketing_consent($1, '2026-12-08-v1', true, 'test')`,
+        `select * from public.set_marketing_consent($1, '2026-09-25-v2', true, 'test')`,
         [REAL_BUSINESS_ID]
       )
 

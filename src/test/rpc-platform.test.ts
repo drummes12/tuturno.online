@@ -150,10 +150,14 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
       // Crear una solicitud pendiente como usuario normal
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       const reqResult = await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'Test Biz',
            p_desired_slug := 't-' || gen_random_uuid()::text,
-           p_city := 'Bogotá'
+           p_city := 'Bogotá',
+           p_business_type := null,
+           p_contact_phone := null,
+           p_notes := null,
+           p_policy_version := 'test'
          ) as req_id`
       )
       const requestId = reqResult.rows[0].req_id as string
@@ -173,9 +177,14 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
       // Crear solicitud como usuario normal
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       const reqResult = await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'Test Biz AAL1',
-           p_desired_slug := 'tb1-' || gen_random_uuid()::text
+           p_desired_slug := 'tb1-' || gen_random_uuid()::text,
+           p_business_type := null,
+           p_contact_phone := null,
+           p_city := null,
+           p_notes := null,
+           p_policy_version := 'test'
          ) as req_id`
       )
       const requestId = reqResult.rows[0].req_id as string
@@ -197,9 +206,14 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       const slug = 'test-approve-' + crypto.randomUUID().slice(0, 8)
       const reqResult = await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'Test Approve Biz',
-           p_desired_slug := $1
+           p_desired_slug := $1,
+           p_business_type := null,
+           p_contact_phone := null,
+           p_city := null,
+           p_notes := null,
+           p_policy_version := 'test'
          ) as req_id`,
         [slug]
       )
@@ -226,9 +240,14 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
     await withTransaction(async (client) => {
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       const reqResult = await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'Test Reject AAL1',
-           p_desired_slug := 'tra-' || gen_random_uuid()::text
+           p_desired_slug := 'tra-' || gen_random_uuid()::text,
+           p_business_type := null,
+           p_contact_phone := null,
+           p_city := null,
+           p_notes := null,
+           p_policy_version := 'test'
          ) as req_id`
       )
       const requestId = reqResult.rows[0].req_id as string
@@ -247,9 +266,14 @@ describe.skipIf(!DB_AVAILABLE)('RPCs de plataforma — autorización', () => {
     await withTransaction(async (client) => {
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       const reqResult = await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'Test Reject OK',
-           p_desired_slug := 'tr-' || gen_random_uuid()::text
+           p_desired_slug := 'tr-' || gen_random_uuid()::text,
+           p_business_type := null,
+           p_contact_phone := null,
+           p_city := null,
+           p_notes := null,
+           p_policy_version := 'test'
          ) as req_id`
       )
       const requestId = reqResult.rows[0].req_id as string
@@ -323,9 +347,14 @@ describe.skipIf(!DB_AVAILABLE)('RLS de plataforma — lectura', () => {
       // Crear una solicitud ajena primero
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'RLS Test',
-           p_desired_slug := 'rt-' || gen_random_uuid()::text
+           p_desired_slug := 'rt-' || gen_random_uuid()::text,
+           p_business_type := null,
+           p_contact_phone := null,
+           p_city := null,
+           p_notes := null,
+           p_policy_version := 'test'
          )`
       )
 
@@ -345,9 +374,14 @@ describe.skipIf(!DB_AVAILABLE)('RLS de plataforma — lectura', () => {
     await withTransaction(async (client) => {
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'RLS AAL2 Test',
-           p_desired_slug := 'ra-' || gen_random_uuid()::text
+           p_desired_slug := 'ra-' || gen_random_uuid()::text,
+           p_business_type := null,
+           p_contact_phone := null,
+           p_city := null,
+           p_notes := null,
+           p_policy_version := 'test'
          )`
       )
 
@@ -393,9 +427,14 @@ describe.skipIf(!DB_AVAILABLE)('Auditoría', () => {
       await setAuthContext(client, NORMAL_USER_ID, 'aal2')
       const slug = 'test-audit-' + crypto.randomUUID().slice(0, 8)
       const reqResult = await client.query(
-        `select public.request_business_signup(
+        `select public.submit_business_signup_request(
            p_business_name := 'Audit Test Biz',
-           p_desired_slug := $1
+           p_desired_slug := $1,
+           p_business_type := null,
+           p_contact_phone := null,
+           p_city := null,
+           p_notes := null,
+           p_policy_version := 'test'
          ) as req_id`,
         [slug]
       )

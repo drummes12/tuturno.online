@@ -13,6 +13,33 @@ import { CURRENT_POLICY_VERSION } from '@/types'
  * El error aquí no debe bloquear el flujo principal: el llamante decide
  * si propagar.
  */
+export async function recordReservationDataConsent(
+  businessId: string,
+  policyVersion: string = CURRENT_POLICY_VERSION
+): Promise<void> {
+  const { error } = await supabase.rpc('record_reservation_data_consent', {
+    p_business_id: businessId,
+    p_policy_version: policyVersion
+  })
+  if (error) throw error
+}
+
+/**
+ * Indica si el usuario actual ya registró la autorización de datos para
+ * reservas en este negocio con la versión de política vigente.
+ */
+export async function hasReservationDataConsent(
+  businessId: string,
+  policyVersion: string = CURRENT_POLICY_VERSION
+): Promise<boolean> {
+  const { data, error } = await supabase.rpc('has_reservation_data_consent', {
+    p_business_id: businessId,
+    p_policy_version: policyVersion
+  })
+  if (error) throw error
+  return Boolean(data)
+}
+
 export async function recordRegistrationConsent(
   policyVersion: string = CURRENT_POLICY_VERSION,
   source = 'registration'
@@ -31,8 +58,8 @@ export async function recordRegistrationConsent(
 export async function setMarketingConsent(
   businessId: string,
   accept: boolean = true,
-  policyVersion: string = CURRENT_POLICY_VERSION,
-  source = 'reservation'
+  source = 'reservation',
+  policyVersion: string = CURRENT_POLICY_VERSION
 ): Promise<void> {
   const { error } = await supabase.rpc('set_marketing_consent', {
     p_business_id: businessId,

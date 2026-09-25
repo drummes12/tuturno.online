@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { CURRENT_POLICY_VERSION } from '@/types'
 import type {
   BusinessRole,
   PlatformAuditEntry,
@@ -42,13 +43,14 @@ export type SignupRequestInput = {
 export async function requestBusinessSignup(
   input: SignupRequestInput
 ): Promise<string> {
-  const { data, error } = await supabase.rpc('request_business_signup', {
+  const { data, error } = await supabase.rpc('submit_business_signup_request', {
     p_business_name: input.businessName,
     p_desired_slug: input.desiredSlug,
     p_business_type: input.businessType ?? null,
     p_contact_phone: input.contactPhone ?? null,
     p_city: input.city ?? null,
-    p_notes: input.notes ?? null
+    p_notes: input.notes ?? null,
+    p_policy_version: CURRENT_POLICY_VERSION
   })
   if (error) throw error
   return data as string

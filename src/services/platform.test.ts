@@ -84,13 +84,14 @@ describe('requestBusinessSignup', () => {
       desiredSlug: 'canchas-el-parque'
     })
     expect(id).toBe('req-1')
-    expect(mockRpc).toHaveBeenCalledWith('request_business_signup', {
+    expect(mockRpc).toHaveBeenCalledWith('submit_business_signup_request', {
       p_business_name: 'Canchas El Parque',
       p_desired_slug: 'canchas-el-parque',
       p_business_type: null,
       p_contact_phone: null,
       p_city: null,
-      p_notes: null
+      p_notes: null,
+      p_policy_version: expect.any(String)
     })
   })
 

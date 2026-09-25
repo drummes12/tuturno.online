@@ -15,7 +15,6 @@ import { Input } from '@/components/common/input'
 import { Alert } from '@/components/common/alert'
 import { Badge } from '@/components/common/badge'
 import { PageLoader } from '@/components/common/spinner'
-import { PhoneInput } from '@/components/common/phone-input'
 import { CheckIcon, XIcon } from '@/components/common/icon'
 import type { SignupRequest, SlugAvailability } from '@/types'
 
@@ -38,10 +37,7 @@ export function CreateBusinessPage() {
   const [businessName, setBusinessName] = useState('')
   const [slug, setSlug] = useState('')
   const [slugTouched, setSlugTouched] = useState(false)
-  const [businessType, setBusinessType] = useState('')
-  const [city, setCity] = useState('')
-  const [phone, setPhone] = useState('')
-  const [notes, setNotes] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [slugStatus, setSlugStatus] = useState<SlugAvailability | null>(null)
   const [checkingSlug, setCheckingSlug] = useState(false)
 
@@ -108,15 +104,17 @@ export function CreateBusinessPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (!acceptedTerms) {
+      setError(
+        'Acepta los términos y autoriza el uso de los datos para enviar tu solicitud.'
+      )
+      return
+    }
     setSubmitting(true)
     try {
       await requestBusinessSignup({
         businessName,
-        desiredSlug: slug,
-        businessType: businessType || null,
-        contactPhone: phone || null,
-        city: city || null,
-        notes: notes || null
+        desiredSlug: slug
       })
       await load()
     } catch (err) {
@@ -207,11 +205,7 @@ export function CreateBusinessPage() {
           </div>
 
           <div className='relative flex items-center gap-2.5 font-bold tracking-tight'>
-            <img
-              src='/logo-mark.svg'
-              alt='TuTurno'
-              className='h-9 w-9 rounded-xl'
-            />
+            <img src='/logo-mark.svg' alt='' className='h-9 w-9 rounded-xl' />
             <span className='text-lg'>TuTurno</span>
           </div>
 
@@ -228,8 +222,8 @@ export function CreateBusinessPage() {
             <div className='mt-6 flex flex-col divide-y divide-white/10 rounded-xl border border-white/15 bg-white/5 text-[11px] backdrop-blur-sm'>
               {[
                 'Envías la solicitud',
-                'La revisamos a mano · < 24 h',
-                'Tu página queda lista /b/tu-negocio'
+                'Revisamos la solicitud y te avisamos por correo',
+                'Si aprobamos, tendrás una página /b/tu-negocio'
               ].map((step, i) => (
                 <div key={step} className='flex items-center gap-3 px-4 py-2.5'>
                   <span className='nums font-semibold text-pitch-300'>
@@ -259,7 +253,7 @@ export function CreateBusinessPage() {
               <p className='text-[10px] font-medium uppercase tracking-[0.14em] text-pitch-300'>
                 Alta de negocio
               </p>
-              <p className='text-xs text-chalk/70'>Revisión en &lt; 24 h.</p>
+              <p className='text-xs text-chalk/70'>Revisión manual.</p>
             </div>
           </div>
           <div className='p-6 md:p-8 lg:p-10'>
@@ -267,8 +261,8 @@ export function CreateBusinessPage() {
               Solicita tu negocio
             </h1>
             <p className='text-sm text-(--color-text-muted) mb-6'>
-              Revisamos cada solicitud a mano y te avisamos por correo. Suele
-              tomar menos de 24 horas.
+              Revisamos las solicitudes y te avisamos por correo. No hay un
+              plazo fijo de respuesta.
             </p>
 
             {request && request.status === 'rejected' && (
@@ -326,38 +320,36 @@ export function CreateBusinessPage() {
                 )}
               </div>
 
-              <Input
-                label='Tipo de negocio'
-                value={businessType}
-                onChange={(e) => setBusinessType(e.target.value)}
-                placeholder='Cancha de fútbol, consultorio, salón…'
-              />
-              <Input
-                label='Ciudad'
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder='Bogotá'
-              />
-              <PhoneInput
-                label='Teléfono de contacto'
-                value={phone}
-                onChange={setPhone}
-                optional
-                hint='Lo usamos para contactarte durante la activación.'
-              />
-
-              <label className='flex flex-col gap-1.5'>
-                <span className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
-                  Cuéntanos más
-                </span>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                  maxLength={1000}
-                  placeholder='Cuántos espacios reservables tienes, horarios, cualquier detalle útil.'
-                  className='rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm focus:outline-none focus:border-pitch-600'
+              <label className='flex items-start gap-3 text-sm text-(--color-text) cursor-pointer select-none'>
+                <input
+                  type='checkbox'
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className='mt-0.5 h-4 w-4 rounded border-border accent-(--color-primary) cursor-pointer'
+                  required
                 />
+                <span className='leading-relaxed'>
+                  Acepto los{' '}
+                  <Link
+                    href='/terminos'
+                    target='_blank'
+                    className='text-(--color-primary) font-medium hover:underline'
+                  >
+                    Términos para negocios
+                    <span className='sr-only'>(se abre en otra pestaña)</span>
+                  </Link>{' '}
+                  y autorizo el uso de los datos escritos y del correo de mi
+                  cuenta para revisar y responder mi solicitud, conforme a la{' '}
+                  <Link
+                    href='/privacidad'
+                    target='_blank'
+                    className='text-(--color-primary) font-medium hover:underline'
+                  >
+                    Política de datos
+                    <span className='sr-only'>(se abre en otra pestaña)</span>
+                  </Link>
+                  .
+                </span>
               </label>
 
               {error && <Alert variant='error'>{error}</Alert>}

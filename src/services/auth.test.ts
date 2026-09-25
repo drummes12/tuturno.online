@@ -72,16 +72,33 @@ describe('signInWithEmail', () => {
     })
   })
 
-  it('intenta registrar el consentimiento de registro tras login (fallback)', async () => {
-    mockAuth.signInWithPassword.mockResolvedValue({ data: {}, error: null })
+  it('registra solo la versión aceptada en el registro durante el fallback', async () => {
+    mockAuth.signInWithPassword.mockResolvedValue({
+      data: {
+        user: { user_metadata: { terms_policy_version: '2026-01-01-v1' } }
+      },
+      error: null
+    })
     const { recordRegistrationConsent } = await import('@/services/privacy')
 
     await signInWithEmail('user@example.com', 'pass')
 
     expect(recordRegistrationConsent).toHaveBeenCalledWith(
-      expect.any(String),
+      '2026-01-01-v1',
       'signin_fallback'
     )
+  })
+
+  it('no registra una aceptación nueva para cuentas sin versión guardada', async () => {
+    mockAuth.signInWithPassword.mockResolvedValue({
+      data: { user: { user_metadata: {} } },
+      error: null
+    })
+    const { recordRegistrationConsent } = await import('@/services/privacy')
+
+    await signInWithEmail('user@example.com', 'pass')
+
+    expect(recordRegistrationConsent).not.toHaveBeenCalled()
   })
 
   it('no lanza aunque el consentimiento falle tras login', async () => {
@@ -122,7 +139,11 @@ describe('signUpWithEmail', () => {
       email: 'juan@test.io',
       password: 'secret123',
       options: {
-        data: { full_name: 'Juan Pérez', phone: '+57 300 000 0000' }
+        data: {
+          full_name: 'Juan Pérez',
+          phone: '+57 300 000 0000',
+          terms_policy_version: expect.any(String)
+        }
       }
     })
   })
@@ -188,7 +209,11 @@ describe('signUpWithEmail', () => {
       email: 'a@b.io',
       password: 'pass',
       options: {
-        data: { full_name: 'Ana', phone: '3001112222' }
+        data: {
+          full_name: 'Ana',
+          phone: '3001112222',
+          terms_policy_version: expect.any(String)
+        }
       }
     })
   })

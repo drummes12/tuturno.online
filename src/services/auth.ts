@@ -3,19 +3,19 @@ import { recordRegistrationConsent } from '@/services/privacy'
 import { CURRENT_POLICY_VERSION } from '@/types'
 
 export async function signInWithEmail(email: string, password: string) {
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: email.trim().toLowerCase(),
     password
   })
   if (error) throw error
 
-  // Fallback idempotente: si el usuario se registró cuando el email
-  // confirmation estaba activo, su consentimiento de registro no se
-  // pudo persistir. Lo registramos ahora en el primer login.
-  try {
-    await recordRegistrationConsent(CURRENT_POLICY_VERSION, 'signin_fallback')
-  } catch {
-    // No bloquear el login por un fallo de consentimiento.
+  const acceptedPolicyVersion = data.user?.user_metadata?.terms_policy_version
+  if (typeof acceptedPolicyVersion === 'string' && acceptedPolicyVersion) {
+    try {
+      await recordRegistrationConsent(acceptedPolicyVersion, 'signin_fallback')
+    } catch {
+      // No bloquear el login por un fallo de consentimiento.
+    }
   }
 }
 
@@ -29,7 +29,11 @@ export async function signUpWithEmail(
     email: email.trim().toLowerCase(),
     password,
     options: {
-      data: { full_name: fullName.trim(), phone: phone.trim() }
+      data: {
+        full_name: fullName.trim(),
+        ...(phone.trim() ? { phone: phone.trim() } : {}),
+        terms_policy_version: CURRENT_POLICY_VERSION
+      }
     }
   })
   if (error) throw error

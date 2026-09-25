@@ -4,6 +4,7 @@ import { signUpWithEmail } from '@/services/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { PhoneInput } from '@/components/common/phone-input'
+import { isValidPhoneNumber } from 'react-phone-number-input'
 import { Card } from '@/components/common/card'
 import { Alert } from '@/components/common/alert'
 import { AuthShell } from '@/components/auth/auth-shell'
@@ -26,6 +27,11 @@ export function RegisterPage() {
 
     if (password.length < 6) {
       setError('La contraseña debe tener al menos 6 caracteres.')
+      return
+    }
+
+    if (!isValidPhoneNumber(phone)) {
+      setError('Ingresa un número de teléfono válido.')
       return
     }
 
@@ -116,7 +122,7 @@ export function RegisterPage() {
             value={phone}
             onChange={setPhone}
             required
-            hint='Lo usará el negocio para contactarte. No se verifica automáticamente.'
+            hint='Los negocios lo usan para contactarte sobre tus reservas.'
           />
           <Input
             label='Email'
@@ -150,13 +156,15 @@ export function RegisterPage() {
               required
             />
             <span className='leading-relaxed'>
-              He leído y acepto los{' '}
+              Confirmo que tengo 18 años o más, autorizo el tratamiento de mis
+              datos para crear la cuenta y gestionar reservas, y acepto los{' '}
               <Link
                 href='/terminos'
                 target='_blank'
                 className='text-(--color-primary) font-medium hover:underline'
               >
                 Términos
+                <span className='sr-only'>(se abre en otra pestaña)</span>
               </Link>{' '}
               y la{' '}
               <Link
@@ -164,7 +172,8 @@ export function RegisterPage() {
                 target='_blank'
                 className='text-(--color-primary) font-medium hover:underline'
               >
-                Política de Tratamiento de Datos Personales
+                Política de Datos
+                <span className='sr-only'>(se abre en otra pestaña)</span>
               </Link>
               . Esta aceptación es necesaria para crear la cuenta y gestionar
               reservas.

@@ -9,6 +9,7 @@ vi.mock('@/lib/supabase', () => ({
 
 import {
   recordRegistrationConsent,
+  recordReservationDataConsent,
   setMarketingConsent,
   withdrawMarketingConsent,
   fetchMyMarketingConsents
@@ -16,6 +17,28 @@ import {
 
 beforeEach(() => {
   vi.clearAllMocks()
+})
+
+describe('recordReservationDataConsent', () => {
+  it('guarda la autorización específica de la reserva', async () => {
+    mockRpc.mockResolvedValue({ data: 'consent-1', error: null })
+
+    await recordReservationDataConsent('biz-1')
+
+    expect(mockRpc).toHaveBeenCalledWith('record_reservation_data_consent', {
+      p_business_id: 'biz-1',
+      p_policy_version: expect.any(String)
+    })
+  })
+
+  it('propaga errores del RPC', async () => {
+    const rpcError = { message: 'permission denied', code: '42501' }
+    mockRpc.mockResolvedValue({ data: null, error: rpcError })
+
+    await expect(recordReservationDataConsent('biz-1')).rejects.toEqual(
+      rpcError
+    )
+  })
 })
 
 describe('recordRegistrationConsent', () => {
@@ -112,7 +135,7 @@ describe('fetchMyMarketingConsents', () => {
         status: 'accepted',
         accepted_at: '2026-01-01T00:00:00Z',
         withdrawn_at: null,
-        policy_version: '2026-12-08-v1'
+        policy_version: '2026-09-25-v2'
       }
     ]
     mockRpc.mockResolvedValue({ data: mockData, error: null })

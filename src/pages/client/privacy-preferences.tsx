@@ -14,6 +14,7 @@ import { Alert } from '@/components/common/alert'
 import { Spinner, PageLoader } from '@/components/common/spinner'
 import { CheckIcon, MailIcon } from '@/components/common/icon'
 import { Page } from '@/components/layout/page'
+import { LEGAL_ENTITY } from '@/lib/legal'
 
 interface ConsentRow {
   business_id: string
@@ -206,7 +207,7 @@ export function PrivacyPreferencesPage() {
           Puedes consultar, corregir, solicitar la supresión o retirar tu
           consentimiento de marketing en cualquier momento. Para ejercer tus
           derechos sobre tus datos personales, escribe a{' '}
-          <strong>privacidad@tuturno.online</strong>. Consulta la{' '}
+          <strong>{LEGAL_ENTITY.email}</strong>. Consulta la{' '}
           <Link
             href='/privacidad'
             className='text-(--color-primary) hover:underline'

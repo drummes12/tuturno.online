@@ -290,4 +290,4 @@ export interface MarketingConsent {
  * Se usa como evidencia del texto que aceptó cada usuario.
  * Incrementar al cambiar el contenido de /privacidad o /terminos.
  */
-export const CURRENT_POLICY_VERSION = '2026-12-08-v1'
+export const CURRENT_POLICY_VERSION = '2026-09-25-v2'
