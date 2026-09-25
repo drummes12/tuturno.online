@@ -481,7 +481,8 @@ describe('createReservationAdmin', () => {
       p_client_name: 'Juan Pérez',
       p_client_phone: '+57 300 123 4567',
       p_client_email: 'juan@email.com',
-      p_notes: 'reserva administrativa'
+      p_notes: 'reserva administrativa',
+      p_policy_version: expect.any(String)
     })
     expect(result).toEqual({ error: null })
   })
@@ -511,7 +512,8 @@ describe('createReservationAdmin', () => {
       p_client_name: 'Juan Pérez',
       p_client_phone: '3001234567',
       p_client_email: 'juan@email.com',
-      p_notes: null
+      p_notes: null,
+      p_policy_version: expect.any(String)
     })
     expect(result).toEqual({ error: null })
   })

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import PhoneInputBase from 'react-phone-number-input'
+import PhoneInputBase, { isValidPhoneNumber } from 'react-phone-number-input'
 import type { Country } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 
@@ -37,7 +37,9 @@ export function PhoneInput({
     onChange(val ?? '')
   }
 
-  const showError = error ?? (touched && required && !value && !optional)
+  const invalid = Boolean(value) && !isValidPhoneNumber(value)
+  const showError =
+    error ?? (touched && (invalid || (required && !value && !optional)))
 
   return (
     <div className='flex flex-col gap-1.5'>
@@ -55,6 +57,10 @@ export function PhoneInput({
         onChange={handleChange}
         onBlur={() => setTouched(true)}
         placeholder={placeholder}
+        aria-invalid={!!showError}
+        aria-describedby={
+          showError ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
+        }
         required={required}
         disabled={disabled}
         className={`tuturno-phone-input ${
@@ -62,7 +68,10 @@ export function PhoneInput({
         }`}
       />
       {showError ? (
-        <p className='text-sm text-(--color-danger) flex items-center gap-1.5'>
+        <p
+          id={`${inputId}-error`}
+          className='text-sm text-(--color-danger) flex items-center gap-1.5'
+        >
           <svg
             width='14'
             height='14'
@@ -78,10 +87,15 @@ export function PhoneInput({
             <line x1='12' y1='8' x2='12' y2='12' />
             <line x1='12' y1='16' x2='12.01' y2='16' />
           </svg>
-          {error ?? 'El teléfono es obligatorio.'}
+          {error ??
+            (invalid
+              ? 'El número no es válido.'
+              : 'El teléfono es obligatorio.')}
         </p>
       ) : hint ? (
-        <p className='text-sm text-(--color-text-muted)'>{hint}</p>
+        <p id={`${inputId}-hint`} className='text-sm text-(--color-text-muted)'>
+          {hint}
+        </p>
       ) : null}
     </div>
   )

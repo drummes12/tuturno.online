@@ -5,16 +5,19 @@ import {
   createReservation,
   createReservationAdmin
 } from '@/services/reservations'
-import { updateProfile } from '@/services/profiles'
 import { fetchBusinessId } from '@/services/profiles'
 import { fetchBusinessContactById } from '@/services/business'
-import { setMarketingConsent } from '@/services/privacy'
+import {
+  recordReservationDataConsent,
+  hasReservationDataConsent,
+  setMarketingConsent,
+  fetchMyMarketingConsents
+} from '@/services/privacy'
 import { useTenant } from '@/hooks/use-tenant'
 import { useIsOffline } from '@/hooks/use-connectivity'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
-import { PhoneInput } from '@/components/common/phone-input'
 import { Card } from '@/components/common/card'
 import { PitchTicket } from '@/components/common/pitch-ticket'
 import { Alert } from '@/components/common/alert'
@@ -37,6 +40,7 @@ import {
   resolveWhatsAppLink,
   buildClientReservationMessage
 } from '@/lib/whatsapp'
+import { isValidPhoneNumber } from 'react-phone-number-input'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Page } from '@/components/layout/page'
@@ -60,8 +64,6 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   const [resourceName, setResourceName] = useState<string | null>(null)
   const [loadingResource, setLoadingResource] = useState(true)
   const [notes, setNotes] = useState('')
-  const [fullName, setFullName] = useState(profile?.full_name ?? '')
-  const [phone, setPhone] = useState(profile?.phone ?? '')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -75,6 +77,14 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   } | null>(null)
   const [whatsappLink, setWhatsappLink] = useState<string | null>(null)
   const [marketingOptIn, setMarketingOptIn] = useState(false)
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
+  // null = aún cargando; true = hay que mostrar la casilla; false = ya respondió
+  const [needsPrivacyConsent, setNeedsPrivacyConsent] = useState<
+    boolean | null
+  >(null)
+  const [needsMarketingConsent, setNeedsMarketingConsent] = useState<
+    boolean | null
+  >(null)
   const [clientSelection, setClientSelection] = useState<ClientSelection>({
     clientId: null,
     name: '',
@@ -113,12 +123,26 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
       .catch(() => {})
   }, [businessId])
 
+  // Consultar si el cliente ya autorizó el tratamiento de datos para este
+  // negocio y si ya respondió el opt-in de marketing. Si falla la consulta,
+  // se muestran las casillas (comportamiento seguro).
   useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name ?? '')
-      setPhone(profile.phone ?? '')
+    if (isAdmin || !user || !businessId) return
+    let cancelled = false
+    Promise.all([
+      hasReservationDataConsent(businessId).catch(() => false),
+      fetchMyMarketingConsents()
+        .then((rows) => rows.some((r) => r.business_id === businessId))
+        .catch(() => false)
+    ]).then(([hasConsent, marketingAnswered]) => {
+      if (cancelled) return
+      setNeedsPrivacyConsent(!hasConsent)
+      setNeedsMarketingConsent(!marketingAnswered)
+    })
+    return () => {
+      cancelled = true
     }
-  }, [profile])
+  }, [isAdmin, user, businessId])
 
   useEffect(() => {
     async function loadResource() {
@@ -161,7 +185,6 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         resourceName={resourceName}
         loadingResource={loadingResource}
         businessName={business?.name ?? 'Demo'}
-
         slotDurationMinutes={business?.slot_duration_minutes ?? 60}
       />
     )
@@ -237,6 +260,15 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault()
     setError(null)
+    if (
+      !isAdmin &&
+      businessContact &&
+      needsPrivacyConsent !== false &&
+      !acceptedPrivacy
+    ) {
+      setError('Autoriza el uso de tus datos para gestionar esta reserva.')
+      return
+    }
     setSubmitting(true)
 
     try {
@@ -244,6 +276,15 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         // Admin: validar que haya un cliente seleccionado o creado
         if (!clientSelection.clientId && !clientSelection.name.trim()) {
           setError('Selecciona o crea un cliente para la reserva.')
+          setSubmitting(false)
+          return
+        }
+
+        if (
+          !clientSelection.clientId &&
+          (!clientSelection.phone || !isValidPhoneNumber(clientSelection.phone))
+        ) {
+          setError('Ingresa un número de teléfono válido para el cliente.')
           setSubmitting(false)
           return
         }
@@ -271,12 +312,8 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         return
       }
 
-      // Cliente: actualizar perfil si cambió
-      if (fullName !== profile?.full_name || phone !== profile?.phone) {
-        await updateProfile(user!.id, {
-          full_name: fullName.trim(),
-          phone: phone.trim()
-        })
+      if (businessId && needsPrivacyConsent === true) {
+        await recordReservationDataConsent(businessId)
       }
 
       const { error: rpcError } = await createReservation(
@@ -292,10 +329,12 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         return
       }
 
-      // Registrar el consentimiento de marketing (opt-in o no).
+      // Registrar el consentimiento de marketing (opt-in o no) solo si se
+      // mostró la casilla. Si ya respondió antes, su decisión se respeta y
+      // se gestiona desde /preferencias.
       // Se hace tras la reserva exitosa: la reserva no depende de esto.
       // Solo aplica para clientes autenticados, no para admins.
-      if (businessId) {
+      if (businessId && needsMarketingConsent === true) {
         try {
           await setMarketingConsent(businessId, marketingOptIn, 'reservation')
         } catch {
@@ -311,7 +350,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
           resourceLabel: businessContact.resource_label_singular,
           dateLabel: dateLabel,
           timeLabel,
-          clientName: fullName.trim()
+          clientName: profile?.full_name?.trim() ?? ''
         })
         const link = resolveWhatsAppLink(
           businessContact.whatsapp_link,
@@ -462,36 +501,64 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
               <Skeleton className='h-32 rounded-xl' />
             )
           ) : (
-            <>
-              <div data-tour='reservation-contact'>
-                <Input
-                  label='Nombre completo'
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  autoComplete='name'
-                />
-                <PhoneInput
-                  label='Teléfono'
-                  value={phone}
-                  onChange={setPhone}
-                  required
-                  hint='El negocio lo usará para contactarte.'
-                />
-              </div>
-            </>
+            <div
+              data-tour='reservation-contact'
+              className='rounded-xl border border-border bg-surface-elevated px-4 py-3 text-sm text-(--color-text-muted)'
+            >
+              La reserva usa el nombre y teléfono de tu cuenta:{' '}
+              <span className='font-medium text-(--color-text)'>
+                {profile?.full_name ?? user?.email}
+                {profile?.phone && <> · {profile.phone}</>}
+              </span>
+            </div>
           )}
           <Input
             label='Notas (opcional)'
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder='Ej: llegaremos 10 min antes'
-            hint='Información adicional para el negocio.'
+            maxLength={500}
+            hint='Información adicional para el negocio. No incluyas datos médicos ni información sensible.'
           />
 
-          {/* Opt-in de marketing por email del negocio — opcional, no preseleccionado */}
-          {!isAdmin && businessContact && (
-            <label className='flex items-start gap-3 text-sm text-(--color-text) cursor-pointer select-none p-3 rounded-lg border border-border bg-surface-elevated'>
+          {!isAdmin &&
+            businessContact &&
+            (needsPrivacyConsent === null ||
+              needsMarketingConsent === null) && (
+              <Skeleton className='h-14 rounded-xl' />
+            )}
+
+          {!isAdmin && businessContact && needsPrivacyConsent === true && (
+            <label className='flex items-start gap-3 text-sm text-(--color-text) cursor-pointer select-none'>
+              <input
+                type='checkbox'
+                checked={acceptedPrivacy}
+                onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                className='mt-0.5 h-4 w-4 rounded border-border accent-(--color-primary) cursor-pointer'
+                required
+              />
+              <span className='leading-relaxed'>
+                Autorizo a <strong>{businessContact.name}</strong> a tratar mi
+                nombre, teléfono y datos de esta solicitud para gestionar la
+                reserva. TuTurno procesa esos datos por cuenta del negocio y usa
+                tu correo para enviarte avisos. Solicita al negocio su política
+                y canal de privacidad.
+                <Link
+                  href='/privacidad'
+                  target='_blank'
+                  className='ml-1 text-(--color-primary) font-medium hover:underline'
+                >
+                  Política de datos de TuTurno
+                  <span className='sr-only'>(se abre en otra pestaña)</span>
+                </Link>
+                .
+              </span>
+            </label>
+          )}
+
+          {/* Opt-in de marketing por email del negocio — opcional, no preseleccionado. Solo se muestra si el cliente aún no ha respondido. */}
+          {!isAdmin && businessContact && needsMarketingConsent === true && (
+            <label className='flex items-start gap-3 text-sm text-(--color-text) cursor-pointer select-none'>
               <input
                 type='checkbox'
                 checked={marketingOptIn}
@@ -542,16 +609,37 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
             </>
           )}
 
-          <div data-tour='reservation-submit'>
+          <div data-tour='reservation-submit' className='flex flex-col gap-2'>
             <Button
               type='submit'
               loading={submitting}
-              disabled={offline}
+              disabled={
+                offline ||
+                (!isAdmin &&
+                  businessContact != null &&
+                  needsPrivacyConsent !== false &&
+                  !acceptedPrivacy)
+              }
               size='lg'
               className='w-full'
             >
               {isAdmin ? 'Crear reserva confirmada' : 'Enviar solicitud'}
             </Button>
+            {isAdmin && (
+              <p className='text-xs text-center text-(--color-text-muted)'>
+                Al crear la reserva declaras que el cliente autorizó al negocio
+                a registrar estos datos.
+              </p>
+            )}
+            {!isAdmin &&
+              businessContact &&
+              needsPrivacyConsent === true &&
+              !acceptedPrivacy && (
+                <p className='text-xs text-center text-(--color-text-muted)'>
+                  Marca la autorización de uso de datos para poder enviar la
+                  solicitud.
+                </p>
+              )}
           </div>
         </form>
       </Card>
@@ -682,20 +770,8 @@ function DemoReservePreview({
 
       <Card className='p-5 animate-fade-up' style={{ animationDelay: '60ms' }}>
         <div className='flex flex-col gap-4'>
-          <div>
-            <Input
-              label='Nombre completo'
-              value=''
-              disabled
-              placeholder='El cliente escribiría su nombre aquí'
-            />
-            <PhoneInput
-              label='Teléfono'
-              value=''
-              onChange={() => {}}
-              disabled
-              hint='El negocio lo usará para contactarte.'
-            />
+          <div className='rounded-xl border border-border bg-surface-elevated px-4 py-3 text-sm text-(--color-text-muted)'>
+            La reserva usa el nombre y el teléfono de la cuenta del cliente.
           </div>
           <Input
             label='Notas (opcional)'

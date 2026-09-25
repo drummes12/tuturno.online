@@ -4,6 +4,7 @@ import {
   uniqueReservations
 } from '@/lib/reservation-status'
 import type { Reservation, ReservationFilter } from '@/types'
+import { CURRENT_POLICY_VERSION } from '@/types'
 
 const RESERVATION_SELECT =
   '*, resource:resources(*), profile:profiles!reservations_user_id_fkey(*), client:clients(*)'
@@ -175,7 +176,8 @@ export async function createReservationAdmin(
     p_client_name: options.clientName ?? null,
     p_client_phone: options.clientPhone ?? null,
     p_client_email: options.clientEmail ?? null,
-    p_notes: options.notes ?? null
+    p_notes: options.notes ?? null,
+    p_policy_version: CURRENT_POLICY_VERSION
   })
   if (error) throw error
   const row = Array.isArray(data) ? data[0] : data

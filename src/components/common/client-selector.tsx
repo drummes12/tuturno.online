@@ -172,6 +172,13 @@ export function ClientSelector({ businessId, onChange }: ClientSelectorProps) {
   if (mode === 'new') {
     return (
       <div className='flex flex-col gap-4'>
+        <div
+          role='note'
+          className='rounded-lg border border-border bg-surface-inset p-3 text-sm text-(--color-text-muted)'
+        >
+          Confirma que el cliente autorizó al negocio a registrar solo los datos
+          necesarios para esta reserva. No incluyas información sensible.
+        </div>
         <Input
           label='Nombre del cliente'
           value={guestName}
@@ -185,8 +192,8 @@ export function ClientSelector({ businessId, onChange }: ClientSelectorProps) {
           value={guestPhone}
           onChange={setGuestPhone}
           placeholder='300 123 4567'
-          hint='Se usará para vincular la reserva cuando el cliente se registre.'
-          optional
+          hint='Es el canal de contacto del negocio. También vincula la reserva cuando el cliente se registre.'
+          required
         />
         <Input
           label='Email (opcional)'
