@@ -207,9 +207,14 @@ function DayStrip({
   )
 }
 
+const fmtDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
 /**
- * Vista Mes: calendario de días del periodo. Todos los días del rango
- * se dibujan — sin datos = verde apenas visible, cerrado = gris.
+ * Vista Mes: siempre el mes calendario completo que contiene el fin del
+ * periodo (del 1 al último día, con los días del mes anterior/siguiente
+ * que completan las semanas, atenuados). Dentro del mes, los días fuera
+ * del rango seleccionado quedan apagados — no son "sin reservas".
  */
 function MonthCalendar({
   month,
@@ -226,21 +231,28 @@ function MonthCalendar({
   const max = Math.max(...month.map((c) => c.total), 0)
   const openDows = new Set(hours.map((b) => b.dow))
 
-  const days = useMemo(() => {
-    const out: string[] = []
-    const cur = new Date(`${from}T12:00:00`)
+  const cells = useMemo(() => {
     const end = new Date(`${to}T12:00:00`)
-    while (cur <= end) {
-      out.push(
-        `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`
-      )
-      cur.setDate(cur.getDate() + 1)
+    const first = new Date(end.getFullYear(), end.getMonth(), 1, 12)
+    const last = new Date(end.getFullYear(), end.getMonth() + 1, 0, 12)
+    // Relleno para completar semanas (lunes=0 … domingo=6)
+    const lead = (first.getDay() + 6) % 7
+    const trail = (7 - ((last.getDay() + 6) % 7) - 1) % 7
+    const out: Array<{ date: string; inMonth: boolean }> = []
+    for (let i = lead; i > 0; i--) {
+      const d = new Date(first)
+      d.setDate(d.getDate() - i)
+      out.push({ date: fmtDate(d), inMonth: false })
+    }
+    for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1))
+      out.push({ date: fmtDate(d), inMonth: true })
+    for (let i = 1; i <= trail; i++) {
+      const d = new Date(last)
+      d.setDate(d.getDate() + i)
+      out.push({ date: fmtDate(d), inMonth: false })
     }
     return out
-  }, [from, to])
-
-  // Offset de la primera celda: isodow(lunes=1..domingo=7) - 1
-  const firstDow = (new Date(`${days[0]}T12:00:00`).getDay() + 6) % 7
+  }, [to])
 
   return (
     <div>
@@ -250,32 +262,41 @@ function MonthCalendar({
         ))}
       </div>
       <div className='mt-1 grid grid-cols-7 gap-1'>
-        {Array.from({ length: firstDow }).map((_, i) => (
-          <span key={`pad-${i}`} />
-        ))}
-        {days.map((d) => {
+        {cells.map(({ date: d, inMonth }) => {
+          const inRange = d >= from && d <= to
           const dow = ((new Date(`${d}T12:00:00`).getDay() + 6) % 7) + 1
           const open = openDows.has(dow)
-          const total = byDate.get(d)
-          const lv = open && total ? level(total, max) : 0
+          const total = inRange ? byDate.get(d) : undefined
+          const lv = inRange && open && total ? level(total, max) : 0
+          const muted = !inRange
           return (
             <div
               key={d}
               title={
-                !open
-                  ? `${d} — cerrado`
-                  : total
-                    ? `${d}: ${total} reservas`
-                    : `${d} — sin reservas`
+                !inRange
+                  ? `${d} — fuera del periodo`
+                  : !open
+                    ? `${d} — cerrado`
+                    : total
+                      ? `${d}: ${total} reservas`
+                      : `${d} — sin reservas`
               }
               className={`flex h-8 items-center justify-center rounded-md nums text-[10px] font-semibold ${
-                !open
-                  ? 'text-text-muted/60'
-                  : lv >= 3
-                    ? 'text-white'
-                    : 'text-graphite-900'
-              }`}
-              style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
+                muted
+                  ? 'text-text-muted/40'
+                  : !open
+                    ? 'text-text-muted/60'
+                    : lv >= 3
+                      ? 'text-white'
+                      : 'text-graphite-900'
+              } ${!inMonth ? 'opacity-70' : ''}`}
+              style={
+                muted
+                  ? undefined
+                  : open
+                    ? { background: heatBg(lv) }
+                    : CLOSED_STYLE
+              }
             >
               {parseInt(d.slice(8))}
             </div>
@@ -392,7 +413,8 @@ export function HeatmapCard({
               />
               <HeatLegend />
               <p className='mt-4 text-[11px] leading-snug text-text-muted'>
-                Reservas totales por día del periodo.
+                Mes completo del calendario · los días atenuados están fuera del
+                periodo seleccionado.
               </p>
             </>
           )}

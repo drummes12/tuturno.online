@@ -155,21 +155,11 @@ function buildTours(): TourDef[] {
           }
         },
         {
-          element: '[data-tour="admin-nav-resources"]',
-          popover: {
-            title: '1. Configura tus recursos',
-            description:
-              'Antes de recibir reservas necesitas crear al menos un recurso (sala, cancha, mesa, etc.). Visita esta sección para hacerlo.',
-            side: 'bottom',
-            align: 'center'
-          }
-        },
-        {
           element: '[data-tour="admin-nav-business"]',
           popover: {
-            title: '2. Configura tu negocio',
+            title: 'Configura tu negocio',
             description:
-              'Aquí defines tus horarios, cierres puntuales, tu equipo y la configuración de la operación (duración de turnos, hold, políticas de cancelación e instrucciones).',
+              'Antes de recibir reservas crea al menos un recurso (sala, cancha, mesa…) y define horarios, cierres, equipo y la operación (duración de turnos, hold, políticas e instrucciones). Todo vive aquí.',
             side: 'bottom',
             align: 'center'
           }

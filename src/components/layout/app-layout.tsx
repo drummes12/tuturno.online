@@ -7,7 +7,6 @@ import {
   ChartIcon,
   LayoutIcon,
   ListIcon,
-  StoreIcon,
   SettingsIcon,
   LogInIcon,
   BellIcon,
@@ -88,6 +87,7 @@ interface NavItem {
 // no sobrecargar el bottom nav en mobile (máx. 4-5 destinos recomendado).
 const BUSINESS_HUB_ROUTES = [
   '/admin/negocio',
+  '/admin/recursos',
   '/admin/horarios',
   '/admin/excepciones',
   '/admin/equipo',
@@ -97,7 +97,6 @@ const BUSINESS_HUB_ROUTES = [
 const adminNav: NavItem[] = [
   { label: 'Operación', href: '/admin', icon: <LayoutIcon size={18} /> },
   { label: 'Reservas', href: '/admin/reservas', icon: <ListIcon size={18} /> },
-  { label: 'Recursos', href: '/admin/recursos', icon: <StoreIcon size={18} /> },
   { label: 'Métricas', href: '/admin/metricas', icon: <ChartIcon size={18} /> },
   {
     label: 'Negocio',
@@ -392,11 +391,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   data-tour={
                     item.href === '/mis-reservas'
                       ? 'client-nav-reservations'
-                      : item.href === '/admin/recursos'
-                        ? 'admin-nav-resources'
-                        : item.href === '/admin/negocio'
-                          ? 'admin-nav-business'
-                          : undefined
+                      : item.href === '/admin/negocio'
+                        ? 'admin-nav-business'
+                        : undefined
                   }
                   className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                     active

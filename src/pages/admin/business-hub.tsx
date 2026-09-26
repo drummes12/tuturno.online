@@ -2,6 +2,7 @@ import { Link } from 'wouter'
 import { Card } from '@/components/common/card'
 import {
   ScheduleIcon,
+  StoreIcon,
   LockIcon,
   UsersIcon,
   SettingsIcon,
@@ -18,6 +19,12 @@ type HubItem = {
 }
 
 const items: HubItem[] = [
+  {
+    label: 'Recursos',
+    description: 'Crea y administra tus canchas, salas o mesas reservables.',
+    href: '/admin/recursos',
+    icon: <StoreIcon size={22} />
+  },
   {
     label: 'Horarios',
     description: 'Define las franjas horarias en las que aceptas reservas.',
@@ -50,7 +57,7 @@ const items: HubItem[] = [
 
 /**
  * Hub de configuración del negocio. Agrupa las secciones que se
- * ajustan ocasionalmente (a diferencia de Operación/Reservas/Recursos,
+ * ajustan ocasionalmente (a diferencia de Operación/Reservas/Métricas,
  * de uso diario) para no sobrecargar el bottom nav en mobile.
  */
 export function AdminBusinessHubPage() {
