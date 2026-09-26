@@ -283,13 +283,18 @@ begin
     select coalesce(jsonb_agg(row_to_json(t)::jsonb), '[]'::jsonb) as j
     from (
       select e.client_id as id, c.name,
-             c.created_at::date::text as client_since,
+             fs.since::text as client_since,
              count(*) as reservations,
              count(*) filter (where e.status = 'confirmed') as confirmed,
              count(*) filter (where e.status = 'completed') as completed
       from enriched e
       join public.clients c on c.id = e.client_id
-      group by e.client_id, c.name, c.created_at
+      join lateral (
+        select min(r2.starts_at)::date as since
+        from public.reservations r2
+        where r2.business_id = p_business_id and r2.client_id = e.client_id
+      ) fs on true
+      group by e.client_id, c.name, fs.since
       order by reservations desc, c.name
       limit 5
     ) t
@@ -446,7 +451,7 @@ begin
   select a.client_id,
          c.name,
          c.phone,
-         c.created_at::date as client_since,
+         fs.since as client_since,
          a.n,
          a.confirmed,
          a.completed,
@@ -454,6 +459,11 @@ begin
          count(*) over () as total_count
   from agg a
   join public.clients c on c.id = a.client_id
+  join lateral (
+    select min(r2.starts_at)::date as since
+    from public.reservations r2
+    where r2.business_id = p_business_id and r2.client_id = a.client_id
+  ) fs on true
   where (p_search is null or btrim(p_search) = ''
          or c.name ilike '%' || btrim(p_search) || '%'
          or c.phone ilike '%' || btrim(p_search) || '%')

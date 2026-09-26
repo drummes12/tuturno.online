@@ -269,8 +269,117 @@ export interface AvailabilitySlot {
 }
 
 // =============================================================================
-// Privacidad y consentimiento
+// Dashboard de métricas — respuesta de get_business_dashboard /
+// get_business_dashboard_clients (migración 04500).
+// Los nombres de campo son camelCase porque el RPC devuelve jsonb ya
+// armado para el front, no columnas snake_case.
 // =============================================================================
+
+export type DashboardPeriodKey = 'week' | '7d' | '30d' | 'month' | '90d'
+
+export interface DashboardTrendPoint {
+  /** Fecha local del negocio, 'YYYY-MM-DD' */
+  d: string
+  /** Reservas de ese día (periodo actual) */
+  n: number
+  /** Reservas del día espejo en el periodo anterior (mismo índice) */
+  prev: number
+}
+
+export interface DashboardSla {
+  requests: number
+  confirmed: number
+  rejected: number
+  expired: number
+  cancelledByClient: number
+  pending: number
+  onTime: number
+  avgResponseMinutes: number | null
+  medianResponseMinutes: number | null
+  avgResponsePctOfHold: number | null
+  prev: {
+    requests: number
+    avgResponseMinutes: number | null
+    medianResponseMinutes: number | null
+    onTime: number
+  }
+}
+
+export interface DashboardStatusBreakdown {
+  total: number
+  confirmed: number
+  completed: number
+  pending: number
+  expired: number
+  rejected: number
+  cancelledByClient: number
+  cancelledByBusiness: number
+}
+
+export interface DashboardBusinessHours {
+  /** 1 = lunes … 7 = domingo (isodow) */
+  dow: number
+  /** 'HH:MM' */
+  open: string
+  /** 'HH:MM' */
+  close: string
+}
+
+export interface DashboardData {
+  period: {
+    from: string
+    to: string
+    prevFrom: string
+    prevTo: string
+    timezone: string
+    holdMinutes: number
+  }
+  resources: Array<{ id: string; name: string }>
+  businessHours: DashboardBusinessHours[]
+  totals: { current: number; previous: number }
+  statusTotals: Partial<Record<ReservationStatus, number>>
+  statusTotalsPrev: Partial<Record<ReservationStatus, number>>
+  trend: DashboardTrendPoint[]
+  sla: DashboardSla
+  heatmap: {
+    /** Promedio por hora sobre todas las jornadas abiertas del periodo */
+    day: Array<{ hour: number; total: number; avg: number }>
+    /** dow (isodow) × hora */
+    week: Array<{ dow: number; hour: number; total: number; avg: number }>
+    /** Solo fechas del periodo con al menos una reserva */
+    month: Array<{ date: string; total: number }>
+  }
+  origin: {
+    client: DashboardStatusBreakdown
+    business: DashboardStatusBreakdown
+  }
+  topClients: DashboardClientRow[]
+}
+
+export interface DashboardClientRow {
+  id: string
+  name: string
+  client_since: string
+  reservations: number
+  confirmed: number
+  completed: number
+}
+
+/** Fila de get_business_dashboard_clients (snake_case: viene de returns table) */
+export interface DashboardClientListRow {
+  client_id: string
+  name: string
+  phone: string | null
+  client_since: string
+  reservations: number
+  confirmed: number
+  completed: number
+  cancelled: number
+  /** Total de clientes con reservas en el periodo (para paginar) */
+  total_count: number
+}
+
+
 
 export type ConsentPurpose = 'terms_and_privacy' | 'marketing_email'
 

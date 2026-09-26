@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import {
   CalendarIcon,
   CalendarPlusIcon,
+  ChartIcon,
   LayoutIcon,
   ListIcon,
   StoreIcon,
@@ -97,6 +98,7 @@ const adminNav: NavItem[] = [
   { label: 'Operación', href: '/admin', icon: <LayoutIcon size={18} /> },
   { label: 'Reservas', href: '/admin/reservas', icon: <ListIcon size={18} /> },
   { label: 'Recursos', href: '/admin/recursos', icon: <StoreIcon size={18} /> },
+  { label: 'Métricas', href: '/admin/metricas', icon: <ChartIcon size={18} /> },
   {
     label: 'Negocio',
     href: '/admin/negocio',

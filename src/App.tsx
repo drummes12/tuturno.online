@@ -57,6 +57,9 @@ const AdminExceptionsPage = lazy(() =>
 const AdminTeamPage = lazy(() =>
   import('@/pages/admin/team').then((m) => ({ default: m.AdminTeamPage }))
 )
+const AdminMetricsPage = lazy(() =>
+  import('@/pages/admin/metrics').then((m) => ({ default: m.AdminMetricsPage }))
+)
 
 // Onboarding y plataforma — lazy: flujos poco frecuentes
 const CreateBusinessPage = lazy(() =>
@@ -156,6 +159,7 @@ export default function App() {
         warm(import('@/pages/admin/config'))
         warm(import('@/pages/admin/exceptions'))
         warm(import('@/pages/admin/team'))
+        warm(import('@/pages/admin/metrics'))
       }
       if (isPlatformAdmin) warm(import('@/pages/platform/dashboard'))
     }, 2500)
@@ -270,6 +274,11 @@ export default function App() {
             <Route path='/admin/reservas'>
               <AdminRoute>
                 <AdminReservationsPage />
+              </AdminRoute>
+            </Route>
+            <Route path='/admin/metricas'>
+              <AdminRoute>
+                <AdminMetricsPage />
               </AdminRoute>
             </Route>
             <Route path='/admin/recursos'>

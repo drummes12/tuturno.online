@@ -598,3 +598,61 @@ export function WifiOffIcon(props: IconProps) {
     </svg>
   )
 }
+
+/* Chart — for metrics/analytics nav */
+export function ChartIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <line x1='3' y1='21' x2='21' y2='21' />
+      <line x1='7' y1='17' x2='7' y2='11' />
+      <line x1='12' y1='17' x2='12' y2='7' />
+      <line x1='17' y1='17' x2='17' y2='13' />
+    </svg>
+  )
+}
+
+/* Filter — for filter/sheet actions */
+export function FilterIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <line x1='4' y1='7' x2='20' y2='7' />
+      <line x1='7' y1='12' x2='17' y2='12' />
+      <line x1='10' y1='17' x2='14' y2='17' />
+      <circle cx='9' cy='7' r='1.6' fill='currentColor' stroke='none' />
+      <circle cx='15' cy='12' r='1.6' fill='currentColor' stroke='none' />
+      <circle cx='12' cy='17' r='1.6' fill='currentColor' stroke='none' />
+    </svg>
+  )
+}
+
+/* Trend up — for positive deltas */
+export function TrendUpIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <polyline points='3 17 9 11 13 15 21 7' />
+      <polyline points='15 7 21 7 21 13' />
+    </svg>
+  )
+}
+
+/* Trend down — for negative deltas */
+export function TrendDownIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <polyline points='3 7 9 13 13 9 21 17' />
+      <polyline points='15 17 21 17 21 11' />
+    </svg>
+  )
+}
+
+/* Expand — opens the enlarged view of a card */
+export function ExpandIcon(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <polyline points='15 4 20 4 20 9' />
+      <polyline points='9 20 4 20 4 15' />
+      <line x1='20' y1='4' x2='13' y2='11' />
+      <line x1='4' y1='20' x2='11' y2='13' />
+    </svg>
+  )
+}
