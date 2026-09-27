@@ -5,7 +5,10 @@ import { Button } from '@/components/common/button'
 import { Card } from '@/components/common/card'
 import { FilterIcon, ChartIcon } from '@/components/common/icon'
 import { useBusinessId } from '@/hooks/use-business-id'
-import { fetchDashboardMetrics } from '@/services/metrics'
+import {
+  fetchDashboardClients,
+  fetchDashboardMetrics
+} from '@/services/metrics'
 import { metricsRange, metricsRangeLabel, PERIOD_OPTIONS } from '@/lib/metrics'
 import { ReservationsCard } from '@/components/admin/metrics/reservations-card'
 import { SlaCard } from '@/components/admin/metrics/sla-card'
@@ -13,7 +16,11 @@ import { HeatmapCard } from '@/components/admin/metrics/heatmap-card'
 import { OriginCard } from '@/components/admin/metrics/origin-card'
 import { ClientsCard } from '@/components/admin/metrics/clients-card'
 import { FiltersSheet } from '@/components/admin/metrics/filters-sheet'
-import type { DashboardData, DashboardPeriodKey } from '@/types'
+import type {
+  DashboardClientListRow,
+  DashboardData,
+  DashboardPeriodKey
+} from '@/types'
 
 type Section = 'reservas' | 'clientes'
 
@@ -24,6 +31,7 @@ export function AdminMetricsPage() {
   const [section, setSection] = useState<Section>('reservas')
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [data, setData] = useState<DashboardData | null>(null)
+  const [clients, setClients] = useState<DashboardClientListRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -36,13 +44,17 @@ export function AdminMetricsPage() {
     setLoading(true)
     setError(null)
     try {
-      const d = await fetchDashboardMetrics(
-        businessId,
-        range.from,
-        range.to,
-        resourceIds
-      )
+      // El top 5 de clientes viene de la RPC de lista: trae el desglose
+      // por estado (confirmed/completed/cancelled) que topClients no incluye.
+      const [d, clientRows] = await Promise.all([
+        fetchDashboardMetrics(businessId, range.from, range.to, resourceIds),
+        fetchDashboardClients(businessId, range.from, range.to, {
+          resourceIds,
+          limit: 5
+        })
+      ])
       setData(d)
+      setClients(clientRows.rows)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar métricas')
     }
@@ -185,7 +197,7 @@ export function AdminMetricsPage() {
             </h2>
             <div className='grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-2'>
               <ClientsCard
-                topClients={data.topClients}
+                topClients={clients}
                 businessId={businessId!}
                 from={range.from}
                 to={range.to}

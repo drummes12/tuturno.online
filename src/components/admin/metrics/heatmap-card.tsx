@@ -164,9 +164,9 @@ function WeekGrid({
                   key={dow}
                   type='button'
                   {...bind(key, title, summary)}
-                  className={`${compact ? 'h-5' : 'h-7'} min-w-0 appearance-none rounded border-0 p-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
+                  className={`${compact ? 'h-5' : 'h-7'} min-w-0 appearance-none rounded border-0 p-0 transition-shadow hover:shadow-(--shadow-glow) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
                     isActive(key)
-                      ? 'ring-1 ring-inset ring-(--color-text)/50'
+                      ? 'shadow-(--shadow-glow) ring-1 ring-inset ring-(--color-text)/50'
                       : ''
                   }`}
                   style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
@@ -224,9 +224,9 @@ function DayStrip({
               <button
                 type='button'
                 {...bind(`h-${h}`, title, summary)}
-                className={`flex h-7 min-w-0 flex-1 appearance-none items-center justify-end rounded-md border-0 px-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
+                className={`flex h-7 min-w-0 flex-1 appearance-none items-center justify-end rounded-md border-0 px-2 transition-shadow hover:shadow-(--shadow-glow) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
                   isActive(`h-${h}`)
-                    ? 'ring-1 ring-inset ring-(--color-text)/50'
+                    ? 'shadow-(--shadow-glow) ring-1 ring-inset ring-(--color-text)/50'
                     : ''
                 }`}
                 style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
@@ -333,7 +333,7 @@ function MonthCalendar({
               : total
                 ? `${total} reservas ese día · ${Math.round((total / Math.max(periodTotal, 1)) * 100)}% del período`
                 : 'Sin reservas ese día'
-          const className = `flex h-9 min-w-0 appearance-none items-center justify-center rounded-md border-0 p-0 nums text-[10px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
+          const className = `flex h-9 min-w-0 appearance-none items-center justify-center rounded-md border-0 p-0 nums text-[10px] font-semibold transition-shadow enabled:hover:shadow-(--shadow-glow) focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
             muted
               ? 'text-text-muted/40'
               : !open
@@ -342,7 +342,9 @@ function MonthCalendar({
                   ? 'text-graphite-900'
                   : 'text-text'
           } ${!inMonth ? 'opacity-70' : ''} ${
-            isActive(d) ? 'ring-1 ring-inset ring-(--color-text)/50' : ''
+            isActive(d)
+              ? 'shadow-(--shadow-glow) ring-1 ring-inset ring-(--color-text)/50'
+              : ''
           }`
           return (
             <button

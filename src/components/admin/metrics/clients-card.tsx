@@ -8,43 +8,152 @@ import {
   ChevronRightIcon
 } from '@/components/common/icon'
 import { MetricsSheet } from '@/components/admin/metrics/sheet'
+import { ChartDetail } from '@/components/admin/metrics/chart-detail'
+import { useChartDetail } from '@/components/admin/metrics/use-chart-detail'
 import { fetchDashboardClients } from '@/services/metrics'
 import { formatLocal } from '@/lib/time'
-import type { DashboardClientListRow, DashboardClientRow } from '@/types'
+import type { DashboardClientListRow } from '@/types'
 
 const PAGE_SIZE = 20
 
-function ClientRow({
-  name,
-  since,
-  reservations,
-  completed
+/**
+ * Desglose por cliente en 4 grupos — mismos colores que la barra de origen.
+ * `cancelled` de la RPC agrupa rechazadas, expiradas y canceladas.
+ */
+const BUCKETS = [
+  {
+    key: 'completed',
+    label: 'Completadas',
+    one: 'completada',
+    cls: 'bg-pitch-600'
+  },
+  {
+    key: 'confirmed',
+    label: 'Confirmadas',
+    one: 'confirmada',
+    cls: 'bg-pitch-300'
+  },
+  {
+    key: 'pending',
+    label: 'Pendientes',
+    one: 'pendiente',
+    cls: 'bg-signal-orange/80'
+  },
+  { key: 'lost', label: 'Perdidas', one: 'perdida', cls: 'bg-graphite-400' }
+] as const
+
+type BucketKey = (typeof BUCKETS)[number]['key']
+
+type ClientCounts = Pick<
+  DashboardClientListRow,
+  'reservations' | 'confirmed' | 'completed' | 'cancelled'
+>
+
+function clientBuckets(c: ClientCounts): Record<BucketKey, number> {
+  return {
+    completed: c.completed,
+    confirmed: c.confirmed,
+    pending: Math.max(
+      0,
+      c.reservations - c.confirmed - c.completed - c.cancelled
+    ),
+    lost: c.cancelled
+  }
+}
+
+function clientSummary(client: DashboardClientListRow): string {
+  const counts = clientBuckets(client)
+  const parts = BUCKETS.filter((b) => counts[b.key] > 0).map(
+    (b) =>
+      `${counts[b.key]} ${counts[b.key] === 1 ? b.one : b.label.toLowerCase()}`
+  )
+  return `${client.reservations} reservas · ${parts.join(' · ')}`
+}
+
+function StatusBar({
+  counts,
+  active
 }: {
-  name: string
-  since: string
-  reservations: number
-  completed: number
+  counts: Record<BucketKey, number>
+  active?: boolean
 }) {
+  const total = BUCKETS.reduce((acc, b) => acc + counts[b.key], 0)
+  if (total === 0) return null
   return (
-    <li className='w-full flex items-center gap-3 py-2.5'>
+    <div
+      className={`mt-1.5 flex h-1.5 w-full overflow-hidden rounded-full bg-surface-inset transition-shadow group-hover:shadow-(--shadow-glow) ${
+        active ? 'shadow-(--shadow-glow)' : ''
+      }`}
+      aria-hidden
+    >
+      {BUCKETS.map((b) =>
+        counts[b.key] > 0 ? (
+          <span
+            key={b.key}
+            className={`${b.cls} h-full`}
+            style={{ width: `${(counts[b.key] / total) * 100}%` }}
+          />
+        ) : null
+      )}
+    </div>
+  )
+}
+
+function ClientRow({
+  client,
+  bind,
+  isActive
+}: {
+  client: DashboardClientListRow
+  bind?: ReturnType<typeof useChartDetail>['bind']
+  isActive?: (key: string) => boolean
+}) {
+  const key = `client-${client.client_id}`
+  const active = isActive?.(key) ?? false
+  const counts = clientBuckets(client)
+
+  const content = (
+    <>
       <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 text-xs font-semibold text-pitch-700 dark:bg-pitch-500/20 dark:text-pitch-300'>
-        {name.slice(0, 2).toUpperCase()}
+        {client.name.slice(0, 2).toUpperCase()}
       </span>
       <div className='min-w-0 flex-1'>
-        <p className='truncate text-sm font-medium'>{name}</p>
+        <p className='truncate text-sm font-medium'>{client.name}</p>
         <p className='truncate text-[11px] text-text-muted'>
-          cliente desde {formatLocal(`${since}T12:00:00`, 'd MMM yyyy')}
+          cliente desde{' '}
+          {formatLocal(`${client.client_since}T12:00:00`, 'd MMM yyyy')}
         </p>
+        <StatusBar counts={counts} active={active} />
       </div>
       <div className='shrink-0 text-right'>
         <p className='nums text-sm font-bold'>
-          {completed}
-          <span className='font-normal text-text-muted'>/{reservations}</span>
+          {client.completed}
+          <span className='font-normal text-text-muted'>
+            /{client.reservations}
+          </span>
         </p>
         <p className='text-[9px] uppercase tracking-wide text-text-muted'>
           completadas
         </p>
       </div>
+    </>
+  )
+
+  if (!bind) {
+    return <li className='flex w-full items-center gap-3 py-2.5'>{content}</li>
+  }
+
+  return (
+    <li>
+      <button
+        type='button'
+        {...bind(key, client.name, clientSummary(client))}
+        className={`group -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-inset/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
+          active ? 'bg-surface-inset' : ''
+        }`}
+      >
+        {content}
+      </button>
     </li>
   )
 }
@@ -129,13 +238,7 @@ function ClientsSheet({
       ) : (
         <ul className='w-full divide-y divide-border'>
           {rows.map((c) => (
-            <ClientRow
-              key={c.client_id}
-              name={c.name}
-              since={c.client_since}
-              reservations={c.reservations}
-              completed={c.completed}
-            />
+            <ClientRow key={c.client_id} client={c} />
           ))}
         </ul>
       )}
@@ -176,13 +279,17 @@ export function ClientsCard({
   to,
   resourceIds
 }: {
-  topClients: DashboardClientRow[]
+  topClients: DashboardClientListRow[]
   businessId: string
   from: string
   to: string
   resourceIds?: string[]
 }) {
   const [sheetOpen, setSheetOpen] = useState(false)
+  const { detail, bind, isActive } = useChartDetail()
+  const presentBuckets = BUCKETS.filter((b) =>
+    topClients.some((c) => clientBuckets(c)[b.key] > 0)
+  )
 
   return (
     <>
@@ -210,17 +317,38 @@ export function ClientsCard({
             Sin clientes con reservas en el periodo.
           </p>
         ) : (
-          <ul className='mt-2 divide-y divide-border'>
-            {topClients.map((c) => (
-              <ClientRow
-                key={c.id}
-                name={c.name}
-                since={c.client_since}
-                reservations={c.reservations}
-                completed={c.completed}
-              />
-            ))}
-          </ul>
+          <>
+            <ul className='mt-2 divide-y divide-border'>
+              {topClients.map((c) => (
+                <ClientRow
+                  key={c.client_id}
+                  client={c}
+                  bind={bind}
+                  isActive={isActive}
+                />
+              ))}
+            </ul>
+            {presentBuckets.length > 1 && (
+              <ul className='mt-3 flex flex-wrap gap-x-3 gap-y-1'>
+                {presentBuckets.map((b) => (
+                  <li
+                    key={b.key}
+                    className='flex items-center gap-1.5 text-[10px] text-text-muted'
+                  >
+                    <span
+                      className={`h-2 w-2 rounded-full ${b.cls}`}
+                      aria-hidden
+                    />
+                    {b.label}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <ChartDetail
+              detail={detail}
+              hint='Toca un cliente para ver el desglose de sus reservas'
+            />
+          </>
         )}
       </Card>
 

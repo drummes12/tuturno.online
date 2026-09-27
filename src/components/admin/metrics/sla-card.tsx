@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Card } from '@/components/common/card'
 import { TimerIcon } from '@/components/common/icon'
 import { useChartDetail } from '@/components/admin/metrics/use-chart-detail'
@@ -50,9 +51,24 @@ export function SlaCard({
   const my = CY - R * Math.sin(angle)
 
   const segments = [
-    { key: 'Confirmadas', n: sla.confirmed, cls: 'bg-pitch-500' },
-    { key: 'Rechazadas', n: sla.rejected, cls: 'bg-signal-orange' },
-    { key: 'Vencidas', n: sla.expired, cls: 'bg-signal-red/70' }
+    {
+      key: 'Confirmadas',
+      n: sla.confirmed,
+      cls: 'bg-pitch-500',
+      glow: 'var(--color-pitch-500)'
+    },
+    {
+      key: 'Rechazadas',
+      n: sla.rejected,
+      cls: 'bg-signal-orange',
+      glow: 'var(--color-signal-orange)'
+    },
+    {
+      key: 'Vencidas',
+      n: sla.expired,
+      cls: 'bg-signal-red/70',
+      glow: 'var(--color-signal-red)'
+    }
   ]
   const total = segments.reduce((a, s) => a + s.n, 0)
   const { detail, bind, isActive } = useChartDetail()
@@ -165,7 +181,7 @@ export function SlaCard({
       {total > 0 && (
         <div className='mt-4'>
           <div
-            className='flex h-2.5 w-full overflow-hidden rounded-full bg-surface-inset'
+            className='flex h-2.5 w-full rounded-full bg-surface-inset'
             role='group'
             aria-label='Desenlace de solicitudes de clientes'
           >
@@ -181,10 +197,15 @@ export function SlaCard({
                     s.key,
                     `${s.n} solicitudes · ${pct}% del total`
                   )}
-                  className={`${s.cls} h-full flex-none appearance-none border-0 p-0 transition-[filter] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
+                  className={`${s.cls} relative h-full flex-none appearance-none border-0 p-0 transition-[filter,box-shadow] first:rounded-l-full last:rounded-r-full hover:z-10 hover:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] aria-pressed:z-10 aria-pressed:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
                     isActive(s.key) ? 'brightness-125' : ''
                   }`}
-                  style={{ width: `${(s.n / total) * 100}%` }}
+                  style={
+                    {
+                      width: `${(s.n / total) * 100}%`,
+                      '--seg-glow': s.glow
+                    } as CSSProperties
+                  }
                 />
               )
             })}

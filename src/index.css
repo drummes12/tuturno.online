@@ -89,6 +89,8 @@
   --shadow-lg: 0 12px 32px rgba(11, 31, 23, 0.08), 0 4px 10px rgba(11, 31, 23, 0.04);
   --shadow-pitch: 0 4px 14px rgba(15, 122, 74, 0.2);
   --shadow-flood: 0 4px 16px rgba(52, 211, 153, 0.25);
+  /* Halo mint centrado — hover/selección en celdas y barras de métricas */
+  --shadow-glow: 0 0 8px rgba(52, 211, 153, 0.3);
 
   /* Motion — spring physics, not linear */
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
@@ -120,6 +122,7 @@
   --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.45), 0 4px 8px rgba(0, 0, 0, 0.3);
   --shadow-pitch: 0 4px 16px rgba(52, 211, 153, 0.22);
   --shadow-flood: 0 4px 16px rgba(52, 211, 153, 0.18);
+  --shadow-glow: 0 0 8px rgba(52, 211, 153, 0.3);
 
   color-scheme: dark;
 }

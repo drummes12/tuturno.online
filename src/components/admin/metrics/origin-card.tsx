@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Card } from '@/components/common/card'
 import { UsersIcon } from '@/components/common/icon'
 import { useChartDetail } from '@/components/admin/metrics/use-chart-detail'
@@ -5,20 +6,47 @@ import { ChartDetail } from '@/components/admin/metrics/chart-detail'
 import type { DashboardData } from '@/types'
 
 const SEGMENTS = [
-  { key: 'completed', label: 'Completadas', cls: 'bg-pitch-600' },
-  { key: 'confirmed', label: 'Confirmadas', cls: 'bg-pitch-300' },
-  { key: 'pending', label: 'Pendientes', cls: 'bg-signal-orange/80' },
-  { key: 'rejected', label: 'Rechazadas', cls: 'bg-signal-red/70' },
-  { key: 'expired', label: 'Vencidas', cls: 'bg-graphite-600' },
+  {
+    key: 'completed',
+    label: 'Completadas',
+    cls: 'bg-pitch-600',
+    glow: 'var(--color-pitch-600)'
+  },
+  {
+    key: 'confirmed',
+    label: 'Confirmadas',
+    cls: 'bg-pitch-300',
+    glow: 'var(--color-pitch-300)'
+  },
+  {
+    key: 'pending',
+    label: 'Pendientes',
+    cls: 'bg-signal-orange/80',
+    glow: 'var(--color-signal-orange)'
+  },
+  {
+    key: 'rejected',
+    label: 'Rechazadas',
+    cls: 'bg-signal-red/70',
+    glow: 'var(--color-signal-red)'
+  },
+  {
+    key: 'expired',
+    label: 'Vencidas',
+    cls: 'bg-graphite-600',
+    glow: 'var(--color-graphite-500)'
+  },
   {
     key: 'cancelledByClient',
     label: 'Canceladas cliente',
-    cls: 'bg-graphite-400'
+    cls: 'bg-graphite-400',
+    glow: 'var(--color-graphite-400)'
   },
   {
     key: 'cancelledByBusiness',
     label: 'Canceladas negocio',
-    cls: 'bg-graphite-200'
+    cls: 'bg-graphite-200',
+    glow: 'var(--color-graphite-300)'
   }
 ] as const
 
@@ -43,7 +71,7 @@ function StackedBar({
         <span className='nums text-text-muted'>{breakdown.total}</span>
       </p>
       <div
-        className='flex h-2.5 w-full overflow-hidden rounded-full bg-surface-inset'
+        className='flex h-2.5 w-full rounded-full bg-surface-inset'
         role='group'
         aria-label={label}
       >
@@ -61,10 +89,15 @@ function StackedBar({
                 s.label,
                 `${count} de ${breakdown.total} reservas · ${pct}% ${label === 'Creadas por el cliente' ? 'del cliente' : 'del negocio'}`
               )}
-              className={`${s.cls} h-full flex-none appearance-none border-0 p-0 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
+              className={`${s.cls} relative h-full flex-none appearance-none border-0 p-0 transition-[filter,box-shadow] first:rounded-l-full last:rounded-r-full hover:z-10 hover:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] aria-pressed:z-10 aria-pressed:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
                 isActive(key) ? 'brightness-125' : ''
               }`}
-              style={{ width: `${(count / breakdown.total) * 100}%` }}
+              style={
+                {
+                  width: `${(count / breakdown.total) * 100}%`,
+                  '--seg-glow': s.glow
+                } as CSSProperties
+              }
             />
           )
         })}

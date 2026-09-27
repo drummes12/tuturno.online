@@ -22,10 +22,76 @@ function smoothPath(points: Array<{ x: number; y: number }>): string {
 }
 
 const W = 340
+const W_WIDE = 640
 const H = 120
 const PAD_X = 4
 const PAD_TOP = 14
 const PAD_BOTTOM = 8
+
+interface TrendPaths {
+  areaPath: string
+  linePath: string
+  prevPath: string
+}
+
+function TrendChart({
+  width,
+  paths,
+  gradientId,
+  className
+}: {
+  width: number
+  paths: TrendPaths
+  gradientId: string
+  className: string
+}) {
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${H}`}
+      className={className}
+      preserveAspectRatio='none'
+      aria-hidden
+    >
+      <defs>
+        <linearGradient id={gradientId} x1='0' y1='0' x2='0' y2='1'>
+          <stop
+            offset='0%'
+            stopColor='var(--color-pitch-400)'
+            stopOpacity='0.35'
+          />
+          <stop
+            offset='100%'
+            stopColor='var(--color-pitch-400)'
+            stopOpacity='0.02'
+          />
+        </linearGradient>
+      </defs>
+      {paths.areaPath && (
+        <path d={paths.areaPath} fill={`url(#${gradientId})`} />
+      )}
+      {paths.linePath && (
+        <path
+          d={paths.linePath}
+          fill='none'
+          stroke='var(--color-pitch-500)'
+          strokeWidth='2.5'
+          strokeLinecap='round'
+        />
+      )}
+      {/* La comparación va encima: si coincide con la actual, se sigue viendo */}
+      {paths.prevPath && (
+        <path
+          d={paths.prevPath}
+          fill='none'
+          stroke='var(--color-graphite-500)'
+          strokeWidth='1.5'
+          strokeDasharray='3 4'
+          opacity='0.85'
+        />
+      )}
+    </svg>
+  )
+}
 
 export function ReservationsCard({
   trend,
@@ -44,25 +110,31 @@ export function ReservationsCard({
     previous > 0 ? Math.round(((total - previous) / previous) * 100) : null
   const hasPrev = trend.some((p) => p.prev > 0)
 
-  const { areaPath, linePath, prevPath } = useMemo(() => {
-    if (trend.length === 0) return { areaPath: '', linePath: '', prevPath: '' }
-    const all = trend.flatMap((p) => [p.n, p.prev])
-    const max = Math.max(...all, 1)
-    const x = (i: number) =>
-      PAD_X + (i / Math.max(trend.length - 1, 1)) * (W - PAD_X * 2)
-    const y = (v: number) =>
-      PAD_TOP + (1 - v / max) * (H - PAD_TOP - PAD_BOTTOM)
-    const cur = trend.map((p, i) => ({ x: x(i), y: y(p.n) }))
-    const line = smoothPath(cur)
-    const area = `${line} L ${cur[cur.length - 1].x} ${H} L ${cur[0].x} ${H} Z`
-    const prev = hasPrev
-      ? smoothPath(trend.map((p, i) => ({ x: x(i), y: y(p.prev) })))
-      : ''
-    return { areaPath: area, linePath: line, prevPath: prev }
+  // La curva se genera a dos anchos para que preserveAspectRatio='none'
+  // solo ajuste el remanente y no aplaste la forma en desktop.
+  const paths = useMemo(() => {
+    const build = (w: number): TrendPaths => {
+      if (trend.length === 0)
+        return { areaPath: '', linePath: '', prevPath: '' }
+      const all = trend.flatMap((p) => [p.n, p.prev])
+      const max = Math.max(...all, 1)
+      const x = (i: number) =>
+        PAD_X + (i / Math.max(trend.length - 1, 1)) * (w - PAD_X * 2)
+      const y = (v: number) =>
+        PAD_TOP + (1 - v / max) * (H - PAD_TOP - PAD_BOTTOM)
+      const cur = trend.map((p, i) => ({ x: x(i), y: y(p.n) }))
+      const line = smoothPath(cur)
+      const area = `${line} L ${cur[cur.length - 1].x} ${H} L ${cur[0].x} ${H} Z`
+      const prev = hasPrev
+        ? smoothPath(trend.map((p, i) => ({ x: x(i), y: y(p.prev) })))
+        : ''
+      return { areaPath: area, linePath: line, prevPath: prev }
+    }
+    return { sm: build(W), lg: build(W_WIDE) }
   }, [trend, hasPrev])
 
   return (
-    <Card className='flex relative overflow-hidden'>
+    <Card className='relative overflow-hidden'>
       {/* Glow de marca sobre la curva, como el radial del mockup */}
       <div
         className='pointer-events-none absolute -top-16 right-0 h-44 w-44 rounded-full opacity-60 dark:opacity-40'
@@ -72,7 +144,7 @@ export function ReservationsCard({
         }}
         aria-hidden
       />
-      <div className='flex-1 relative flex flex-col'>
+      <div className='relative'>
         <div className='flex items-start justify-between gap-3 px-5 pt-5'>
           <div>
             <div className='flex items-baseline gap-2'>
@@ -116,48 +188,18 @@ export function ReservationsCard({
           </span>
         </div>
 
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className='flex-1 mt-1 block h-28 w-full'
-          preserveAspectRatio='none'
-          aria-hidden
-        >
-          <defs>
-            <linearGradient id='trend-fill' x1='0' y1='0' x2='0' y2='1'>
-              <stop
-                offset='0%'
-                stopColor='var(--color-pitch-400)'
-                stopOpacity='0.35'
-              />
-              <stop
-                offset='100%'
-                stopColor='var(--color-pitch-400)'
-                stopOpacity='0.02'
-              />
-            </linearGradient>
-          </defs>
-          {areaPath && <path d={areaPath} fill='url(#trend-fill)' />}
-          {linePath && (
-            <path
-              d={linePath}
-              fill='none'
-              stroke='var(--color-pitch-500)'
-              strokeWidth='2.5'
-              strokeLinecap='round'
-            />
-          )}
-          {/* La comparación va encima: si coincide con la actual, se sigue viendo */}
-          {prevPath && (
-            <path
-              d={prevPath}
-              fill='none'
-              stroke='var(--color-graphite-500)'
-              strokeWidth='1.5'
-              strokeDasharray='3 4'
-              opacity='0.85'
-            />
-          )}
-        </svg>
+        <TrendChart
+          width={W}
+          paths={paths.sm}
+          gradientId='trend-fill'
+          className='mt-1 block h-28 w-full sm:hidden'
+        />
+        <TrendChart
+          width={W_WIDE}
+          paths={paths.lg}
+          gradientId='trend-fill-lg'
+          className='mt-1 hidden h-28 w-full sm:block'
+        />
 
         <div className='flex items-center justify-between gap-2 px-5 pb-4'>
           <span className='text-[11px] text-text-muted nums'>{rangeLabel}</span>
