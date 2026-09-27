@@ -1,19 +1,47 @@
 import { useState } from 'react'
+import type {
+  PointerEventHandler,
+  FocusEventHandler,
+  MouseEventHandler
+} from 'react'
 
-/**
- * Detalle interactivo de gráficas: hover (desktop) o tap (mobile) fija
- * una línea de texto bajo la gráfica. Sin tooltips flotantes — las
- * celdas son demasiado pequeñas para posicionar un globo encima.
- */
+export interface ChartDetailState {
+  key: string
+  title: string
+  summary: string
+}
+
 export function useChartDetail() {
-  const [detail, setDetail] = useState<{ key: string; text: string } | null>(
-    null
-  )
-  const bind = (key: string, text: string) => ({
-    onMouseEnter: () => setDetail({ key, text }),
-    onMouseLeave: () => setDetail(null),
-    onClick: () => setDetail({ key, text })
-  })
-  const isActive = (key: string) => detail?.key === key
-  return { detail, bind, isActive }
+  const [selected, setSelected] = useState<ChartDetailState | null>(null)
+  const [hovered, setHovered] = useState<ChartDetailState | null>(null)
+
+  const bind = (key: string, title: string, summary: string) => {
+    const item = { key, title, summary }
+    const onPointerEnter: PointerEventHandler<HTMLButtonElement> = (event) => {
+      if (event.pointerType === 'mouse') setHovered(item)
+    }
+    const onPointerLeave: PointerEventHandler<HTMLButtonElement> = (event) => {
+      if (event.pointerType === 'mouse') setHovered(null)
+    }
+    const onFocus: FocusEventHandler<HTMLButtonElement> = () => setHovered(item)
+    const onBlur: FocusEventHandler<HTMLButtonElement> = () => setHovered(null)
+    const onClick: MouseEventHandler<HTMLButtonElement> = () =>
+      setSelected(item)
+
+    return {
+      'aria-label': `${title}. ${summary}`,
+      'aria-pressed': selected?.key === key,
+      onPointerEnter,
+      onPointerLeave,
+      onFocus,
+      onBlur,
+      onClick
+    }
+  }
+
+  return {
+    detail: hovered ?? selected,
+    bind,
+    isActive: (key: string) => (hovered ?? selected)?.key === key
+  }
 }

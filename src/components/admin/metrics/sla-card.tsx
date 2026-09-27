@@ -166,28 +166,33 @@ export function SlaCard({
         <div className='mt-4'>
           <div
             className='flex h-2.5 w-full overflow-hidden rounded-full bg-surface-inset'
-            role='img'
-            aria-label={segments.map((s) => `${s.key}: ${s.n}`).join(', ')}
+            role='group'
+            aria-label='Desenlace de solicitudes de clientes'
           >
-            {segments.map(
-              (s) =>
-                s.n > 0 && (
-                  <div
-                    key={s.key}
-                    {...bind(
-                      s.key,
-                      `${s.key}: ${s.n} · ${Math.round((s.n / total) * 100)}%`
-                    )}
-                    className={`${s.cls} h-full transition-all ${
-                      isActive(s.key) ? 'brightness-125' : ''
-                    }`}
-                    style={{ width: `${(s.n / total) * 100}%` }}
-                    title={`${s.key}: ${s.n}`}
-                  />
-                )
-            )}
+            {segments.map((s) => {
+              if (s.n === 0) return null
+              const pct = Math.round((s.n / total) * 100)
+              return (
+                <button
+                  key={s.key}
+                  type='button'
+                  {...bind(
+                    s.key,
+                    s.key,
+                    `${s.n} solicitudes · ${pct}% del total`
+                  )}
+                  className={`${s.cls} h-full flex-none appearance-none border-0 p-0 transition-[filter] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
+                    isActive(s.key) ? 'brightness-125' : ''
+                  }`}
+                  style={{ width: `${(s.n / total) * 100}%` }}
+                />
+              )
+            })}
           </div>
-          <ChartDetail text={detail?.text ?? null} />
+          <ChartDetail
+            detail={detail}
+            hint='Toca un segmento para ver cantidad y porcentaje'
+          />
           <ul className='mt-2 flex flex-wrap gap-x-4 gap-y-1'>
             {segments.map((s) => (
               <li

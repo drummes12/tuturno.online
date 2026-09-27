@@ -62,7 +62,7 @@ export function ReservationsCard({
   }, [trend, hasPrev])
 
   return (
-    <Card className='relative overflow-hidden'>
+    <Card className='flex relative overflow-hidden'>
       {/* Glow de marca sobre la curva, como el radial del mockup */}
       <div
         className='pointer-events-none absolute -top-16 right-0 h-44 w-44 rounded-full opacity-60 dark:opacity-40'
@@ -72,7 +72,7 @@ export function ReservationsCard({
         }}
         aria-hidden
       />
-      <div className='relative'>
+      <div className='flex-1 relative flex flex-col'>
         <div className='flex items-start justify-between gap-3 px-5 pt-5'>
           <div>
             <div className='flex items-baseline gap-2'>
@@ -118,7 +118,7 @@ export function ReservationsCard({
 
         <svg
           viewBox={`0 0 ${W} ${H}`}
-          className='mt-1 block h-28 w-full'
+          className='flex-1 mt-1 block h-28 w-full'
           preserveAspectRatio='none'
           aria-hidden
         >

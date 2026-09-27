@@ -11,6 +11,19 @@ type Heatmap = DashboardData['heatmap']
 type Mode = 'day' | 'week' | 'month'
 
 const DOW_LABEL = ['', 'L', 'M', 'X', 'J', 'V', 'S', 'D']
+const DOW_FULL = [
+  '',
+  'Lunes',
+  'Martes',
+  'Miércoles',
+  'Jueves',
+  'Viernes',
+  'Sábado',
+  'Domingo'
+]
+const averageFormat = new Intl.NumberFormat('es-CO', {
+  maximumFractionDigits: 1
+})
 const MODE_LABEL: Record<Mode, string> = {
   day: 'Día',
   week: 'Semana',
@@ -118,7 +131,7 @@ function WeekGrid({
       <div
         className='grid gap-1'
         style={{ gridTemplateColumns: 'auto repeat(7, minmax(0,1fr))' }}
-        role='img'
+        role='group'
         aria-label='Ocupación por día y hora'
       >
         <span />
@@ -140,17 +153,18 @@ function WeekGrid({
               const cell = byCell.get(`${dow}-${h}`)
               const lv = open && cell ? level(cell.avg, max) : 0
               const key = `${dow}-${h}`
-              const label = !open
-                ? `${DOW_LABEL[dow]} ${h}:00 — cerrado`
+              const title = `${DOW_FULL[dow]} · ${String(h).padStart(2, '0')}:00`
+              const summary = !open
+                ? 'Cerrado'
                 : cell
-                  ? `${DOW_LABEL[dow]} ${h}:00 — ${cell.avg} reservas/jornada · ${cell.total} en el periodo (${Math.round((cell.total / weekTotal) * 100)}%)`
-                  : `${DOW_LABEL[dow]} ${h}:00 — sin reservas`
+                  ? `Promedio ${averageFormat.format(cell.avg)} reservas/jornada · Total ${cell.total} · ${Math.round((cell.total / Math.max(weekTotal, 1)) * 100)}% del período`
+                  : 'Sin reservas en el período'
               return (
-                <div
+                <button
                   key={dow}
-                  title={label}
-                  {...bind(key, label)}
-                  className={`${compact ? 'h-4' : 'h-7'} rounded ${
+                  type='button'
+                  {...bind(key, title, summary)}
+                  className={`${compact ? 'h-5' : 'h-7'} min-w-0 appearance-none rounded border-0 p-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
                     isActive(key)
                       ? 'ring-1 ring-inset ring-(--color-text)/50'
                       : ''
@@ -162,7 +176,10 @@ function WeekGrid({
           </div>
         ))}
       </div>
-      <ChartDetail text={detail?.text ?? null} />
+      <ChartDetail
+        detail={detail}
+        hint='Toca una franja para ver promedio y acumulado'
+      />
     </div>
   )
 }
@@ -193,20 +210,21 @@ function DayStrip({
           const open = isOpenAnyDay(hours, h)
           const cell = byHour.get(h)
           const lv = open && cell ? level(cell.avg, max) : 0
-          const label = !open
-            ? `${h}:00 — cerrado`
+          const title = `${String(h).padStart(2, '0')}:00`
+          const summary = !open
+            ? 'Cerrado'
             : cell
-              ? `${h}:00 — ${cell.avg} reservas/jornada · ${cell.total} en el periodo (${Math.round((cell.total / dayTotal) * 100)}%)`
-              : `${h}:00 — sin reservas`
+              ? `Promedio ${averageFormat.format(cell.avg)} reservas/jornada · Total ${cell.total} · ${Math.round((cell.total / Math.max(dayTotal, 1)) * 100)}% del período`
+              : 'Sin reservas en el período'
           return (
             <li key={h} className='flex items-center gap-3'>
               <span className='nums w-10 shrink-0 text-right text-[11px] text-text-muted'>
-                {h}:00
+                {title}
               </span>
-              <div
-                title={label}
-                {...bind(`h-${h}`, label)}
-                className={`flex h-7 flex-1 items-center justify-end rounded-md px-2 ${
+              <button
+                type='button'
+                {...bind(`h-${h}`, title, summary)}
+                className={`flex h-7 min-w-0 flex-1 appearance-none items-center justify-end rounded-md border-0 px-2 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
                   isActive(`h-${h}`)
                     ? 'ring-1 ring-inset ring-(--color-text)/50'
                     : ''
@@ -219,15 +237,18 @@ function DayStrip({
                       lv >= 3 ? 'text-graphite-900' : 'text-text'
                     }`}
                   >
-                    {cell.avg}
+                    {averageFormat.format(cell.avg)}
                   </span>
                 )}
-              </div>
+              </button>
             </li>
           )
         })}
       </ul>
-      <ChartDetail text={detail?.text ?? null} />
+      <ChartDetail
+        detail={detail}
+        hint='Toca una franja para ver promedio y acumulado'
+      />
     </div>
   )
 }
@@ -304,29 +325,32 @@ function MonthCalendar({
           const lv = inRange && open && total ? level(total, max) : 0
           const muted = !inRange
           const pretty = fmtDay.format(new Date(`${d}T12:00:00`))
-          const label = !inRange
-            ? `${pretty} — fuera del periodo`
+          const title = `${pretty}${inMonth ? '' : ' · otro mes'}`
+          const summary = !inRange
+            ? 'Fuera del período seleccionado'
             : !open
-              ? `${pretty} — cerrado`
+              ? 'Cerrado'
               : total
-                ? `${pretty} — ${total} reservas (${Math.round((total / Math.max(periodTotal, 1)) * 100)}% del periodo)`
-                : `${pretty} — sin reservas`
+                ? `${total} reservas ese día · ${Math.round((total / Math.max(periodTotal, 1)) * 100)}% del período`
+                : 'Sin reservas ese día'
+          const className = `flex h-9 min-w-0 appearance-none items-center justify-center rounded-md border-0 p-0 nums text-[10px] font-semibold focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-(--color-primary) ${
+            muted
+              ? 'text-text-muted/40'
+              : !open
+                ? 'text-text-muted/60'
+                : lv >= 3
+                  ? 'text-graphite-900'
+                  : 'text-text'
+          } ${!inMonth ? 'opacity-70' : ''} ${
+            isActive(d) ? 'ring-1 ring-inset ring-(--color-text)/50' : ''
+          }`
           return (
-            <div
+            <button
               key={d}
-              title={label}
-              {...(inRange ? bind(d, label) : {})}
-              className={`flex h-8 items-center justify-center rounded-md nums text-[10px] font-semibold ${
-                muted
-                  ? 'text-text-muted/40'
-                  : !open
-                    ? 'text-text-muted/60'
-                    : lv >= 3
-                      ? 'text-graphite-900'
-                      : 'text-text'
-              } ${!inMonth ? 'opacity-70' : ''} ${
-                isActive(d) ? 'ring-1 ring-inset ring-(--color-text)/50' : ''
-              }`}
+              type='button'
+              disabled={!inRange}
+              {...(inRange ? bind(d, title, summary) : {})}
+              className={className}
               style={
                 muted
                   ? undefined
@@ -336,11 +360,14 @@ function MonthCalendar({
               }
             >
               {parseInt(d.slice(8))}
-            </div>
+            </button>
           )
         })}
       </div>
-      <ChartDetail text={detail?.text ?? null} />
+      <ChartDetail
+        detail={detail}
+        hint='Toca una franja para ver promedio y acumulado'
+      />
     </div>
   )
 }

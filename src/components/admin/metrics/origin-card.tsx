@@ -37,37 +37,37 @@ function StackedBar({
 }) {
   if (breakdown.total === 0) return null
   return (
-    <div>
+    <div className='mt-2'>
       <p className='mb-1.5 flex items-baseline justify-between text-[11px]'>
         <span className='font-medium text-(--color-text)'>{label}</span>
         <span className='nums text-text-muted'>{breakdown.total}</span>
       </p>
       <div
         className='flex h-2.5 w-full overflow-hidden rounded-full bg-surface-inset'
-        role='img'
-        aria-label={SEGMENTS.map((s) => `${s.label}: ${breakdown[s.key]}`).join(
-          ', '
-        )}
+        role='group'
+        aria-label={label}
       >
-        {SEGMENTS.map(
-          (s) =>
-            breakdown[s.key] > 0 && (
-              <div
-                key={s.key}
-                {...bind(
-                  `${label}-${s.key}`,
-                  `${s.label}: ${breakdown[s.key]} · ${Math.round((breakdown[s.key] / breakdown.total) * 100)}% ${label === 'Creadas por el cliente' ? 'del cliente' : 'del negocio'}`
-                )}
-                className={`${s.cls} h-full ${
-                  isActive(`${label}-${s.key}`) ? 'brightness-125' : ''
-                }`}
-                style={{
-                  width: `${(breakdown[s.key] / breakdown.total) * 100}%`
-                }}
-                title={`${s.label}: ${breakdown[s.key]}`}
-              />
-            )
-        )}
+        {SEGMENTS.map((s) => {
+          const count = breakdown[s.key]
+          if (count === 0) return null
+          const key = `${label}-${s.key}`
+          const pct = Math.round((count / breakdown.total) * 100)
+          return (
+            <button
+              key={s.key}
+              type='button'
+              {...bind(
+                key,
+                s.label,
+                `${count} de ${breakdown.total} reservas · ${pct}% ${label === 'Creadas por el cliente' ? 'del cliente' : 'del negocio'}`
+              )}
+              className={`${s.cls} h-full flex-none appearance-none border-0 p-0 focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
+                isActive(key) ? 'brightness-125' : ''
+              }`}
+              style={{ width: `${(count / breakdown.total) * 100}%` }}
+            />
+          )
+        })}
       </div>
     </div>
   )
@@ -182,7 +182,7 @@ export function OriginCard({ origin }: { origin: DashboardData['origin'] }) {
         </ul>
       </div>
 
-      <div className='mt-5 flex flex-col gap-3.5'>
+      <div className='mt-5 flex flex-col'>
         <StackedBar
           breakdown={origin.client}
           label='Creadas por el cliente'
@@ -195,7 +195,10 @@ export function OriginCard({ origin }: { origin: DashboardData['origin'] }) {
           bind={bind}
           isActive={isActive}
         />
-        <ChartDetail text={detail?.text ?? null} />
+        <ChartDetail
+          detail={detail}
+          hint='Toca un segmento para ver cantidad y porcentaje'
+        />
       </div>
 
       <ul className='mt-3 flex flex-wrap gap-x-4 gap-y-1'>
