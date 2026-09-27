@@ -6,7 +6,7 @@
  * mostrarlo automáticamente a quienes ya lo vieron.
  */
 
-const ADMIN_TUTORIAL_VERSION = 1
+const ADMIN_TUTORIAL_VERSION = 2
 
 function userKey(userId: string): string {
   return `tuturno:admin-tutorial:user:${userId}:v${ADMIN_TUTORIAL_VERSION}`
@@ -36,6 +36,7 @@ export function markAdminTutorialSeen(userId: string): void {
 
 export type AdminTutorialStage =
   | 'admin-dashboard'
+  | 'admin-metrics'
   | 'admin-resources'
   | 'admin-business-hub'
   | 'admin-hours'

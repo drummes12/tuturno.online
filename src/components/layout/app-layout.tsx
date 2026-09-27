@@ -213,6 +213,15 @@ export function AppLayout({ children }: { children: ReactNode }) {
     return location === href
   }
 
+  // Anclas de los tutoriales: deben existir en ambos navs (desktop y
+  // bottom nav mobile); los tours eligen la visible según el viewport.
+  function navItemTour(href: string): string | undefined {
+    if (href === '/admin/negocio') return 'admin-nav-business'
+    if (href === '/admin/metricas') return 'admin-nav-metrics'
+    if (href.endsWith('/mis-reservas')) return 'client-nav-reservations'
+    return undefined
+  }
+
   // El tutorial del cliente aplica a visitantes/autenticados sin rol admin
   // en rutas tenant. El tutorial del admin aplica en cualquier ruta /admin.
   const showTutorialButton =
@@ -403,13 +412,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
-                  data-tour={
-                    item.href === '/mis-reservas'
-                      ? 'client-nav-reservations'
-                      : item.href === '/admin/negocio'
-                        ? 'admin-nav-business'
-                        : undefined
-                  }
+                  data-tour={navItemTour(item.href)}
                   className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors ${
                     active
                       ? 'bg-primary text-on-primary'
@@ -455,11 +458,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
-                  data-tour={
-                    item.href === '/admin/negocio'
-                      ? 'admin-nav-business'
-                      : undefined
-                  }
+                  data-tour={navItemTour(item.href)}
                   className={`flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-semibold uppercase tracking-wide transition-colors touch-target select-none ${
                     active ? 'bg-primary text-on-primary' : 'text-text-muted'
                   }`}

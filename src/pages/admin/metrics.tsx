@@ -95,7 +95,10 @@ export function AdminMetricsPage() {
       </div>
 
       {/* Barra de contexto: rango visible + recursos + filtros */}
-      <div className='flex items-center gap-2 rounded-xl border border-border bg-surface-elevated px-4 py-2.5 shadow-(--shadow-xs)'>
+      <div
+        data-tour='metrics-context'
+        className='flex items-center gap-2 rounded-xl border border-border bg-surface-elevated px-4 py-2.5 shadow-(--shadow-xs)'
+      >
         <div className='min-w-0 flex-1'>
           <p className='nums truncate text-[13px] font-medium'>
             {metricsRangeLabel(range.from, range.to)}
@@ -118,6 +121,7 @@ export function AdminMetricsPage() {
 
       {/* Toggle de sección — solo mobile; en desktop se apilan */}
       <div
+        data-tour='metrics-sections'
         className='flex gap-1 rounded-full bg-surface-inset p-1 sm:hidden'
         role='tablist'
       >
@@ -169,21 +173,27 @@ export function AdminMetricsPage() {
               Reservas
             </h2>
             <div className='grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2'>
-              <ReservationsCard
-                trend={data.trend}
-                total={data.totals.current}
-                previous={data.totals.previous}
-                periodLabel={periodLabel}
-                rangeLabel={metricsRangeLabel(range.from, range.to)}
-              />
-              <SlaCard sla={data.sla} holdMinutes={data.period.holdMinutes} />
+              <div data-tour='metrics-reservations'>
+                <ReservationsCard
+                  trend={data.trend}
+                  total={data.totals.current}
+                  previous={data.totals.previous}
+                  periodLabel={periodLabel}
+                  rangeLabel={metricsRangeLabel(range.from, range.to)}
+                />
+              </div>
+              <div data-tour='metrics-sla'>
+                <SlaCard sla={data.sla} holdMinutes={data.period.holdMinutes} />
+              </div>
             </div>
-            <HeatmapCard
-              heatmap={data.heatmap}
-              businessHours={data.businessHours}
-              periodFrom={range.from}
-              periodTo={range.to}
-            />
+            <div data-tour='metrics-heatmap'>
+              <HeatmapCard
+                heatmap={data.heatmap}
+                businessHours={data.businessHours}
+                periodFrom={range.from}
+                periodTo={range.to}
+              />
+            </div>
           </section>
 
           {/* ── Clientes ─────────────────────────────────────────── */}
@@ -196,14 +206,18 @@ export function AdminMetricsPage() {
               Clientes
             </h2>
             <div className='grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-2'>
-              <ClientsCard
-                topClients={clients}
-                businessId={businessId!}
-                from={range.from}
-                to={range.to}
-                resourceIds={resourceIds}
-              />
-              <OriginCard origin={data.origin} />
+              <div data-tour='metrics-clients'>
+                <ClientsCard
+                  topClients={clients}
+                  businessId={businessId!}
+                  from={range.from}
+                  to={range.to}
+                  resourceIds={resourceIds}
+                />
+              </div>
+              <div data-tour='metrics-origin'>
+                <OriginCard origin={data.origin} />
+              </div>
             </div>
           </section>
         </>

@@ -66,6 +66,14 @@ function waitForElement(
   })
 }
 
+/** ¿El elemento existe y está renderizado? Un display:none da rect 0 —
+    clave para distinguir el nav desktop del bottom nav en mobile. */
+function isVisible(el: Element | null): el is Element {
+  if (!el) return false
+  const r = el.getBoundingClientRect()
+  return r.width > 0 && r.height > 0
+}
+
 type TourId =
   | 'visitor-home'
   | 'auth'
@@ -81,8 +89,12 @@ interface TourDef {
   steps: DriveStep[]
 }
 
-/** Construye los pasos del tour según la ruta y el estado de auth. */
-function buildTours(): TourDef[] {
+/** Construye los pasos del tour según la ruta y el estado de auth.
+    `isMobile` decide a qué nav apuntar: desktop (`nav.hidden`) o la
+    píldora inferior (`nav.fixed`) — ambos existen siempre en el DOM. */
+function buildTours(isMobile: boolean): TourDef[] {
+  const navSel = (attr: string) =>
+    `${isMobile ? 'nav.fixed' : 'nav.hidden'} [data-tour="${attr}"]`
   return [
     // === Visitante en / ===
     {
@@ -203,12 +215,13 @@ function buildTours(): TourDef[] {
           }
         },
         {
-          element: '[data-tour="client-nav-reservations"]',
+          element: navSel('client-nav-reservations'),
           popover: {
             title: 'Mis reservas',
-            description:
-              'Aquí puedes ver y gestionar tus reservas: confirmaciones, cancelaciones y más.',
-            side: 'top',
+            description: isMobile
+              ? 'La pestaña Mis reservas en la barra inferior muestra tus reservas: confirmaciones, cancelaciones y más.'
+              : 'En el menú superior, Mis reservas muestra tus reservas: confirmaciones, cancelaciones y más.',
+            side: isMobile ? 'top' : 'bottom',
             align: 'center'
           }
         }
@@ -316,11 +329,12 @@ function buildTours(): TourDef[] {
 function selectTour(
   route: string,
   userId: string | null,
-  isAdmin: boolean
+  isAdmin: boolean,
+  isMobile: boolean
 ): TourDef | null {
   if (isAdmin) return null
 
-  const tours = buildTours()
+  const tours = buildTours(isMobile)
 
   // En login, siempre el tour de auth
   if (route === '/login' || route === '/registro') {
@@ -385,7 +399,8 @@ export function useClientTutorial(): UseClientTutorialResult {
       // Evitar aperturas duplicadas por auto-start, reanudación y clic manual.
       if (startingRef.current || driverRef.current?.isActive()) return
 
-      const tour = selectTour(route, user?.id ?? null, isAdmin)
+      const isMobile = window.matchMedia('(max-width: 767px)').matches
+      const tour = selectTour(route, user?.id ?? null, isAdmin, isMobile)
       if (!tour) return
 
       // Si es automático, verificar si ya se vio.
@@ -408,10 +423,12 @@ export function useClientTutorial(): UseClientTutorialResult {
         // Si cambió la ruta o se cerró el intento durante la espera, abandonar.
         if (startToken !== startTokenRef.current) return
 
-        // Filtrar pasos cuyo elemento no existe (skipMissingElement no siempre funciona bien).
+        // Filtrar pasos cuyo elemento no existe o está oculto
+        // (skipMissingElement no siempre funciona bien, y el nav del
+        // otro dispositivo existe en el DOM pero con display:none).
         const validSteps = tour.steps.filter((step) => {
           if (!step.element || typeof step.element !== 'string') return true
-          return document.querySelector(step.element) !== null
+          return isVisible(document.querySelector(step.element))
         })
 
         if (validSteps.length === 0) return
@@ -475,7 +492,12 @@ export function useClientTutorial(): UseClientTutorialResult {
     if (!stage) return
 
     // Si la etapa corresponde a la ruta actual, iniciar el tour
-    const tour = selectTour(location, user?.id ?? null, isAdmin)
+    const tour = selectTour(
+      location,
+      user?.id ?? null,
+      isAdmin,
+      window.matchMedia('(max-width: 767px)').matches
+    )
     if (tour && tour.stage === stage) {
       // No es auto, es reanudación
       const timer = setTimeout(() => {

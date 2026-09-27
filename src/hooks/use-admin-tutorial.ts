@@ -67,8 +67,17 @@ function waitForElement(
   })
 }
 
+/** ¿El elemento existe y está renderizado? Un display:none da rect 0 —
+    clave para distinguir el nav desktop del bottom nav en mobile. */
+function isVisible(el: Element | null): el is Element {
+  if (!el) return false
+  const r = el.getBoundingClientRect()
+  return r.width > 0 && r.height > 0
+}
+
 type TourId =
   | 'admin-dashboard'
+  | 'admin-metrics'
   | 'admin-resources'
   | 'admin-business-hub'
   | 'admin-hours'
@@ -95,8 +104,17 @@ interface TourDef {
  * 5. Escribir instrucciones de confirmación/abono
  * 6. Filtrar y gestionar reservas por fecha/estado
  * 7. Cancelar una reserva confirmada
+ *
+ * `isMobile` decide a qué nav apuntar los pasos: el desktop vive bajo el
+ * header (`nav.hidden`) y el mobile es la píldora fija inferior
+ * (`nav.fixed`). Ambos existen siempre en el DOM — apuntar al oculto
+ * resaltaría un elemento invisible.
  */
-function buildTours(): TourDef[] {
+function buildTours(isMobile: boolean): TourDef[] {
+  const navSel = (attr: string) =>
+    `${isMobile ? 'nav.fixed' : 'nav.hidden'} [data-tour="${attr}"]`
+  const navWhere = isMobile ? 'la barra inferior' : 'el menú superior'
+  const navSide = isMobile ? ('top' as const) : ('bottom' as const)
   return [
     // === Operación /admin ===
     {
@@ -155,12 +173,98 @@ function buildTours(): TourDef[] {
           }
         },
         {
-          element: '[data-tour="admin-nav-business"]',
+          element: navSel('admin-nav-metrics'),
+          popover: {
+            title: 'Métricas del negocio',
+            description: `En ${navWhere} tienes Métricas: ocupación por horario, velocidad de respuesta y clientes top del período.`,
+            side: navSide,
+            align: 'center'
+          }
+        },
+        {
+          element: navSel('admin-nav-business'),
           popover: {
             title: 'Configura tu negocio',
+            description: `Antes de recibir reservas crea al menos un recurso (sala, cancha, mesa…) y define horarios, cierres, equipo y la operación (duración de turnos, hold, políticas e instrucciones). Todo vive en ${navWhere}.`,
+            side: navSide,
+            align: 'center'
+          }
+        }
+      ]
+    },
+    // === Métricas /admin/metricas ===
+    {
+      id: 'admin-metrics',
+      stage: 'admin-metrics',
+      route: '/admin/metricas',
+      steps: [
+        {
+          element: '[data-tour="metrics-context"]',
+          popover: {
+            title: 'El período y los filtros',
             description:
-              'Antes de recibir reservas crea al menos un recurso (sala, cancha, mesa…) y define horarios, cierres, equipo y la operación (duración de turnos, hold, políticas e instrucciones). Todo vive aquí.',
+              'Aquí ves el rango de fechas activo. En Filtros cambias el período (7, 30 o 90 días) y puedes limitar todas las métricas a recursos específicos.',
             side: 'bottom',
+            align: 'start'
+          }
+        },
+        {
+          element: '[data-tour="metrics-reservations"]',
+          popover: {
+            title: 'Reservas por día',
+            description:
+              'Cuántas reservas entraron cada día del período, comparadas con el período anterior. Sirve para ver si la demanda sube o baja.',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="metrics-sla"]',
+          popover: {
+            title: 'Velocidad de respuesta',
+            description:
+              'Qué tan rápido respondes las solicitudes: tiempo mediano de respuesta y cómo terminaron — confirmadas, rechazadas o vencidas por el hold.',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="metrics-heatmap"]',
+          popover: {
+            title: 'Mapa de calor',
+            description:
+              'Qué días y horas concentran la demanda — útil para ajustar horarios y precios. Toca una celda para ver el promedio por jornada y el total del período.',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="metrics-sections"]',
+          popover: {
+            title: 'Reservas y Clientes',
+            description:
+              'En el celular las métricas se dividen en dos pestañas. En Clientes verás tus clientes top y de dónde vienen las reservas.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="metrics-clients"]',
+          popover: {
+            title: 'Clientes top',
+            description:
+              'Tus clientes con más reservas del período. La mini barra resume sus estados: completadas, confirmadas, pendientes y perdidas. Toca una fila para ver el detalle.',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="metrics-origin"]',
+          popover: {
+            title: 'Origen de las reservas',
+            description:
+              'Quién crea las reservas: tus clientes desde la página pública o tu equipo desde el panel. Cada barra muestra el desglose de estados de ese origen.',
+            side: 'top',
             align: 'center'
           }
         }
@@ -418,11 +522,14 @@ function buildTours(): TourDef[] {
 }
 
 /** Determina qué tour corresponde a la ruta actual. */
-function selectTour(route: string): TourDef | null {
-  const tours = buildTours()
+function selectTour(route: string, isMobile: boolean): TourDef | null {
+  const tours = buildTours(isMobile)
 
   if (route === '/admin') {
     return tours.find((t) => t.id === 'admin-dashboard') ?? null
+  }
+  if (route === '/admin/metricas') {
+    return tours.find((t) => t.id === 'admin-metrics') ?? null
   }
   if (route === '/admin/recursos') {
     return tours.find((t) => t.id === 'admin-resources') ?? null
@@ -484,7 +591,8 @@ export function useAdminTutorial(): UseAdminTutorialResult {
       // Evitar aperturas duplicadas por auto-start, reanudación y clic manual.
       if (startingRef.current || driverRef.current?.isActive()) return
 
-      const tour = selectTour(route)
+      const isMobile = window.matchMedia('(max-width: 767px)').matches
+      const tour = selectTour(route, isMobile)
       if (!tour) return
 
       // Si es automático, verificar si ya se vio.
@@ -509,10 +617,11 @@ export function useAdminTutorial(): UseAdminTutorialResult {
         // Si cambió la ruta o se cerró el intento durante la espera, abandonar.
         if (startToken !== startTokenRef.current) return
 
-        // Filtrar pasos cuyo elemento no existe.
+        // Filtrar pasos cuyo elemento no existe o está oculto (p. ej. la
+        // sección Clientes en mobile o el nav del otro dispositivo).
         const validSteps = tour.steps.filter((step) => {
           if (!step.element || typeof step.element !== 'string') return true
-          return document.querySelector(step.element) !== null
+          return isVisible(document.querySelector(step.element))
         })
 
         if (validSteps.length === 0) return
@@ -575,7 +684,10 @@ export function useAdminTutorial(): UseAdminTutorialResult {
     const stage = getAdminTutorialStage()
     if (!stage) return
 
-    const tour = selectTour(location)
+    const tour = selectTour(
+      location,
+      window.matchMedia('(max-width: 767px)').matches
+    )
     if (tour && tour.stage === stage) {
       const timer = setTimeout(() => {
         startTourForRoute(location, false)
