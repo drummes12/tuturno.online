@@ -3,6 +3,8 @@ import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { ScheduleIcon, ExpandIcon } from '@/components/common/icon'
 import { MetricsSheet } from '@/components/admin/metrics/sheet'
+import { useChartDetail } from '@/components/admin/metrics/use-chart-detail'
+import { ChartDetail } from '@/components/admin/metrics/chart-detail'
 import type { DashboardBusinessHours, DashboardData } from '@/types'
 
 type Heatmap = DashboardData['heatmap']
@@ -106,51 +108,61 @@ function WeekGrid({
   const band = hourBand(hours)
   const byCell = new Map(week.map((c) => [`${c.dow}-${c.hour}`, c]))
   const max = Math.max(...week.map((c) => c.avg), 0)
+  const weekTotal = week.reduce((a, c) => a + c.total, 0)
+  const { detail, bind, isActive } = useChartDetail()
 
   if (band.length === 0) return null
 
   return (
-    <div
-      className='grid gap-1'
-      style={{ gridTemplateColumns: 'auto repeat(7, minmax(0,1fr))' }}
-      role='img'
-      aria-label='Ocupación por día y hora'
-    >
-      <span />
-      {[1, 2, 3, 4, 5, 6, 7].map((dow) => (
-        <span
-          key={dow}
-          className='text-center text-[9.5px] font-semibold uppercase text-text-muted'
-        >
-          {DOW_LABEL[dow]}
-        </span>
-      ))}
-      {band.map((h) => (
-        <div key={h} className='contents'>
-          <span className='nums flex items-center justify-end pr-1.5 text-[9px] text-text-muted'>
-            {h}:00
+    <div>
+      <div
+        className='grid gap-1'
+        style={{ gridTemplateColumns: 'auto repeat(7, minmax(0,1fr))' }}
+        role='img'
+        aria-label='Ocupación por día y hora'
+      >
+        <span />
+        {[1, 2, 3, 4, 5, 6, 7].map((dow) => (
+          <span
+            key={dow}
+            className='text-center text-[9.5px] font-semibold uppercase text-text-muted'
+          >
+            {DOW_LABEL[dow]}
           </span>
-          {[1, 2, 3, 4, 5, 6, 7].map((dow) => {
-            const open = isOpen(hours, dow, h)
-            const cell = byCell.get(`${dow}-${h}`)
-            const lv = open && cell ? level(cell.avg, max) : 0
-            return (
-              <div
-                key={dow}
-                title={
-                  !open
-                    ? `${DOW_LABEL[dow]} ${h}:00 — cerrado`
-                    : cell
-                      ? `${DOW_LABEL[dow]} ${h}:00 — ${cell.avg} reservas/jornada (${cell.total} total)`
-                      : `${DOW_LABEL[dow]} ${h}:00 — sin reservas`
-                }
-                className={`${compact ? 'h-4' : 'h-7'} rounded`}
-                style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
-              />
-            )
-          })}
-        </div>
-      ))}
+        ))}
+        {band.map((h) => (
+          <div key={h} className='contents'>
+            <span className='nums flex items-center justify-end pr-1.5 text-[9px] text-text-muted'>
+              {h}:00
+            </span>
+            {[1, 2, 3, 4, 5, 6, 7].map((dow) => {
+              const open = isOpen(hours, dow, h)
+              const cell = byCell.get(`${dow}-${h}`)
+              const lv = open && cell ? level(cell.avg, max) : 0
+              const key = `${dow}-${h}`
+              const label = !open
+                ? `${DOW_LABEL[dow]} ${h}:00 — cerrado`
+                : cell
+                  ? `${DOW_LABEL[dow]} ${h}:00 — ${cell.avg} reservas/jornada · ${cell.total} en el periodo (${Math.round((cell.total / weekTotal) * 100)}%)`
+                  : `${DOW_LABEL[dow]} ${h}:00 — sin reservas`
+              return (
+                <div
+                  key={dow}
+                  title={label}
+                  {...bind(key, label)}
+                  className={`${compact ? 'h-4' : 'h-7'} rounded ${
+                    isActive(key)
+                      ? 'ring-1 ring-inset ring-(--color-text)/50'
+                      : ''
+                  }`}
+                  style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
+                />
+              )
+            })}
+          </div>
+        ))}
+      </div>
+      <ChartDetail text={detail?.text ?? null} />
     </div>
   )
 }
@@ -169,45 +181,54 @@ function DayStrip({
 }) {
   const byHour = new Map(day.map((c) => [c.hour, c]))
   const max = Math.max(...day.map((c) => c.avg), 0)
+  const dayTotal = day.reduce((a, c) => a + c.total, 0)
   const band = hourBand(hours)
+  const { detail, bind, isActive } = useChartDetail()
   if (band.length === 0) return null
 
   return (
-    <ul className='flex flex-col gap-1'>
-      {band.map((h) => {
-        const open = isOpenAnyDay(hours, h)
-        const cell = byHour.get(h)
-        const lv = open && cell ? level(cell.avg, max) : 0
-        return (
-          <li key={h} className='flex items-center gap-3'>
-            <span className='nums w-10 shrink-0 text-right text-[11px] text-text-muted'>
-              {h}:00
-            </span>
-            <div
-              title={
-                !open
-                  ? 'Cerrado'
-                  : cell
-                    ? `${cell.avg} reservas/jornada (${cell.total} total)`
-                    : 'Sin reservas'
-              }
-              className='flex h-7 flex-1 items-center justify-end rounded-md px-2'
-              style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
-            >
-              {cell && open && (
-                <span
-                  className={`nums text-[10px] font-semibold ${
-                    lv >= 3 ? 'text-graphite-900' : 'text-text'
-                  }`}
-                >
-                  {cell.avg}
-                </span>
-              )}
-            </div>
-          </li>
-        )
-      })}
-    </ul>
+    <div>
+      <ul className='flex flex-col gap-1'>
+        {band.map((h) => {
+          const open = isOpenAnyDay(hours, h)
+          const cell = byHour.get(h)
+          const lv = open && cell ? level(cell.avg, max) : 0
+          const label = !open
+            ? `${h}:00 — cerrado`
+            : cell
+              ? `${h}:00 — ${cell.avg} reservas/jornada · ${cell.total} en el periodo (${Math.round((cell.total / dayTotal) * 100)}%)`
+              : `${h}:00 — sin reservas`
+          return (
+            <li key={h} className='flex items-center gap-3'>
+              <span className='nums w-10 shrink-0 text-right text-[11px] text-text-muted'>
+                {h}:00
+              </span>
+              <div
+                title={label}
+                {...bind(`h-${h}`, label)}
+                className={`flex h-7 flex-1 items-center justify-end rounded-md px-2 ${
+                  isActive(`h-${h}`)
+                    ? 'ring-1 ring-inset ring-(--color-text)/50'
+                    : ''
+                }`}
+                style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
+              >
+                {cell && open && (
+                  <span
+                    className={`nums text-[10px] font-semibold ${
+                      lv >= 3 ? 'text-graphite-900' : 'text-text'
+                    }`}
+                  >
+                    {cell.avg}
+                  </span>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+      <ChartDetail text={detail?.text ?? null} />
+    </div>
   )
 }
 
@@ -234,6 +255,15 @@ function MonthCalendar({
   const byDate = new Map(month.map((c) => [c.date, c.total]))
   const max = Math.max(...month.map((c) => c.total), 0)
   const openDows = new Set(hours.map((b) => b.dow))
+  const { detail, bind, isActive } = useChartDetail()
+  const periodTotal = month.reduce(
+    (a, c) => (c.date >= from && c.date <= to ? a + c.total : a),
+    0
+  )
+  const fmtDay = new Intl.DateTimeFormat('es', {
+    day: 'numeric',
+    month: 'short'
+  })
 
   const cells = useMemo(() => {
     const end = new Date(`${to}T12:00:00`)
@@ -273,18 +303,19 @@ function MonthCalendar({
           const total = inRange ? byDate.get(d) : undefined
           const lv = inRange && open && total ? level(total, max) : 0
           const muted = !inRange
+          const pretty = fmtDay.format(new Date(`${d}T12:00:00`))
+          const label = !inRange
+            ? `${pretty} — fuera del periodo`
+            : !open
+              ? `${pretty} — cerrado`
+              : total
+                ? `${pretty} — ${total} reservas (${Math.round((total / Math.max(periodTotal, 1)) * 100)}% del periodo)`
+                : `${pretty} — sin reservas`
           return (
             <div
               key={d}
-              title={
-                !inRange
-                  ? `${d} — fuera del periodo`
-                  : !open
-                    ? `${d} — cerrado`
-                    : total
-                      ? `${d}: ${total} reservas`
-                      : `${d} — sin reservas`
-              }
+              title={label}
+              {...(inRange ? bind(d, label) : {})}
               className={`flex h-8 items-center justify-center rounded-md nums text-[10px] font-semibold ${
                 muted
                   ? 'text-text-muted/40'
@@ -293,7 +324,9 @@ function MonthCalendar({
                     : lv >= 3
                       ? 'text-graphite-900'
                       : 'text-text'
-              } ${!inMonth ? 'opacity-70' : ''}`}
+              } ${!inMonth ? 'opacity-70' : ''} ${
+                isActive(d) ? 'ring-1 ring-inset ring-(--color-text)/50' : ''
+              }`}
               style={
                 muted
                   ? undefined
@@ -307,6 +340,7 @@ function MonthCalendar({
           )
         })}
       </div>
+      <ChartDetail text={detail?.text ?? null} />
     </div>
   )
 }

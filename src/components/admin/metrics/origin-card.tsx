@@ -1,5 +1,7 @@
 import { Card } from '@/components/common/card'
 import { UsersIcon } from '@/components/common/icon'
+import { useChartDetail } from '@/components/admin/metrics/use-chart-detail'
+import { ChartDetail } from '@/components/admin/metrics/chart-detail'
 import type { DashboardData } from '@/types'
 
 const SEGMENTS = [
@@ -24,10 +26,14 @@ type OriginKey = keyof DashboardData['origin']
 
 function StackedBar({
   breakdown,
-  label
+  label,
+  bind,
+  isActive
 }: {
   breakdown: DashboardData['origin'][OriginKey]
   label: string
+  bind: ReturnType<typeof useChartDetail>['bind']
+  isActive: (key: string) => boolean
 }) {
   if (breakdown.total === 0) return null
   return (
@@ -48,7 +54,13 @@ function StackedBar({
             breakdown[s.key] > 0 && (
               <div
                 key={s.key}
-                className={`${s.cls} h-full`}
+                {...bind(
+                  `${label}-${s.key}`,
+                  `${s.label}: ${breakdown[s.key]} · ${Math.round((breakdown[s.key] / breakdown.total) * 100)}% ${label === 'Creadas por el cliente' ? 'del cliente' : 'del negocio'}`
+                )}
+                className={`${s.cls} h-full ${
+                  isActive(`${label}-${s.key}`) ? 'brightness-125' : ''
+                }`}
                 style={{
                   width: `${(breakdown[s.key] / breakdown.total) * 100}%`
                 }}
@@ -72,6 +84,7 @@ export function OriginCard({ origin }: { origin: DashboardData['origin'] }) {
   // Anillo: circunferencia 2πr, r=42
   const CIRC = 2 * Math.PI * 42
   const clientLen = total > 0 ? (origin.client.total / total) * CIRC : 0
+  const { detail, bind, isActive } = useChartDetail()
 
   return (
     <Card className='p-5'>
@@ -170,11 +183,19 @@ export function OriginCard({ origin }: { origin: DashboardData['origin'] }) {
       </div>
 
       <div className='mt-5 flex flex-col gap-3.5'>
-        <StackedBar breakdown={origin.client} label='Creadas por el cliente' />
+        <StackedBar
+          breakdown={origin.client}
+          label='Creadas por el cliente'
+          bind={bind}
+          isActive={isActive}
+        />
         <StackedBar
           breakdown={origin.business}
           label='Creadas por el negocio'
+          bind={bind}
+          isActive={isActive}
         />
+        <ChartDetail text={detail?.text ?? null} />
       </div>
 
       <ul className='mt-3 flex flex-wrap gap-x-4 gap-y-1'>

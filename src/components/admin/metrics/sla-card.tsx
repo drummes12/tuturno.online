@@ -1,5 +1,7 @@
 import { Card } from '@/components/common/card'
 import { TimerIcon } from '@/components/common/icon'
+import { useChartDetail } from '@/components/admin/metrics/use-chart-detail'
+import { ChartDetail } from '@/components/admin/metrics/chart-detail'
 import type { DashboardSla } from '@/types'
 
 function fmtMinutes(min: number | null): string {
@@ -53,6 +55,7 @@ export function SlaCard({
     { key: 'Vencidas', n: sla.expired, cls: 'bg-signal-red/70' }
   ]
   const total = segments.reduce((a, s) => a + s.n, 0)
+  const { detail, bind, isActive } = useChartDetail()
 
   return (
     <Card className='p-5'>
@@ -171,12 +174,20 @@ export function SlaCard({
                 s.n > 0 && (
                   <div
                     key={s.key}
-                    className={`${s.cls} h-full transition-all`}
+                    {...bind(
+                      s.key,
+                      `${s.key}: ${s.n} · ${Math.round((s.n / total) * 100)}%`
+                    )}
+                    className={`${s.cls} h-full transition-all ${
+                      isActive(s.key) ? 'brightness-125' : ''
+                    }`}
                     style={{ width: `${(s.n / total) * 100}%` }}
+                    title={`${s.key}: ${s.n}`}
                   />
                 )
             )}
           </div>
+          <ChartDetail text={detail?.text ?? null} />
           <ul className='mt-2 flex flex-wrap gap-x-4 gap-y-1'>
             {segments.map((s) => (
               <li
