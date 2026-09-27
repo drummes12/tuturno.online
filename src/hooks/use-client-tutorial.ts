@@ -96,18 +96,19 @@ function buildTours(isMobile: boolean): TourDef[] {
   const navSel = (attr: string) =>
     `${isMobile ? 'nav.fixed' : 'nav.hidden'} [data-tour="${attr}"]`
   return [
-    // === Visitante en / ===
+    // === Visitante en /b/:slug ===
     {
       id: 'visitor-home',
       stage: 'public-discovery',
-      route: '/',
+      route: '/b/:slug',
       steps: [
         {
           element: '[data-tour="availability-date-picker"]',
           popover: {
             title: 'Elige una fecha',
-            description:
-              'Desliza y toca un día para ver los turnos disponibles en esa fecha.',
+            description: isMobile
+              ? 'Desliza y toca un día para ver los turnos disponibles en esa fecha.'
+              : 'Elige un día para ver los turnos disponibles en esa fecha.',
             side: 'bottom',
             align: 'start'
           }
@@ -115,9 +116,9 @@ function buildTours(isMobile: boolean): TourDef[] {
         {
           element: '[data-tour="availability-resource-selector"]',
           popover: {
-            title: 'Selecciona una recurso',
+            title: 'Elige el recurso',
             description:
-              'Si el negocio tiene varias recursos, elige cuál quieres reservar.',
+              'Si el negocio tiene varios recursos (canchas, salas, mesas…), elige cuál quieres reservar.',
             side: 'bottom',
             align: 'start'
           }
@@ -127,8 +128,18 @@ function buildTours(isMobile: boolean): TourDef[] {
           popover: {
             title: 'Elige un turno',
             description:
-              'Los turnos verdes están disponibles. Toca uno para iniciar tu reserva.',
+              'Los turnos marcados Libre están disponibles: toca uno para iniciar tu reserva. En espera, Reservado y Bloqueado no se pueden tomar.',
             side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="availability-location"]',
+          popover: {
+            title: 'Cómo llegar',
+            description:
+              'Aquí ves la dirección del negocio con un acceso directo a Google Maps.',
+            side: 'bottom',
             align: 'center'
           }
         },
@@ -172,19 +183,28 @@ function buildTours(isMobile: boolean): TourDef[] {
           element: '[data-tour="login-submit"]',
           popover: {
             title: 'Iniciar sesión',
+            description: 'Presiona este botón para entrar.',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="register-link"]',
+          popover: {
+            title: '¿No tienes cuenta?',
             description:
-              'Presiona este botón para entrar. Si no tienes cuenta, usa el enlace de abajo para registrarte.',
+              'Regístrate gratis desde aquí: solo necesitas tu correo y una contraseña.',
             side: 'top',
             align: 'center'
           }
         }
       ]
     },
-    // === Cliente autenticado en / ===
+    // === Cliente autenticado en /b/:slug ===
     {
       id: 'client-home',
       stage: 'public-discovery',
-      route: '/',
+      route: '/b/:slug',
       steps: [
         {
           element: '[data-tour="availability-date-picker"]',
@@ -198,8 +218,8 @@ function buildTours(isMobile: boolean): TourDef[] {
         {
           element: '[data-tour="availability-resource-selector"]',
           popover: {
-            title: 'Selecciona una recurso',
-            description: 'Elige la recurso que prefieras.',
+            title: 'Elige el recurso',
+            description: 'Si hay varios, elige el que prefieras.',
             side: 'bottom',
             align: 'start'
           }
@@ -209,8 +229,18 @@ function buildTours(isMobile: boolean): TourDef[] {
           popover: {
             title: 'Elige un turno',
             description:
-              'Toca un turno disponible para ir al formulario de reserva.',
+              'Los turnos marcados Libre están disponibles. Toca uno para ir al formulario de reserva.',
             side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="availability-location"]',
+          popover: {
+            title: 'Cómo llegar',
+            description:
+              'Aquí ves la dirección del negocio con un acceso directo a Google Maps.',
+            side: 'bottom',
             align: 'center'
           }
         },
@@ -237,7 +267,7 @@ function buildTours(isMobile: boolean): TourDef[] {
           element: '[data-tour="reservation-summary"]',
           popover: {
             title: 'Resumen de tu reserva',
-            description: 'Revisa la recurso, fecha y hora seleccionadas.',
+            description: 'Revisa el recurso, la fecha y la hora seleccionados.',
             side: 'bottom',
             align: 'center'
           }
@@ -249,6 +279,16 @@ function buildTours(isMobile: boolean): TourDef[] {
             description:
               'Confirma tu nombre y teléfono. El negocio los usará para contactarte.',
             side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="reservation-notes"]',
+          popover: {
+            title: 'Notas para el negocio',
+            description:
+              'Opcional: comenta algo útil para el negocio (a qué hora llegas, cuántos van, etc.). Evita datos médicos o sensibles.',
+            side: 'top',
             align: 'center'
           }
         },
@@ -284,8 +324,9 @@ function buildTours(isMobile: boolean): TourDef[] {
           element: '[data-tour="reservations-filters"]',
           popover: {
             title: 'Filtra tus reservas',
-            description:
-              'Cambia entre próximas, pendientes, confirmadas y pasadas.',
+            description: isMobile
+              ? 'Cambia entre próximas, pendientes, confirmadas y pasadas. También puedes deslizar la lista hacia los lados para cambiar de filtro.'
+              : 'Cambia entre próximas, pendientes, confirmadas y pasadas.',
             side: 'bottom',
             align: 'start'
           }
@@ -295,7 +336,7 @@ function buildTours(isMobile: boolean): TourDef[] {
           popover: {
             title: 'Tus reservas',
             description:
-              'Cada tarjeta muestra la recurso, fecha, hora y estado de tu reserva.',
+              'Cada tarjeta muestra el recurso, la fecha, la hora y el estado de tu reserva. Tócala para ver el detalle completo.',
             side: 'top',
             align: 'center'
           }

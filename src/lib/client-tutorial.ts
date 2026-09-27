@@ -6,7 +6,7 @@
  * automáticamente a quienes ya lo vieron.
  */
 
-const TUTORIAL_VERSION = 1
+const TUTORIAL_VERSION = 2
 
 function visitorKey(): string {
   return `tuturno:tutorial:visitor:v${TUTORIAL_VERSION}`

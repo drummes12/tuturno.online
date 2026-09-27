@@ -417,6 +417,7 @@ export function AdminHoursPage() {
                   <div className='ml-auto flex items-center justify-end gap-1'>
                     <button
                       onClick={() => toggleCopy(dayIdx)}
+                      data-tour={dayIdx === 1 ? 'admin-hours-copy' : undefined}
                       className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors touch-target ${
                         copySource === dayIdx
                           ? 'bg-pitch-500/15 text-pitch-700 dark:text-pitch-300'

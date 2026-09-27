@@ -40,6 +40,7 @@ export type AdminTutorialStage =
   | 'admin-resources'
   | 'admin-business-hub'
   | 'admin-hours'
+  | 'admin-exceptions'
   | 'admin-config'
   | 'admin-reservations'
   | 'admin-team'

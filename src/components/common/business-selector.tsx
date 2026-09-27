@@ -183,6 +183,7 @@ export function NewReservationButton() {
   return (
     <Link
       href={`/b/${active.slug}`}
+      data-tour='admin-new-reservation'
       className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
       aria-label={`Crear reserva en ${active.businessName}`}
       title={`Nueva reserva en ${active.businessName}`}

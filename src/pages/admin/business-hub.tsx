@@ -23,7 +23,8 @@ const items: HubItem[] = [
     label: 'Recursos',
     description: 'Crea y administra tus canchas, salas o mesas reservables.',
     href: '/admin/recursos',
-    icon: <StoreIcon size={22} />
+    icon: <StoreIcon size={22} />,
+    tourKey: 'business-hub-resources'
   },
   {
     label: 'Horarios',
@@ -37,13 +38,15 @@ const items: HubItem[] = [
     description:
       'Bloquea fechas u horarios puntuales (festivos, mantenimiento).',
     href: '/admin/excepciones',
-    icon: <LockIcon size={22} />
+    icon: <LockIcon size={22} />,
+    tourKey: 'business-hub-exceptions'
   },
   {
     label: 'Equipo',
     description: 'Añade o quita managers que administran este negocio.',
     href: '/admin/equipo',
-    icon: <UsersIcon size={22} />
+    icon: <UsersIcon size={22} />,
+    tourKey: 'business-hub-team'
   },
   {
     label: 'Configuración',

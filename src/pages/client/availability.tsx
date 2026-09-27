@@ -324,6 +324,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
           <Card
             className='hidden md:block p-4 animate-fade-up'
             style={{ animationDelay: '30ms' }}
+            data-tour='availability-location'
           >
             <div className='flex items-center gap-3'>
               <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-pitch-500/15 text-pitch-700 dark:text-pitch-300 shrink-0'>

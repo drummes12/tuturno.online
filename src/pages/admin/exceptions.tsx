@@ -323,7 +323,10 @@ export function AdminExceptionsPage() {
 
         <div className='flex flex-col gap-4'>
           {/* Alcance */}
-          <div className='flex flex-col gap-2'>
+          <div
+            className='flex flex-col gap-2'
+            data-tour='admin-exceptions-scope'
+          >
             <label className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
               Alcance
             </label>
@@ -387,7 +390,10 @@ export function AdminExceptionsPage() {
           )}
 
           {/* Fechas */}
-          <div className='flex flex-wrap gap-3'>
+          <div
+            className='flex flex-wrap gap-3'
+            data-tour='admin-exceptions-dates'
+          >
             <div className='flex-1 min-w-0 flex flex-col gap-2'>
               <label
                 htmlFor='exception-start-date'
@@ -535,6 +541,7 @@ export function AdminExceptionsPage() {
             disabled={!canSubmit || offline}
             size='lg'
             className='w-full'
+            data-tour='admin-exceptions-create'
           >
             <PlusIcon size={18} />
             Crear cierre
@@ -543,7 +550,11 @@ export function AdminExceptionsPage() {
       </Card>
 
       {/* Excepciones activas/futuras */}
-      <div className='animate-fade-up' style={{ animationDelay: '60ms' }}>
+      <div
+        className='animate-fade-up'
+        style={{ animationDelay: '60ms' }}
+        data-tour='admin-exceptions-list'
+      >
         <h2 className='text-xs font-medium uppercase tracking-[0.14em] text-text-muted mb-3 flex items-center gap-2'>
           <CalendarIcon size={16} className='text-text-muted' />
           Cierres programados ({upcomingExceptions.length})

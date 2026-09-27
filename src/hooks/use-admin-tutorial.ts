@@ -81,6 +81,7 @@ type TourId =
   | 'admin-resources'
   | 'admin-business-hub'
   | 'admin-hours'
+  | 'admin-exceptions'
   | 'admin-config'
   | 'admin-reservations'
   | 'admin-team'
@@ -137,7 +138,7 @@ function buildTours(isMobile: boolean): TourDef[] {
           popover: {
             title: 'Datos del cliente',
             description:
-              'Cada tarjeta muestra el recurso, la fecha, la hora, el nombre y el teléfono del cliente. Si dejó notas, también aparecen aquí.',
+              'Cada tarjeta muestra el recurso, la fecha, la hora, el nombre y el teléfono del cliente. Si dejó notas, también aparecen aquí, y tienes un acceso directo a su WhatsApp.',
             side: 'top',
             align: 'center'
           }
@@ -160,6 +161,16 @@ function buildTours(isMobile: boolean): TourDef[] {
               'Si no puedes aceptar la solicitud, presiona Rechazar. Deberás escribir un motivo que el cliente verá en su notificación.',
             side: 'top',
             align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="admin-new-reservation"]',
+          popover: {
+            title: 'Crear una reserva manual',
+            description:
+              'Si un cliente te llama o llega en persona, usa Nueva reserva en el encabezado para registrarle el turno. Queda confirmada de inmediato.',
+            side: 'bottom',
+            align: 'end'
           }
         },
         {
@@ -315,6 +326,16 @@ function buildTours(isMobile: boolean): TourDef[] {
       route: '/admin/negocio',
       steps: [
         {
+          element: '[data-tour="business-hub-resources"]',
+          popover: {
+            title: 'Recursos',
+            description:
+              'Crea y administra las unidades reservables de tu negocio: canchas, salas, mesas o consultorios. Sin recursos activos no hay turnos para reservar.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
           element: '[data-tour="business-hub-hours"]',
           popover: {
             title: 'Horarios',
@@ -325,12 +346,32 @@ function buildTours(isMobile: boolean): TourDef[] {
           }
         },
         {
+          element: '[data-tour="business-hub-exceptions"]',
+          popover: {
+            title: 'Cierres',
+            description:
+              'Bloquea fechas completas o franjas puntuales — festivos, mantenimiento o eventos privados — para todo el negocio o un recurso específico.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="business-hub-team"]',
+          popover: {
+            title: 'Equipo',
+            description:
+              'Añade managers que puedan gestionar reservas, recursos y horarios. Solo el owner puede administrar el equipo.',
+            side: 'bottom',
+            align: 'center'
+          }
+        },
+        {
           element: '[data-tour="business-hub-config"]',
           popover: {
             title: 'Configuración',
             description:
-              'Ajusta la duración de los turnos, el tiempo de hold, las políticas de cancelación y las instrucciones que verán tus clientes.',
-            side: 'bottom',
+              'Ajusta los datos del negocio, la duración de los turnos, el tiempo de hold, las políticas de cancelación y las instrucciones que verán tus clientes.',
+            side: 'top',
             align: 'center'
           }
         }
@@ -363,6 +404,16 @@ function buildTours(isMobile: boolean): TourDef[] {
           }
         },
         {
+          element: '[data-tour="admin-hours-copy"]',
+          popover: {
+            title: 'Copiar a otros días',
+            description:
+              'Si varios días comparten horario, usa Copiar para replicar las franjas de un día a los demás (por ejemplo, Lun–Vie) en vez de repetirlas a mano.',
+            side: 'bottom',
+            align: 'end'
+          }
+        },
+        {
           element: '[data-tour="admin-hours-save"]',
           popover: {
             title: 'Guardar cambios',
@@ -374,12 +425,70 @@ function buildTours(isMobile: boolean): TourDef[] {
         }
       ]
     },
+    // === Cierres /admin/excepciones ===
+    {
+      id: 'admin-exceptions',
+      stage: 'admin-exceptions',
+      route: '/admin/excepciones',
+      steps: [
+        {
+          element: '[data-tour="admin-exceptions-scope"]',
+          popover: {
+            title: 'Alcance del cierre',
+            description:
+              'Elige si el bloqueo aplica a todo el negocio (festivos, vacaciones) o solo a un recurso específico (mantenimiento de una cancha o sala).',
+            side: 'bottom',
+            align: 'start'
+          }
+        },
+        {
+          element: '[data-tour="admin-exceptions-dates"]',
+          popover: {
+            title: 'Fechas y horario',
+            description:
+              'Define la fecha de inicio y fin. Con Todo el día bloqueas la jornada completa; desmárcalo para bloquear solo unas horas. Puedes anotar un motivo como recordatorio.',
+            side: 'bottom',
+            align: 'start'
+          }
+        },
+        {
+          element: '[data-tour="admin-exceptions-create"]',
+          popover: {
+            title: 'Crear el cierre',
+            description:
+              'Al crearlo, esas horas dejan de aparecer disponibles para nuevas reservas. Las reservas ya existentes no se cancelan: te avisamos cuántas quedan afectadas para que contactes a los clientes.',
+            side: 'top',
+            align: 'center'
+          }
+        },
+        {
+          element: '[data-tour="admin-exceptions-list"]',
+          popover: {
+            title: 'Cierres programados',
+            description:
+              'Aquí ves los bloqueos activos y venideros, con su alcance y motivo. Desde el ícono de papelera puedes eliminar un cierre; los pasados quedan archivados al final.',
+            side: 'top',
+            align: 'center'
+          }
+        }
+      ]
+    },
     // === Configuración /admin/configuracion ===
     {
       id: 'admin-config',
       stage: 'admin-config',
       route: '/admin/configuracion',
       steps: [
+        {
+          element: '[data-tour="admin-config-info"]',
+          popover: {
+            title: 'Datos del negocio',
+            description:
+              'El nombre que ven tus clientes, cómo llamas a tus unidades reservables (cancha/sala/mesa) y tu contacto de WhatsApp. Con Probar en WhatsApp verificas que el enlace abre el chat correcto.',
+            side: 'bottom',
+            align: 'start'
+          }
+        },
         {
           element: '[data-tour="admin-config-slot"]',
           popover: {
@@ -401,11 +510,31 @@ function buildTours(isMobile: boolean): TourDef[] {
           }
         },
         {
+          element: '[data-tour="admin-config-address"]',
+          popover: {
+            title: 'Ubicación',
+            description:
+              'La dirección aparece en tu página pública con un acceso directo a Google Maps para que el cliente sepa cómo llegar.',
+            side: 'top',
+            align: 'start'
+          }
+        },
+        {
           element: '[data-tour="admin-config-hold"]',
           popover: {
             title: 'Hold temporal',
             description:
               'Cuando un cliente envía una solicitud, el turno queda reservado temporalmente este número de minutos mientras decides confirmar o rechazar. Si no actúas a tiempo, la solicitud expira automáticamente.',
+            side: 'top',
+            align: 'start'
+          }
+        },
+        {
+          element: '[data-tour="admin-config-rules"]',
+          popover: {
+            title: 'Reglas de operación',
+            description:
+              'Además del hold: la anticipación mínima y máxima para reservar, y hasta cuántas horas antes el cliente puede cancelar su turno.',
             side: 'top',
             align: 'start'
           }
@@ -443,7 +572,7 @@ function buildTours(isMobile: boolean): TourDef[] {
           popover: {
             title: 'Filtrar por fecha',
             description:
-              'Selecciona cualquier fecha para ver todas las reservas de ese día, pasadas o futuras.',
+              'Selecciona cualquier fecha para ver todas las reservas de ese día, pasadas o futuras. Usa las flechas para moverte día a día y el botón Hoy para volver al día actual.',
             side: 'bottom',
             align: 'start'
           }
@@ -452,8 +581,9 @@ function buildTours(isMobile: boolean): TourDef[] {
           element: '[data-tour="admin-reservations-filters"]',
           popover: {
             title: 'Filtrar por estado',
-            description:
-              'Cambia entre todas, pendientes, confirmadas, rechazadas, canceladas y completadas para encontrar rápidamente lo que necesitas.',
+            description: isMobile
+              ? 'Cambia entre todas, pendientes, confirmadas, rechazadas, canceladas y completadas. También puedes deslizar la lista de reservas hacia los lados para cambiar de filtro.'
+              : 'Cambia entre todas, pendientes, confirmadas, rechazadas, canceladas y completadas para encontrar rápidamente lo que necesitas.',
             side: 'bottom',
             align: 'start'
           }
@@ -463,7 +593,7 @@ function buildTours(isMobile: boolean): TourDef[] {
           popover: {
             title: 'Gestionar reservas',
             description:
-              'Cada tarjeta muestra la hora, el recurso, el cliente y el estado. Desde aquí puedes confirmar, rechazar o cancelar según corresponda.',
+              'Cada tarjeta muestra la hora, el recurso, el cliente y el estado, con acceso directo a su WhatsApp y los botones de acción. Tócala para abrir el detalle completo de la reserva.',
             side: 'top',
             align: 'center'
           }
@@ -473,7 +603,7 @@ function buildTours(isMobile: boolean): TourDef[] {
           popover: {
             title: 'Cancelar reserva confirmada',
             description:
-              'Si una reserva ya está confirmada y necesitas cancelarla, usa este botón. Deberás escribir un motivo que se le notificará al cliente.',
+              'Las acciones disponibles dependen del estado: Confirmar y Rechazar en pendientes, Cancelar en confirmadas. Al cancelar deberás escribir un motivo que se le notificará al cliente.',
             side: 'top',
             align: 'center'
           }
@@ -539,6 +669,9 @@ function selectTour(route: string, isMobile: boolean): TourDef | null {
   }
   if (route === '/admin/horarios') {
     return tours.find((t) => t.id === 'admin-hours') ?? null
+  }
+  if (route === '/admin/excepciones') {
+    return tours.find((t) => t.id === 'admin-exceptions') ?? null
   }
   if (route === '/admin/configuracion') {
     return tours.find((t) => t.id === 'admin-config') ?? null

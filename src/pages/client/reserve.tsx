@@ -514,6 +514,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
           )}
           <Input
             label='Notas (opcional)'
+            data-tour='reservation-notes'
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder='Ej: llegaremos 10 min antes'

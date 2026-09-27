@@ -198,7 +198,10 @@ export function AdminConfigPage() {
         >
           <div className='contents md:order-1 md:flex md:flex-col md:gap-4'>
             {/* Datos del negocio */}
-            <Card className='order-1 p-5 animate-fade-up'>
+            <Card
+              className='order-1 p-5 animate-fade-up'
+              data-tour='admin-config-info'
+            >
               <div className='flex items-center gap-2 mb-4'>
                 <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
                   <StoreIcon size={18} />
@@ -298,6 +301,7 @@ export function AdminConfigPage() {
             <Card
               className='order-3 p-5 animate-fade-up'
               style={{ animationDelay: '20ms' }}
+              data-tour='admin-config-address'
             >
               <div className='flex items-center gap-2 mb-4'>
                 <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
@@ -513,6 +517,7 @@ export function AdminConfigPage() {
             <Card
               className='order-4 p-5 animate-fade-up'
               style={{ animationDelay: '80ms' }}
+              data-tour='admin-config-rules'
             >
               <div className='flex items-center gap-2 mb-4'>
                 <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-surface-inset text-text-muted'>
