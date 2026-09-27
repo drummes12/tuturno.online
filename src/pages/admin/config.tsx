@@ -4,6 +4,7 @@ import { useBusinessId } from '@/hooks/use-business-id'
 import { Card } from '@/components/common/card'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
+import { NumberInput, NumberDraftInput } from '@/components/common/number-input'
 import { PhoneInput } from '@/components/common/phone-input'
 import { Alert } from '@/components/common/alert'
 import { PageLoader } from '@/components/common/spinner'
@@ -413,15 +414,15 @@ export function AdminConfigPage() {
                     }
                   />
                   <div className='flex items-center gap-2 mt-2'>
-                    <input
-                      type='number'
+                    <NumberDraftInput
                       min={15}
                       step={5}
                       value={business.slot_duration_minutes}
-                      onChange={(e) =>
+                      fallback={60}
+                      onCommit={(v) =>
                         setBusiness({
                           ...business,
-                          slot_duration_minutes: parseInt(e.target.value) || 60
+                          slot_duration_minutes: v
                         })
                       }
                       className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-primary'
@@ -452,16 +453,13 @@ export function AdminConfigPage() {
                     }
                   />
                   <div className='flex items-center gap-2 mt-2'>
-                    <input
-                      type='number'
+                    <NumberDraftInput
                       min={0}
                       step={5}
                       value={business.gap_minutes}
-                      onChange={(e) =>
-                        setBusiness({
-                          ...business,
-                          gap_minutes: parseInt(e.target.value) || 0
-                        })
+                      fallback={0}
+                      onCommit={(v) =>
+                        setBusiness({ ...business, gap_minutes: v })
                       }
                       className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-primary'
                       aria-label='Gap personalizado'
@@ -526,56 +524,53 @@ export function AdminConfigPage() {
               </div>
               <div className='flex flex-col gap-4'>
                 <div data-tour='admin-config-hold'>
-                  <Input
+                  <NumberInput
                     label='Hold temporal (minutos)'
-                    type='number'
                     min={5}
-                    value={String(business.hold_duration_minutes)}
-                    onChange={(e) =>
+                    value={business.hold_duration_minutes}
+                    fallback={30}
+                    onCommit={(v) =>
                       setBusiness({
                         ...business,
-                        hold_duration_minutes: parseInt(e.target.value) || 30
+                        hold_duration_minutes: v
                       })
                     }
                     hint='Tiempo que un turno queda retenido mientras el negocio decide confirmar.'
                   />
                 </div>
-                <Input
+                <NumberInput
                   label='Anticipación mínima para reservar (minutos)'
-                  type='number'
                   min={0}
-                  value={String(business.min_advance_minutes)}
-                  onChange={(e) =>
+                  value={business.min_advance_minutes}
+                  fallback={0}
+                  onCommit={(v) =>
                     setBusiness({
                       ...business,
-                      min_advance_minutes: parseInt(e.target.value) || 0
+                      min_advance_minutes: v
                     })
                   }
                   hint='El cliente solo podrá reservar si faltan al menos estos minutos para el turno.'
                 />
-                <Input
+                <NumberInput
                   label='Límite de cancelación (horas antes)'
-                  type='number'
                   min={0}
-                  value={String(business.cancellation_limit_hours)}
-                  onChange={(e) =>
+                  value={business.cancellation_limit_hours}
+                  fallback={2}
+                  onCommit={(v) =>
                     setBusiness({
                       ...business,
-                      cancellation_limit_hours: parseInt(e.target.value) || 2
+                      cancellation_limit_hours: v
                     })
                   }
                   hint='El cliente puede cancelar hasta X horas antes del turno.'
                 />
-                <Input
+                <NumberInput
                   label='Anticipación máxima (días)'
-                  type='number'
                   min={1}
-                  value={String(business.max_advance_days)}
-                  onChange={(e) =>
-                    setBusiness({
-                      ...business,
-                      max_advance_days: parseInt(e.target.value) || 30
-                    })
+                  value={business.max_advance_days}
+                  fallback={30}
+                  onCommit={(v) =>
+                    setBusiness({ ...business, max_advance_days: v })
                   }
                   hint='Hasta cuántos días en adelante se puede reservar.'
                 />
