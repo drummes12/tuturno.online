@@ -13,7 +13,9 @@ import {
   CheckIcon,
   XIcon,
   HelpIcon,
-  QrIcon
+  QrIcon,
+  SunIcon,
+  MoonIcon
 } from '@/components/common/icon'
 import { WhatsAppFab } from '@/components/common/whatsapp-fab'
 import { QrShowSheet } from '@/components/common/qr-show-sheet'
@@ -358,14 +360,27 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   themeToggle={{ dark, onToggle: toggleTheme }}
                 />
               ) : (
-                <Link
-                  href='/login'
-                  data-tour='auth-entry'
-                  className='flex min-w-0 max-w-28 items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white/90 shadow-sm transition-[background-color,border-color,color] hover:border-white/35 hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target'
-                >
-                  <LogInIcon size={16} className='shrink-0' />
-                  <span className='min-w-0 truncate'>Ingresar</span>
-                </Link>
+                <>
+                  <button
+                    type='button'
+                    onClick={toggleTheme}
+                    className='flex items-center justify-center rounded-lg border border-white/20 bg-white/5 p-2 text-white/90 shadow-sm transition-[background-color,border-color,color] hover:border-white/35 hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target'
+                    aria-label={
+                      dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'
+                    }
+                    title={dark ? 'Tema claro' : 'Tema oscuro'}
+                  >
+                    {dark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
+                  </button>
+                  <Link
+                    href='/login'
+                    data-tour='auth-entry'
+                    className='flex min-w-0 max-w-28 items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white/90 shadow-sm transition-[background-color,border-color,color] hover:border-white/35 hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target'
+                  >
+                    <LogInIcon size={16} className='shrink-0' />
+                    <span className='min-w-0 truncate'>Ingresar</span>
+                  </Link>
+                </>
               )}
             </div>
           </div>
