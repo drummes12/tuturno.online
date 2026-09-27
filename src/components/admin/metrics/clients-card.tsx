@@ -39,7 +39,7 @@ const BUCKETS = [
     one: 'pendiente',
     cls: 'bg-signal-orange/80'
   },
-  { key: 'lost', label: 'Perdidas', one: 'perdida', cls: 'bg-graphite-400' }
+  { key: 'lost', label: 'Perdidas', one: 'perdida', cls: 'bg-signal-red/70' }
 ] as const
 
 type BucketKey = (typeof BUCKETS)[number]['key']

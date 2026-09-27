@@ -27,14 +27,14 @@ const SEGMENTS = [
   {
     key: 'rejected',
     label: 'Rechazadas',
-    cls: 'bg-signal-red/70',
+    cls: 'bg-signal-red/50',
     glow: 'var(--color-signal-red)'
   },
   {
     key: 'expired',
     label: 'Vencidas',
-    cls: 'bg-graphite-600',
-    glow: 'var(--color-graphite-500)'
+    cls: 'bg-signal-red/80',
+    glow: 'var(--color-signal-red)'
   },
   {
     key: 'cancelledByClient',
