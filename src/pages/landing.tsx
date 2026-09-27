@@ -8,6 +8,8 @@ import {
   type SubmitEvent
 } from 'react'
 import { Link, useLocation } from 'wouter'
+import { TransitionLink } from '@/components/common/transition-link'
+import { navigateWithTransition } from '@/lib/view-transition'
 import { useAuthStore } from '@/stores/auth'
 import { getRecentBusinesses } from '@/lib/recent-businesses'
 import { Page } from '@/components/layout/page'
@@ -35,6 +37,8 @@ interface BoardSlot {
   time: string
   court: string
   status: SlotStatus
+  /** El slot "en vivo" cicla libre → en espera → reservado: cuenta el flujo real. */
+  live?: boolean
 }
 
 // Tablero ilustrativo del hero: replica el estado real que muestra /b/demo.
@@ -42,11 +46,19 @@ const TONIGHT_SLOTS: BoardSlot[] = [
   { time: '18:00', court: 'Cancha 1 · Fútbol 5', status: 'reservado' },
   { time: '19:00', court: 'Cancha 2 · Fútbol 5', status: 'reservado' },
   { time: '20:00', court: 'Sala Norte · Reuniones', status: 'ultimo' },
-  { time: '20:00', court: 'Cancha 3 · Fútbol 8', status: 'libre' },
+  {
+    time: '20:00',
+    court: 'Cancha 3 · Fútbol 8',
+    status: 'libre',
+    live: true
+  },
   { time: '21:00', court: 'Cancha 2 · Pádel', status: 'libre' },
   { time: '22:00', court: 'Consultorio 3 · Terapia', status: 'libre' },
   { time: '23:00', court: 'Cancha 1 · Fútbol 5', status: 'libre' }
 ]
+
+// Libre → En espera → Reservado: el ciclo completo de una solicitud.
+const LIVE_STAGES: SlotStatus[] = ['libre', 'ultimo', 'reservado']
 
 const STATUS_STYLE: Record<SlotStatus, { chip: string; label: string }> = {
   libre: {
@@ -138,8 +150,12 @@ export function LandingPage() {
   const [slug, setSlug] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [scannerOpen, setScannerOpen] = useState(false)
+  const [liveStage, setLiveStage] = useState(0)
   const [, navigate] = useLocation()
   const closeScanner = useCallback(() => setScannerOpen(false), [])
+  const heroRef = useRef<HTMLElement>(null)
+  const boardRef = useRef<HTMLDivElement>(null)
+  const haloRef = useRef<HTMLDivElement>(null)
 
   function handleGoToOrg(e: SubmitEvent) {
     e.preventDefault()
@@ -153,8 +169,51 @@ export function LandingPage() {
       return
     }
     setError(null)
-    navigate(`/b/${trimmed}`)
+    navigateWithTransition(navigate, `/b/${trimmed}`)
   }
+
+  // Slot en vivo del hero: un ciclo libre → en espera → reservado.
+  useEffect(() => {
+    if (user) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const id = setInterval(
+      () => setLiveStage((s) => (s + 1) % LIVE_STAGES.length),
+      2600
+    )
+    return () => clearInterval(id)
+  }, [user])
+
+  // Parallax del hero: un listener pasivo + rAF mueve el tablero más
+  // lento que el scroll y el halo en contrario. (El CSS nativo
+  // animation-timeline: view() no aplica aquí — el overflow-hidden
+  // de la sección crea un scrollport interno que nunca se mueve).
+  useEffect(() => {
+    if (user) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const hero = heroRef.current
+    const board = boardRef.current
+    const halo = haloRef.current
+    if (!hero || !board || !halo) return
+    let raf = 0
+    const update = () => {
+      const { top, height } = hero.getBoundingClientRect()
+      const p = Math.min(Math.max(-top / height, 0), 1)
+      board.style.transform = `translateY(${p * 48}px)`
+      halo.style.transform = `translateY(${p * -72}px)`
+    }
+    const onScroll = () => {
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScroll)
+      board.style.transform = ''
+      halo.style.transform = ''
+    }
+  }, [user])
 
   const orgForm = (
     <form onSubmit={handleGoToOrg} className='flex flex-col gap-3'>
@@ -299,10 +358,14 @@ export function LandingPage() {
     <div className='-mt-23 -mb-4 sm:-mb-8 flex flex-col'>
       {/* Hero — el tablero de esta noche. Panel verde profundo a ancho
           completo, halo mint, la disponibilidad como pieza central. */}
-      <section className='relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-pitch-950 text-chalk dark:bg-[#050f09]'>
+      <section
+        ref={heroRef}
+        className='relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-pitch-950 text-chalk dark:bg-[#050f09]'
+      >
         {/* Decoración: halo mint + anillo de reloj gigante */}
 
         <div
+          ref={haloRef}
           aria-hidden='true'
           className='pointer-events-none absolute inset-0'
         >
@@ -324,7 +387,7 @@ export function LandingPage() {
               desde el celular; tú apruebas con un toque.
             </p>
             <div className='flex w-full flex-col gap-3 sm:w-auto sm:flex-row'>
-              <Link href='/b/demo' data-tour='landing-demo'>
+              <TransitionLink href='/b/demo' data-tour='landing-demo'>
                 <Button
                   size='lg'
                   className='w-full sm:w-auto'
@@ -333,71 +396,86 @@ export function LandingPage() {
                   Probar demostración
                   <ArrowRightIcon size={18} />
                 </Button>
-              </Link>
-              <Link
+              </TransitionLink>
+              <TransitionLink
                 href='/crear-negocio'
                 className='inline-flex touch-target items-center justify-center gap-2 rounded-xl border border-white/20 backdrop-blur-sm px-6 py-3.5 text-lg font-semibold text-chalk transition-all duration-200 ease-spring hover:bg-white/10 active:scale-[0.98] w-full sm:w-auto'
               >
                 Crear mi negocio
-              </Link>
+              </TransitionLink>
             </div>
           </div>
 
           {/* Fixture board — replica la grilla real de disponibilidad.
               El border-beam invita al click: es "la luz del estadio". */}
-          <div
-            className='border-beam animate-fade-up rounded-2xl p-[1.5px]'
-            style={{ animationDelay: '120ms' }}
-          >
-            <Link
-              href='/b/demo'
-              aria-label='Ver la demostración'
-              className='group block rounded-2xl bg-pitch-950 shadow-(--shadow-lg) backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-spring'
+          {/* El parallax va en el wrapper: el keyframe de fade-up queda en
+              fill 'both' y pisaría cualquier transform sobre el mismo nodo. */}
+          <div ref={boardRef}>
+            <div
+              className='border-beam animate-fade-up rounded-2xl p-[1.5px]'
+              style={{ animationDelay: '120ms' }}
             >
-              <div className='flex items-center justify-between border-b border-white/15 px-5 py-3.5 dark:border-white/10'>
-                <span className='text-xs font-semibold uppercase tracking-[0.15em] text-chalk-dim/70'>
-                  Esta noche · 4 espacios
-                </span>
-                <span className='flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-pitch-300'>
-                  <span
-                    aria-hidden='true'
-                    className='h-1.5 w-1.5 rounded-full bg-pitch-400'
-                  />
-                  Demo
-                </span>
-              </div>
-              <ul className='flex flex-col divide-y divide-white/10 dark:divide-white/6'>
-                {TONIGHT_SLOTS.map((slot, i) => {
-                  const status = STATUS_STYLE[slot.status]
-                  return (
-                    <li
-                      key={`${slot.time}-${slot.court}`}
-                      className='animate-stagger flex items-center gap-4 px-5 py-3 transition-[transform,background-color] duration-200 ease-spring hover:translate-x-0.5 hover:bg-white/8 dark:hover:bg-white/6'
-                      style={{ '--index': i } as CSSProperties}
-                    >
-                      <span className='nums font-mono w-12 text-sm font-semibold text-chalk'>
-                        {slot.time}
-                      </span>
-                      <span className='flex-1 truncate text-sm text-chalk-dim/70'>
-                        {slot.court}
-                      </span>
-                      <span
-                        className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${status.chip}`}
+              <TransitionLink
+                href='/b/demo'
+                aria-label='Ver la demostración'
+                className='group block rounded-2xl bg-pitch-950 shadow-(--shadow-lg) backdrop-blur-sm transition-[transform,box-shadow] duration-300 ease-spring'
+              >
+                <div className='flex items-center justify-between border-b border-white/15 px-5 py-3.5 dark:border-white/10'>
+                  <span className='text-xs font-semibold uppercase tracking-[0.15em] text-chalk-dim/70'>
+                    Esta noche · 4 espacios
+                  </span>
+                  <span className='flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] text-pitch-300'>
+                    <span
+                      aria-hidden='true'
+                      className='h-1.5 w-1.5 rounded-full bg-pitch-400'
+                    />
+                    Demo
+                  </span>
+                </div>
+                <ul className='flex flex-col divide-y divide-white/10 dark:divide-white/6'>
+                  {TONIGHT_SLOTS.map((slot, i) => {
+                    const slotStatus = slot.live
+                      ? LIVE_STAGES[liveStage]
+                      : slot.status
+                    const status = STATUS_STYLE[slotStatus]
+                    return (
+                      <li
+                        key={
+                          slot.live
+                            ? `live-${slotStatus}`
+                            : `${slot.time}-${slot.court}`
+                        }
+                        className={`${
+                          slot.live ? 'animate-row-flash' : 'animate-stagger'
+                        } flex items-center gap-4 px-5 py-3 transition-[transform,background-color] duration-200 ease-spring hover:translate-x-0.5 hover:bg-white/8 dark:hover:bg-white/6`}
+                        style={{ '--index': i } as CSSProperties}
                       >
-                        {status.label}
-                      </span>
-                    </li>
-                  )
-                })}
-              </ul>
-              <div className='flex items-center justify-between border-t border-white/15 px-5 py-3 text-xs text-chalk-dim/70 dark:border-white/10 dark:text-chalk-dim/60'>
-                <span>Así se ve tu disponibilidad</span>
-                <span className='flex items-center gap-1 font-medium text-pitch-300 transition-transform duration-200 ease-spring group-hover:translate-x-0.5'>
-                  Ver demo
-                  <ArrowRightIcon size={13} />
-                </span>
-              </div>
-            </Link>
+                        <span className='nums font-mono w-12 text-sm font-semibold text-chalk'>
+                          {slot.time}
+                        </span>
+                        <span className='flex-1 truncate text-sm text-chalk-dim/70'>
+                          {slot.court}
+                        </span>
+                        <span
+                          className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${
+                            slot.live ? 'animate-popover-in ' : ''
+                          }${status.chip}`}
+                        >
+                          {status.label}
+                        </span>
+                      </li>
+                    )
+                  })}
+                </ul>
+                <div className='flex items-center justify-between border-t border-white/15 px-5 py-3 text-xs text-chalk-dim/70 dark:border-white/10 dark:text-chalk-dim/60'>
+                  <span>Así se ve tu disponibilidad</span>
+                  <span className='flex items-center gap-1 font-medium text-pitch-300 transition-transform duration-200 ease-spring group-hover:translate-x-0.5'>
+                    Ver demo
+                    <ArrowRightIcon size={13} />
+                  </span>
+                </div>
+              </TransitionLink>
+            </div>
           </div>
         </div>
       </section>
@@ -453,12 +531,12 @@ export function LandingPage() {
                 trabaja por horarios, te sirve.
               </p>
               <div className='mt-2 flex flex-col gap-2'>
-                <Link href='/crear-negocio' className='w-fit'>
+                <TransitionLink href='/crear-negocio' className='w-fit'>
                   <Button size='md' variant='secondary'>
                     <StoreIcon size={18} />
                     Quiero TuTurno para mi negocio
                   </Button>
-                </Link>
+                </TransitionLink>
                 <p className='text-sm text-(--color-text-muted)'>
                   Desde $49.900 COP/mes por negocio. El precio final se acuerda
                   por escrito antes de activar; no hay cobros automáticos.
@@ -560,41 +638,43 @@ export function LandingPage() {
         >
           <div className='absolute bottom-0 left-0 right-0 h-48 bg-[radial-gradient(60%_100%_at_50%_100%,rgba(52,211,153,0.10),transparent)]' />
         </div>
-        <div className='relative mx-auto flex w-full max-w-3xl flex-col items-center gap-8 px-6 text-center'>
-          <h2 className='text-balance text-3xl font-bold tracking-[-0.02em] sm:text-4xl'>
-            ¿Listo para llenar tu agenda?
-          </h2>
-          <div className='flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row'>
-            <Link href='/crear-negocio'>
-              <Button size='lg' className='w-full sm:w-auto'>
-                <StoreIcon size={18} />
-                Crear mi negocio
-              </Button>
-            </Link>
-            <Link
-              href='/b/demo'
-              className='inline-flex touch-target w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 text-lg font-semibold text-chalk transition-all duration-200 ease-spring hover:bg-white/10 active:scale-[0.98] sm:w-auto'
-            >
-              Ver la demostración
-            </Link>
-          </div>
-          <p className='max-w-xl text-sm text-chalk-dim/70'>
-            Desde $49.900 COP/mes por negocio. El precio final se acuerda por
-            escrito antes de activar; no hay cobros automáticos.
-          </p>
-          <div className='flex flex-col items-center gap-1'>
-            <p className='text-xs text-chalk-dim/70'>
-              ¿Ya administras un negocio?
+        <Reveal>
+          <div className='relative mx-auto flex w-full max-w-3xl flex-col items-center gap-8 px-6 text-center'>
+            <h2 className='text-balance text-3xl font-bold tracking-[-0.02em] sm:text-4xl'>
+              ¿Listo para llenar tu agenda?
+            </h2>
+            <div className='flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row'>
+              <TransitionLink href='/crear-negocio'>
+                <Button size='lg' className='w-full sm:w-auto'>
+                  <StoreIcon size={18} />
+                  Crear mi negocio
+                </Button>
+              </TransitionLink>
+              <TransitionLink
+                href='/b/demo'
+                className='inline-flex touch-target w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 text-lg font-semibold text-chalk transition-all duration-200 ease-spring hover:bg-white/10 active:scale-[0.98] sm:w-auto'
+              >
+                Ver la demostración
+              </TransitionLink>
+            </div>
+            <p className='max-w-xl text-sm text-chalk-dim/70'>
+              Desde $49.900 COP/mes por negocio. El precio final se acuerda por
+              escrito antes de activar; no hay cobros automáticos.
             </p>
-            <Link
-              href='/login'
-              className='inline-flex touch-target items-center gap-1.5 text-sm font-medium text-pitch-300 transition-colors hover:text-pitch-200'
-            >
-              <LogInIcon size={15} />
-              Iniciar sesión
-            </Link>
+            <div className='flex flex-col items-center gap-1'>
+              <p className='text-xs text-chalk-dim/70'>
+                ¿Ya administras un negocio?
+              </p>
+              <TransitionLink
+                href='/login'
+                className='inline-flex touch-target items-center gap-1.5 text-sm font-medium text-pitch-300 transition-colors hover:text-pitch-200'
+              >
+                <LogInIcon size={15} />
+                Iniciar sesión
+              </TransitionLink>
+            </div>
           </div>
-        </div>
+        </Reveal>
       </section>
       {scannerOpen && <QrScannerSheet onClose={closeScanner} />}
     </div>

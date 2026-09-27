@@ -818,3 +818,63 @@ body {
     animation: none !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   View Transitions — crossfade + slide sutil al navegar entre
+   rutas (TransitionLink / navigateWithTransition). La página que
+   sale solo se desvanece; la que entra sube 10px y aparece.
+   ───────────────────────────────────────────────────────────── */
+@keyframes vt-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes vt-page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+::view-transition-old(root) {
+  animation: vt-page-out 0.18s ease-out both;
+}
+
+::view-transition-new(root) {
+  animation: vt-page-in 0.3s var(--ease-out-quart) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* Flash mint sobre la fila del tablero del hero cuando el slot
+   "en vivo" cambia de estado (libre → en espera → reservado). */
+@keyframes row-flash {
+  from {
+    background-color: rgba(52, 211, 153, 0.18);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+/* La fila en vivo remplaza a .animate-stagger: entrada idéntica más
+   el flash mint que se dispara también en cada cambio de estado
+   (la fila se remonta con una key nueva). */
+.animate-row-flash {
+  animation:
+    fade-up 0.1s var(--ease-out-quart) both,
+    row-flash 0.9s ease-out both;
+  animation-delay: calc(var(--index, 0) * 20ms), 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-row-flash {
+    animation: none;
+  }
+}
