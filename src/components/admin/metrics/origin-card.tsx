@@ -24,12 +24,10 @@ type OriginKey = keyof DashboardData['origin']
 
 function StackedBar({
   breakdown,
-  label,
-  total
+  label
 }: {
   breakdown: DashboardData['origin'][OriginKey]
   label: string
-  total: number
 }) {
   if (breakdown.total === 0) return null
   return (
@@ -52,7 +50,7 @@ function StackedBar({
                 key={s.key}
                 className={`${s.cls} h-full`}
                 style={{
-                  width: `${(breakdown[s.key] / total) * 100}%`
+                  width: `${(breakdown[s.key] / breakdown.total) * 100}%`
                 }}
                 title={`${s.label}: ${breakdown[s.key]}`}
               />
@@ -172,15 +170,10 @@ export function OriginCard({ origin }: { origin: DashboardData['origin'] }) {
       </div>
 
       <div className='mt-5 flex flex-col gap-3.5'>
-        <StackedBar
-          breakdown={origin.client}
-          label='Creadas por el cliente'
-          total={total}
-        />
+        <StackedBar breakdown={origin.client} label='Creadas por el cliente' />
         <StackedBar
           breakdown={origin.business}
           label='Creadas por el negocio'
-          total={total}
         />
       </div>
 

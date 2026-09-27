@@ -195,7 +195,11 @@ function DayStrip({
               style={open ? { background: heatBg(lv) } : CLOSED_STYLE}
             >
               {cell && open && (
-                <span className='nums text-[10px] font-semibold text-graphite-900'>
+                <span
+                  className={`nums text-[10px] font-semibold ${
+                    lv >= 3 ? 'text-graphite-900' : 'text-text'
+                  }`}
+                >
                   {cell.avg}
                 </span>
               )}
@@ -287,8 +291,8 @@ function MonthCalendar({
                   : !open
                     ? 'text-text-muted/60'
                     : lv >= 3
-                      ? 'text-white'
-                      : 'text-graphite-900'
+                      ? 'text-graphite-900'
+                      : 'text-text'
               } ${!inMonth ? 'opacity-70' : ''}`}
               style={
                 muted

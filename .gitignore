@@ -37,3 +37,5 @@ deno.lock
 .impeccable/
 .playwright-mcp/
 audit-shots/
+brag-output/
+social/
