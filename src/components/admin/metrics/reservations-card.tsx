@@ -111,7 +111,7 @@ export function ReservationsCard({
               reservas en el periodo
             </p>
           </div>
-          <span className='rounded-full border border-border bg-surface-inset/80 px-2.5 py-1 text-[10px] font-medium uppercase tracking-widest text-text-muted nums backdrop-blur-sm'>
+          <span className='rounded-full border border-border bg-surface-inset/80 px-2.5 py-1 text-[10px] font-medium uppercase tracking-widest text-right text-text-muted nums backdrop-blur-sm'>
             {periodLabel}
           </span>
         </div>

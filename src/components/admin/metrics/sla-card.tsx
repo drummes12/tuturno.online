@@ -69,7 +69,7 @@ export function SlaCard({
         Solo reservas creadas por clientes ({sla.requests} en el periodo).
       </p>
 
-      <div className='mt-2 flex items-center gap-5'>
+      <div className='mt-2 flex flex-wrap items-center gap-x-5 gap-y-3'>
         {/* Velocímetro: consumo del hold configurado */}
         <svg
           viewBox='0 0 180 100'

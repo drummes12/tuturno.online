@@ -95,7 +95,7 @@ export function OriginCard({ origin }: { origin: DashboardData['origin'] }) {
         </h2>
       </div>
 
-      <div className='mt-4 flex items-center justify-center gap-5'>
+      <div className='mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-3'>
         <svg
           viewBox='0 0 100 100'
           className='w-28 shrink-0'
@@ -152,30 +152,30 @@ export function OriginCard({ origin }: { origin: DashboardData['origin'] }) {
           </text>
         </svg>
 
-        <ul className='flex flex-col gap-2.5'>
+        <ul className='flex min-w-0 flex-col gap-2.5'>
           <li className='flex items-center gap-2.5'>
             <span
-              className='h-2.5 w-2.5 rounded-full bg-pitch-500'
+              className='h-2.5 w-2.5 shrink-0 rounded-full bg-pitch-500'
               aria-hidden
             />
             <span className='text-sm'>Cliente</span>
             <span className='nums text-sm font-semibold'>
               {origin.client.total}
             </span>
-            <span className='nums w-10 text-right text-xs text-text-muted'>
+            <span className='nums w-10 shrink-0 text-right text-xs text-text-muted'>
               {clientPct}%
             </span>
           </li>
           <li className='flex items-center gap-2.5'>
             <span
-              className='h-2.5 w-2.5 rounded-full bg-graphite-300'
+              className='h-2.5 w-2.5 shrink-0 rounded-full bg-graphite-300'
               aria-hidden
             />
             <span className='text-sm'>Negocio</span>
             <span className='nums text-sm font-semibold'>
               {origin.business.total}
             </span>
-            <span className='nums w-10 text-right text-xs text-text-muted'>
+            <span className='nums w-10 shrink-0 text-right text-xs text-text-muted'>
               {total > 0 ? 100 - clientPct : 0}%
             </span>
           </li>

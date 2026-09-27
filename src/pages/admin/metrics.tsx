@@ -156,7 +156,7 @@ export function AdminMetricsPage() {
             <h2 className='hidden text-xs font-medium uppercase tracking-[0.14em] text-text-muted sm:block'>
               Reservas
             </h2>
-            <div className='grid gap-4 lg:grid-cols-2'>
+            <div className='grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2'>
               <ReservationsCard
                 trend={data.trend}
                 total={data.totals.current}
@@ -183,7 +183,7 @@ export function AdminMetricsPage() {
             <h2 className='hidden text-xs font-medium uppercase tracking-[0.14em] text-text-muted sm:block'>
               Clientes
             </h2>
-            <div className='grid items-start gap-4 lg:grid-cols-2'>
+            <div className='grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-2'>
               <ClientsCard
                 topClients={data.topClients}
                 businessId={businessId!}
