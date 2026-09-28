@@ -1,5 +1,6 @@
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
+import { isDemoPath, DEMO_BUSINESS_ID } from '@/lib/demo'
 import {
   StoreIcon,
   CalendarPlusIcon,
@@ -175,18 +176,25 @@ export function BusinessSelector({
 
 export function NewReservationButton() {
   const { memberships, activeBusinessId } = useAuthStore()
+  const [location] = useLocation()
   const active =
     memberships.find((m) => m.businessId === activeBusinessId) ?? memberships[0]
 
-  if (!active) return null
+  // En la demo pública no hay membresías: el botón lleva a la página
+  // pública del negocio ficticio (/b/demo) tal como lo haría un admin.
+  const isDemo = isDemoPath(location)
+  if (!active && !isDemo) return null
+
+  const slug = isDemo ? DEMO_BUSINESS_ID : active!.slug
+  const businessName = isDemo ? 'el negocio demo' : active!.businessName
 
   return (
     <Link
-      href={`/b/${active.slug}`}
+      href={`/b/${slug}`}
       data-tour='admin-new-reservation'
       className='inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 hover:border-white/30 hover:bg-white/15 hover:text-white transition-colors touch-target'
-      aria-label={`Crear reserva en ${active.businessName}`}
-      title={`Nueva reserva en ${active.businessName}`}
+      aria-label={`Crear reserva en ${businessName}`}
+      title={`Nueva reserva en ${businessName}`}
     >
       <CalendarPlusIcon size={16} className='shrink-0' />
       <span className='hidden min-w-0 max-w-16 truncate sm:inline md:max-w-none'>

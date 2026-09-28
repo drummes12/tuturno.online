@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
+import { useLocation } from 'wouter'
 import { supabase } from '@/lib/supabase'
+import { isDemoPath } from '@/lib/demo'
 
 /**
  * Hook para suscribirse a cambios en la tabla `reservations` vía Realtime.
@@ -14,8 +16,12 @@ export function useReservationsRealtime(
 ) {
   const callbackRef = useRef(onChange)
   callbackRef.current = onChange
+  const [location] = useLocation()
 
   useEffect(() => {
+    // En /demo/* las reservas viven en memoria; no hay nada que escuchar.
+    if (isDemoPath(location)) return
+
     const channel = supabase
       .channel('reservations-changes')
       .on(
@@ -24,7 +30,7 @@ export function useReservationsRealtime(
           event: '*',
           schema: 'public',
           table: 'reservations',
-          ...(filter ? { filter } : {}),
+          ...(filter ? { filter } : {})
         },
         () => {
           callbackRef.current()
@@ -35,5 +41,5 @@ export function useReservationsRealtime(
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [filter])
+  }, [filter, location])
 }

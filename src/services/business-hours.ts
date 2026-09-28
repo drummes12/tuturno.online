@@ -1,9 +1,17 @@
 import { supabase } from '@/lib/supabase'
+import { isDemoBusinessId, isDemoEntityId } from '@/lib/demo'
+import {
+  demoFetchBusinessHours,
+  demoInsertBusinessHour,
+  demoUpdateBusinessHour,
+  demoDeleteBusinessHour
+} from '@/lib/demo-store'
 import type { BusinessHours } from '@/types'
 
 export async function fetchBusinessHours(
   businessId: string
 ): Promise<BusinessHours[]> {
+  if (isDemoBusinessId(businessId)) return demoFetchBusinessHours()
   const { data, error } = await supabase
     .from('business_hours')
     .select('*')
@@ -20,6 +28,8 @@ export async function insertBusinessHour(
   closeTime: string,
   isActive: boolean
 ): Promise<void> {
+  if (isDemoBusinessId(businessId))
+    return demoInsertBusinessHour(dayOfWeek, openTime, closeTime, isActive)
   const { error } = await supabase.from('business_hours').insert({
     business_id: businessId,
     day_of_week: dayOfWeek,
@@ -36,6 +46,8 @@ export async function updateBusinessHour(
   closeTime: string,
   isActive: boolean
 ): Promise<void> {
+  if (isDemoEntityId(id))
+    return demoUpdateBusinessHour(id, openTime, closeTime, isActive)
   const { error } = await supabase
     .from('business_hours')
     .update({ open_time: openTime, close_time: closeTime, is_active: isActive })
@@ -44,6 +56,7 @@ export async function updateBusinessHour(
 }
 
 export async function deleteBusinessHour(id: string): Promise<void> {
+  if (isDemoEntityId(id)) return demoDeleteBusinessHour(id)
   const { error } = await supabase.from('business_hours').delete().eq('id', id)
   if (error) throw error
 }

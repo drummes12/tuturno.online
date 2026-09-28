@@ -3,6 +3,16 @@ import {
   filterReservations,
   uniqueReservations
 } from '@/lib/reservation-status'
+import { isDemoBusinessId, isDemoEntityId } from '@/lib/demo'
+import {
+  demoFetchPendingReservations,
+  demoFetchTodayReservations,
+  demoFetchReservationsByDate,
+  demoFetchReservationById,
+  demoConfirmReservation,
+  demoRejectReservation,
+  demoCancelReservationByBusiness
+} from '@/lib/demo-store'
 import type { Reservation, ReservationFilter } from '@/types'
 import { CURRENT_POLICY_VERSION } from '@/types'
 
@@ -12,6 +22,7 @@ const RESERVATION_SELECT =
 export async function fetchPendingReservations(
   businessId: string
 ): Promise<Reservation[]> {
+  if (isDemoBusinessId(businessId)) return demoFetchPendingReservations()
   const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
@@ -27,6 +38,8 @@ export async function fetchTodayReservations(
   end: string,
   businessId: string
 ): Promise<Reservation[]> {
+  if (isDemoBusinessId(businessId))
+    return demoFetchTodayReservations(start, end)
   const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
@@ -45,6 +58,8 @@ export async function fetchReservationsByDate(
   filter: ReservationFilter = 'all',
   businessId: string
 ): Promise<Reservation[]> {
+  if (isDemoBusinessId(businessId))
+    return demoFetchReservationsByDate(start, end, filter)
   const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
@@ -101,6 +116,8 @@ export async function fetchUserReservations(
 export async function fetchReservationById(
   reservationId: string
 ): Promise<Reservation | null> {
+  if (isDemoEntityId(reservationId))
+    return demoFetchReservationById(reservationId)
   const { data, error } = await supabase
     .from('reservations')
     .select(RESERVATION_SELECT)
@@ -114,6 +131,8 @@ export async function fetchReservationById(
 // RPC calls
 
 export async function confirmReservation(reservationId: string): Promise<void> {
+  if (isDemoEntityId(reservationId))
+    return demoConfirmReservation(reservationId)
   const { error } = await supabase.rpc('confirm_reservation', {
     p_reservation_id: reservationId,
   })
@@ -121,6 +140,8 @@ export async function confirmReservation(reservationId: string): Promise<void> {
 }
 
 export async function rejectReservation(reservationId: string, reason: string): Promise<void> {
+  if (isDemoEntityId(reservationId))
+    return demoRejectReservation(reservationId, reason)
   const { error } = await supabase.rpc('reject_reservation', {
     p_reservation_id: reservationId,
     p_reason: reason,
@@ -129,6 +150,8 @@ export async function rejectReservation(reservationId: string, reason: string): 
 }
 
 export async function cancelReservationByBusiness(reservationId: string, reason: string): Promise<void> {
+  if (isDemoEntityId(reservationId))
+    return demoCancelReservationByBusiness(reservationId, reason)
   const { error } = await supabase.rpc('cancel_reservation_by_business', {
     p_reservation_id: reservationId,
     p_reason: reason,

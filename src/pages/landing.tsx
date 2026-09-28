@@ -404,6 +404,16 @@ export function LandingPage() {
                 Crear mi negocio
               </TransitionLink>
             </div>
+            <TransitionLink
+              href='/demo'
+              className='group mt-1 inline-flex w-fit items-center gap-1.5 text-sm font-medium text-chalk-dim/70 transition-colors hover:text-flood-300 touch-target'
+            >
+              ¿Tienes un negocio? Explora el panel de administración
+              <ArrowRightIcon
+                size={14}
+                className='transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
+              />
+            </TransitionLink>
           </div>
 
           {/* Fixture board — replica la grilla real de disponibilidad.
@@ -671,6 +681,13 @@ export function LandingPage() {
               >
                 <LogInIcon size={15} />
                 Iniciar sesión
+              </TransitionLink>
+              <TransitionLink
+                href='/demo'
+                className='mt-1 inline-flex touch-target items-center gap-1.5 text-sm font-medium text-chalk-dim/70 transition-colors hover:text-flood-300'
+              >
+                o explora el panel del negocio con datos de prueba
+                <ArrowRightIcon size={14} />
               </TransitionLink>
             </div>
           </div>

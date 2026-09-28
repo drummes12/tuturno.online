@@ -205,7 +205,7 @@ export function AdminMetricsPage() {
             <h2 className='hidden text-xs font-medium uppercase tracking-[0.14em] text-text-muted sm:block'>
               Clientes
             </h2>
-            <div className='grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-2'>
+            <div className='grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2'>
               <div data-tour='metrics-clients'>
                 <ClientsCard
                   topClients={clients}

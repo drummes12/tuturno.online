@@ -1,4 +1,11 @@
 import { supabase } from '@/lib/supabase'
+import { isDemoBusinessId, isDemoPath } from '@/lib/demo'
+import {
+  demoFetchBusinessMembers,
+  demoAddBusinessMember,
+  demoRemoveBusinessMember,
+  demoFindUserByEmailForInvite
+} from '@/lib/demo-store'
 import type { BusinessRole } from '@/types'
 
 export type BusinessMember = {
@@ -20,6 +27,7 @@ export type BusinessMember = {
 export async function fetchBusinessMembers(
   businessId: string
 ): Promise<BusinessMember[]> {
+  if (isDemoBusinessId(businessId)) return demoFetchBusinessMembers()
   const { data, error } = await supabase.rpc('resolve_member_details', {
     p_business_id: businessId
   })
@@ -52,6 +60,7 @@ export async function addBusinessMember(
   businessId: string,
   userId: string
 ): Promise<void> {
+  if (isDemoBusinessId(businessId)) return demoAddBusinessMember(userId)
   const { error } = await supabase.from('business_members').insert({
     business_id: businessId,
     user_id: userId,
@@ -69,6 +78,7 @@ export async function removeBusinessMember(
   businessId: string,
   userId: string
 ): Promise<void> {
+  if (isDemoBusinessId(businessId)) return demoRemoveBusinessMember(userId)
   const { error } = await supabase
     .from('business_members')
     .delete()
@@ -88,6 +98,12 @@ export async function findUserByEmailForInvite(email: string): Promise<{
   email: string
   full_name: string | null
 } | null> {
+  // Esta función no recibe businessId: la búsqueda es global.
+  // En la demo pública (/demo/*) se responde desde el dataset ficticio
+  // según la ruta, para nunca consultar usuarios reales.
+  if (typeof window !== 'undefined' && isDemoPath(window.location.pathname)) {
+    return demoFindUserByEmailForInvite(email)
+  }
   const { data, error } = await supabase.rpc('find_user_for_invite', {
     p_email: email
   })

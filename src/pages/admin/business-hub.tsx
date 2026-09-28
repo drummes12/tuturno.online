@@ -9,11 +9,13 @@ import {
   ChevronRightIcon
 } from '@/components/common/icon'
 import { Page } from '@/components/layout/page'
+import { useAdminBase } from '@/lib/demo'
 
 type HubItem = {
   label: string
   description: string
-  href: string
+  /** Sufijo bajo la base admin ('/admin' o '/demo'). */
+  path: string
   icon: React.ReactNode
   tourKey?: string
 }
@@ -22,14 +24,14 @@ const items: HubItem[] = [
   {
     label: 'Recursos',
     description: 'Crea y administra tus canchas, salas o mesas reservables.',
-    href: '/admin/recursos',
+    path: '/recursos',
     icon: <StoreIcon size={22} />,
     tourKey: 'business-hub-resources'
   },
   {
     label: 'Horarios',
     description: 'Define las franjas horarias en las que aceptas reservas.',
-    href: '/admin/horarios',
+    path: '/horarios',
     icon: <ScheduleIcon size={22} />,
     tourKey: 'business-hub-hours'
   },
@@ -37,14 +39,14 @@ const items: HubItem[] = [
     label: 'Cierres',
     description:
       'Bloquea fechas u horarios puntuales (festivos, mantenimiento).',
-    href: '/admin/excepciones',
+    path: '/excepciones',
     icon: <LockIcon size={22} />,
     tourKey: 'business-hub-exceptions'
   },
   {
     label: 'Equipo',
     description: 'Añade o quita managers que administran este negocio.',
-    href: '/admin/equipo',
+    path: '/equipo',
     icon: <UsersIcon size={22} />,
     tourKey: 'business-hub-team'
   },
@@ -52,7 +54,7 @@ const items: HubItem[] = [
     label: 'Configuración',
     description:
       'Duración de turnos, hold temporal, política de cancelación e instrucciones.',
-    href: '/admin/configuracion',
+    path: '/configuracion',
     icon: <SettingsIcon size={22} />,
     tourKey: 'business-hub-config'
   }
@@ -64,6 +66,7 @@ const items: HubItem[] = [
  * de uso diario) para no sobrecargar el bottom nav en mobile.
  */
 export function AdminBusinessHubPage() {
+  const base = useAdminBase()
   return (
     <Page width='narrow'>
       <div>
@@ -75,7 +78,7 @@ export function AdminBusinessHubPage() {
 
       <div className='flex flex-col gap-3'>
         {items.map((item, index) => (
-          <Link key={item.href} href={item.href}>
+          <Link key={item.path} href={`${base}${item.path}`}>
             <Card
               data-tour={item.tourKey}
               className='group flex animate-stagger items-center gap-4 p-4 transition-all duration-200 ease-spring hover:-translate-y-0.5 hover:border-pitch-600/40 hover:shadow-(--shadow-sm) cursor-pointer touch-target'

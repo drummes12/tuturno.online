@@ -10,6 +10,7 @@ import {
   clearAdminTutorialStage,
   type AdminTutorialStage
 } from '@/lib/admin-tutorial'
+import { demoToAdminPath } from '@/lib/demo'
 
 /**
  * Configuración base de Driver.js en español, con estilos coherentes
@@ -651,35 +652,37 @@ function buildTours(isMobile: boolean): TourDef[] {
   ]
 }
 
-/** Determina qué tour corresponde a la ruta actual. */
+/** Determina qué tour corresponde a la ruta actual.
+ *  Las rutas /demo/* se normalizan a su equivalente /admin. */
 function selectTour(route: string, isMobile: boolean): TourDef | null {
   const tours = buildTours(isMobile)
+  const adminRoute = demoToAdminPath(route)
 
-  if (route === '/admin') {
+  if (adminRoute === '/admin') {
     return tours.find((t) => t.id === 'admin-dashboard') ?? null
   }
-  if (route === '/admin/metricas') {
+  if (adminRoute === '/admin/metricas') {
     return tours.find((t) => t.id === 'admin-metrics') ?? null
   }
-  if (route === '/admin/recursos') {
+  if (adminRoute === '/admin/recursos') {
     return tours.find((t) => t.id === 'admin-resources') ?? null
   }
-  if (route === '/admin/negocio') {
+  if (adminRoute === '/admin/negocio') {
     return tours.find((t) => t.id === 'admin-business-hub') ?? null
   }
-  if (route === '/admin/horarios') {
+  if (adminRoute === '/admin/horarios') {
     return tours.find((t) => t.id === 'admin-hours') ?? null
   }
-  if (route === '/admin/excepciones') {
+  if (adminRoute === '/admin/excepciones') {
     return tours.find((t) => t.id === 'admin-exceptions') ?? null
   }
-  if (route === '/admin/configuracion') {
+  if (adminRoute === '/admin/configuracion') {
     return tours.find((t) => t.id === 'admin-config') ?? null
   }
-  if (route === '/admin/reservas') {
+  if (adminRoute === '/admin/reservas') {
     return tours.find((t) => t.id === 'admin-reservations') ?? null
   }
-  if (route === '/admin/equipo') {
+  if (adminRoute === '/admin/equipo') {
     return tours.find((t) => t.id === 'admin-team') ?? null
   }
 

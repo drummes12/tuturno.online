@@ -1,4 +1,11 @@
 import { supabase } from '@/lib/supabase'
+import { isDemoBusinessId, isDemoEntityId } from '@/lib/demo'
+import {
+  demoFetchAvailabilityExceptions,
+  demoCreateAvailabilityException,
+  demoDeleteAvailabilityException,
+  demoCountOverlappingReservations
+} from '@/lib/demo-store'
 import type { AvailabilityException } from '@/types'
 
 /**
@@ -8,6 +15,7 @@ import type { AvailabilityException } from '@/types'
 export async function fetchAvailabilityExceptions(
   businessId: string
 ): Promise<AvailabilityException[]> {
+  if (isDemoBusinessId(businessId)) return demoFetchAvailabilityExceptions()
   const { data, error } = await supabase
     .from('availability_exceptions')
     .select('*')
@@ -31,6 +39,14 @@ export async function createAvailabilityException(opts: {
   reason?: string | null
   createdBy?: string | null
 }): Promise<void> {
+  if (isDemoBusinessId(opts.businessId)) {
+    return demoCreateAvailabilityException({
+      resourceId: opts.resourceId,
+      startsAt: opts.startsAt,
+      endsAt: opts.endsAt,
+      reason: opts.reason
+    })
+  }
   if (new Date(opts.endsAt) <= new Date(opts.startsAt)) {
     throw new Error('La fecha de fin debe ser posterior a la de inicio')
   }
@@ -51,6 +67,7 @@ export async function createAvailabilityException(opts: {
  * Elimina una excepción por ID.
  */
 export async function deleteAvailabilityException(id: string): Promise<void> {
+  if (isDemoEntityId(id)) return demoDeleteAvailabilityException(id)
   const { error } = await supabase
     .from('availability_exceptions')
     .delete()
@@ -71,6 +88,13 @@ export async function countOverlappingReservations(opts: {
   startsAt: string // ISO UTC
   endsAt: string // ISO UTC
 }): Promise<number> {
+  if (isDemoBusinessId(opts.businessId)) {
+    return demoCountOverlappingReservations({
+      resourceId: opts.resourceId,
+      startsAt: opts.startsAt,
+      endsAt: opts.endsAt
+    })
+  }
   let query = supabase
     .from('reservations')
     .select('id', { count: 'exact', head: true })

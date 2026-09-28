@@ -74,7 +74,7 @@ export function SlaCard({
   const { detail, bind, isActive } = useChartDetail()
 
   return (
-    <Card className='p-5'>
+    <Card className='h-full p-5'>
       <div className='flex items-center gap-2'>
         <TimerIcon size={16} className='shrink-0 text-text-muted' />
         <h2 className='min-w-0 flex-1 truncate text-xs font-medium uppercase tracking-[0.14em] text-text-muted'>

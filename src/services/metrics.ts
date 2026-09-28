@@ -1,4 +1,9 @@
 import { supabase } from '@/lib/supabase'
+import { isDemoBusinessId } from '@/lib/demo'
+import {
+  demoFetchDashboardMetrics,
+  demoFetchDashboardClients
+} from '@/lib/demo-store'
 import type { DashboardClientListRow, DashboardData } from '@/types'
 
 /**
@@ -13,6 +18,8 @@ export async function fetchDashboardMetrics(
   to: string,
   resourceIds?: string[]
 ): Promise<DashboardData> {
+  if (isDemoBusinessId(businessId))
+    return demoFetchDashboardMetrics(from, to, resourceIds)
   const { data, error } = await supabase.rpc('get_business_dashboard', {
     p_business_id: businessId,
     p_from: from,
@@ -38,6 +45,8 @@ export async function fetchDashboardClients(
     offset?: number
   }
 ): Promise<{ rows: DashboardClientListRow[]; total: number }> {
+  if (isDemoBusinessId(businessId))
+    return demoFetchDashboardClients(from, to, options)
   const { data, error } = await supabase.rpc('get_business_dashboard_clients', {
     p_business_id: businessId,
     p_from: from,

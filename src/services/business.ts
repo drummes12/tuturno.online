@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase'
+import { isDemoBusinessId } from '@/lib/demo'
+import { demoFetchBusiness, demoUpdateBusiness } from '@/lib/demo-store'
 import type { Business } from '@/types'
 
 export type BusinessContact = {
@@ -56,6 +58,7 @@ export async function fetchBusinessContactById(
  * Fetch a business by ID (used by admin pages).
  */
 export async function fetchBusinessById(id: string): Promise<Business | null> {
+  if (isDemoBusinessId(id)) return demoFetchBusiness()
   const { data, error } = await supabase
     .from('businesses')
     .select('*')
@@ -90,6 +93,7 @@ export async function updateBusiness(
     >
   >
 ): Promise<void> {
+  if (isDemoBusinessId(id)) return demoUpdateBusiness(updates)
   const { error } = await supabase
     .from('businesses')
     .update(updates)

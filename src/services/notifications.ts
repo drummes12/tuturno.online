@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { isDemoEntityId } from '@/lib/demo'
 import type { AppNotification } from '@/types'
 
 export async function fetchMyNotifications(
@@ -20,6 +21,7 @@ export async function markNotificationRead(id: string): Promise<void> {
 export async function markReservationNotificationsRead(
   reservationId: string
 ): Promise<number> {
+  if (isDemoEntityId(reservationId)) return 0
   const { data, error } = await supabase.rpc(
     'mark_reservation_notifications_read',
     { p_reservation_id: reservationId }

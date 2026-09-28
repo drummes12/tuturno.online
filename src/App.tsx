@@ -265,6 +265,19 @@ export default function App() {
               </PlatformRoute>
             </Route>
 
+            {/* Demo pública del panel admin — las mismas páginas reales
+                alimentadas por el dataset ficticio en memoria
+                (useBusinessId devuelve el sentinel 'demo' en /demo/*). */}
+            <Route path='/demo' component={AdminDashboardPage} />
+            <Route path='/demo/reservas' component={AdminReservationsPage} />
+            <Route path='/demo/metricas' component={AdminMetricsPage} />
+            <Route path='/demo/recursos' component={AdminResourcesPage} />
+            <Route path='/demo/negocio' component={AdminBusinessHubPage} />
+            <Route path='/demo/horarios' component={AdminHoursPage} />
+            <Route path='/demo/configuracion' component={AdminConfigPage} />
+            <Route path='/demo/excepciones' component={AdminExceptionsPage} />
+            <Route path='/demo/equipo' component={AdminTeamPage} />
+
             {/* Admin */}
             <Route path='/admin'>
               <AdminRoute>

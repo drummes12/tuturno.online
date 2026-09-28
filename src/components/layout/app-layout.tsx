@@ -40,6 +40,7 @@ import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { useTheme } from '@/hooks/use-theme'
 import { extractSlugFromPath } from '@/lib/slug'
+import { isDemoPath, adminToDemoPath, demoToAdminPath } from '@/lib/demo'
 import { LEGAL_ENTITY } from '@/lib/legal'
 import { usePushNotifications } from '@/hooks/use-push-notifications'
 import type { NotificationPermissionState } from '@/lib/push'
@@ -117,6 +118,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
     signOut
   } = useAuthStore()
   const [location] = useLocation()
+  // /demo/* monta el panel admin real con datos ficticios en memoria:
+  // nav admin remapeada, canEdit/businessId via hooks, sin guards de auth.
+  const isDemo = isDemoPath(location)
   // '?qr' abre el sheet del QR directo — lo usa el shortcut del manifest.
   const [qrOpen, setQrOpen] = useState(() =>
     new URLSearchParams(window.location.search).has('qr')
@@ -158,10 +162,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
     }
   }
 
-  const startTour = isAdmin ? adminTutorial.startTour : clientTutorial.startTour
-  const isStarting = isAdmin
-    ? adminTutorial.isStarting
-    : clientTutorial.isStarting
+  const startTour =
+    isAdmin || isDemo ? adminTutorial.startTour : clientTutorial.startTour
+  const isStarting =
+    isAdmin || isDemo ? adminTutorial.isStarting : clientTutorial.isStarting
 
   // Reset de scroll al cambiar de ruta — 'instant' para que el
   // scroll-behavior: smooth global no convierta la navegación en
@@ -196,8 +200,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
         ]
       : []
 
-  const nav = isAdmin ? adminNav : clientNav
-  const hasBottomNav = Boolean(user) && nav.length > 0
+  const demoNav: NavItem[] = adminNav.map((item) => ({
+    ...item,
+    href: adminToDemoPath(item.href)
+  }))
+
+  const nav = isDemo ? demoNav : isAdmin ? adminNav : clientNav
+  const hasBottomNav = Boolean(user || isDemo) && nav.length > 0
 
   const activeMembership =
     memberships.find((m) => m.businessId === activeBusinessId) ??
@@ -207,25 +216,31 @@ export function AppLayout({ children }: { children: ReactNode }) {
   // "Negocio" queda activo también en sus sub-rutas agrupadas (horarios,
   // cierres, equipo, configuración), no solo en /admin/negocio exacto.
   function isNavItemActive(href: string): boolean {
-    if (href === '/admin/negocio') {
-      return BUSINESS_HUB_ROUTES.includes(location)
+    // En /demo/* las rutas cuelgan de /demo: normalizar a su equivalente
+    // /admin para comparar contra las rutas del hub.
+    const effective = isDemo ? demoToAdminPath(location) : location
+    if (href === '/admin/negocio' || href === '/demo/negocio') {
+      return BUSINESS_HUB_ROUTES.includes(effective)
     }
-    return location === href
+    return effective === href
   }
 
   // Anclas de los tutoriales: deben existir en ambos navs (desktop y
   // bottom nav mobile); los tours eligen la visible según el viewport.
   function navItemTour(href: string): string | undefined {
-    if (href === '/admin/negocio') return 'admin-nav-business'
-    if (href === '/admin/metricas') return 'admin-nav-metrics'
-    if (href.endsWith('/mis-reservas')) return 'client-nav-reservations'
+    const normalized = demoToAdminPath(href)
+    if (normalized === '/admin/negocio') return 'admin-nav-business'
+    if (normalized === '/admin/metricas') return 'admin-nav-metrics'
+    if (normalized.endsWith('/mis-reservas')) return 'client-nav-reservations'
     return undefined
   }
 
   // El tutorial del cliente aplica a visitantes/autenticados sin rol admin
-  // en rutas tenant. El tutorial del admin aplica en cualquier ruta /admin.
+  // en rutas tenant. El tutorial del admin aplica en cualquier ruta /admin
+  // y también en la demo pública del panel (/demo/*).
   const showTutorialButton =
     (isAdmin && location.startsWith('/admin')) ||
+    isDemo ||
     (!isAdmin && (Boolean(tenantBase) || location === '/mis-reservas'))
 
   const showQrOpen =
@@ -272,13 +287,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </span>
             </Link>
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
-              {user && showTutorialButton && (
+              {(user || isDemo) && showTutorialButton && (
                 <button
                   type='button'
                   onClick={startTour}
                   disabled={isStarting}
                   data-tour='tutorial-trigger'
-                  className='hidden sm:inline-flex min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target'
+                  className={`${isDemo ? 'inline-flex' : 'hidden sm:inline-flex'} min-w-0 max-w-24 md:max-w-none items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-2.5 py-2 text-sm font-medium text-white/85 shadow-sm transition-[background-color,border-color,transform,color] hover:border-white/30 hover:bg-white/15 hover:text-white active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 disabled:cursor-wait disabled:opacity-80 touch-target`}
                   aria-label='Iniciar guía del tutorial'
                   aria-busy={isStarting}
                   title='Guía interactiva'
@@ -289,7 +304,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </span>
                 </button>
               )}
-              {isAdmin && <NewReservationButton />}
+              {(isAdmin || isDemo) && <NewReservationButton />}
               {user && (
                 <NotificationCenter
                   userId={user.id}
@@ -381,10 +396,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   >
                     {dark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
                   </button>
+                  {isDemo && (
+                    <Link
+                      href='/crear-negocio'
+                      className='hidden min-w-0 items-center gap-1.5 rounded-lg bg-flood-500 px-3 py-2 text-sm font-semibold text-graphite-950 shadow-sm transition-[background-color,transform] hover:bg-flood-400 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target sm:flex'
+                    >
+                      <span className='min-w-0 truncate'>Crea tu negocio</span>
+                    </Link>
+                  )}
                   <Link
                     href='/login'
                     data-tour='auth-entry'
-                    className='flex min-w-0 max-w-28 items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white/90 shadow-sm transition-[background-color,border-color,color] hover:border-white/35 hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target'
+                    className={`${isDemo ? 'hidden sm:flex' : 'flex'} min-w-0 max-w-28 items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-sm font-medium text-white/90 shadow-sm transition-[background-color,border-color,color] hover:border-white/35 hover:bg-white/15 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-flood-400 touch-target`}
                   >
                     <LogInIcon size={16} className='shrink-0' />
                     <span className='min-w-0 truncate'>Ingresar</span>
@@ -396,11 +419,32 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
+      {/* Banner de demostración — el panel /demo muestra datos
+          ficticios; el CTA invita a crear un negocio real. */}
+      {isDemo && (
+        <div className='border-b border-flood-500/30 bg-linear-to-b from-transparent to-flood-500/10 dark:to-flood-500/15'>
+          <div className='mx-auto flex max-w-5xl flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 py-2 text-center text-xs sm:text-sm text-(--color-text)'>
+            <span>
+              Estás explorando el panel con datos de demostración — nada de esto
+              es real ni se guarda.
+            </span>
+            <Link
+              href='/crear-negocio'
+              className='font-semibold text-pitch-700 underline decoration-flood-500/60 underline-offset-2 transition-colors hover:text-pitch-600 dark:text-flood-300 dark:hover:text-flood-200'
+            >
+              Crea tu negocio gratis
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Desktop nav — horizontal, below header */}
-      {user && nav.length > 0 && (
+      {(user || isDemo) && nav.length > 0 && (
         <nav
           aria-label={
-            isAdmin ? 'Navegación de administración' : 'Navegación del negocio'
+            isAdmin || isDemo
+              ? 'Navegación de administración'
+              : 'Navegación del negocio'
           }
           className='hidden md:block'
         >
@@ -443,10 +487,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
       </main>
 
       {/* Bottom nav — mobile, píldora flotante en zona del pulgar */}
-      {user && nav.length > 0 && (
+      {(user || isDemo) && nav.length > 0 && (
         <nav
           aria-label={
-            isAdmin ? 'Navegación de administración' : 'Navegación del negocio'
+            isAdmin || isDemo
+              ? 'Navegación de administración'
+              : 'Navegación del negocio'
           }
           className='fixed inset-x-0 bottom-0 z-40 px-4 sm:px-6 pb-[max(env(safe-area-inset-bottom),0.75rem)] md:hidden'
         >
@@ -528,8 +574,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
       )}
 
       <div className='fixed inset-x-0 bottom-[calc(max(var(--bottom-nav-height),env(safe-area-inset-bottom))+1rem)] z-50 flex flex-col gap-2 px-4 sm:inset-x-auto sm:right-4 sm:w-[min(100%-2rem,28rem)] sm:px-0'>
-        <PwaInstallPrompt />
-        <PwaNotificationPrompt state={pushNotificationState} />
+        {/* En la demo pública no ofrecemos instalar la PWA ni activar
+            notificaciones: distraen del recorrido y no aplican a un
+            visitante anónimo explorando el panel. */}
+        {!isDemo && <PwaInstallPrompt />}
+        {!isDemo && <PwaNotificationPrompt state={pushNotificationState} />}
         <PwaUpdatePrompt />
       </div>
 

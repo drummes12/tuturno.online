@@ -1,9 +1,19 @@
 import { supabase } from '@/lib/supabase'
+import { isDemoBusinessId, isDemoEntityId } from '@/lib/demo'
+import {
+  demoFetchActiveResources,
+  demoFetchAllResources,
+  demoFetchResourceName,
+  demoCreateResource,
+  demoUpdateResource,
+  demoToggleResourceActive
+} from '@/lib/demo-store'
 import type { Resource } from '@/types'
 
 export async function fetchActiveResources(
   businessId: string
 ): Promise<Resource[]> {
+  if (isDemoBusinessId(businessId)) return demoFetchActiveResources()
   const { data, error } = await supabase
     .from('resources')
     .select('*')
@@ -17,6 +27,7 @@ export async function fetchActiveResources(
 export async function fetchAllResources(
   businessId: string
 ): Promise<Resource[]> {
+  if (isDemoBusinessId(businessId)) return demoFetchAllResources()
   const { data, error } = await supabase
     .from('resources')
     .select('*')
@@ -29,6 +40,7 @@ export async function fetchAllResources(
 export async function fetchResourceName(
   resourceId: string
 ): Promise<string | null> {
+  if (isDemoEntityId(resourceId)) return demoFetchResourceName(resourceId)
   const { data } = await supabase
     .from('resources')
     .select('name')
@@ -43,6 +55,8 @@ export async function createResource(
   description: string | null,
   sortOrder: number
 ): Promise<void> {
+  if (isDemoBusinessId(businessId))
+    return demoCreateResource(name, description)
   const { error } = await supabase.from('resources').insert({
     business_id: businessId,
     name: name.trim(),
@@ -57,6 +71,7 @@ export async function updateResource(
   name: string,
   description: string | null
 ): Promise<void> {
+  if (isDemoEntityId(id)) return demoUpdateResource(id, name, description)
   const { error } = await supabase
     .from('resources')
     .update({ name: name.trim(), description: description?.trim() || null })
@@ -68,6 +83,7 @@ export async function toggleResourceActive(
   id: string,
   isActive: boolean
 ): Promise<void> {
+  if (isDemoEntityId(id)) return demoToggleResourceActive(id)
   const { error } = await supabase
     .from('resources')
     .update({ is_active: !isActive })

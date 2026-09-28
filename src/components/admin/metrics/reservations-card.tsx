@@ -134,7 +134,7 @@ export function ReservationsCard({
   }, [trend, hasPrev])
 
   return (
-    <Card className='relative overflow-hidden'>
+    <Card className='relative h-full overflow-hidden'>
       {/* Glow de marca sobre la curva, como el radial del mockup */}
       <div
         className='pointer-events-none absolute -top-16 right-0 h-44 w-44 rounded-full opacity-60 dark:opacity-40'
@@ -201,8 +201,10 @@ export function ReservationsCard({
           className='mt-1 hidden h-28 w-full sm:block'
         />
 
-        <div className='flex items-center justify-between gap-2 px-5 pb-4'>
-          <span className='text-[11px] text-text-muted nums'>{rangeLabel}</span>
+        <div className='flex items-center justify-end gap-2 px-5 pb-4'>
+          <span className='sr-only text-[11px] text-text-muted nums'>
+            {rangeLabel}
+          </span>
           {hasPrev ? (
             <span className='flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-text-muted'>
               <svg width='16' height='4' aria-hidden className='shrink-0'>
