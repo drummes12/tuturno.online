@@ -46,7 +46,17 @@ function tenantVarsStyle(theme: TenantTheme): CSSProperties {
     '--tenant-on-primary-dark': theme.onPrimaryContrast.passesAA
       ? theme.onPrimary
       : '#ffffff',
-    '--tenant-primary-contrast-dark': theme.onSurface.dark
+    '--tenant-primary-contrast-dark': theme.onSurface.dark,
+    /* Las vars indireccionadas (--color-primary: var(--tenant-primary)) se
+       resuelven donde se declaran (:root, con el fallback); dentro de una
+       vista acotada hay que reemitirlas con el valor ya calculado. */
+    '--color-primary': theme.fill.light,
+    '--color-on-primary': theme.onPrimary,
+    '--color-tenant': theme.onSurface.light,
+    '--tenant-primary-soft': theme.primarySoft,
+    '--tenant-primary-hover': theme.hover,
+    '--tenant-primary-active': theme.active,
+    '--shadow-tenant': `0 4px 14px color-mix(in srgb, ${theme.fill.light} 20%, transparent)`
   } as CSSProperties
 }
 
