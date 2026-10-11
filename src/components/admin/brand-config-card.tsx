@@ -79,16 +79,18 @@ export function BrandConfigCard({
   const override = useTenantStore((s) => s.override)
   const setOverride = useTenantStore((s) => s.setOverride)
 
-  // El HEX puede estar a medio escribir: solo se procesa si es válido.
+  // La vista previa sigue lo que realmente se vería en /b/:slug: el
+  // override local (preset o edición) gana sobre el HEX del draft;
+  // si no hay nada, se muestra el fallback verde TuTurno.
   const theme = useMemo(() => {
-    const hex = color?.trim() ?? ''
+    const hex = (override?.brandColor ?? color ?? '#0F7A4A').trim()
     if (!hexToRgb(hex)) return null
     try {
       return processTenantTheme(hex)
     } catch {
       return null
     }
-  }, [color])
+  }, [override?.brandColor, color])
 
   // Previsualización en vivo: cada edición se refleja al instante en
   // la página pública vía override local (localStorage). No escribe al
@@ -160,7 +162,7 @@ export function BrandConfigCard({
         {/* Presets de demostración — solo override local, no se guardan */}
         <div>
           <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)'>
-            Probar una marca ficticia
+            Marcas de ejemplo
           </p>
           <div className='flex flex-wrap gap-2'>
             {TENANT_BRAND_PRESETS.map((preset) => {
@@ -199,9 +201,9 @@ export function BrandConfigCard({
             })}
           </div>
           <p className='mt-2 text-[11px] leading-relaxed text-(--color-text-muted)'>
-            Los cambios del formulario y los presets se previsualizan al
-            instante en este navegador (localStorage) sin guardar nada —
-            ábrelo en{' '}
+            Los cambios del formulario y las marcas de ejemplo se
+            previsualizan al instante en este navegador (localStorage)
+            sin guardar nada — ábrelo en{' '}
             <a
               href={`/b/${slug}`}
               className='font-medium text-tenant underline underline-offset-2'

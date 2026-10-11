@@ -25,7 +25,7 @@ export interface TenantBrandingOverride {
   logoUrl: string | null
 }
 
-/** Marcas ficticias para probar el co-branding sin backend. */
+/** Marcas de ejemplo para probar el co-branding sin backend. */
 export const TENANT_BRAND_PRESETS = [
   {
     id: 'tuturno',
@@ -34,10 +34,10 @@ export const TENANT_BRAND_PRESETS = [
     logoUrl: '/logo-mark.svg'
   },
   {
-    id: 'pulse-arena',
-    name: 'Pulse Arena',
-    brandColor: '#FF5722',
-    logoUrl: '/brand-presets/pulse-arena.svg'
+    id: 'ungim',
+    name: 'UnGim',
+    brandColor: '#FF9078',
+    logoUrl: '/brand-presets/ungim.svg'
   }
 ] as const
 

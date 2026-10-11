@@ -735,7 +735,7 @@ function DemoReservePreview({
 
         {/* Demo banner */}
         <div
-          className='flex items-start gap-3 p-4 rounded-xl border border-tenant/40 bg-(--tenant-primary-soft) text-(--color-text) animate-fade-up'
+          className='flex items-start gap-3 p-4 rounded-xl border border-(--color-warning)/40 bg-(--color-warning)/10 text-(--color-text) animate-fade-up'
           role='status'
         >
           <InfoIcon
