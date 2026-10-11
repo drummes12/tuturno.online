@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'wouter'
+import { Link, useLocation } from 'wouter'
 import { differenceInMinutes } from 'date-fns'
 import type { ReactNode } from 'react'
 import type { Reservation } from '@/types'
@@ -18,6 +18,8 @@ import {
 } from '@/components/common/icon'
 import { formatLocal } from '@/lib/time'
 import { RESERVATION_BEAM_CLASS } from '@/lib/reservation-status'
+import { extractSlugFromPath } from '@/lib/slug'
+import { useTenantStore } from '@/stores/tenant'
 
 type ReservationDetailsSheetProps = {
   reservation: Reservation
@@ -171,6 +173,22 @@ export function ReservationDetailsSheet({
   const duration = formatDuration(reservation)
   const businessName = reservation.business?.name ?? 'Negocio'
   const businessSlug = reservation.business?.slug
+  const [location] = useLocation()
+  const routeSlug = extractSlugFromPath(location)
+  const override = useTenantStore((s) => s.override)
+  // En rutas /b/:slug el tema ya lo mandan las vars de :root (incluye el
+  // override local de preview): la tarjeta solo lleva marca propia
+  // fuera de ellas (lista global, panel admin). El logo siempre es el
+  // efectivo: override o el del negocio.
+  const ticketBusiness = reservation.business
+    ? {
+        name: reservation.business.name,
+        logoUrl:
+          (routeSlug ? override?.logoUrl : null) ??
+          reservation.business.logo_url,
+        ...(routeSlug ? {} : { brandColor: reservation.business.brand_color })
+      }
+    : undefined
   const contactHref = isBusinessViewer
     ? whatsappHref
     : (reservation.business?.whatsapp_link ?? whatsappHref)
@@ -258,6 +276,7 @@ export function ReservationDetailsSheet({
           resourceIcon={<StoreIcon size={16} />}
           resourceLabel={resourceLabel}
           meta={`(${duration})`}
+          business={ticketBusiness}
           note={
             <dl className='flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-[10.5px] uppercase tracking-[0.12em] text-graphite-500 sm:h-11 sm:items-center dark:text-chalk-dim/50'>
               <div className='flex items-baseline gap-1.5'>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link, useSearch } from 'wouter'
 import { useAuthStore } from '@/stores/auth'
+import { useTenantStore } from '@/stores/tenant'
 import {
   fetchUserReservations,
   fetchReservationById
@@ -52,6 +53,7 @@ type MyReservationsPageProps = {
 export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   const { user, profile } = useAuthStore()
   const { business } = useTenant(slug)
+  const override = useTenantStore((s) => s.override)
   const tenantBusinessId = business?.id ?? null
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
@@ -349,7 +351,19 @@ export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
                     : undefined
                 }
                 meta={`(${differenceInMinutes(parseISO(next.ends_at), parseISO(next.starts_at))} MIN)`}
-                note={!slug && next.business ? next.business.name : undefined}
+                business={
+                  next.business
+                    ? {
+                        name: next.business.name,
+                        logoUrl:
+                          (slug ? override?.logoUrl : null) ??
+                          next.business.logo_url,
+                        // Marca propia solo en la lista global; en /b/:slug
+                        // la página ya lleva el tema del tenant.
+                        ...(slug ? {} : { brandColor: next.business.brand_color })
+                      }
+                    : undefined
+                }
                 beam={RESERVATION_BEAM_CLASS[next.status]}
                 onOpen={() => setSelectedReservation(next)}
                 className='animate-fade-up'

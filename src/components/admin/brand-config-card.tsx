@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import type { CSSProperties } from 'react'
 import { Card } from '@/components/common/card'
 import { Input } from '@/components/common/input'
 import {
@@ -11,7 +10,7 @@ import {
 import {
   processTenantTheme,
   hexToRgb,
-  type TenantTheme
+  tenantVarsStyle
 } from '@/lib/tenant-theme'
 import { TENANT_BRAND_PRESETS, useTenantStore } from '@/stores/tenant'
 
@@ -34,30 +33,6 @@ interface BrandConfigCardProps {
   }) => void
   disabled?: boolean
   className?: string
-}
-
-/** Vars --tenant-* como estilos inline para acotar el tema a un contenedor. */
-function tenantVarsStyle(theme: TenantTheme): CSSProperties {
-  return {
-    '--tenant-primary': theme.fill.light,
-    '--tenant-on-primary': theme.onPrimary,
-    '--tenant-primary-contrast': theme.onSurface.light,
-    '--tenant-primary-dark': theme.fill.dark,
-    '--tenant-on-primary-dark': theme.onPrimaryContrast.passesAA
-      ? theme.onPrimary
-      : '#ffffff',
-    '--tenant-primary-contrast-dark': theme.onSurface.dark,
-    /* Las vars indireccionadas (--color-primary: var(--tenant-primary)) se
-       resuelven donde se declaran (:root, con el fallback); dentro de una
-       vista acotada hay que reemitirlas con el valor ya calculado. */
-    '--color-primary': theme.fill.light,
-    '--color-on-primary': theme.onPrimary,
-    '--color-tenant': theme.onSurface.light,
-    '--tenant-primary-soft': theme.primarySoft,
-    '--tenant-primary-hover': theme.hover,
-    '--tenant-primary-active': theme.active,
-    '--shadow-tenant': `0 4px 14px color-mix(in srgb, ${theme.fill.light} 20%, transparent)`
-  } as CSSProperties
 }
 
 function ContrastRow({ label, ratio, passes }: { label: string; ratio: number; passes: boolean }) {

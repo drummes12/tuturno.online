@@ -9,6 +9,7 @@
  *   applyTenantTheme(theme)   // inyecta las vars --tenant-* en :root
  *   resetTenantTheme()        // vuelve al fallback verde TuTurno
  */
+import type { CSSProperties } from 'react'
 
 /** Superficies de referencia — deben coincidir con index.css. */
 export const LIGHT_SURFACE = '#f8f9fa'
@@ -218,4 +219,31 @@ export function applyTenantTheme(theme: TenantTheme): void {
 export function resetTenantTheme(): void {
   const style = document.documentElement.style
   for (const name of TENANT_VARS) style.removeProperty(name)
+}
+
+/**
+ * Vars --tenant-* como estilos inline para acotar el tema a un
+ * contenedor (muestras, tarjetas por negocio). Las vars
+ * indireccionadas (--color-primary: var(--tenant-primary)) se
+ * resuelven donde se declaran — :root con el fallback — así que hay
+ * que reemitirlas ya calculadas o el contenedor no las hereda.
+ */
+export function tenantVarsStyle(theme: TenantTheme): CSSProperties {
+  return {
+    '--tenant-primary': theme.fill.light,
+    '--tenant-on-primary': theme.onPrimary,
+    '--tenant-primary-contrast': theme.onSurface.light,
+    '--tenant-primary-dark': theme.fill.dark,
+    '--tenant-on-primary-dark': theme.onPrimaryContrast.passesAA
+      ? theme.onPrimary
+      : '#ffffff',
+    '--tenant-primary-contrast-dark': theme.onSurface.dark,
+    '--color-primary': theme.fill.light,
+    '--color-on-primary': theme.onPrimary,
+    '--color-tenant': theme.onSurface.light,
+    '--tenant-primary-soft': theme.primarySoft,
+    '--tenant-primary-hover': theme.hover,
+    '--tenant-primary-active': theme.active,
+    '--shadow-tenant': `0 4px 14px color-mix(in srgb, ${theme.fill.light} 20%, transparent)`
+  } as CSSProperties
 }

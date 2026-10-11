@@ -100,7 +100,7 @@ export async function fetchUserReservations(
   const baseQuery = supabase
     .from('reservations')
     .select(
-      '*, resource:resources(*), business:businesses(id,name,slug,phone,whatsapp_link,resource_label_singular,cancellation_limit_hours), client:clients(*)'
+      '*, resource:resources(*), business:businesses(id,name,slug,phone,whatsapp_link,resource_label_singular,cancellation_limit_hours,brand_color,logo_url), client:clients(*)'
     )
     .or(orFilter)
   const scopedQuery = businessId

@@ -144,7 +144,7 @@ function seed(): DemoState {
     resource_label_plural: 'Canchas',
     reservation_instructions_md:
       'Para confirmar tu reserva envía el comprobante del abono por WhatsApp. Sin abono, la solicitud puede ser rechazada.',
-    brand_color: null,
+    brand_color: '#FF5722',
     logo_url: null,
     is_demo: true,
     created_at: created,
@@ -349,6 +349,17 @@ function seed(): DemoState {
       updated_at: decided ? decidedAt.toISOString() : createdAt.toISOString(),
       resource: opts.resource,
       client,
+      business: {
+        id: business.id,
+        name: business.name,
+        slug: business.slug,
+        phone: business.phone,
+        whatsapp_link: business.whatsapp_link,
+        resource_label_singular: business.resource_label_singular,
+        cancellation_limit_hours: business.cancellation_limit_hours,
+        brand_color: business.brand_color,
+        logo_url: business.logo_url
+      },
       _origin: opts.origin
     }
   }
