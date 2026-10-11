@@ -271,7 +271,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             El contenido siempre vive en la columna max-w-5xl, así al
             zoom-out los controles no se van a los bordes de pantalla. */}
         <div
-          className={`relative mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-(--header-pill-bg) shadow-(--shadow-lg) backdrop-blur-md dark:border-white/10 ${location === '/' && !user ? 'morph-header-inner' : ''} ${tenant.slug ? 'mb-4' : ''}`}
+          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-(--header-pill-bg) shadow-(--shadow-lg) backdrop-blur-md dark:border-white/10 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
             {/* Protagonismo del negocio + firma discreta: en páginas
@@ -317,38 +317,6 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </Link>
               )}
             </div>
-            {/* Firma discreta: pestaña que extiende literalmente la
-                cápsula — mismo fondo translúcido, blur y borde; la
-                máscara radial recorta las esquinas superiores en
-                cóncavo para que el borde inferior de la píldora curve
-                alrededor de la unión. Solo en páginas tenant. */}
-            {tenant.slug && (
-              <a
-                href='/'
-                className='absolute left-1/2 top-full z-10 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-b-xl border border-t-0 border-white/12 px-2.5 pb-1.5 pt-1 text-[9px] font-medium tracking-wide text-white/50 transition-colors hover:text-white/75 dark:border-white/10'
-                style={{
-                  background: 'var(--header-pill-bg)',
-                  backdropFilter: 'blur(12px)',
-                  WebkitBackdropFilter: 'blur(12px)',
-                  WebkitMaskImage:
-                    'radial-gradient(circle 9px at 9px 0, transparent 9px, black 9.5px), radial-gradient(circle 9px at calc(100% - 9px) 0, transparent 9px, black 9.5px)',
-                  maskImage:
-                    'radial-gradient(circle 9px at 9px 0, transparent 9px, black 9.5px), radial-gradient(circle 9px at calc(100% - 9px) 0, transparent 9px, black 9.5px)',
-                  WebkitMaskComposite: 'source-in',
-                  maskComposite: 'intersect',
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskRepeat: 'no-repeat'
-                }}
-              >
-                Powered by
-                <img
-                  src='/logo-mark.svg'
-                  alt=''
-                  className='h-2.5 w-2.5 rounded'
-                />
-                TuTurno
-              </a>
-            )}
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
               {(user || isDemo) && showTutorialButton && (
                 <button
@@ -479,6 +447,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
               )}
             </div>
           </div>
+          {/* Firma discreta: la píldora crece una fila en páginas
+              tenant y el "Powered by TuTurno" vive dentro, centrado
+              — misma cápsula, sin extensiones ni fondos extra. */}
+          {tenant.slug && (
+            <a
+              href='/'
+              className='flex items-center justify-center gap-1 whitespace-nowrap border-t border-white/10 px-4 pb-1.5 pt-1 text-[9px] font-medium tracking-wide text-white/50 transition-colors hover:text-white/75'
+            >
+              Powered by
+              <img
+                src='/logo-mark.svg'
+                alt=''
+                className='h-2.5 w-2.5 rounded'
+              />
+              TuTurno
+            </a>
+          )}
         </div>
       </header>
 

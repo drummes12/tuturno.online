@@ -171,9 +171,6 @@
      TuTurno): en /b/:slug toma la marca del negocio. El texto del
      header sigue siendo blanco. */
   --header-pill-bg: color-mix(in srgb, var(--tenant-primary) 95%, transparent);
-  /* Variante sólida: la pestaña "Powered by" la usa para leerse como
-     continuación opaca de la cápsula, sin transparencia. */
-  --header-pill-bg-solid: var(--tenant-primary);
   --header-pill-border: rgb(255 255 255 / 0.22);
   /* Debe coincidir con el max-w-5xl del contenido: la animación
      sobrescribe la clase (así funciona scroll-driven), el valor no. */
