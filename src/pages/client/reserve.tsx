@@ -16,6 +16,7 @@ import {
 import { useTenant } from '@/hooks/use-tenant'
 import { useIsOffline } from '@/hooks/use-connectivity'
 import { useAuthStore } from '@/stores/auth'
+import { useTenantStore } from '@/stores/tenant'
 import { Button } from '@/components/common/button'
 import { Input } from '@/components/common/input'
 import { Card } from '@/components/common/card'
@@ -55,6 +56,17 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   const offline = useIsOffline()
   const businessId = business?.id ?? null
   const isDemo = business?.is_demo ?? false
+  const override = useTenantStore((s) =>
+    slug ? (s.overrides[slug] ?? null) : null
+  )
+  // La página ya lleva el tema del tenant: la papeleta solo necesita
+  // nombre + logo efectivo (override local si hay preview de marca).
+  const ticketBusiness = business
+    ? {
+        name: business.name,
+        logoUrl: override?.logoUrl ?? business.logo_url
+      }
+    : undefined
 
   const params = new URLSearchParams(window.location.search)
   const resourceId = params.get('resource')
@@ -185,6 +197,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         resourceName={resourceName}
         loadingResource={loadingResource}
         businessName={business?.name ?? 'Demo'}
+        ticketBusiness={ticketBusiness}
         slotDurationMinutes={business?.slot_duration_minutes ?? 60}
       />
     )
@@ -398,6 +411,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
           resourceIcon={<StoreIcon size={16} />}
           resourceLabel={business?.resource_label_singular}
           meta={`(${business?.slot_duration_minutes ?? 60} MIN)`}
+          business={ticketBusiness}
           note={
             isAdmin
               ? 'La reserva fue creada y confirmada directamente.'
@@ -484,6 +498,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
           resourceIcon={<StoreIcon size={16} />}
           resourceLabel={business?.resource_label_singular}
           meta={`(${business?.slot_duration_minutes ?? 60} MIN)`}
+          business={ticketBusiness}
         />
       </div>
 
@@ -658,6 +673,7 @@ function DemoReservePreview({
   resourceName,
   loadingResource,
   businessName,
+  ticketBusiness,
   slotDurationMinutes
 }: {
   slug?: string
@@ -667,6 +683,7 @@ function DemoReservePreview({
   resourceName: string | null
   loadingResource: boolean
   businessName: string
+  ticketBusiness?: { name: string; logoUrl?: string | null }
   slotDurationMinutes: number
 }) {
   const timeLabel = (() => {
@@ -764,6 +781,7 @@ function DemoReservePreview({
           resourceName={resourceName}
           resourceIcon={<StoreIcon size={16} />}
           meta={`(${slotDurationMinutes} MIN)`}
+          business={ticketBusiness}
         />
       </div>
 

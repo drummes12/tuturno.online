@@ -396,6 +396,7 @@ export function AdminConfigPage() {
               color={business.brand_color}
               logoUrl={business.logo_url}
               slug={business.slug}
+              isDemo={business.is_demo}
               onChange={(patch) => setBusiness({ ...business, ...patch })}
             />
             {/* Turnos */}

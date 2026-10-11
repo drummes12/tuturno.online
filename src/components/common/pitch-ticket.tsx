@@ -1,4 +1,9 @@
+import { useMemo } from 'react'
 import type { ReactNode } from 'react'
+import {
+  processTenantTheme,
+  tenantVarsStyle
+} from '@/lib/tenant-theme'
 
 /**
  * Papeleta del turno — la pieza de marca: kicker, hora protagonista,
@@ -11,6 +16,10 @@ import type { ReactNode } from 'react'
  * Reservar para "un turno concreto": éxito al reservar, la próxima
  * reserva, el resumen antes de confirmar. No usar como fondo genérico.
  *
+ * - `business`: co-branding de la reserva — logo + nombre arriba con
+ *   el badge justificado a la derecha en la misma fila, firma Powered
+ *   by TuTurno al pie y tema propio si trae brandColor (cada tarjeta
+ *   puede pintarse con el color de SU negocio en la lista global).
  * - `beam`: clases beam-* para el borde animado (p.ej.
  *   RESERVATION_BEAM_CLASS[status] o 'beam-pitch-500 dark:beam-pitch-400')
  * - `onOpen`: la convierte en botón clickeable (abre el detalle)
@@ -25,6 +34,7 @@ export function PitchTicket({
   resourceLabel,
   meta,
   note,
+  business,
   beam,
   onOpen,
   className = '',
@@ -41,6 +51,13 @@ export function PitchTicket({
   resourceLabel?: ReactNode
   meta?: ReactNode
   note?: ReactNode
+  business?: {
+    name: string
+    /** null/ausente → isotipo TuTurno, igual que el header tenant. */
+    logoUrl?: string | null
+    /** HEX del negocio — tema acotado a esta tarjeta. */
+    brandColor?: string | null
+  }
   beam?: string
   onOpen?: () => void
   className?: string
@@ -51,6 +68,15 @@ export function PitchTicket({
   /** Clases extra de la hora protagonista. */
   timeClassName?: string
 }) {
+  const brandStyle = useMemo(() => {
+    if (!business?.brandColor) return undefined
+    try {
+      return tenantVarsStyle(processTenantTheme(business.brandColor))
+    } catch {
+      return undefined
+    }
+  }, [business?.brandColor])
+
   const body = (
     <>
       {/* Decoración: halo mint suave + anillo de reloj tenue */}
@@ -64,11 +90,30 @@ bg-black/10 dark:bg-white/10'
         />
       </div>
 
-      <div className='relative flex items-center justify-between gap-3'>
+      {/* Marca del negocio — logo + nombre protagonistas, badge del
+          estado justificado a la derecha en la misma fila. El nombre
+          cede (truncate) para que el badge nunca salte de línea. */}
+      {business && (
+        <div className='relative flex items-center gap-2.5'>
+          <img
+            src={business.logoUrl ?? '/logo-mark.svg'}
+            alt={business.logoUrl ? `Logo de ${business.name}` : 'TuTurno'}
+            className='size-8 shrink-0 rounded-lg bg-white/95 object-contain'
+          />
+          <span className='min-w-0 flex-1 truncate text-[15px] font-semibold tracking-tight'>
+            {business.name}
+          </span>
+          {badge}
+        </div>
+      )}
+
+      <div
+        className={`relative flex items-center justify-between gap-3 ${business ? 'mt-3' : ''}`}
+      >
         <span className='text-[10px] font-semibold uppercase tracking-[0.14em] text-tenant'>
           {kicker}
         </span>
-        {badge}
+        {!business && badge}
       </div>
 
       {/* Scoreboard — misma anatomía que el panel del sheet de detalle:
@@ -115,6 +160,16 @@ bg-black/10 dark:bg-white/10'
           {note}
         </div>
       )}
+
+      {/* Firma discreta: mismo gesto que la segunda fila de la píldora
+          del header tenant. */}
+      {business && (
+        <div className='relative mt-3 flex items-center justify-center gap-1 border-t border-pitch-900/10 pt-2.5 text-[9px] font-medium tracking-[0.06em] text-graphite-400 dark:border-chalk/10 dark:text-chalk-dim/50'>
+          Powered by
+          <img src='/logo-mark.svg' alt='' className='size-2.5 rounded' />
+          TuTurno
+        </div>
+      )}
     </>
   )
 
@@ -128,12 +183,15 @@ bg-black/10 dark:bg-white/10'
         <button
           type='button'
           onClick={onOpen}
+          style={brandStyle}
           className={`${panelClass} group w-full cursor-pointer text-left transition-transform duration-200 ease-spring hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tenant focus-visible:ring-offset-2`}
         >
           {body}
         </button>
       ) : (
-        <div className={panelClass}>{body}</div>
+        <div className={panelClass} style={brandStyle}>
+          {body}
+        </div>
       )}
     </div>
   )

@@ -171,6 +171,8 @@ export interface Reservation {
     | 'whatsapp_link'
     | 'resource_label_singular'
     | 'cancellation_limit_hours'
+    | 'brand_color'
+    | 'logo_url'
   >
   profile?: Profile | null
   client?: Client | null

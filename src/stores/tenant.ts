@@ -45,22 +45,32 @@ export type TenantBrandPreset = (typeof TENANT_BRAND_PRESETS)[number]
 
 interface TenantState {
   business: TenantBusinessInfo | null
-  override: TenantBrandingOverride | null
+  /** Previews locales por slug de negocio — un negocio nunca ve el
+   *  override de otro. */
+  overrides: Record<string, TenantBrandingOverride>
   setBusiness: (business: TenantBusinessInfo | null) => void
-  setOverride: (override: TenantBrandingOverride | null) => void
+  setOverride: (slug: string, override: TenantBrandingOverride | null) => void
 }
 
 export const useTenantStore = create<TenantState>()(
   persist(
     (set) => ({
       business: null,
-      override: null,
+      overrides: {},
       setBusiness: (business) => set({ business }),
-      setOverride: (override) => set({ override })
+      setOverride: (slug, override) =>
+        set((state) => {
+          const overrides = { ...state.overrides }
+          if (override) overrides[slug] = override
+          else delete overrides[slug]
+          return { overrides }
+        })
     }),
     {
       name: 'tuturno:tenant-override',
-      partialize: (state) => ({ override: state.override })
+      version: 2,
+      migrate: () => ({ overrides: {} }),
+      partialize: (state) => ({ overrides: state.overrides })
     }
   )
 )

@@ -43,7 +43,9 @@ export function useTenantBranding(): TenantBranding {
   const [location] = useLocation()
   const slug = extractSlugFromPath(location)
   const business = useTenantStore((s) => s.business)
-  const override = useTenantStore((s) => s.override)
+  const override = useTenantStore((s) =>
+    s.business ? (s.overrides[s.business.slug] ?? null) : null
+  )
   const setBusiness = useTenantStore((s) => s.setBusiness)
 
   // Sin slug en la ruta no hay contexto tenant: limpiar el negocio

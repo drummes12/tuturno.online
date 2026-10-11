@@ -265,7 +265,7 @@ describe('fetchUserReservations', () => {
     expect(clientsChain.eq).toHaveBeenCalledWith('user_id', userId)
     expect(mockFrom).toHaveBeenNthCalledWith(2, 'reservations')
     expect(reservationsChain.select).toHaveBeenCalledWith(
-      '*, resource:resources(*), business:businesses(id,name,slug,phone,whatsapp_link,resource_label_singular,cancellation_limit_hours), client:clients(*)'
+      '*, resource:resources(*), business:businesses(id,name,slug,phone,whatsapp_link,resource_label_singular,cancellation_limit_hours,brand_color,logo_url), client:clients(*)'
     )
     expect(reservationsChain.or).toHaveBeenCalledWith(
       `user_id.eq.${userId},client_id.in.(client-1,client-2)`
