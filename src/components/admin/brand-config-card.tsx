@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Card } from '@/components/common/card'
 import { Input } from '@/components/common/input'
 import {
@@ -25,8 +25,11 @@ interface BrandConfigCardProps {
   /** HEX guardado en el draft del negocio (null = fallback verde). */
   color: string | null
   logoUrl: string | null
-  /** Slug público para enlazar la vista de cliente. */
+  /** Slug público para enlazar la vista de cliente y aislar la
+   *  previsualización local por negocio. */
   slug: string
+  /** Negocio de demostración: muestra las marcas de ejemplo. */
+  isDemo?: boolean
   onChange: (patch: {
     brand_color: string | null
     logo_url: string | null
@@ -57,12 +60,19 @@ export function BrandConfigCard({
   color,
   logoUrl,
   slug,
+  isDemo = false,
   onChange,
   disabled = false,
   className = ''
 }: BrandConfigCardProps) {
-  const override = useTenantStore((s) => s.override)
+  const override = useTenantStore((s) => s.overrides[slug] ?? null)
   const setOverride = useTenantStore((s) => s.setOverride)
+  // Negocios reales: branding personalizado opt-in — apagado, la página
+  // pública usa la marca TuTurno. En demo los controles van siempre.
+  const [customBrand, setCustomBrand] = useState(() =>
+    Boolean(color ?? logoUrl)
+  )
+  const showFields = isDemo || customBrand
 
   // La vista previa sigue lo que realmente se vería en /b/:slug: el
   // override local (preset o edición) gana sobre el HEX del draft;
@@ -89,9 +99,17 @@ export function BrandConfigCard({
     const hex = patch.brand_color?.trim() ?? null
     const validColor = hex && hexToRgb(hex) ? hex : null
     if (!validColor && !patch.logo_url) {
-      setOverride(null)
+      setOverride(slug, null)
     } else {
-      setOverride({ brandColor: validColor, logoUrl: patch.logo_url })
+      setOverride(slug, { brandColor: validColor, logoUrl: patch.logo_url })
+    }
+  }
+
+  const handleCustomBrand = (enabled: boolean) => {
+    setCustomBrand(enabled)
+    if (!enabled) {
+      onChange({ brand_color: null, logo_url: null })
+      setOverride(slug, null)
     }
   }
 
@@ -111,7 +129,43 @@ export function BrandConfigCard({
       </p>
 
       <div className='flex flex-col gap-4'>
+        {/* Negocios reales: activar marca propia (por defecto TuTurno) */}
+        {!isDemo && (
+          <button
+            type='button'
+            role='switch'
+            aria-checked={customBrand}
+            disabled={disabled}
+            onClick={() => handleCustomBrand(!customBrand)}
+            className='flex w-full items-center justify-between gap-3 rounded-lg border border-border bg-surface-inset px-4 py-3 text-left touch-target disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            <span>
+              <span className='block text-sm font-medium text-(--color-text)'>
+                Branding personalizado
+              </span>
+              <span className='block text-xs text-(--color-text-muted)'>
+                {customBrand
+                  ? 'Tu página usa tu color y tu logo.'
+                  : 'Tu página usa la marca TuTurno.'}
+              </span>
+            </span>
+            <span
+              aria-hidden='true'
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                customBrand ? 'bg-(--color-primary)' : 'bg-graphite-200 dark:bg-graphite-700'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                  customBrand ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </span>
+          </button>
+        )}
+
         {/* Color de marca — label compartido + picker e input en la misma fila */}
+        {showFields && (
         <div className='flex flex-col gap-1.5'>
           <label
             htmlFor='brand-color-hex'
@@ -159,7 +213,10 @@ export function BrandConfigCard({
           )}
         </div>
 
-        {/* Presets de demostración — solo override local, no se guardan */}
+        )}
+
+        {/* Presets de demostración — solo demo, solo override local */}
+        {isDemo && (
         <div>
           <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)'>
             Marcas de ejemplo
@@ -174,6 +231,7 @@ export function BrandConfigCard({
                   disabled={disabled}
                   onClick={() =>
                     setOverride(
+                      slug,
                       active
                         ? null
                         : {
@@ -213,8 +271,10 @@ export function BrandConfigCard({
             . Si hay una marca de prueba activa, tap de nuevo para quitarla.
           </p>
         </div>
+        )}
 
         {/* Logo */}
+        {showFields && (
         <Input
           label='Logo del negocio (URL)'
           value={logoUrl ?? ''}
@@ -228,7 +288,8 @@ export function BrandConfigCard({
           name='brand-logo'
           hint='Aparece junto al nombre TuTurno en el encabezado público.'
         />
-        {logoUrl && (
+        )}
+        {showFields && logoUrl && (
           <div className='flex items-center gap-3 rounded-lg border border-border bg-surface-inset p-3'>
             <img
               src={logoUrl}
@@ -248,7 +309,7 @@ export function BrandConfigCard({
         )}
 
         {/* Validación de contraste en vivo */}
-        {theme && (
+        {showFields && theme && (
           <div className='rounded-lg border border-border bg-surface-inset p-3'>
             <p className='mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-(--color-text-muted)'>
               Accesibilidad (WCAG AA)
@@ -278,7 +339,7 @@ export function BrandConfigCard({
         )}
 
         {/* Muestra acotada — las vars --tenant-* solo viven en este div */}
-        {theme && (
+        {showFields && theme && (
           <div
             style={tenantVarsStyle(theme)}
             className='rounded-xl border border-border bg-surface p-4'

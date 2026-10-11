@@ -53,7 +53,9 @@ type MyReservationsPageProps = {
 export function MyReservationsPage({ slug }: MyReservationsPageProps = {}) {
   const { user, profile } = useAuthStore()
   const { business } = useTenant(slug)
-  const override = useTenantStore((s) => s.override)
+  const override = useTenantStore((s) =>
+    slug ? (s.overrides[slug] ?? null) : null
+  )
   const tenantBusinessId = business?.id ?? null
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)

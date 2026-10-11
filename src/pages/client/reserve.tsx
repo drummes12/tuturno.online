@@ -56,7 +56,9 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
   const offline = useIsOffline()
   const businessId = business?.id ?? null
   const isDemo = business?.is_demo ?? false
-  const override = useTenantStore((s) => s.override)
+  const override = useTenantStore((s) =>
+    slug ? (s.overrides[slug] ?? null) : null
+  )
   // La página ya lleva el tema del tenant: la papeleta solo necesita
   // nombre + logo efectivo (override local si hay preview de marca).
   const ticketBusiness = business

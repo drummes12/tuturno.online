@@ -175,7 +175,9 @@ export function ReservationDetailsSheet({
   const businessSlug = reservation.business?.slug
   const [location] = useLocation()
   const routeSlug = extractSlugFromPath(location)
-  const override = useTenantStore((s) => s.override)
+  const override = useTenantStore((s) =>
+    routeSlug ? (s.overrides[routeSlug] ?? null) : null
+  )
   // En rutas /b/:slug el tema ya lo mandan las vars de :root (incluye el
   // override local de preview): la tarjeta solo lleva marca propia
   // fuera de ellas (lista global, panel admin). El logo siempre es el
