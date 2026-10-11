@@ -90,6 +90,24 @@ export function BrandConfigCard({
     }
   }, [color])
 
+  // Previsualización en vivo: cada edición se refleja al instante en
+  // la página pública vía override local (localStorage). No escribe al
+  // backend — al guardar, el override coincide con lo persistido. Solo
+  // se sincroniza al editar, así no pisa un preset al montar la tarjeta.
+  const handleChange = (patch: {
+    brand_color: string | null
+    logo_url: string | null
+  }) => {
+    onChange(patch)
+    const hex = patch.brand_color?.trim() ?? null
+    const validColor = hex && hexToRgb(hex) ? hex : null
+    if (!validColor && !patch.logo_url) {
+      setOverride(null)
+    } else {
+      setOverride({ brandColor: validColor, logoUrl: patch.logo_url })
+    }
+  }
+
   return (
     <Card className={`p-5 animate-fade-up ${className}`}>
       <div className='flex items-center gap-2 mb-1'>
@@ -112,7 +130,7 @@ export function BrandConfigCard({
             type='color'
             value={hexToRgb(color ?? '') ? (color ?? '#0F7A4A') : '#0F7A4A'}
             onChange={(e) =>
-              onChange({ brand_color: e.target.value, logo_url: logoUrl })
+              handleChange({ brand_color: e.target.value, logo_url: logoUrl })
             }
             disabled={disabled}
             aria-label='Selector de color de marca'
@@ -122,7 +140,7 @@ export function BrandConfigCard({
             label='Color de marca (HEX)'
             value={color ?? ''}
             onChange={(e) =>
-              onChange({
+              handleChange({
                 brand_color: e.target.value.trim() === '' ? null : e.target.value,
                 logo_url: logoUrl
               })
@@ -156,7 +174,10 @@ export function BrandConfigCard({
                     setOverride(
                       active
                         ? null
-                        : { brandColor: preset.brandColor, logoUrl: null }
+                        : {
+                            brandColor: preset.brandColor,
+                            logoUrl: preset.logoUrl
+                          }
                     )
                   }
                   className={`inline-flex touch-target items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
@@ -166,9 +187,10 @@ export function BrandConfigCard({
                   }`}
                   aria-pressed={active}
                 >
-                  <span
-                    className='h-3.5 w-3.5 rounded-full border border-black/10'
-                    style={{ backgroundColor: preset.brandColor }}
+                  <img
+                    src={preset.logoUrl}
+                    alt=''
+                    className='h-4 w-4 rounded object-contain'
                     aria-hidden='true'
                   />
                   {preset.name}
@@ -177,8 +199,9 @@ export function BrandConfigCard({
             })}
           </div>
           <p className='mt-2 text-[11px] leading-relaxed text-(--color-text-muted)'>
-            Solo cambia la vista en este navegador (localStorage) sin
-            guardar nada — ábrelo en{' '}
+            Los cambios del formulario y los presets se previsualizan al
+            instante en este navegador (localStorage) sin guardar nada —
+            ábrelo en{' '}
             <a
               href={`/b/${slug}`}
               className='font-medium text-tenant underline underline-offset-2'
@@ -194,7 +217,7 @@ export function BrandConfigCard({
           label='Logo del negocio (URL)'
           value={logoUrl ?? ''}
           onChange={(e) =>
-            onChange({
+            handleChange({
               brand_color: color,
               logo_url: e.target.value.trim() === '' ? null : e.target.value
             })

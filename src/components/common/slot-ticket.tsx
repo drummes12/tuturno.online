@@ -41,7 +41,7 @@ export function SlotTicket({
           </p>
         </div>
         {badge ?? (
-          <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 text-[11px] font-medium text-tenant dark:border-flood-400/40 dark:text-flood-300'>
+          <span className='rounded-md border border-tenant/40 bg-(--tenant-primary-soft) px-2 py-0.5 text-[11px] font-medium text-tenant'>
             Seleccionado
           </span>
         )}

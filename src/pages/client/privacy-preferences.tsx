@@ -162,7 +162,7 @@ export function PrivacyPreferencesPage() {
                       }`}
                     >
                       <span
-                        className={`h-1.5 w-1.5 rounded-full ${accepted ? 'bg-pitch-500' : 'bg-(--color-text-muted)/50'}`}
+                        className={`h-1.5 w-1.5 rounded-full ${accepted ? 'bg-(--color-primary)' : 'bg-(--color-text-muted)/50'}`}
                         aria-hidden='true'
                       />
                       {accepted

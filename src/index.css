@@ -167,10 +167,10 @@
    (Safari estable) el header queda siempre como píldora.
    ───────────────────────────────────────────────────────────── */
 :root {
-  /* En light la píldora usa el verde primario (pitch-700, el mismo de
-     los items activos del nav) — el verde casi negro original chocaba
-     contra el fondo claro. El texto del header sigue siendo blanco. */
-  --header-pill-bg: rgb(15 122 74 / 0.95);
+  /* En light la píldora sigue el color del tenant (fallback = verde
+     TuTurno): en /b/:slug toma la marca del negocio. El texto del
+     header sigue siendo blanco. */
+  --header-pill-bg: color-mix(in srgb, var(--tenant-primary) 95%, transparent);
   --header-pill-border: rgb(255 255 255 / 0.22);
   /* Debe coincidir con el max-w-5xl del contenido: la animación
      sobrescribe la clase (así funciona scroll-driven), el valor no. */
@@ -178,7 +178,9 @@
 }
 
 .dark {
-  --header-pill-bg: rgb(18 23 29 / 0.8);
+  /* En dark la píldora es neutra pero recibe un tinte sutil del tenant
+     (~14%) para no perder la marca sin competir con los acentos. */
+  --header-pill-bg: color-mix(in srgb, var(--tenant-primary) 14%, rgb(18 23 29 / 0.8));
   --header-pill-border: rgb(255 255 255 / 0.1);
 }
 

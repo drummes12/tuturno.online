@@ -262,7 +262,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
       {/* Demo banner */}
       {isDemo && (
         <div
-          className='flex items-start gap-3 p-4 rounded-xl border border-flood-500/40 bg-flood-500/10 text-(--color-text) animate-fade-up'
+          className='flex items-start gap-3 p-4 rounded-xl border border-tenant/40 bg-(--tenant-primary-soft) text-(--color-text) animate-fade-up'
           role='status'
         >
           <InfoIcon

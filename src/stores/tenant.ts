@@ -27,8 +27,18 @@ export interface TenantBrandingOverride {
 
 /** Marcas ficticias para probar el co-branding sin backend. */
 export const TENANT_BRAND_PRESETS = [
-  { id: 'tuturno', name: 'TuTurno Original', brandColor: '#0F7A4A' },
-  { id: 'pulse-arena', name: 'Pulse Arena', brandColor: '#FF5722' }
+  {
+    id: 'tuturno',
+    name: 'TuTurno Original',
+    brandColor: '#0F7A4A',
+    logoUrl: '/logo-mark.svg'
+  },
+  {
+    id: 'pulse-arena',
+    name: 'Pulse Arena',
+    brandColor: '#FF5722',
+    logoUrl: '/brand-presets/pulse-arena.svg'
+  }
 ] as const
 
 export type TenantBrandPreset = (typeof TENANT_BRAND_PRESETS)[number]
