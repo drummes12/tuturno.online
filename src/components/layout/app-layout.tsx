@@ -39,6 +39,7 @@ import { useConnectivity } from '@/hooks/use-connectivity'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { useTheme } from '@/hooks/use-theme'
+import { useTenantBranding } from '@/hooks/use-tenant-branding'
 import { extractSlugFromPath } from '@/lib/slug'
 import { isDemoPath, adminToDemoPath, demoToAdminPath } from '@/lib/demo'
 import { LEGAL_ENTITY } from '@/lib/legal'
@@ -128,6 +129,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const clientTutorial = useClientTutorial()
   const adminTutorial = useAdminTutorial()
   const { dark, toggle: toggleTheme } = useTheme()
+  const tenant = useTenantBranding()
   const pushNotificationState = usePushNotifications(user?.id ?? null)
   const { status, hardOffline, recheck } = useConnectivity()
   const [signingOut, setSigningOut] = useState(false)
@@ -286,6 +288,22 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 Tu<span className='text-flood-400'>Turno</span>
               </span>
             </Link>
+            {/* Co-branding: logo del negocio junto a la marca TuTurno.
+                Solo aparece cuando el tenant configuró logo (o hay un
+                override local en Admin/Demo). */}
+            {tenant.logoUrl && (
+              <span className='flex min-w-0 shrink items-center gap-2'>
+                <span
+                  className='h-6 w-px bg-white/25'
+                  aria-hidden='true'
+                />
+                <img
+                  src={tenant.logoUrl}
+                  alt={tenant.name ?? 'Logo del negocio'}
+                  className='h-8 w-8 shrink-0 rounded-lg bg-white object-contain p-0.5'
+                />
+              </span>
+            )}
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
               {(user || isDemo) && showTutorialButton && (
                 <button
@@ -430,7 +448,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </span>
             <Link
               href='/crear-negocio'
-              className='font-semibold text-pitch-700 underline decoration-flood-500/60 underline-offset-2 transition-colors hover:text-pitch-600 dark:text-flood-300 dark:hover:text-flood-200'
+              className='font-semibold text-tenant underline decoration-flood-500/60 underline-offset-2 transition-colors hover:text-pitch-600 dark:text-flood-300 dark:hover:text-flood-200'
             >
               Crea tu negocio gratis
             </Link>

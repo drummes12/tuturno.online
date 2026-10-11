@@ -138,7 +138,7 @@ export function RecoverPasswordPage() {
         {/* --- Contraseña actualizada --- */}
         {isRecoveryFlow && updated && (
           <div className='flex flex-col items-center gap-4 text-center'>
-            <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-pitch-700 dark:text-pitch-300'>
+            <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-tenant'>
               <CheckIcon size={32} />
             </div>
             <div>
@@ -159,7 +159,7 @@ export function RecoverPasswordPage() {
         {/* --- Flow normal: solicitar enlace de recuperación --- */}
         {!isRecoveryFlow && sent && (
           <div className='flex flex-col items-center gap-4 text-center'>
-            <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-pitch-700 dark:text-pitch-300'>
+            <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-tenant'>
               <MailIcon size={32} />
             </div>
             <div>
@@ -208,7 +208,7 @@ export function RecoverPasswordPage() {
             <p className='mt-6 text-sm text-center text-(--color-text-muted)'>
               <Link
                 href='/login'
-                className='text-(--color-primary) font-medium hover:underline'
+                className='text-tenant font-medium hover:underline'
               >
                 Volver a iniciar sesión
               </Link>

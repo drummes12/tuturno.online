@@ -165,7 +165,7 @@ export function ReservationsCard({
                 <span
                   className={`flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold nums ${
                     delta >= 0
-                      ? 'bg-pitch-500/15 text-pitch-700 dark:bg-pitch-500/20 dark:text-pitch-300'
+                      ? 'bg-(--tenant-primary-soft) text-tenant'
                       : 'bg-signal-red/10 text-signal-red'
                   }`}
                 >

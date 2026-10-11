@@ -31,7 +31,7 @@ const variantConfig: Record<
   },
   success: {
     container:
-      'border-pitch-500/40 bg-pitch-500/10 text-pitch-700 dark:border-pitch-400/30 dark:bg-pitch-400/10 dark:text-pitch-300',
+      'border-tenant/40 bg-(--tenant-primary-soft) text-tenant',
     icon: <CheckIcon size={18} />
   }
 }

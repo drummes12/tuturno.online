@@ -32,6 +32,8 @@ const mockBusiness: Business = {
   resource_label_singular: 'Espacio',
   resource_label_plural: 'Espacios',
   reservation_instructions_md: null,
+  brand_color: null,
+  logo_url: null,
   is_demo: true,
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z'

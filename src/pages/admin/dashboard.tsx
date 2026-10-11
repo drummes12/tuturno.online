@@ -79,7 +79,7 @@ function TodayRow({
             onOpen(r)
           }
         }}
-        className='group flex cursor-pointer items-center gap-4 px-5 py-3.5 transition-colors hover:bg-surface-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-inset dark:hover:bg-white/6'
+        className='group flex cursor-pointer items-center gap-4 px-5 py-3.5 transition-colors hover:bg-surface-inset focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tenant focus-visible:ring-inset dark:hover:bg-white/6'
         aria-label={`Ver detalles de la reserva de ${r.resource?.name ?? 'recurso'} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
       >
         <span
@@ -105,7 +105,7 @@ function TodayRow({
               target='_blank'
               rel='noopener noreferrer'
               onClick={(e) => e.stopPropagation()}
-              className='flex h-8 w-8 items-center justify-center rounded-lg text-pitch-700 transition-colors hover:bg-pitch-100 dark:text-pitch-300 dark:hover:bg-pitch-500/15'
+              className='flex h-8 w-8 items-center justify-center rounded-lg text-tenant transition-colors hover:bg-(--tenant-primary-soft)'
               aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
             >
               <WhatsAppIcon size={16} />
@@ -159,7 +159,7 @@ function TodayGroup({
           {reservations.length} turno{reservations.length !== 1 ? 's' : ''}
         </span>
       </div>
-      <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm) dark:border-white/10 dark:bg-pitch-950 dark:text-chalk'>
+      <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm) dark:border-white/10 dark:bg-graphite-900 dark:text-chalk'>
         <ul className='flex flex-col divide-y divide-border dark:divide-white/10'>
           {reservations.map((r) => (
             <TodayRow
@@ -361,7 +361,7 @@ export function AdminDashboardPage() {
         {sortedPending.length === 0 ? (
           <Card className='p-8 text-center animate-fade-up'>
             <div className='flex flex-col items-center gap-3'>
-              <div className='w-12 h-12 rounded-2xl bg-pitch-100 flex items-center justify-center text-pitch-600 dark:bg-pitch-500/15 dark:text-pitch-300'>
+              <div className='w-12 h-12 rounded-2xl bg-(--tenant-primary-soft) flex items-center justify-center text-tenant'>
                 <CheckIcon size={24} />
               </div>
               <p className='text-text-muted text-sm'>
@@ -446,7 +446,7 @@ export function AdminDashboardPage() {
                           href={buildReservationWhatsAppLink(r)!}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='flex items-center gap-1.5 text-sm font-medium text-pitch-700 hover:bg-pitch-100 dark:text-pitch-300 dark:hover:bg-pitch-500/15 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                          className='flex items-center gap-1.5 text-sm font-medium text-tenant hover:bg-(--tenant-primary-soft) px-3 py-1.5 rounded-lg transition-colors touch-target'
                           aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
                         >
                           <WhatsAppIcon size={16} />

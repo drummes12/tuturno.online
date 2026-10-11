@@ -71,7 +71,7 @@ export function RegisterPage() {
         <div className='w-full max-w-md animate-fade-up'>
           <Card elevated className='p-8 text-center'>
             <div className='flex flex-col items-center gap-4'>
-              <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-pitch-700 dark:text-pitch-300'>
+              <div className='w-16 h-16 rounded-2xl bg-pitch-500/15 flex items-center justify-center text-tenant'>
                 <MailIcon size={32} />
               </div>
               <div>
@@ -152,7 +152,7 @@ export function RegisterPage() {
               type='checkbox'
               checked={acceptedTerms}
               onChange={(e) => setAcceptedTerms(e.target.checked)}
-              className='mt-0.5 h-4 w-4 rounded border-border accent-(--color-primary) cursor-pointer'
+              className='mt-0.5 h-4 w-4 rounded border-border accent-tenant cursor-pointer'
               required
             />
             <span className='leading-relaxed'>
@@ -161,7 +161,7 @@ export function RegisterPage() {
               <Link
                 href='/terminos'
                 target='_blank'
-                className='text-(--color-primary) font-medium hover:underline'
+                className='text-tenant font-medium hover:underline'
               >
                 Términos
                 <span className='sr-only'>(se abre en otra pestaña)</span>
@@ -170,7 +170,7 @@ export function RegisterPage() {
               <Link
                 href='/privacidad'
                 target='_blank'
-                className='text-(--color-primary) font-medium hover:underline'
+                className='text-tenant font-medium hover:underline'
               >
                 Política de Datos
                 <span className='sr-only'>(se abre en otra pestaña)</span>
@@ -191,7 +191,7 @@ export function RegisterPage() {
           ¿Ya tienes cuenta?{' '}
           <Link
             href='/login'
-            className='text-(--color-primary) font-medium hover:underline'
+            className='text-tenant font-medium hover:underline'
           >
             Inicia sesión
           </Link>

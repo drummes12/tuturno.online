@@ -171,7 +171,7 @@ export function AdminReservationsPage() {
         data-tour='admin-reservations-date'
         style={{ animationDelay: '60ms' }}
       >
-        <div className='flex items-stretch overflow-hidden rounded-xl border border-border bg-surface-inset transition-colors focus-within:border-(--color-primary) focus-within:ring-4 focus-within:ring-(--color-primary)/15'>
+        <div className='flex items-stretch overflow-hidden rounded-xl border border-border bg-surface-inset transition-colors focus-within:border-tenant focus-within:ring-4 focus-within:ring-tenant/15'>
           <button
             type='button'
             onClick={() => shiftDay(-1)}
@@ -205,7 +205,7 @@ export function AdminReservationsPage() {
             <button
               type='button'
               onClick={() => setSelectedDate(todayStr)}
-              className='shrink-0 border-l border-pitch-500/40 bg-pitch-500/10 px-4 text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-700 transition-colors hover:bg-pitch-500/20 dark:border-pitch-400/30 dark:text-pitch-300 touch-target'
+              className='shrink-0 border-l border-tenant/40 bg-(--tenant-primary-soft) px-4 text-[11px] font-medium uppercase tracking-[0.14em] text-tenant transition-colors hover:bg-(--tenant-primary-soft) touch-target'
             >
               Hoy
             </button>
@@ -225,7 +225,7 @@ export function AdminReservationsPage() {
             onClick={() => setFilter(f.key)}
             className={`shrink-0 px-4 py-2.5 rounded-full text-[11px] font-medium uppercase tracking-[0.14em] border whitespace-nowrap transition-all duration-200 ease-spring snap-start ${
               filter === f.key
-                ? 'bg-(--color-primary) text-on-primary border-(--color-primary) shadow-(--shadow-pitch)'
+                ? 'bg-(--color-primary) text-on-primary border-(--color-primary) shadow-(--shadow-tenant)'
                 : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-graphite-300'
             }`}
           >
@@ -303,7 +303,7 @@ export function AdminReservationsPage() {
                           href={buildReservationWhatsAppLink(r)!}
                           target='_blank'
                           rel='noopener noreferrer'
-                          className='flex items-center gap-1.5 text-sm font-medium text-pitch-700 hover:bg-pitch-100 dark:text-pitch-300 dark:hover:bg-pitch-500/15 px-3 py-1.5 rounded-lg transition-colors touch-target'
+                          className='flex items-center gap-1.5 text-sm font-medium text-tenant hover:bg-(--tenant-primary-soft) px-3 py-1.5 rounded-lg transition-colors touch-target'
                           aria-label={`WhatsApp a ${r.client?.name ?? r.profile?.full_name ?? 'cliente'}`}
                         >
                           <WhatsAppIcon size={16} />

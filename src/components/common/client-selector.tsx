@@ -122,7 +122,7 @@ export function ClientSelector({ businessId, onChange }: ClientSelectorProps) {
         <div className='rounded-xl border border-(--color-primary)/30 bg-(--color-primary)/5 p-4 animate-fade-up'>
           <div className='flex items-start justify-between gap-2'>
             <div className='flex items-start gap-3 min-w-0'>
-              <div className='w-10 h-10 rounded-full bg-(--color-primary)/10 flex items-center justify-center text-(--color-primary) shrink-0'>
+              <div className='w-10 h-10 rounded-full bg-(--color-primary)/10 flex items-center justify-center text-tenant shrink-0'>
                 <UserIcon size={20} />
               </div>
               <div className='min-w-0'>
@@ -160,7 +160,7 @@ export function ClientSelector({ businessId, onChange }: ClientSelectorProps) {
         <button
           type='button'
           onClick={() => handleSwitchMode('search')}
-          className='text-sm text-(--color-primary) hover:underline self-start touch-target px-1 -m-1'
+          className='text-sm text-tenant hover:underline self-start touch-target px-1 -m-1'
         >
           Buscar otro cliente
         </button>
@@ -207,7 +207,7 @@ export function ClientSelector({ businessId, onChange }: ClientSelectorProps) {
         <button
           type='button'
           onClick={() => handleSwitchMode('search')}
-          className='text-sm text-(--color-primary) hover:underline self-start touch-target px-1 -m-1'
+          className='text-sm text-tenant hover:underline self-start touch-target px-1 -m-1'
         >
           Buscar cliente existente
         </button>
@@ -255,7 +255,7 @@ export function ClientSelector({ businessId, onChange }: ClientSelectorProps) {
               key={client.id ?? `user-${client.user_id ?? index}`}
               type='button'
               onClick={() => handleSelect(client)}
-              className='flex items-center gap-3 p-3 rounded-xl border border-border bg-surface-elevated hover:border-(--color-primary) hover:bg-(--color-primary)/5 transition-all duration-200 text-left touch-target'
+              className='flex items-center gap-3 p-3 rounded-xl border border-border bg-surface-elevated hover:border-tenant hover:bg-(--color-primary)/5 transition-all duration-200 text-left touch-target'
             >
               <div className='w-9 h-9 rounded-full bg-surface-inset flex items-center justify-center text-(--color-text-muted) shrink-0'>
                 <UserIcon size={18} />
@@ -294,7 +294,7 @@ export function ClientSelector({ businessId, onChange }: ClientSelectorProps) {
         <button
           type='button'
           onClick={() => handleSwitchMode('new')}
-          className='text-sm text-(--color-primary) hover:underline self-start touch-target px-1 -m-1'
+          className='text-sm text-tenant hover:underline self-start touch-target px-1 -m-1'
         >
           Crear nuevo cliente
         </button>

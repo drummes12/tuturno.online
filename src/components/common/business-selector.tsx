@@ -111,7 +111,7 @@ export function BusinessSelector({
                 {isActive && (
                   <CheckIcon
                     size={16}
-                    className='shrink-0 text-pitch-700 dark:text-pitch-300'
+                    className='shrink-0 text-tenant'
                   />
                 )}
               </button>

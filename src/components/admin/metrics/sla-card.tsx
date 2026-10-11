@@ -151,7 +151,7 @@ export function SlaCard({
         <div className='min-w-0 flex-1'>
           {onTimePct !== null && (
             <p className='text-sm'>
-              <span className='nums text-2xl font-bold text-pitch-600 dark:text-pitch-400'>
+              <span className='nums text-2xl font-bold text-tenant'>
                 {onTimePct}%
               </span>{' '}
               <span className='text-text-muted'>a tiempo</span>
@@ -197,7 +197,7 @@ export function SlaCard({
                     s.key,
                     `${s.n} solicitudes · ${pct}% del total`
                   )}
-                  className={`${s.cls} relative h-full flex-none appearance-none border-0 p-0 transition-[filter,box-shadow] first:rounded-l-full last:rounded-r-full hover:z-10 hover:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] aria-pressed:z-10 aria-pressed:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
+                  className={`${s.cls} relative h-full flex-none appearance-none border-0 p-0 transition-[filter,box-shadow] first:rounded-l-full last:rounded-r-full hover:z-10 hover:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] aria-pressed:z-10 aria-pressed:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-tenant ${
                     isActive(s.key) ? 'brightness-125' : ''
                   }`}
                   style={

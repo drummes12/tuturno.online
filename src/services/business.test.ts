@@ -38,6 +38,8 @@ const mockBusiness: Business = {
   resource_label_singular: 'Cancha',
   resource_label_plural: 'Canchas',
   reservation_instructions_md: '## Abono\n1. Paga 50%\n2. Envía comprobante',
+  brand_color: null,
+  logo_url: null,
   is_demo: false,
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-01-01T00:00:00Z'

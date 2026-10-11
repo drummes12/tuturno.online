@@ -37,7 +37,7 @@ export function FiltersSheet({
               onClick={() => onPeriodChange(p.key)}
               className={`flex items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors touch-target ${
                 period === p.key
-                  ? 'bg-pitch-500/12 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'
+                  ? 'bg-(--tenant-primary-soft) text-tenant'
                   : 'hover:bg-surface-inset'
               }`}
             >
@@ -61,7 +61,7 @@ export function FiltersSheet({
               <button
                 type='button'
                 onClick={onClearResources}
-                className='text-[11px] font-medium text-pitch-700 dark:text-pitch-300'
+                className='text-[11px] font-medium text-tenant'
               >
                 Todas
               </button>
@@ -78,14 +78,14 @@ export function FiltersSheet({
                   aria-pressed={active}
                   className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors touch-target ${
                     active
-                      ? 'bg-pitch-500/12 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'
+                      ? 'bg-(--tenant-primary-soft) text-tenant'
                       : 'hover:bg-surface-inset'
                   }`}
                 >
                   <span
                     className={`flex h-5 w-5 items-center justify-center rounded-md border transition-colors ${
                       active
-                        ? 'border-pitch-500 bg-pitch-500 text-white'
+                        ? 'border-(--color-primary) bg-(--color-primary) text-on-primary'
                         : 'border-border-strong'
                     }`}
                     aria-hidden

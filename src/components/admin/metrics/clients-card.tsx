@@ -114,7 +114,7 @@ function ClientRow({
 
   const content = (
     <>
-      <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 text-xs font-semibold text-pitch-700 dark:bg-pitch-500/20 dark:text-pitch-300'>
+      <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 text-xs font-semibold text-tenant dark:bg-pitch-500/20 dark:text-pitch-300'>
         {client.name.slice(0, 2).toUpperCase()}
       </span>
       <div className='min-w-0 flex-1'>
@@ -148,7 +148,7 @@ function ClientRow({
       <button
         type='button'
         {...bind(key, client.name, clientSummary(client))}
-        className={`group -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-inset/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) ${
+        className={`group -mx-2 flex w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-inset/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tenant ${
           active ? 'bg-surface-inset' : ''
         }`}
       >

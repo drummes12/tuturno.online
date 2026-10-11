@@ -231,7 +231,7 @@ function InviteMemberForm({
         {found && (
           <div className='flex flex-col gap-3'>
             <div className='flex items-center gap-3 p-3 rounded-xl bg-surface-inset'>
-              <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary'>
+              <div className='w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-tenant'>
                 <UserIcon size={20} />
               </div>
               <div className='flex-1 min-w-0'>
@@ -309,7 +309,7 @@ function MemberRow({
       className='group relative flex animate-stagger flex-wrap items-center gap-3 px-5 py-3.5 sm:flex-nowrap'
       style={{ '--index': index } as CSSProperties}
     >
-      <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary'>
+      <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-tenant'>
         <UserIcon size={20} />
       </span>
       <div className='min-w-0 flex-1'>

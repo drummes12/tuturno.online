@@ -86,7 +86,7 @@ export function AdminMetricsPage() {
       {/* Header */}
       <div className='animate-fade-up'>
         <div className='flex items-center gap-2'>
-          <ChartIcon size={20} className='text-pitch-600 dark:text-pitch-400' />
+          <ChartIcon size={20} className='text-tenant' />
           <h1 className='text-2xl font-bold tracking-tight'>Métricas</h1>
         </div>
         <p className='text-sm text-(--color-text-muted) mt-0.5'>

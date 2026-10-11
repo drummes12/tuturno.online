@@ -89,7 +89,7 @@ function StackedBar({
                 s.label,
                 `${count} de ${breakdown.total} reservas · ${pct}% ${label === 'Creadas por el cliente' ? 'del cliente' : 'del negocio'}`
               )}
-              className={`${s.cls} relative h-full flex-none appearance-none border-0 p-0 transition-[filter,box-shadow] first:rounded-l-full last:rounded-r-full hover:z-10 hover:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] aria-pressed:z-10 aria-pressed:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) ${
+              className={`${s.cls} relative h-full flex-none appearance-none border-0 p-0 transition-[filter,box-shadow] first:rounded-l-full last:rounded-r-full hover:z-10 hover:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] aria-pressed:z-10 aria-pressed:shadow-[0_0_8px_color-mix(in_srgb,var(--seg-glow)_40%,transparent)] focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-tenant ${
                 isActive(key) ? 'brightness-125' : ''
               }`}
               style={

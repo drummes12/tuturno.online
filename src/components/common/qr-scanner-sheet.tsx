@@ -213,7 +213,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
         </div>
 
         <div className='flex items-center gap-3 px-5 pb-3 pt-4'>
-          <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
+          <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-(--tenant-primary-soft) text-tenant'>
             <QrIcon size={18} />
           </span>
           <div className='min-w-0 flex-1'>
@@ -238,7 +238,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
           </button>
         </div>
 
-        <div className='relative mx-5 mb-[max(1.25rem,env(safe-area-inset-bottom))] aspect-square overflow-hidden rounded-2xl bg-pitch-950'>
+        <div className='relative mx-5 mb-[max(1.25rem,env(safe-area-inset-bottom))] aspect-square overflow-hidden rounded-2xl bg-graphite-900'>
           {error ? (
             <div className='flex h-full flex-col items-center justify-center gap-3 px-8 text-center'>
               <AlertIcon size={28} className='text-flood-400' />
@@ -256,7 +256,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
                 aria-hidden='true'
                 className='pointer-events-none absolute inset-0 flex items-center justify-center'
               >
-                <span className='h-3/5 w-3/5 animate-pulse rounded-2xl border-2 border-pitch-400/80' />
+                <span className='h-3/5 w-3/5 animate-pulse rounded-2xl border-2 border-tenant/80' />
               </div>
               {starting && (
                 <div className='absolute inset-0 flex items-center justify-center'>

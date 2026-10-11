@@ -44,7 +44,7 @@ export function WhatsAppRedirectPage() {
       </p>
       <a
         href='/'
-        className='text-primary text-sm font-semibold underline'
+        className='text-tenant text-sm font-semibold underline'
       >
         Cancelar
       </a>

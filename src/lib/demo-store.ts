@@ -144,6 +144,8 @@ function seed(): DemoState {
     resource_label_plural: 'Canchas',
     reservation_instructions_md:
       'Para confirmar tu reserva envía el comprobante del abono por WhatsApp. Sin abono, la solicitud puede ser rechazada.',
+    brand_color: null,
+    logo_url: null,
     is_demo: true,
     created_at: created,
     updated_at: created

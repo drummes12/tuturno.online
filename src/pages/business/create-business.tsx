@@ -302,7 +302,7 @@ export function CreateBusinessPage() {
                 {slug && !checkingSlug && slugStatus && (
                   <p
                     className={`mt-1.5 flex items-center gap-1.5 text-xs ${
-                      slugStatus.available ? 'text-pitch-700' : 'text-red-700'
+                      slugStatus.available ? 'text-tenant' : 'text-red-700'
                     }`}
                   >
                     {slugStatus.available ? (
@@ -325,7 +325,7 @@ export function CreateBusinessPage() {
                   type='checkbox'
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className='mt-0.5 h-4 w-4 rounded border-border accent-(--color-primary) cursor-pointer'
+                  className='mt-0.5 h-4 w-4 rounded border-border accent-tenant cursor-pointer'
                   required
                 />
                 <span className='leading-relaxed'>
@@ -333,7 +333,7 @@ export function CreateBusinessPage() {
                   <Link
                     href='/terminos'
                     target='_blank'
-                    className='text-(--color-primary) font-medium hover:underline'
+                    className='text-tenant font-medium hover:underline'
                   >
                     Términos para negocios
                     <span className='sr-only'>(se abre en otra pestaña)</span>
@@ -343,7 +343,7 @@ export function CreateBusinessPage() {
                   <Link
                     href='/privacidad'
                     target='_blank'
-                    className='text-(--color-primary) font-medium hover:underline'
+                    className='text-tenant font-medium hover:underline'
                   >
                     Política de datos
                     <span className='sr-only'>(se abre en otra pestaña)</span>
