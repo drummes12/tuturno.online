@@ -4,6 +4,7 @@ import { useLocation } from 'wouter'
 import jsQR from 'jsqr'
 import { AlertIcon, QrIcon, XIcon } from '@/components/common/icon'
 import { Spinner } from '@/components/common/spinner'
+import { Sheet } from '@/components/common/sheet'
 
 type QrScannerSheetProps = {
   onClose: () => void
@@ -40,7 +41,6 @@ function parseBusinessSlug(raw: string): string | null {
  */
 export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
   const [, navigate] = useLocation()
-  const dialogRef = useRef<HTMLElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const actionsRef = useRef({ navigate, onClose })
@@ -50,48 +50,6 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
   const [notice, setNotice] = useState<string | null>(null)
 
   actionsRef.current = { navigate, onClose }
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-
-    const focusTimer = window.setTimeout(() => {
-      closeButtonRef.current?.focus()
-    }, 0)
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        actionsRef.current.onClose()
-        return
-      }
-
-      if (event.key !== 'Tab' || !dialogRef.current) return
-      const focusable = Array.from(
-        dialogRef.current.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        )
-      )
-      if (focusable.length === 0) return
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.clearTimeout(focusTimer)
-      document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = previousOverflow
-    }
-  }, [])
 
   useEffect(() => {
     const video = videoRef.current
@@ -191,27 +149,14 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
   }, [notice])
 
   return createPortal(
-    <div
-      className='fixed inset-0 z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm animate-backdrop-in sm:items-center sm:p-6'
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
+    <Sheet
+      onClose={onClose}
+      labelledBy='qr-scanner-title'
+      initialFocusRef={closeButtonRef}
+      className='flex w-full flex-col overflow-hidden rounded-t-3xl bg-surface-elevated shadow-(--shadow-lg) sm:max-w-md sm:rounded-3xl'
     >
-      <section
-        ref={dialogRef}
-        role='dialog'
-        aria-modal='true'
-        aria-labelledby='qr-scanner-title'
-        className='flex w-full flex-col overflow-hidden rounded-t-3xl bg-surface-elevated shadow-(--shadow-lg) animate-sheet-up sm:max-w-md sm:rounded-3xl sm:animate-fade-up'
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div
-          className='flex justify-center pt-2.5 sm:hidden'
-          aria-hidden='true'
-        >
-          <span className='h-1 w-10 rounded-full bg-graphite-200' />
-        </div>
-
+      {(requestClose) => (
+        <>
         <div className='flex items-center gap-3 px-5 pb-3 pt-4'>
           <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-(--tenant-primary-soft) text-tenant'>
             <QrIcon size={18} />
@@ -230,7 +175,7 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
           <button
             ref={closeButtonRef}
             type='button'
-            onClick={onClose}
+            onClick={requestClose}
             className='touch-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-(--color-text-muted) transition-all duration-150 ease-out hover:bg-surface-inset hover:text-(--color-text) active:scale-[0.92]'
             aria-label='Cerrar escáner'
           >
@@ -271,8 +216,9 @@ export function QrScannerSheet({ onClose }: QrScannerSheetProps) {
             </>
           )}
         </div>
-      </section>
-    </div>,
+        </>
+      )}
+    </Sheet>,
     document.body
   )
 }

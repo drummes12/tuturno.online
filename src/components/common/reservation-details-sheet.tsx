@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation } from 'wouter'
 import { differenceInMinutes } from 'date-fns'
@@ -20,6 +20,7 @@ import { formatLocal } from '@/lib/time'
 import { RESERVATION_BEAM_CLASS } from '@/lib/reservation-status'
 import { extractSlugFromPath } from '@/lib/slug'
 import { useTenantStore } from '@/stores/tenant'
+import { Sheet } from '@/components/common/sheet'
 
 type ReservationDetailsSheetProps = {
   reservation: Reservation
@@ -108,56 +109,7 @@ export function ReservationDetailsSheet({
   actions,
   viewer = 'business'
 }: ReservationDetailsSheetProps) {
-  const dialogRef = useRef<HTMLElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
-  const previousFocusRef = useRef<HTMLElement | null>(null)
-
-  useEffect(() => {
-    previousFocusRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-
-    const focusTimer = window.setTimeout(() => {
-      closeButtonRef.current?.focus()
-    }, 0)
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        onClose()
-        return
-      }
-
-      if (event.key !== 'Tab' || !dialogRef.current) return
-      const focusable = Array.from(
-        dialogRef.current.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        )
-      )
-      if (focusable.length === 0) return
-
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault()
-        last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault()
-        first.focus()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.clearTimeout(focusTimer)
-      document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = previousOverflow
-      previousFocusRef.current?.focus()
-    }
-  }, [onClose])
 
   const isBusinessViewer = viewer === 'business'
   const clientName =
@@ -196,31 +148,18 @@ export function ReservationDetailsSheet({
     : (reservation.business?.whatsapp_link ?? whatsappHref)
 
   return createPortal(
-    <div
-      className='fixed inset-0 z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm animate-backdrop-in sm:items-center sm:p-6'
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
+    <Sheet
+      onClose={onClose}
+      labelledBy='reservation-details-title'
+      describedBy='reservation-details-description'
+      initialFocusRef={closeButtonRef}
+      className='grid w-full max-h-[min(92dvh,720px)] grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden rounded-t-3xl bg-surface-elevated shadow-(--shadow-lg) sm:max-w-3xl sm:grid-rows-none sm:grid-cols-[minmax(0,10fr)_minmax(0,13fr)] sm:rounded-3xl'
     >
-      <section
-        ref={dialogRef}
-        role='dialog'
-        aria-modal='true'
-        aria-labelledby='reservation-details-title'
-        aria-describedby='reservation-details-description'
-        className='grid w-full max-h-[min(92dvh,720px)] grid-rows-[auto_auto_minmax(0,1fr)] overflow-hidden rounded-t-3xl bg-surface-elevated shadow-(--shadow-lg) animate-sheet-up sm:max-w-3xl sm:grid-rows-none sm:grid-cols-[minmax(0,10fr)_minmax(0,13fr)] sm:rounded-3xl sm:animate-fade-up'
-        onClick={(event) => event.stopPropagation()}
-      >
+      {(requestClose) => (
+        <>
         <p id='reservation-details-description' className='sr-only'>
           Detalle completo del turno y del cliente.
         </p>
-
-        <div
-          className='flex justify-center pt-2.5 sm:hidden'
-          aria-hidden='true'
-        >
-          <span className='h-1 w-10 rounded-full bg-graphite-200' />
-        </div>
 
         {/* Panel pitch — la papeleta del turno, sigue el tema de la
             app. En mobile es la cabecera del sheet; en desktop es la
@@ -249,7 +188,7 @@ export function ReservationDetailsSheet({
               <button
                 ref={closeButtonRef}
                 type='button'
-                onClick={onClose}
+                onClick={requestClose}
                 className='touch-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-graphite-500 transition-all duration-150 ease-out hover:bg-graphite-900/5 hover:text-graphite-900 active:scale-[0.92] dark:text-chalk-dim/70 dark:hover:bg-white/10 dark:hover:text-chalk'
                 aria-label='Cerrar detalle de reserva'
               >
@@ -396,8 +335,9 @@ export function ReservationDetailsSheet({
             </section>
           )}
         </div>
-      </section>
-    </div>,
+        </>
+      )}
+    </Sheet>,
     document.body
   )
 }

@@ -76,17 +76,30 @@ describe('ReservationDetailsSheet', () => {
   it('cierra al pulsar el botón de cerrar o Escape', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
-    render(
+    const { unmount } = render(
       <ReservationDetailsSheet reservation={reservation} onClose={onClose} />
     )
 
     await user.click(
       screen.getByRole('button', { name: 'Cerrar detalle de reserva' })
     )
-    expect(onClose).toHaveBeenCalledTimes(1)
+    // El cierre es animado: onClose llega tras la animación de salida.
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1), {
+      timeout: 1000
+    })
+    unmount()
 
+    const onCloseEscape = vi.fn()
+    render(
+      <ReservationDetailsSheet
+        reservation={reservation}
+        onClose={onCloseEscape}
+      />
+    )
     await user.keyboard('{Escape}')
-    expect(onClose).toHaveBeenCalledTimes(2)
+    await waitFor(() => expect(onCloseEscape).toHaveBeenCalledTimes(1), {
+      timeout: 1000
+    })
   })
 
   it('renderiza las acciones proporcionadas dentro del diálogo', () => {

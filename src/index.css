@@ -374,6 +374,17 @@ body {
   animation: sheet-up 0.34s var(--ease-spring) both;
 }
 
+@keyframes sheet-down {
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+@utility animate-sheet-down {
+  animation: sheet-down 0.24s var(--ease-out-quart) both;
+}
+
 @keyframes backdrop-in {
   from {
     opacity: 0;
@@ -385,6 +396,16 @@ body {
 
 @utility animate-backdrop-in {
   animation: backdrop-in 0.22s ease-out both;
+}
+
+@keyframes backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@utility animate-backdrop-out {
+  animation: backdrop-out 0.22s ease-in both;
 }
 
 /* Popover anclado — crece desde su esquina superior derecha (donde
