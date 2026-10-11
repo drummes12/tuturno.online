@@ -373,7 +373,7 @@ export function AdminExceptionsPage() {
                   value={selectedResourceId}
                   onChange={(e) => setSelectedResourceId(e.target.value)}
                   disabled={!canEdit || offline}
-                  className='w-full appearance-none rounded-xl border border-border bg-surface-inset pl-4 pr-10 py-3 text-sm focus:border-(--color-primary)  disabled:opacity-60 touch-target'
+                  className='w-full appearance-none rounded-xl border border-border bg-surface-inset pl-4 pr-10 py-3 text-sm focus:border-tenant  disabled:opacity-60 touch-target'
                 >
                   {resources.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -407,7 +407,7 @@ export function AdminExceptionsPage() {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 disabled={!canEdit || offline}
-                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-tenant  disabled:opacity-60 touch-target'
               />
             </div>
             <div className='flex-1 min-w-0 flex flex-col gap-2'>
@@ -423,7 +423,7 @@ export function AdminExceptionsPage() {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 disabled={!canEdit || offline}
-                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
+                className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-tenant  disabled:opacity-60 touch-target'
               />
             </div>
           </div>
@@ -435,7 +435,7 @@ export function AdminExceptionsPage() {
               checked={allDay}
               onChange={(e) => setAllDay(e.target.checked)}
               disabled={!canEdit || offline}
-              className='w-5 h-5 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15 disabled:opacity-60'
+              className='w-5 h-5 rounded border-border text-tenant focus:ring-tenant/15 disabled:opacity-60'
             />
             <span className='text-[11px] font-medium uppercase tracking-[0.14em] text-(--color-text-muted)'>
               Todo el día
@@ -458,7 +458,7 @@ export function AdminExceptionsPage() {
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   disabled={!canEdit || offline}
-                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-tenant  disabled:opacity-60 touch-target'
                 />
               </div>
               <div className='flex-1 flex min-w-0 flex-col gap-2'>
@@ -474,7 +474,7 @@ export function AdminExceptionsPage() {
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   disabled={!canEdit || offline}
-                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-(--color-primary)  disabled:opacity-60 touch-target'
+                  className='w-full min-w-0 appearance-none rounded-xl border border-border bg-surface-inset px-4 py-3 text-base nums font-mono focus:border-tenant  disabled:opacity-60 touch-target'
                 />
               </div>
             </div>
@@ -496,7 +496,7 @@ export function AdminExceptionsPage() {
               disabled={!canEdit || offline}
               placeholder='Ej: Festivo, mantenimiento, evento privado'
               maxLength={200}
-              className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm focus:border-(--color-primary)  disabled:opacity-60 touch-target'
+              className='w-full rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm focus:border-tenant  disabled:opacity-60 touch-target'
             />
           </div>
 
@@ -524,7 +524,7 @@ export function AdminExceptionsPage() {
                     checked={confirmedCreate}
                     onChange={(e) => setConfirmedCreate(e.target.checked)}
                     disabled={!canEdit || offline}
-                    className='w-4 h-4 rounded border-border text-(--color-primary) focus:ring-(--color-primary)/15'
+                    className='w-4 h-4 rounded border-border text-tenant focus:ring-tenant/15'
                   />
                   <span className='text-sm'>
                     Entiendo y quiero crear el cierre de todas formas
@@ -596,7 +596,7 @@ export function AdminExceptionsPage() {
                       <span
                         className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest ${
                           exc.resource_id
-                            ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'
+                            ? 'bg-(--tenant-primary-soft) text-tenant'
                             : 'bg-signal-blue/10 text-signal-blue dark:bg-signal-blue/20 dark:text-blue-300'
                         }`}
                       >

@@ -36,7 +36,7 @@ export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
     <span
       role='status'
       aria-label='Cargando'
-      className='arc-loader text-primary'
+      className='arc-loader text-tenant'
       style={{ '--arc-size': `${px / 48}px` } as CSSProperties}
     />
   )

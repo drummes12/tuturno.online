@@ -15,6 +15,7 @@ import { useIsOffline } from '@/hooks/use-connectivity'
 import { formatFullAddress, googleMapsLink } from '@/lib/address'
 import { resolveWhatsAppLink, buildGeneralInquiryMessage } from '@/lib/whatsapp'
 import { ShareCard } from '@/components/admin/share-card'
+import { BrandConfigCard } from '@/components/admin/brand-config-card'
 import { MarkdownContent } from '@/components/common/markdown-content'
 import {
   ClockIcon,
@@ -112,7 +113,9 @@ export function AdminConfigPage() {
         max_advance_days: business.max_advance_days,
         resource_label_singular: business.resource_label_singular.trim(),
         resource_label_plural: business.resource_label_plural.trim(),
-        reservation_instructions_md: business.reservation_instructions_md
+        reservation_instructions_md: business.reservation_instructions_md,
+        brand_color: business.brand_color,
+        logo_url: business.logo_url
       })
     } catch (err) {
       setSaving(false)
@@ -284,7 +287,7 @@ export function AdminConfigPage() {
                       href={testLink}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='inline-flex items-center justify-center gap-2 rounded-lg border border-pitch-600/30 bg-pitch-100 px-4 py-2.5 text-sm font-medium text-pitch-800 hover:bg-pitch-200 dark:bg-pitch-500/15 dark:text-pitch-300 dark:border-pitch-500/30 dark:hover:bg-pitch-500/25 transition-colors touch-target w-full sm:w-auto'
+                      className='inline-flex items-center justify-center gap-2 rounded-lg border border-pitch-600/30 bg-pitch-100 px-4 py-2.5 text-sm font-medium text-tenant hover:bg-pitch-200 dark:bg-pitch-500/15 dark:text-pitch-300 dark:border-pitch-500/30 dark:hover:bg-pitch-500/25 transition-colors touch-target w-full sm:w-auto'
                       aria-label='Probar link de WhatsApp en nueva pestaña'
                       title='Abre el mismo link que vería tu cliente al tocar el botón flotante'
                     >
@@ -387,6 +390,14 @@ export function AdminConfigPage() {
             </Card>
           </div>
           <div className='contents md:order-2 md:flex md:flex-col md:gap-4'>
+            {/* Marca del negocio — color + logo públicos (co-branding) */}
+            <BrandConfigCard
+              className='order-4'
+              color={business.brand_color}
+              logoUrl={business.logo_url}
+              slug={business.slug}
+              onChange={(patch) => setBusiness({ ...business, ...patch })}
+            />
             {/* Turnos */}
             <Card
               className='order-2 p-5 animate-fade-up'
@@ -429,7 +440,7 @@ export function AdminConfigPage() {
                           slot_duration_minutes: v
                         })
                       }
-                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-primary'
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-tenant'
                       aria-label='Duración personalizada'
                     />
                     <span className='text-xs text-text-muted'>
@@ -465,7 +476,7 @@ export function AdminConfigPage() {
                       onCommit={(v) =>
                         setBusiness({ ...business, gap_minutes: v })
                       }
-                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-primary'
+                      className='w-20 rounded-lg border border-border bg-surface-inset px-3 py-2 text-sm nums font-mono  focus:border-tenant'
                       aria-label='Gap personalizado'
                     />
                     <span className='text-xs text-text-muted'>
@@ -606,7 +617,7 @@ export function AdminConfigPage() {
                         reservation_instructions_md: INSTRUCTIONS_TEMPLATE
                       })
                     }
-                    className='ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-pitch-700 transition-colors hover:bg-pitch-500/10 dark:text-pitch-300 touch-target'
+                    className='ml-auto flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-tenant transition-colors hover:bg-(--tenant-primary-soft) touch-target'
                   >
                     <SparklesIcon size={13} />
                     <span className='hidden sm:inline'>Usar plantilla</span>
@@ -640,7 +651,7 @@ export function AdminConfigPage() {
               {showPreview ? (
                 <Card className='p-4 bg-(--color-primary)/5 border-(--color-primary)/20'>
                   <div className='flex items-center gap-2 mb-2'>
-                    <CheckIcon size={16} className='text-(--color-primary)' />
+                    <CheckIcon size={16} className='text-tenant' />
                     <h3 className='text-sm font-semibold text-(--color-text)'>
                       Pasos para confirmar tu reserva
                     </h3>
@@ -671,7 +682,7 @@ export function AdminConfigPage() {
                   disabled={!canEdit || offline}
                   placeholder={INSTRUCTIONS_TEMPLATE}
                   rows={8}
-                  className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-(--color-primary)  focus:ring-4 focus:ring-(--color-primary)/15 transition-all duration-200 ease-spring resize-y disabled:opacity-60'
+                  className='w-full min-w-0 rounded-xl border border-border bg-surface-inset px-4 py-3 text-sm text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-tenant  focus:ring-4 focus:ring-tenant/15 transition-all duration-200 ease-spring resize-y disabled:opacity-60'
                   aria-describedby='reservation-instructions-hint'
                 />
               )}
@@ -773,7 +784,7 @@ function PresetGrid({
             onClick={() => onChange(opt.v)}
             className={`flex flex-col items-center justify-center rounded-lg border py-2.5 transition-[border-color,background-color,color,transform] duration-200 ease-spring active:scale-[0.97] ${
               active
-                ? 'border-primary bg-pitch-100 text-primary dark:bg-pitch-500/15 dark:text-pitch-300'
+                ? 'border-tenant bg-(--tenant-primary-soft) text-tenant'
                 : 'border-border bg-surface-inset text-text-muted hover:border-graphite-300 hover:text-text'
             }`}
             aria-pressed={active}

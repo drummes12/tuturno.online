@@ -117,7 +117,7 @@ export function PrivacyPreferencesPage() {
         style={{ animationDelay: '60ms' }}
       >
         <div className='flex items-center gap-3 border-b border-border px-5 py-4'>
-          <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
+          <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-(--tenant-primary-soft) text-tenant'>
             <MailIcon size={16} />
           </span>
           <div className='min-w-0'>
@@ -157,12 +157,12 @@ export function PrivacyPreferencesPage() {
                     <span
                       className={`flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.12em] ${
                         accepted
-                          ? 'text-pitch-700 dark:text-pitch-300'
+                          ? 'text-tenant'
                           : 'text-(--color-text-muted)'
                       }`}
                     >
                       <span
-                        className={`h-1.5 w-1.5 rounded-full ${accepted ? 'bg-pitch-500' : 'bg-(--color-text-muted)/50'}`}
+                        className={`h-1.5 w-1.5 rounded-full ${accepted ? 'bg-(--color-primary)' : 'bg-(--color-text-muted)/50'}`}
                         aria-hidden='true'
                       />
                       {accepted
@@ -210,7 +210,7 @@ export function PrivacyPreferencesPage() {
           <strong>{LEGAL_ENTITY.email}</strong>. Consulta la{' '}
           <Link
             href='/privacidad'
-            className='text-(--color-primary) hover:underline'
+            className='text-tenant hover:underline'
           >
             Política de Datos
           </Link>{' '}

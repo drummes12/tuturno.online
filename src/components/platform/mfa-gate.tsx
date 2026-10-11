@@ -117,7 +117,7 @@ export function MfaGate({ children }: { children: ReactNode }) {
   return (
     <div className='mx-auto max-w-md py-8'>
       <Card elevated className='p-6'>
-        <div className='flex items-center gap-2 mb-4 text-pitch-800'>
+        <div className='flex items-center gap-2 mb-4 text-tenant'>
           <LockIcon size={20} />
           <h1 className='text-lg font-bold tracking-tight'>
             Verificación en dos pasos

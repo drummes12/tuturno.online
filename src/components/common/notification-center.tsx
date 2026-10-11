@@ -177,7 +177,7 @@ function TypeGlyph({ type }: { type: string }) {
     return (
       <CheckIcon
         size={15}
-        className='shrink-0 text-pitch-600 dark:text-pitch-300'
+        className='shrink-0 text-tenant'
       />
     )
   }
@@ -418,7 +418,7 @@ export function NotificationCenter({
                 <span className='h-1.5 w-12 rounded-full bg-graphite-200 dark:bg-white/15' />
               </div>
               <div className='flex items-center justify-between gap-2 border-b border-border px-4 py-2.5'>
-                <h2 className='text-[11px] font-semibold uppercase tracking-[0.14em] text-primary'>
+                <h2 className='text-[11px] font-semibold uppercase tracking-[0.14em] text-tenant'>
                   Notificaciones
                 </h2>
                 <div className='flex items-center gap-1'>
@@ -428,7 +428,7 @@ export function NotificationCenter({
                     disabled={unreadCount === 0}
                     aria-label='Marcar todas leídas'
                     title='Marcar todas leídas'
-                    className='flex h-7 w-7 items-center justify-center rounded-lg text-primary transition-[background-color,color,transform] hover:bg-surface-inset active:scale-95 disabled:cursor-not-allowed disabled:text-text-muted/40 disabled:hover:bg-transparent touch-target'
+                    className='flex h-7 w-7 items-center justify-center rounded-lg text-tenant transition-[background-color,color,transform] hover:bg-surface-inset active:scale-95 disabled:cursor-not-allowed disabled:text-text-muted/40 disabled:hover:bg-transparent touch-target'
                   >
                     <CheckIcon size={14} />
                   </button>
@@ -521,7 +521,7 @@ export function NotificationCenter({
                                   <button
                                     type='button'
                                     onClick={() => handleItemClick(n)}
-                                    className='flex w-full min-w-0 flex-col px-4 pb-3 pt-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-(--color-primary) touch-target'
+                                    className='flex w-full min-w-0 flex-col px-4 pb-3 pt-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-tenant touch-target'
                                   >
                                     <span className='flex items-center justify-between gap-2'>
                                       <span
@@ -612,7 +612,7 @@ export function NotificationCenter({
                                         <button
                                           type='button'
                                           onClick={() => handleItemClick(n)}
-                                          className='flex items-center gap-1 px-1 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted transition-[color,transform] hover:text-primary active:scale-95'
+                                          className='flex items-center gap-1 px-1 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-text-muted transition-[color,transform] hover:text-tenant active:scale-95'
                                         >
                                           Revisar
                                           <ArrowRightIcon size={11} />

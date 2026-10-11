@@ -17,6 +17,8 @@ export type BusinessContact = {
   resource_label_singular: string
   resource_label_plural: string
   reservation_instructions_md: string | null
+  brand_color: string | null
+  logo_url: string | null
   is_demo: boolean
 }
 
@@ -46,7 +48,7 @@ export async function fetchBusinessContactById(
   const { data, error } = await supabase
     .from('businesses')
     .select(
-      'id, phone, whatsapp_link, name, slug, street, neighborhood, city, state, country, resource_label_singular, resource_label_plural, reservation_instructions_md, is_demo'
+      'id, phone, whatsapp_link, name, slug, street, neighborhood, city, state, country, resource_label_singular, resource_label_plural, reservation_instructions_md, brand_color, logo_url, is_demo'
     )
     .eq('id', businessId)
     .maybeSingle()
@@ -90,6 +92,8 @@ export async function updateBusiness(
       | 'cancellation_limit_hours'
       | 'max_advance_days'
       | 'reservation_instructions_md'
+      | 'brand_color'
+      | 'logo_url'
     >
   >
 ): Promise<void> {

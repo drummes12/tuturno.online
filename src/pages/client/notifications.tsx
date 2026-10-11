@@ -170,7 +170,7 @@ export function NotificationsPage() {
         <div className='divide-y divide-border'>
           <div className='flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
             <div className='flex min-w-0 items-start gap-3'>
-              <span className='mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-pitch-500/15 text-pitch-700 dark:text-pitch-300'>
+              <span className='mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-(--tenant-primary-soft) text-tenant'>
                 <BellIcon size={18} />
               </span>
               <div className='min-w-0'>
@@ -259,7 +259,7 @@ export function NotificationsPage() {
                   ]
               ).map((step, index) => (
                 <li key={step} className='flex items-start gap-3 text-sm'>
-                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-pitch-500/15 text-[11px] font-semibold text-pitch-700 dark:text-pitch-300'>
+                  <span className='flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-(--tenant-primary-soft) text-[11px] font-semibold text-tenant'>
                     {index + 1}
                   </span>
                   <span className='pt-0.5 leading-relaxed text-(--color-text-muted)'>

@@ -59,7 +59,7 @@ function ContactRow({
   children: ReactNode
 }) {
   const linkClass =
-    'nums mt-0.5 block truncate text-sm font-medium text-primary underline-offset-2 transition-colors hover:text-(--color-primary-hover) hover:underline'
+    'nums mt-0.5 block truncate text-sm font-medium text-tenant underline-offset-2 transition-colors hover:text-(--color-primary-hover) hover:underline'
   const value = href ? (
     href.startsWith('/') ? (
       <Link href={href} onClick={onNavigate} className={linkClass}>

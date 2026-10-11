@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="glow">
+      <stop offset="0%" stop-color="#ffb3c9" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ffb3c9" stop-opacity="0"/>
+    </radialGradient>
+    <mask id="donut-mask">
+      <rect width="64" height="64" fill="white"/>
+      <circle cx="32" cy="33.5" r="6.5" fill="black"/>
+    </mask>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#faf1e7"/>
+  <circle cx="32" cy="34" r="30" fill="url(#glow)"/>
+  <rect x="6" y="27.8" width="4" height="12.4" rx="2" fill="#14110f"/>
+  <rect x="11.5" y="24" width="4" height="20" rx="2" fill="#14110f"/>
+  <rect x="48.5" y="24" width="4" height="20" rx="2" fill="#14110f"/>
+  <rect x="54" y="27.8" width="4" height="12.4" rx="2" fill="#14110f"/>
+  <g transform="translate(32 34) scale(0.66) translate(-32 -33.5)" mask="url(#donut-mask)">
+    <circle cx="32" cy="33.5" r="21" fill="#e8a961"/>
+    <path d="M11 33.5c0-5 4-7.4 8.2-6.8 3.4.4 4.4 4 8 3.6 4-.3 3.6-4.9 8.5-4.9 4 0 5.5 3.3 8.4 3.7 3.1.4 7.5-1.6 7.5 4.4a20.7 20.7 0 0 1-20.3 20.7 20.7 20.7 0 0 1-20.3-20.7Z" fill="#ffb3c9"/>
+    <circle cx="32" cy="34" r="21" fill="none" stroke="#14110f" stroke-width="3.4"/>
+    <circle cx="32" cy="33.5" r="8" fill="none" stroke="#14110f" stroke-width="3.4"/>
+    <path d="m21 27.5 3 1.5M38 24l1.5 3.1M45 32.5l3 1.5M22 39.5l3-.8M36.5 44l2.2-2.3" stroke="#fffdf9" stroke-width="3" stroke-linecap="round"/>
+    <path d="m17 32.5 2.2-2.3M44 42l2.3 3" stroke="#ffe08f" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

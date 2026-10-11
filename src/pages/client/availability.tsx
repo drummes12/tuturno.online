@@ -247,7 +247,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
           </p>
         </div>
         <Link href='/'>
-          <button className='text-sm font-medium text-(--color-primary) hover:underline touch-target px-4 py-2'>
+          <button className='text-sm font-medium text-tenant hover:underline touch-target px-4 py-2'>
             Volver al inicio
           </button>
         </Link>
@@ -262,7 +262,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
       {/* Demo banner */}
       {isDemo && (
         <div
-          className='flex items-start gap-3 p-4 rounded-xl border border-flood-500/40 bg-flood-500/10 text-(--color-text) animate-fade-up'
+          className='flex items-start gap-3 p-4 rounded-xl border border-(--color-warning)/40 bg-(--color-warning)/10 text-(--color-text) animate-fade-up'
           role='status'
         >
           <InfoIcon
@@ -296,7 +296,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             {!loading &&
               slots.length > 0 &&
               (availableTotal > 0 ? (
-                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-pitch-500/40 bg-pitch-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 nums dark:border-pitch-400/30 dark:text-pitch-300'>
+                <span className='flex items-center gap-1.5 ml-auto rounded-full border border-tenant/40 bg-(--tenant-primary-soft) px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-tenant nums'>
                   <CheckIcon size={12} />
                   {availableTotal}
                 </span>
@@ -327,7 +327,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
             data-tour='availability-location'
           >
             <div className='flex items-center gap-3'>
-              <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-pitch-500/15 text-pitch-700 dark:text-pitch-300 shrink-0'>
+              <div className='flex items-center justify-center w-9 h-9 rounded-lg bg-(--tenant-primary-soft) text-tenant shrink-0'>
                 <MapPinIcon size={18} />
               </div>
               <div className='flex-1 min-w-0'>
@@ -346,7 +346,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
               >
                 <ExternalLinkIcon
                   size={14}
-                  className='text-(--color-primary)'
+                  className='text-tenant'
                 />
                 Maps
               </a>
@@ -393,7 +393,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                 onClick={() => setSelectedDate(dateStr)}
                 className={`flex flex-col items-center justify-center min-w-16 py-2.5 px-3 rounded-xl border transition-all duration-200 ease-spring touch-target snap-start ${
                   isSelected
-                    ? 'bg-(--color-primary) text-on-primary border-transparent shadow-(--shadow-pitch) scale-105'
+                    ? 'bg-(--color-primary) text-on-primary border-transparent shadow-(--shadow-tenant) scale-105'
                     : 'bg-surface-elevated text-(--color-text) border-border hover:border-border-strong hover:shadow-sm'
                 }`}
               >
@@ -427,7 +427,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                 onClick={() => setSelectedResource(resource.id)}
                 className={`px-4 py-2 rounded-full text-xs uppercase tracking-[0.12em] border whitespace-nowrap transition-all duration-200 ease-spring touch-target ${
                   isSelected
-                    ? 'bg-(--color-primary) text-on-primary border-transparent shadow-(--shadow-pitch)'
+                    ? 'bg-(--color-primary) text-on-primary border-transparent shadow-(--shadow-tenant)'
                     : 'bg-surface-elevated text-(--color-text-muted) border-border hover:border-border-strong hover:text-(--color-text)'
                 }`}
               >
@@ -484,7 +484,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                     </div>
                   </div>
                   {availableCount > 0 && (
-                    <span className='rounded-full border border-pitch-500/40 bg-pitch-500/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 nums dark:border-pitch-400/30 dark:text-pitch-300'>
+                    <span className='rounded-full border border-tenant/40 bg-(--tenant-primary-soft) px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-tenant nums'>
                       {availableCount} libre{availableCount !== 1 ? 's' : ''}
                     </span>
                   )}
@@ -493,7 +493,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                 {/* Fixture board — el lenguaje del hero adaptado al tema:
                     tarjeta clara en light, marcador nocturno en dark.
                     La identidad es la estructura, no el color. */}
-                <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm) dark:border-white/10 dark:bg-pitch-950 dark:text-chalk'>
+                <div className='overflow-hidden rounded-2xl border border-border bg-surface-elevated shadow-(--shadow-sm) dark:border-white/10 dark:bg-graphite-900 dark:text-chalk'>
                   <ul className='flex flex-col divide-y divide-border dark:divide-white/10'>
                     {group.slots.map((slot, index) => {
                       const time = format(parseISO(slot.starts_at), 'HH:mm')
@@ -512,7 +512,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
 
                       const chipClass = {
                         available:
-                          'border-pitch-500/40 bg-pitch-500/10 text-pitch-700 dark:border-pitch-400/40 dark:bg-pitch-400/10 dark:text-pitch-300',
+                          'border-tenant/40 bg-(--tenant-primary-soft) text-tenant',
                         held: 'border-orange-500/40 bg-orange-500/10 text-orange-700 dark:border-orange-400/40 dark:text-orange-300',
                         reserved:
                           'border-border bg-surface-inset text-text-muted dark:border-white/10 dark:bg-white/5 dark:text-white/40',
@@ -546,7 +546,7 @@ export function AvailabilityPage({ slug }: AvailabilityPageProps = {}) {
                           {isAvailable && (
                             <ArrowRightIcon
                               size={14}
-                              className='ml-auto text-pitch-600 transition-transform duration-200 ease-spring group-hover:translate-x-0.5 dark:text-pitch-300'
+                              className='ml-auto text-tenant transition-transform duration-200 ease-spring group-hover:translate-x-0.5'
                             />
                           )}
                         </>

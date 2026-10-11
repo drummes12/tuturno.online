@@ -89,7 +89,7 @@ export function canClientCancelReservation(
  */
 export const RESERVATION_BEAM_CLASS: Record<ReservationStatus, string> = {
   pending: 'beam-orange-500 dark:beam-orange-400',
-  confirmed: 'beam-pitch-500 dark:beam-pitch-400',
+  confirmed: 'beam-tenant',
   rejected: 'beam-signal-red dark:beam-red-400',
   cancelled_by_client: 'beam-graphite-400 dark:beam-graphite-300',
   cancelled_by_business: 'beam-graphite-400 dark:beam-graphite-300',

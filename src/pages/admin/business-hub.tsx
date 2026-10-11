@@ -81,10 +81,10 @@ export function AdminBusinessHubPage() {
           <Link key={item.path} href={`${base}${item.path}`}>
             <Card
               data-tour={item.tourKey}
-              className='group flex animate-stagger items-center gap-4 p-4 transition-all duration-200 ease-spring hover:-translate-y-0.5 hover:border-pitch-600/40 hover:shadow-(--shadow-sm) cursor-pointer touch-target'
+              className='group flex animate-stagger items-center gap-4 p-4 transition-all duration-200 ease-spring hover:-translate-y-0.5 hover:border-tenant/40 hover:shadow-(--shadow-sm) cursor-pointer touch-target'
               style={{ '--index': index } as React.CSSProperties}
             >
-              <div className='flex items-center justify-center w-11 h-11 rounded-xl bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300 shrink-0'>
+              <div className='flex items-center justify-center w-11 h-11 rounded-xl bg-(--tenant-primary-soft) text-tenant shrink-0'>
                 {item.icon}
               </div>
               <div className='flex-1 min-w-0'>

@@ -39,7 +39,7 @@ export function LegalPage({ title, subtitle, children }: LegalPageProps) {
         className='p-6 sm:p-8 animate-fade-up'
         style={{ animationDelay: '60ms' }}
       >
-        <div className='flex flex-col gap-4 text-sm leading-relaxed text-(--color-text) [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-2 [&_h2]:tracking-tight [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1 [&_a]:text-(--color-primary) [&_a]:underline'>
+        <div className='flex flex-col gap-4 text-sm leading-relaxed text-(--color-text) [&_h2]:text-base [&_h2]:font-semibold [&_h2]:mt-6 [&_h2]:mb-2 [&_h2]:tracking-tight [&_p]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1 [&_a]:text-tenant [&_a]:underline'>
           {children}
         </div>
       </Card>

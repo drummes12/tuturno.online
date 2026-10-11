@@ -39,6 +39,7 @@ import { useConnectivity } from '@/hooks/use-connectivity'
 import { useClientTutorial } from '@/hooks/use-client-tutorial'
 import { useAdminTutorial } from '@/hooks/use-admin-tutorial'
 import { useTheme } from '@/hooks/use-theme'
+import { useTenantBranding } from '@/hooks/use-tenant-branding'
 import { extractSlugFromPath } from '@/lib/slug'
 import { isDemoPath, adminToDemoPath, demoToAdminPath } from '@/lib/demo'
 import { LEGAL_ENTITY } from '@/lib/legal'
@@ -128,6 +129,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const clientTutorial = useClientTutorial()
   const adminTutorial = useAdminTutorial()
   const { dark, toggle: toggleTheme } = useTheme()
+  const tenant = useTenantBranding()
   const pushNotificationState = usePushNotifications(user?.id ?? null)
   const { status, hardOffline, recheck } = useConnectivity()
   const [signingOut, setSigningOut] = useState(false)
@@ -272,20 +274,40 @@ export function AppLayout({ children }: { children: ReactNode }) {
           className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-(--header-pill-bg) shadow-(--shadow-lg) backdrop-blur-md dark:border-white/10 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
-            <Link
-              href='/'
-              className='flex min-w-0 shrink items-center gap-2 font-bold text-base tracking-tight'
-            >
-              <img
-                src='/logo-mark.svg'
-                alt=''
-                data-nav-logo
-                className='w-8 h-8 rounded-lg'
-              />
-              <span>
-                Tu<span className='text-flood-400'>Turno</span>
-              </span>
-            </Link>
+            {/* Protagonismo del negocio + firma discreta: en páginas
+                tenant el logo y el nombre del negocio ocupan la
+                izquierda; TuTurno pasa a una firma sutil "Powered by"
+                en el centro. Fuera de /b/:slug la barra es TuTurno
+                como siempre. */}
+            <div className='flex min-w-0 shrink items-center gap-2'>
+              {tenant.slug ? (
+                <>
+                  <img
+                    src={tenant.logoUrl ?? '/logo-mark.svg'}
+                    alt={tenant.name ?? 'Logo del negocio'}
+                    className='h-8 w-8 shrink-0 rounded-lg bg-white/95 object-contain'
+                  />
+                  <span className='min-w-0 truncate font-bold text-base tracking-tight'>
+                    {tenant.name ?? tenant.slug}
+                  </span>
+                </>
+              ) : (
+                <Link
+                  href='/'
+                  className='flex min-w-0 shrink items-center gap-2 font-bold text-base tracking-tight'
+                >
+                  <img
+                    src='/logo-mark.svg'
+                    alt=''
+                    data-nav-logo
+                    className='w-8 h-8 rounded-lg'
+                  />
+                  <span>
+                    Tu<span className='text-white/80'>Turno</span>
+                  </span>
+                </Link>
+              )}
+            </div>
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
               {(user || isDemo) && showTutorialButton && (
                 <button
@@ -416,6 +438,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
               )}
             </div>
           </div>
+          {/* Firma discreta: la píldora crece una fila en páginas
+              tenant y el "Powered by TuTurno" vive dentro, centrado
+              — misma cápsula, sin extensiones ni fondos extra. */}
+          {tenant.slug && (
+            <a
+              href='/'
+              className='flex items-center justify-center gap-1 whitespace-nowrap border-t border-white/10 px-4 pb-1.5 pt-1 text-[9px] font-medium tracking-wide text-white/50 transition-colors hover:text-white/75'
+            >
+              Powered by
+              <img
+                src='/logo-mark.svg'
+                alt=''
+                className='h-2.5 w-2.5 rounded'
+              />
+              TuTurno
+            </a>
+          )}
         </div>
       </header>
 
@@ -430,7 +469,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </span>
             <Link
               href='/crear-negocio'
-              className='font-semibold text-pitch-700 underline decoration-flood-500/60 underline-offset-2 transition-colors hover:text-pitch-600 dark:text-flood-300 dark:hover:text-flood-200'
+              className='font-semibold text-tenant underline decoration-flood-500/60 underline-offset-2 transition-colors hover:text-pitch-600 dark:text-flood-300 dark:hover:text-flood-200'
             >
               Crea tu negocio gratis
             </Link>

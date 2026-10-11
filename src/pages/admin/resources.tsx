@@ -174,7 +174,7 @@ export function AdminResourcesPage() {
       {showForm && (
         <Card elevated className='p-5 animate-fade-up'>
           <div className='flex items-center gap-2 mb-4'>
-            <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300'>
+            <div className='flex items-center justify-center w-8 h-8 rounded-lg bg-(--tenant-primary-soft) text-tenant'>
               {editingResource ? (
                 <EditIcon size={16} />
               ) : (
@@ -260,7 +260,7 @@ export function AdminResourcesPage() {
                   {String(resource.sort_order).padStart(2, '0')}
                 </span>
                 <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${resource.is_active ? 'bg-pitch-100 text-pitch-700 dark:bg-pitch-500/15 dark:text-pitch-300' : 'bg-surface-inset text-text-muted'}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${resource.is_active ? 'bg-(--tenant-primary-soft) text-tenant' : 'bg-surface-inset text-text-muted'}`}
                 >
                   <StoreIcon size={18} />
                 </div>
@@ -278,7 +278,7 @@ export function AdminResourcesPage() {
                   <span
                     className={`rounded-md border px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] ${
                       resource.is_active
-                        ? 'border-pitch-500/40 bg-pitch-500/10 text-pitch-700 dark:border-pitch-400/30 dark:text-pitch-300'
+                        ? 'border-tenant/40 bg-(--tenant-primary-soft) text-tenant'
                         : 'border-border bg-surface-inset text-text-muted'
                     }`}
                   >

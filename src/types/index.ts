@@ -76,6 +76,10 @@ export interface Business {
   resource_label_singular: string
   resource_label_plural: string
   reservation_instructions_md: string | null
+  /** Color de marca HEX (#rrggbb) para el co-branding del tenant. */
+  brand_color: string | null
+  /** URL del logo del negocio para el co-branding del header. */
+  logo_url: string | null
   is_demo: boolean
   created_at: string
   updated_at: string

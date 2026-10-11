@@ -384,7 +384,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.12em] ${
                 isAdmin
-                  ? 'border-pitch-600/30 bg-pitch-100 text-pitch-800 dark:border-pitch-400/40 dark:bg-pitch-400/10 dark:text-pitch-300'
+                  ? 'border-tenant/40 bg-(--tenant-primary-soft) text-tenant'
                   : 'border-orange-500/30 bg-orange-500/10 text-orange-700 dark:border-orange-400/40 dark:bg-orange-400/10 dark:text-orange-300'
               }`}
             >
@@ -404,9 +404,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
               : 'Pendiente de confirmación por el negocio. Te avisaremos por correo.'
           }
           beam={
-            isAdmin
-              ? 'beam-pitch-500 dark:beam-pitch-400'
-              : 'beam-orange-500 dark:beam-orange-400'
+            isAdmin ? 'beam-tenant' : 'beam-orange-500 dark:beam-orange-400'
           }
           className='w-full'
         />
@@ -476,7 +474,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
         <PitchTicket
           kicker='Tu turno'
           badge={
-            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 text-[11px] font-medium text-pitch-700 dark:border-flood-400/40 dark:text-flood-300'>
+            <span className='rounded-md border border-tenant/40 bg-(--tenant-primary-soft) px-2 py-0.5 text-[11px] font-medium text-tenant'>
               Seleccionado
             </span>
           }
@@ -535,7 +533,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
                 type='checkbox'
                 checked={acceptedPrivacy}
                 onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                className='mt-0.5 h-4 w-4 rounded border-border accent-(--color-primary) cursor-pointer'
+                className='mt-0.5 h-4 w-4 rounded border-border accent-tenant cursor-pointer'
                 required
               />
               <span className='leading-relaxed'>
@@ -547,7 +545,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
                 <Link
                   href='/privacidad'
                   target='_blank'
-                  className='ml-1 text-(--color-primary) font-medium hover:underline'
+                  className='ml-1 text-tenant font-medium hover:underline'
                 >
                   Política de datos de TuTurno
                   <span className='sr-only'>(se abre en otra pestaña)</span>
@@ -564,7 +562,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
                 type='checkbox'
                 checked={marketingOptIn}
                 onChange={(e) => setMarketingOptIn(e.target.checked)}
-                className='mt-0.5 h-4 w-4 rounded border-border accent-(--color-primary) cursor-pointer'
+                className='mt-0.5 h-4 w-4 rounded border-border accent-tenant cursor-pointer'
               />
               <span className='leading-relaxed'>
                 Acepto recibir novedades y promociones de{' '}
@@ -587,7 +585,7 @@ export function ReservePage({ slug }: ReservePageProps = {}) {
                   data-tour='reservation-instructions'
                 >
                   <div className='flex items-center gap-2 mb-2'>
-                    <CheckIcon size={16} className='text-(--color-primary)' />
+                    <CheckIcon size={16} className='text-tenant' />
                     <h3 className='text-sm font-semibold text-(--color-text)'>
                       Pasos para confirmar tu reserva
                     </h3>
@@ -737,7 +735,7 @@ function DemoReservePreview({
 
         {/* Demo banner */}
         <div
-          className='flex items-start gap-3 p-4 rounded-xl border border-flood-500/40 bg-flood-500/10 text-(--color-text) animate-fade-up'
+          className='flex items-start gap-3 p-4 rounded-xl border border-(--color-warning)/40 bg-(--color-warning)/10 text-(--color-text) animate-fade-up'
           role='status'
         >
           <InfoIcon
@@ -757,7 +755,7 @@ function DemoReservePreview({
         <PitchTicket
           kicker='Tu turno'
           badge={
-            <span className='rounded-md border border-flood-500/40 bg-flood-500/10 px-2 py-0.5 text-[11px] font-medium text-pitch-700 dark:border-flood-400/40 dark:text-flood-300'>
+            <span className='rounded-md border border-tenant/40 bg-(--tenant-primary-soft) px-2 py-0.5 text-[11px] font-medium text-tenant'>
               Seleccionado
             </span>
           }

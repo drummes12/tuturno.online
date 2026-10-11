@@ -111,7 +111,7 @@ export function ReservationCard({
         <button
           type='button'
           onClick={() => onOpen(r)}
-          className='w-full flex-1 cursor-pointer rounded-xl p-2 text-left flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary) focus-visible:ring-offset-2'
+          className='w-full flex-1 cursor-pointer rounded-xl p-2 text-left flex flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tenant focus-visible:ring-offset-2'
           aria-label={`Ver detalles de la reserva de ${r.resource?.name ?? resourceName ?? 'recurso'} a las ${formatLocal(r.starts_at, 'HH:mm')}`}
         >
           {content}

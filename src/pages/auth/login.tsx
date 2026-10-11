@@ -97,7 +97,7 @@ export function LoginPage() {
             ¿No tienes cuenta?{' '}
             <Link
               href='/registro'
-              className='text-(--color-primary) font-medium hover:underline'
+              className='text-tenant font-medium hover:underline'
             >
               Regístrate
             </Link>

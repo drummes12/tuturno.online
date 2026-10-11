@@ -27,8 +27,8 @@
   --color-pitch-100: #d1fae5;
 
   /* Chalk — texto claro sobre paneles oscuros */
-  --color-chalk: #f2f8f5;
-  --color-chalk-dim: #9bafa5;
+  --color-chalk: #f4f6f8;
+  --color-chalk-dim: #9aa5af;
 
   /* Accent mint — highlights de marca (beams, glows, focus) */
   --color-flood-500: #34d399;
@@ -40,28 +40,37 @@
   --color-signal-orange: #ea580c;
   --color-signal-blue: #2563eb;
 
-  /* Neutros con tinte verde */
-  --color-graphite-900: #0b1f17;
-  --color-graphite-800: #163025;
-  --color-graphite-700: #2c4a3c;
-  --color-graphite-600: #476358;
-  --color-graphite-500: #5f7168;
-  --color-graphite-400: #82968c;
-  --color-graphite-300: #aabcb2;
-  --color-graphite-200: #cedbd3;
-  --color-graphite-100: #e8f1ec;
+  /* Neutros slate-carbón — sin tinte verde para que cualquier color
+     de marca (rojo, azul, amarillo…) resalte limpiamente */
+  --color-graphite-900: #11151a;
+  --color-graphite-800: #1c232b;
+  --color-graphite-700: #2d3742;
+  --color-graphite-600: #444f5b;
+  --color-graphite-500: #5d6773;
+  --color-graphite-400: #7e8894;
+  --color-graphite-300: #aab2bc;
+  --color-graphite-200: #cfd5dc;
+  --color-graphite-100: #e9edf1;
 
-  /* Semantic */
-  --color-surface: #f7faf8;
+  /* Semantic — superficies neutras */
+  --color-surface: #f8f9fa;
   --color-surface-elevated: #ffffff;
-  --color-surface-inset: #eef5f1;
+  --color-surface-inset: #eef0f3;
   --color-text: var(--color-graphite-900);
   --color-text-muted: var(--color-graphite-500);
-  --color-border: #dce7e1;
-  --color-border-strong: #bfd2c7;
-  --color-primary: var(--color-pitch-700);
-  --color-primary-hover: #0c633c;
-  --color-on-primary: #ffffff;
+  --color-border: #dde1e7;
+  --color-border-strong: #c3cad2;
+  /* El primario es un alias de las vars --tenant-*: con el fallback
+     verde TuTurno la app se ve igual y al aplicar la marca del
+     negocio todos los bg-primary / text-on-primary / FABs la siguen
+     sin tocar clases. */
+  --color-primary: var(--tenant-primary);
+  --color-primary-hover: var(--tenant-primary-hover);
+  --color-on-primary: var(--tenant-on-primary);
+  /* Variante del primario con contraste ≥4.5:1 garantizado sobre las
+     superficies — úsala en texto, íconos, bordes y focus rings
+     (text-tenant, border-tenant, accent-tenant). */
+  --color-tenant: var(--tenant-primary-contrast);
   --color-accent: var(--color-flood-500);
   --color-success: var(--color-pitch-700);
   --color-warning: var(--color-signal-orange);
@@ -83,10 +92,10 @@
   --radius-2xl: 1.5rem;
 
   /* Shadows — muy ligeras: la profundidad viene de fondo + borde */
-  --shadow-xs: 0 1px 2px rgba(11, 31, 23, 0.05);
-  --shadow-sm: 0 1px 2px rgba(11, 31, 23, 0.05), 0 1px 3px rgba(11, 31, 23, 0.04);
-  --shadow-md: 0 4px 12px rgba(11, 31, 23, 0.06), 0 1px 3px rgba(11, 31, 23, 0.04);
-  --shadow-lg: 0 12px 32px rgba(11, 31, 23, 0.08), 0 4px 10px rgba(11, 31, 23, 0.04);
+  --shadow-xs: 0 1px 2px rgba(17, 21, 26, 0.05);
+  --shadow-sm: 0 1px 2px rgba(17, 21, 26, 0.05), 0 1px 3px rgba(17, 21, 26, 0.04);
+  --shadow-md: 0 4px 12px rgba(17, 21, 26, 0.06), 0 1px 3px rgba(17, 21, 26, 0.04);
+  --shadow-lg: 0 12px 32px rgba(17, 21, 26, 0.08), 0 4px 10px rgba(17, 21, 26, 0.04);
   --shadow-pitch: 0 4px 14px rgba(15, 122, 74, 0.2);
   --shadow-flood: 0 4px 16px rgba(52, 211, 153, 0.25);
   /* Halo mint centrado — hover/selección en celdas y barras de métricas */
@@ -99,21 +108,18 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Tema oscuro — superficies verde-grafito profundas, el primario
-   sube a mint luminoso (#34D399) y el texto on-primary pasa a
-   oscuro. Nada de negro puro.
+   Tema oscuro — superficies carbón profundas, el primario sube a
+   mint luminoso (#34D399) y el texto on-primary pasa a oscuro.
+   Nada de negro puro.
    ───────────────────────────────────────────────────────────── */
 .dark {
-  --color-surface: #071510;
-  --color-surface-elevated: #0d2119;
-  --color-surface-inset: #143326;
-  --color-text: #f2f8f5;
-  --color-text-muted: #9bafa5;
-  --color-border: #244136;
-  --color-border-strong: #35574a;
-  --color-primary: var(--color-pitch-400);
-  --color-primary-hover: var(--color-pitch-500);
-  --color-on-primary: #071510;
+  --color-surface: #0a0d11;
+  --color-surface-elevated: #12171d;
+  --color-surface-inset: #1a2129;
+  --color-text: #f2f5f7;
+  --color-text-muted: #9aa5af;
+  --color-border: #27303a;
+  --color-border-strong: #39434f;
   --color-success: var(--color-pitch-500);
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -128,15 +134,43 @@
 }
 
 /* ─────────────────────────────────────────────────────────────
+   Tenant branding — el negocio solo configura un HEX y un logo;
+   processTenantTheme() genera el resto y lo inyecta en estas vars.
+   Fallback: verde TuTurno. --tenant-primary-contrast es la variante
+   garantizada ≥4.5:1 sobre superficies (texto/íconos/bordes);
+   soft/hover/active se derivan por color-mix, así siguen al color
+   de marca automáticamente en ambos modos.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --tenant-primary: #0f7a4a;
+  --tenant-on-primary: #ffffff;
+  --tenant-primary-contrast: #0f7a4a;
+  --tenant-primary-soft: color-mix(in srgb, var(--tenant-primary) 15%, transparent);
+  --tenant-primary-hover: color-mix(in srgb, var(--tenant-primary) 88%, var(--tenant-on-primary));
+  --tenant-primary-active: color-mix(in srgb, var(--tenant-primary) 78%, var(--tenant-on-primary));
+  --shadow-tenant: 0 4px 14px color-mix(in srgb, var(--tenant-primary) 20%, transparent);
+}
+
+.dark {
+  /* En dark el fallback es mint (pitch-400). Los pares *-dark los
+     fija el helper cuando aplica una marca: el fill siempre conserva
+     el color original y el contraste on-surface viaja en
+     --tenant-primary-contrast-dark. */
+  --tenant-primary: var(--tenant-primary-dark, #34d399);
+  --tenant-on-primary: var(--tenant-on-primary-dark, #0a0d11);
+  --tenant-primary-contrast: var(--tenant-primary-contrast-dark, #34d399);
+}
+
+/* ─────────────────────────────────────────────────────────────
    Header morph — barra embebida en el hero que se contrae a
    píldora al hacer scroll. CSS scroll-driven puro: sin soporte
    (Safari estable) el header queda siempre como píldora.
    ───────────────────────────────────────────────────────────── */
 :root {
-  /* En light la píldora usa el verde primario (pitch-700, el mismo de
-     los items activos del nav) — el verde casi negro original chocaba
-     contra el fondo claro. El texto del header sigue siendo blanco. */
-  --header-pill-bg: rgb(15 122 74 / 0.95);
+  /* En light la píldora sigue el color del tenant (fallback = verde
+     TuTurno): en /b/:slug toma la marca del negocio. El texto del
+     header sigue siendo blanco. */
+  --header-pill-bg: color-mix(in srgb, var(--tenant-primary) 95%, transparent);
   --header-pill-border: rgb(255 255 255 / 0.22);
   /* Debe coincidir con el max-w-5xl del contenido: la animación
      sobrescribe la clase (así funciona scroll-driven), el valor no. */
@@ -144,7 +178,9 @@
 }
 
 .dark {
-  --header-pill-bg: rgb(11 31 23 / 0.8);
+  /* En dark la píldora es neutra pero recibe un tinte sutil del tenant
+     (~14%) para no perder la marca sin competir con los acentos. */
+  --header-pill-bg: color-mix(in srgb, var(--tenant-primary) 14%, rgb(18 23 29 / 0.8));
   --header-pill-border: rgb(255 255 255 / 0.1);
 }
 
@@ -238,7 +274,7 @@ body {
 
 /* Focus visible — always accessible */
 :focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--tenant-primary-contrast);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
@@ -602,7 +638,7 @@ body {
    react-phone-number-input — estilos alineados con TuTurno
    ───────────────────────────────────────────────────────────── */
 .tuturno-phone-input {
-  --PhoneInput-color--focus: var(--color-primary);
+  --PhoneInput-color--focus: var(--tenant-primary-contrast);
   --PhoneInput-color: var(--color-text);
   --PhoneInput-color--icon: var(--color-text-muted);
   --PhoneInput-flag-height: 1em;
@@ -624,10 +660,10 @@ body {
 
 .tuturno-phone-input:focus-within {
   background-color: var(--color-surface-elevated);
-  border-color: var(--color-primary);
-  outline: 2px solid var(--color-primary);
+  border-color: var(--tenant-primary-contrast);
+  outline: 2px solid var(--tenant-primary-contrast);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  box-shadow: 0 0 0 4px var(--tenant-primary-soft);
 }
 
 .tuturno-phone-input--error,
@@ -792,7 +828,7 @@ body {
 
 .tuturno-tutorial-popover .driver-popover-close-btn:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 2px var(--color-primary);
+  box-shadow: inset 0 0 0 2px var(--tenant-primary-contrast);
 }
 
 .tuturno-tutorial-popover .driver-popover-next-btn {

@@ -408,7 +408,7 @@ export function AdminHoursPage() {
                     </span>
                   )}
                   {dayIdx === todayIdx && (
-                    <span className='rounded-md border border-pitch-500/40 bg-pitch-500/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-pitch-700 dark:border-pitch-400/30 dark:text-pitch-300'>
+                    <span className='rounded-md border border-tenant/40 bg-(--tenant-primary-soft) px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-tenant'>
                       Hoy
                     </span>
                   )}
@@ -420,8 +420,8 @@ export function AdminHoursPage() {
                       data-tour={dayIdx === 1 ? 'admin-hours-copy' : undefined}
                       className={`flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors touch-target ${
                         copySource === dayIdx
-                          ? 'bg-pitch-500/15 text-pitch-700 dark:text-pitch-300'
-                          : 'text-primary hover:bg-pitch-100 dark:hover:bg-pitch-500/10'
+                          ? 'bg-(--tenant-primary-soft) text-tenant'
+                          : 'text-tenant hover:bg-(--tenant-primary-soft)'
                       }`}
                       aria-label={`Copiar horario de ${dayName} a otros días`}
                       aria-expanded={copySource === dayIdx}
@@ -432,7 +432,7 @@ export function AdminHoursPage() {
                     <button
                       onClick={() => addFranja(dayIdx)}
                       data-tour={dayIdx === 1 ? 'admin-hours-add' : undefined}
-                      className='flex items-center gap-1 text-xs font-medium text-primary hover:bg-pitch-100 dark:hover:bg-pitch-500/10 px-2.5 py-1.5 rounded-lg transition-colors touch-target'
+                      className='flex items-center gap-1 text-xs font-medium text-tenant hover:bg-(--tenant-primary-soft) px-2.5 py-1.5 rounded-lg transition-colors touch-target'
                       aria-label={`Agregar franja a ${dayName}`}
                     >
                       <PlusIcon size={14} />
@@ -564,7 +564,7 @@ export function AdminHoursPage() {
                             className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums font-mono sm:px-3 ${
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
-                                : 'border-border focus:border-primary'
+                                : 'border-border focus:border-tenant'
                             }  transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Apertura ${dayName} ${label.text}`}
                           />
@@ -585,7 +585,7 @@ export function AdminHoursPage() {
                             className={`min-w-0 flex-1 appearance-none rounded-lg border bg-surface-inset px-2.5 py-2 text-base touch-target nums font-mono sm:px-3 ${
                               franjaOverlap
                                 ? 'border-danger/60 focus:border-danger'
-                                : 'border-border focus:border-primary'
+                                : 'border-border focus:border-tenant'
                             } transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                             aria-label={`Cierre ${dayName} ${label.text}`}
                           />

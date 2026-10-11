@@ -4,9 +4,9 @@ import type { ReactNode } from 'react'
  * Papeleta del turno — la pieza de marca: kicker, hora protagonista,
  * recurso con icono y beam opcional.
  *
- * Sigue el tema de la app: papel claro de día, panel verde profundo
- * en dark mode. El acento cambia con el tema porque el mint no pasa
- * contraste sobre claro (verde de día, mint de noche).
+ * Sigue el tema del tenant: papel claro de día, panel carbón neutro
+ * en dark mode. Los acentos usan las vars --tenant-* — en páginas de
+ * negocio toman su marca y en el resto quedan en verde TuTurno.
  *
  * Reservar para "un turno concreto": éxito al reservar, la próxima
  * reserva, el resumen antes de confirmar. No usar como fondo genérico.
@@ -55,7 +55,7 @@ export function PitchTicket({
     <>
       {/* Decoración: halo mint suave + anillo de reloj tenue */}
       <div aria-hidden='true' className='pointer-events-none absolute inset-0'>
-        <div className='absolute inset-x-0 top-0 h-24 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(52,211,153,0.14),transparent)]' />
+        <div className='absolute inset-x-0 top-0 h-24 bg-[radial-gradient(60%_100%_at_50%_0%,var(--tenant-primary-soft),transparent)]' />
         <div className='absolute inset-y-0 left-1/2 w-px bg-black/10 dark:bg-white/10' />
         <div className='absolute left-1/2 top-1/2 size-30 -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 dark:border-white/10' />
         <div
@@ -65,7 +65,7 @@ bg-black/10 dark:bg-white/10'
       </div>
 
       <div className='relative flex items-center justify-between gap-3'>
-        <span className='text-[10px] font-semibold uppercase tracking-[0.14em] text-pitch-700 dark:text-pitch-300'>
+        <span className='text-[10px] font-semibold uppercase tracking-[0.14em] text-tenant'>
           {kicker}
         </span>
         {badge}
@@ -79,7 +79,7 @@ bg-black/10 dark:bg-white/10'
             {dateLabel}
           </p>
           {meta && (
-            <p className='nums shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-pitch-700 dark:text-flood-400'>
+            <p className='nums shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-tenant'>
               {meta}
             </p>
           )}
@@ -94,7 +94,7 @@ bg-black/10 dark:bg-white/10'
         {resourceName && (
           <div className='mt-3 flex items-center gap-2 border-t border-pitch-900/10 pt-3 dark:border-chalk/10'>
             {resourceIcon && (
-              <span className='shrink-0 text-pitch-600 dark:text-pitch-400'>
+              <span className='shrink-0 text-tenant'>
                 {resourceIcon}
               </span>
             )}
@@ -118,7 +118,7 @@ bg-black/10 dark:bg-white/10'
     </>
   )
 
-  const panelClass = `relative overflow-hidden rounded-2xl bg-white px-6 py-5 text-graphite-900 shadow-(--shadow-lg) dark:bg-pitch-950 dark:text-chalk ${panelClassName}`
+  const panelClass = `relative overflow-hidden rounded-2xl bg-white px-6 py-5 text-graphite-900 shadow-(--shadow-lg) dark:bg-graphite-900 dark:text-chalk ${panelClassName}`
 
   return (
     <div
@@ -128,7 +128,7 @@ bg-black/10 dark:bg-white/10'
         <button
           type='button'
           onClick={onOpen}
-          className={`${panelClass} group w-full cursor-pointer text-left transition-transform duration-200 ease-spring hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pitch-600 focus-visible:ring-offset-2 dark:focus-visible:ring-flood-400`}
+          className={`${panelClass} group w-full cursor-pointer text-left transition-transform duration-200 ease-spring hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tenant focus-visible:ring-offset-2`}
         >
           {body}
         </button>
