@@ -282,20 +282,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className='flex min-w-0 shrink items-center gap-2'>
               {tenant.slug ? (
                 <>
-                  {tenant.logoUrl ? (
-                    <img
-                      src={tenant.logoUrl}
-                      alt={tenant.name ?? 'Logo del negocio'}
-                      className='h-8 w-8 shrink-0 rounded-lg bg-white object-contain p-0.5'
-                    />
-                  ) : (
-                    <span
-                      aria-hidden='true'
-                      className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-sm font-bold'
-                    >
-                      {(tenant.name ?? tenant.slug).charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <img
+                    src={tenant.logoUrl ?? '/logo-mark.svg'}
+                    alt={tenant.name ?? 'Logo del negocio'}
+                    className='h-8 w-8 shrink-0 rounded-lg bg-white object-contain p-0.5'
+                  />
                   <span className='min-w-0 truncate font-bold text-base tracking-tight'>
                     {tenant.name ?? tenant.slug}
                   </span>
