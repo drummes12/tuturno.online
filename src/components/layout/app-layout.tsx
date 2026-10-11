@@ -317,15 +317,28 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </Link>
               )}
             </div>
-            {/* Firma discreta: pestaña continua que cuelga del borde
-                inferior de la píldora — hereda su curvatura (rounded-b),
-                fondo y borde; el -mt-px la solda a la barra para que se
-                lea como una extensión, no como un botón. Solo en
-                páginas tenant. */}
+            {/* Firma discreta: pestaña que extiende literalmente la
+                cápsula — mismo fondo translúcido, blur y borde; la
+                máscara radial recorta las esquinas superiores en
+                cóncavo para que el borde inferior de la píldora curve
+                alrededor de la unión. Solo en páginas tenant. */}
             {tenant.slug && (
               <a
                 href='/'
-                className='absolute left-1/2 top-full z-10 -mt-px flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-b-xl border border-t-0 border-white/12 bg-(--header-pill-bg) px-2.5 pb-1.5 pt-1 text-[9px] font-medium tracking-wide text-white/50 backdrop-blur-md transition-colors hover:text-white/75 dark:border-white/10'
+                className='absolute left-1/2 top-full z-10 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-b-xl border border-t-0 border-white/12 px-2.5 pb-1.5 pt-1 text-[9px] font-medium tracking-wide text-white/50 transition-colors hover:text-white/75 dark:border-white/10'
+                style={{
+                  background: 'var(--header-pill-bg)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  WebkitMaskImage:
+                    'radial-gradient(circle 9px at 9px 0, transparent 9px, black 9.5px), radial-gradient(circle 9px at calc(100% - 9px) 0, transparent 9px, black 9.5px)',
+                  maskImage:
+                    'radial-gradient(circle 9px at 9px 0, transparent 9px, black 9.5px), radial-gradient(circle 9px at calc(100% - 9px) 0, transparent 9px, black 9.5px)',
+                  WebkitMaskComposite: 'source-in',
+                  maskComposite: 'intersect',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat'
+                }}
               >
                 Powered by
                 <img
