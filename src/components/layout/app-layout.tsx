@@ -274,38 +274,63 @@ export function AppLayout({ children }: { children: ReactNode }) {
           className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-(--header-pill-bg) shadow-(--shadow-lg) backdrop-blur-md dark:border-white/10 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
-            {/* Co-branding: [Logo TuTurno] TuTurno | [Logo Negocio]
-                agrupados a la izquierda. El logo del negocio solo aparece
-                cuando el tenant configuró logo (o hay override local). */}
+            {/* Protagonismo del negocio + firma discreta: en páginas
+                tenant el logo y el nombre del negocio ocupan la
+                izquierda; TuTurno pasa a una firma sutil "Powered by"
+                en el centro. Fuera de /b/:slug la barra es TuTurno
+                como siempre. */}
             <div className='flex min-w-0 shrink items-center gap-2'>
-              <Link
+              {tenant.slug ? (
+                <>
+                  {tenant.logoUrl ? (
+                    <img
+                      src={tenant.logoUrl}
+                      alt={tenant.name ?? 'Logo del negocio'}
+                      className='h-8 w-8 shrink-0 rounded-lg bg-white object-contain p-0.5'
+                    />
+                  ) : (
+                    <span
+                      aria-hidden='true'
+                      className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/20 text-sm font-bold'
+                    >
+                      {(tenant.name ?? tenant.slug).charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className='min-w-0 truncate font-bold text-base tracking-tight'>
+                    {tenant.name ?? tenant.slug}
+                  </span>
+                </>
+              ) : (
+                <Link
+                  href='/'
+                  className='flex min-w-0 shrink items-center gap-2 font-bold text-base tracking-tight'
+                >
+                  <img
+                    src='/logo-mark.svg'
+                    alt=''
+                    data-nav-logo
+                    className='w-8 h-8 rounded-lg'
+                  />
+                  <span>
+                    Tu<span className='text-white/80'>Turno</span>
+                  </span>
+                </Link>
+              )}
+            </div>
+            {tenant.slug && (
+              <a
                 href='/'
-                className='flex min-w-0 shrink items-center gap-2 font-bold text-base tracking-tight'
+                className='hidden min-w-0 flex-1 items-center justify-center gap-1.5 text-[10px] font-medium tracking-wide text-white/60 transition-colors hover:text-white/85 sm:flex'
               >
+                Powered by
                 <img
                   src='/logo-mark.svg'
                   alt=''
-                  data-nav-logo
-                  className='w-8 h-8 rounded-lg'
+                  className='h-3.5 w-3.5 rounded'
                 />
-                <span>
-                  Tu<span className='text-white/80'>Turno</span>
-                </span>
-              </Link>
-              {tenant.logoUrl && (
-                <>
-                  <span
-                    className='h-6 w-px bg-white/25'
-                    aria-hidden='true'
-                  />
-                  <img
-                    src={tenant.logoUrl}
-                    alt={tenant.name ?? 'Logo del negocio'}
-                    className='h-8 w-8 shrink-0 rounded-lg bg-white object-contain p-0.5'
-                  />
-                </>
-              )}
-            </div>
+                TuTurno
+              </a>
+            )}
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
               {(user || isDemo) && showTutorialButton && (
                 <button

@@ -136,37 +136,52 @@ export function BrandConfigCard({
       </p>
 
       <div className='flex flex-col gap-4'>
-        {/* Color de marca — picker nativo + HEX */}
-        <div className='flex items-end gap-3'>
-          <input
-            type='color'
-            value={hexToRgb(color ?? '') ? (color ?? '#0F7A4A') : '#0F7A4A'}
-            onChange={(e) =>
-              handleChange({ brand_color: e.target.value, logo_url: logoUrl })
-            }
-            disabled={disabled}
-            aria-label='Selector de color de marca'
-            className='h-12 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-surface-inset p-1 touch-target disabled:cursor-not-allowed disabled:opacity-50'
-          />
-          <Input
-            label='Color de marca (HEX)'
-            value={color ?? ''}
-            onChange={(e) =>
-              handleChange({
-                brand_color: e.target.value.trim() === '' ? null : e.target.value,
-                logo_url: logoUrl
-              })
-            }
-            placeholder='#0F7A4A'
-            name='brand-color'
-            wrapperClassName='flex-1'
-            error={
-              color && !theme
-                ? 'Usa formato HEX: #RRGGBB o #RGB.'
-                : null
-            }
-            hint='Si lo dejas vacío se usa el verde TuTurno.'
-          />
+        {/* Color de marca — label compartido + picker e input en la misma fila */}
+        <div className='flex flex-col gap-1.5'>
+          <label
+            htmlFor='brand-color-hex'
+            className='text-xs font-semibold uppercase tracking-wider text-(--color-text-muted)'
+          >
+            Color de marca (HEX)
+          </label>
+          <div className='flex items-center gap-3'>
+            <input
+              type='color'
+              value={hexToRgb(color ?? '') ? (color ?? '#0F7A4A') : '#0F7A4A'}
+              onChange={(e) =>
+                handleChange({ brand_color: e.target.value, logo_url: logoUrl })
+              }
+              disabled={disabled}
+              aria-label='Selector de color de marca'
+              className='h-12 w-12 shrink-0 cursor-pointer rounded-lg border border-border bg-surface-inset p-1 touch-target disabled:cursor-not-allowed disabled:opacity-50'
+            />
+            <div className='relative min-w-0 flex-1'>
+              <input
+                id='brand-color-hex'
+                name='brand-color'
+                value={color ?? ''}
+                onChange={(e) =>
+                  handleChange({
+                    brand_color:
+                      e.target.value.trim() === '' ? null : e.target.value,
+                    logo_url: logoUrl
+                  })
+                }
+                placeholder='#0F7A4A'
+                aria-invalid={!!(color && !theme)}
+                className='w-full min-w-0 rounded-md border bg-surface-inset px-4 py-3 text-base text-(--color-text) placeholder:text-(--color-text-muted) focus:bg-surface-elevated focus:border-tenant focus:outline-none focus:ring-4 focus:ring-tenant/15 transition-all duration-200 ease-spring border-border'
+              />
+            </div>
+          </div>
+          {color && !theme ? (
+            <p className='text-sm text-(--color-danger)'>
+              Usa formato HEX: #RRGGBB o #RGB.
+            </p>
+          ) : (
+            <p className='text-sm text-(--color-text-muted)'>
+              Si lo dejas vacío se usa el verde TuTurno.
+            </p>
+          )}
         </div>
 
         {/* Presets de demostración — solo override local, no se guardan */}
