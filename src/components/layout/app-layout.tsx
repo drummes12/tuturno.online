@@ -317,20 +317,23 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </Link>
               )}
             </div>
-            {/* Firma discreta: insignia que sobresale del borde inferior
-                central de la píldora, extendiendo el navbar — solo en
+            {/* Firma discreta: pestaña continua que cuelga del borde
+                inferior de la píldora — hereda su curvatura (rounded-b),
+                fondo y borde; el -mt-px la solda a la barra para que se
+                lea como una extensión, no como un botón. Solo en
                 páginas tenant. */}
             {tenant.slug && (
               <a
                 href='/'
-                className='absolute left-1/2 top-full z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-white/12 bg-(--header-pill-bg) px-2.5 py-1 text-[10px] font-medium tracking-wide text-white/75 shadow-(--shadow-lg) backdrop-blur-md transition-colors hover:text-white'
+                className='absolute left-1/2 top-full z-10 -mt-px flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-b-xl border border-t-0 border-white/12 bg-(--header-pill-bg) px-2.5 pb-1.5 pt-1 text-[9px] font-medium tracking-wide text-white/50 backdrop-blur-md transition-colors hover:text-white/75 dark:border-white/10'
               >
+                Powered by
                 <img
                   src='/logo-mark.svg'
                   alt=''
-                  className='h-3 w-3 rounded'
+                  className='h-2.5 w-2.5 rounded'
                 />
-                Powered by TuTurno
+                TuTurno
               </a>
             )}
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
