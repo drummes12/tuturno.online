@@ -271,7 +271,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             El contenido siempre vive en la columna max-w-5xl, así al
             zoom-out los controles no se van a los bordes de pantalla. */}
         <div
-          className={`mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-(--header-pill-bg) shadow-(--shadow-lg) backdrop-blur-md dark:border-white/10 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
+          className={`relative mx-auto w-full max-w-5xl rounded-2xl border border-white/12 bg-(--header-pill-bg) shadow-(--shadow-lg) backdrop-blur-md dark:border-white/10 ${location === '/' && !user ? 'morph-header-inner' : ''}`}
         >
           <div className='mx-auto flex h-14 min-w-0 w-full max-w-5xl items-center justify-between gap-2 px-4'>
             {/* Protagonismo del negocio + firma discreta: en páginas
@@ -317,18 +317,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </Link>
               )}
             </div>
+            {/* Firma discreta: insignia que sobresale del borde inferior
+                central de la píldora, extendiendo el navbar — solo en
+                páginas tenant. */}
             {tenant.slug && (
               <a
                 href='/'
-                className='hidden min-w-0 flex-1 items-center justify-center gap-1.5 text-[10px] font-medium tracking-wide text-white/60 transition-colors hover:text-white/85 sm:flex'
+                className='absolute left-1/2 top-full z-10 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-white/12 bg-(--header-pill-bg) px-2.5 py-1 text-[10px] font-medium tracking-wide text-white/75 shadow-(--shadow-lg) backdrop-blur-md transition-colors hover:text-white'
               >
-                Powered by
                 <img
                   src='/logo-mark.svg'
                   alt=''
-                  className='h-3.5 w-3.5 rounded'
+                  className='h-3 w-3 rounded'
                 />
-                TuTurno
+                Powered by TuTurno
               </a>
             )}
             <div className='flex min-w-0 shrink items-center justify-end gap-1 sm:gap-2'>
